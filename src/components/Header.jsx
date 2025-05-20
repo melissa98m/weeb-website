@@ -83,7 +83,7 @@ export default function Header() {
 
         {/* Mobile toggle button */}
         <button
-          className="md:hidden text-white bg-secondary"
+          className={`md:hidden  ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -93,12 +93,12 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden px-6 pb-4 space-y-4 text-white/90 text-sm ">
+        <div className={`md:hidden px-6 pb-4 space-y-4 text-sm ${theme === 'dark' ?  'text-white/90' : 'text-dark/90'}`}>
           {isContactPage ? (
             <>
-              <span className="block">Contact</span>
+              <span className={`block ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Contact</span>
               <a href="/login">
-                <button className="block w-full my-4">Se connecter</button>
+                <button className={`block w-full my-4 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Se connecter</button>
               </a>
             </>
           ) : isLoginPage ? (
