@@ -7,16 +7,23 @@ export default function Header() {
   const location = useLocation();
 
   const isContactPage = location.pathname === "/contact";
+  const isLoginPage = location.pathname === "/login";
 
   return (
     <header className="bg-dark shadow-md rounded-xl max-w-5xl mx-auto my-4">
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-8">
-          <div className="text-white font-bold text-lg tracking-wide"><a href="/">weeb</a></div>
+          <div className="text-white font-bold text-lg tracking-wide">
+            <a href="/">weeb</a>
+          </div>
           {/* Desktop navigation */}
           <nav className="hidden md:flex items-center space-x-6 text-sm text-white">
             {isContactPage ? (
               <span>Contact</span>
+            ) : isLoginPage ? (
+              <>
+                <span>Login</span>
+              </>
             ) : (
               <>
                 <a href="/about-us" className="hover:text-white transition">
@@ -38,6 +45,20 @@ export default function Header() {
                 Se connecter
               </button>
             </a>
+          ) : isLoginPage ? (
+            <>
+              <a
+                href="/contact"
+                className="text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition"
+              >
+                Contact
+              </a>
+              <a href="/registration">
+                <button className="bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                  Join Now
+                </button>
+              </a>
+            </>
           ) : (
             <>
               <a href="/login">
@@ -56,7 +77,7 @@ export default function Header() {
 
         {/* Mobile toggle button */}
         <button
-          className="md:hidden text-white"
+          className="md:hidden text-white bg-secondary"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -76,21 +97,36 @@ export default function Header() {
                 </button>
               </a>
             </>
+          ) : isLoginPage ? (
+            <>
+              <span className="block">Login</span>
+              <a
+                href="/contact"
+                className="block text-white text-sm px-4 py-2 rounded-md shadow"
+              >
+                Contact
+              </a>
+              <a href="/registration">
+                <button className="block w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shado">
+                  Join Now
+                </button>
+              </a>
+            </>
           ) : (
             <>
-              <a href="/about-us" className="block hover:text-white transition">
+              <a href="/about-us" className="block">
                 About Us
               </a>
-              <a href="/contact" className="block hover:text-white transition">
+              <a href="/contact" className="bloc">
                 Contact
               </a>
               <a href="/login">
-                <button className="block w-full hover:text-white transition my-4">
+                <button className="block w-full my-4">
                   Log In
                 </button>
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
                   Join Now
                 </button>
               </a>
