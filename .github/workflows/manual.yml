@@ -17,31 +17,41 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # ⚠️ important pour avoir tout l’historique Git (sinon git diff ou git checkout peut planter)
-
-      - name: Debug Git state
-        run: |
-          echo "GitHub ref: ${{ github.ref }}"
-          echo "GitHub ref_name: ${{ github.ref_name }}"
-          git status
-          git branch -a
-          git remote -v
+          fetch-depth: 0
 
       - name: Set up Git config
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Ensure correct branch is checked out
+      - name: Fetch full branch history
+        run: |
+          git fetch origin ${{ github.ref_name }}
+
+      - name: Create temporary PR branch
         run: |
           git checkout ${{ github.ref_name }}
+          git pull origin ${{ github.ref_name }}
+          git checkout -B auto-pr/${{ github.ref_name }}
+
+      - name: Push temporary PR branch
+        run: |
+          git push origin auto-pr/${{ github.ref_name }} --force
+
+      - name: Close old pull requests from auto-pr/${{ github.ref_name }}
+        uses: peter-evans/close-pull@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment: "This pull request is being closed in favor of a newer automatic pull request."
+          # Rechercher une PR vers main depuis la branche auto-pr/*
+          search: author:app/github-actions is:open is:pr head:auto-pr/${{ github.ref_name }} base:main
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: main
-          branch: ${{ github.ref_name }}
+          branch: auto-pr/${{ github.ref_name }}
           title: "Auto PR from '${{ github.ref_name }}' to 'main'"
           body: "This pull request was automatically created after a push to '${{ github.ref_name }}'."
           draft: false
