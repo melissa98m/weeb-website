@@ -57,7 +57,7 @@ export default function Footer() {
       {/* Ligne du bas */}
       <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <p className="text-muted">&copy; 2025 Weeb, Inc. All rights reserved.</p>
-        <div className="flex gap-4 text-xl text-muted">
+        <div className="flex gap-4 text-xl text-dark-icon">
           <FaYoutube className="hover:text-primary cursor-pointer" />
           <FaFacebookF className="hover:text-primary cursor-pointer" />
           <FaTwitter className="hover:text-primary cursor-pointer" />
