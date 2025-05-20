@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
 
       - name: Set up Git config
         run: |
@@ -53,6 +53,13 @@ jobs:
           token: ${{ secrets.PAT_GITHUB }}
           comment: "Closing stale PR in favor of a new one."
           search: author:app/github-actions is:open is:pr head:auto-pr/${{ github.ref_name }} base:main
+
+      - name: Show diff with main
+        run: |
+          git fetch origin main
+          echo "=== Commits in auto-pr/${{ github.ref_name }} that are NOT in main ==="
+          git log --oneline origin/main..auto-pr/${{ github.ref_name }} || echo "✅ Aucun commit de différence avec main."
+          echo "=== Fin du diff ==="
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
