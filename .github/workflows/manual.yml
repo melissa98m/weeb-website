@@ -35,6 +35,15 @@ jobs:
       - name: Ensure correct branch is checked out
         run: |
           git checkout ${{ github.ref_name }}
+      - name: Add dummy commit if needed
+        run: |
+          if git diff --quiet origin/main..HEAD; then
+          echo "No diff found — adding dummy commit to trigger PR"
+          git commit --allow-empty -m "chore: trigger auto PR"
+          git push origin auto-pr/${{ github.ref_name }} --force
+          else
+          echo "Diff found — real changes will trigger PR"
+          fi
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
