@@ -16,11 +16,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # ⚠️ important pour avoir tout l’historique Git (sinon git diff ou git checkout peut planter)
+
+      - name: Debug Git state
+        run: |
+          echo "GitHub ref: ${{ github.ref }}"
+          echo "GitHub ref_name: ${{ github.ref_name }}"
+          git status
+          git branch -a
+          git remote -v
 
       - name: Set up Git config
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Ensure correct branch is checked out
+        run: |
+          git checkout ${{ github.ref_name }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
