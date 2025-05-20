@@ -2,7 +2,7 @@ import { FaYoutube, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "re
 
 export default function Footer() {
   return (
-    <footer className="bg-white text-dark text-sm px-6 py-12">
+    <footer className="bg-white text-dark text-sm px-6 py-12 w-full">
       <div className="max-w-6xl mx-auto flex flex-col gap-10 lg:flex-row lg:justify-between">
         {/* Colonne 1 : Logo */}
         <div>

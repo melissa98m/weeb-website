@@ -5,7 +5,7 @@ export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="bg-dark shadow-md rounded-xl max-w-5xl mx-auto">
+    <header className="bg-dark shadow-md rounded-xl max-w-5xl mx-auto my-4">
       <div className="px-6 py-4 flex items-center justify-between">
         {/* Left side: logo + nav */}
         <div className="flex items-center space-x-8">
