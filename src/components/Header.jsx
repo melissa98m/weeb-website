@@ -73,7 +73,7 @@ export default function Header() {
                 </button>
               </a>
               <a href="/registration">
-                <button className="bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}>
                   Join Now
                 </button>
               </a>
