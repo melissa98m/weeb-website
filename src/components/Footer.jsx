@@ -2,8 +2,8 @@ import { FaYoutube, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "re
 
 export default function Footer() {
   return (
-    <footer className="bg-white text-dark text-sm px-6 py-12 w-full">
-      <div className="max-w-6xl mx-auto flex flex-col gap-10 lg:flex-row lg:justify-between">
+    <footer className="bg-white text-dark text-sm px-12 py-12 w-full">
+      <div className="max-w-6xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
         {/* Colonne 1 : Logo */}
         <div>
           <h2 className="text-xl font-bold">weeb</h2>
@@ -55,7 +55,7 @@ export default function Footer() {
       </div>
 
       {/* Ligne du bas */}
-      <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4">
         <p className="text-muted">&copy; 2025 Weeb, Inc. All rights reserved.</p>
         <div className="flex gap-4 text-xl text-dark-icon">
           <FaYoutube className="hover:text-primary cursor-pointer" />
