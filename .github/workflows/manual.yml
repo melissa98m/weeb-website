@@ -22,8 +22,8 @@ jobs:
 
       - name: Set up Git config
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "melissa98m"
+          git config --global user.email "melissa.mangione@gmail.com"
 
       - name: Use PAT for authenticated remote
         run: |
