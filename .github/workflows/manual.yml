@@ -1,0 +1,28 @@
+name: Auto PR on push to feature branches
+
+on:
+  push:
+    branches:
+      - 'contact'
+      - 'header'
+      - 'footer'
+      - 'login'
+      - 'theme'
+      - 'home'
+
+jobs:
+  create-pull-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: main
+          branch: ${{ github.ref_name }}
+          title: "Auto PR from '${{ github.ref_name }}' to 'main'"
+          body: "This pull request was automatically created after a push to '${{ github.ref_name }}'."
+          draft: false
