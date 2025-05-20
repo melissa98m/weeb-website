@@ -108,7 +108,7 @@ export default function Header() {
                 Contact
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
                   Join Now
                 </button>
               </a>
@@ -125,7 +125,7 @@ export default function Header() {
                 <button className="block w-full my-4">Log In</button>
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
                   Join Now
                 </button>
               </a>
