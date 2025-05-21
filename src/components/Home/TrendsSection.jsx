@@ -6,7 +6,7 @@ export default function TrendsSection() {
     <section className="px-6 py-20 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10">
       <div className="w-full max-w-xs flex justify-center">
         <img
-          src="src\assets\home\Shapes.svg"
+          src="/home/Shapes.svg"
           alt="Visuel geometrique"
           className="w-60 h-60 animate-spin"
         />
