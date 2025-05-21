@@ -1,4 +1,6 @@
 import { useTheme } from "../../context/ThemeContext";
+import { motion } from "framer-motion";
+
 export default function LearningSection() {
   const { theme } = useTheme();
   return (
@@ -37,10 +39,14 @@ export default function LearningSection() {
           Explorer les ressources →
         </button>
       </div>
-      <img
-        src="src\assets\home\mokup.png"
+      <motion.img
+        src="src/assets/home/mokup.png"
         alt="Mockup 2"
         className="w-full max-w-md rounded-md shadow-lg"
+        initial={{ x: 100, opacity: 0 }}
+        whileInView={{ x: 0, opacity: 1 }}
+        viewport={{ once: false, amount: 1.0 }}
+        transition={{ type: "spring", stiffness: 30, damping: 10, mass: 1 }}
       />
     </section>
   );
