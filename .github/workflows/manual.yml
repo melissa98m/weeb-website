@@ -1,57 +1,24 @@
-name: Auto PR on push to feature branches
-
+name: Run the Action on each commit
 on:
   push:
-    branches:
-      - 'contact'
-      - 'header'
-      - 'footer'
-      - 'login'
-      - 'theme'
-      - 'home'
-
+    branches-ignore: master
 jobs:
-  create-pull-request:
+  action-pull-request:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@master
         with:
           fetch-depth: 0
-
-      - name: Debug Git state
-        run: |
-          echo "GitHub ref: ${{ github.ref }}"
-          echo "GitHub ref_name: ${{ github.ref_name }}"
-          git status
-          git branch -a
-          git remote -v
-
-      - name: Set up Git config
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Ensure correct branch is checked out
-        run: |
-          git checkout ${{ github.ref_name }}
-      - name: Add dummy commit if needed
-        run: |
-          if git diff --quiet origin/main..HEAD; then
-          echo "No diff found — adding dummy commit to trigger PR"
-          git commit --allow-empty -m "chore: trigger auto PR"
-          git push origin auto-pr/${{ github.ref_name }} --force
-          else
-          echo "Diff found — real changes will trigger PR"
-          fi
-
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
+      - name: Run the Action
+        if: startsWith(github.ref, 'refs/heads/feature')
+        uses: devops-infra/action-pull-request@master
         with:
-          token: ${{ secrets.PAT_GITHUB }}
-          base: main
-          branch: ${{ github.ref_name }}
-          title: "Auto PR from '${{ github.ref_name }}' to 'main'"
-          body: "This pull request was automatically created after a push to '${{ github.ref_name }}'."
-          draft: false
-
+          github_token: ${{ secrets.PAT_GITHUB }}
+          title: ${{ github.event.commits[0].message }}
+          assignee: ${{ github.actor }}
+          label: automatic,feature
+          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
+          old_string: "**Write you description here**"
+          new_string: ${{ github.event.commits[0].message }}
+          get_diff: true
