@@ -1,24 +1,22 @@
-name: Run the Action on each commit
+name: Automatically create / update pull request
+
+# run this workflow only on new feature branches, not when they're merged to main
 on:
   push:
-    branches-ignore: master
+    branches-ignore:
+      - "main"
+
 jobs:
-  action-pull-request:
+  create_pr_repo_sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@master
+      - uses: actions/checkout@v3
+      - name: Create pull request
+        id: open-pr
+        uses: repo-sync/pull-request@v2
         with:
-          fetch-depth: 0
-      - name: Run the Action
-        if: startsWith(github.ref, 'refs/heads/feature')
-        uses: devops-infra/action-pull-request@master
-        with:
-          github_token: ${{ secrets.PAT_GITHUB }}
-          title: ${{ github.event.commits[0].message }}
-          assignee: ${{ github.actor }}
-          label: automatic,feature
-          template: .github/PULL_REQUEST_TEMPLATE/FEATURE.md
-          old_string: "**Write you description here**"
-          new_string: ${{ github.event.commits[0].message }}
-          get_diff: true
+          destination_branch: "main"
+          pr_title: "feat: PLACEHOLDER TITLE"
+          pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
+          pr_reviewer: "melissa98m"
+          pr_draft: true
