@@ -42,7 +42,7 @@ export default function LearningSection() {
       <motion.img
         src="/home/mokup.png"
         alt="Mockup 2"
-        className="w-full max-w-md rounded-md shadow-lg"
+        className="w-full max-w-md rounded-md"
         initial={{ x: 100, opacity: 0 }}
         whileInView={{ x: 0, opacity: 1 }}
         viewport={{ once: false, amount: 1.0 }}
