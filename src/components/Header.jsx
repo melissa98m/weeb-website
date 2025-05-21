@@ -13,7 +13,7 @@ export default function Header() {
   const isLoginPage = location.pathname === "/login";
 
   return (
-    <header className={` shadow-md rounded-xl max-w-5xl mx-auto my-4 ${theme === 'dark' ? 'bg-dark' : 'bg-gray-100'}`}>
+    <header className={`shadow-md rounded-xl max-w-5xl mx-auto my-4 ${theme === 'dark' ? 'bg-dark' : 'bg-gray-100'}`}>
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div className={` font-bold text-lg tracking-wide ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
@@ -83,7 +83,7 @@ export default function Header() {
 
         {/* Mobile toggle button */}
         <button
-          className={`md:hidden  ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}
+          className={`md:hidden px-2 py-2 rounded-xl ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -108,7 +108,7 @@ export default function Header() {
                 Contact
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
+                <button className={`w-full text-sm px-4 py-2 rounded-md shadow ${theme === 'dark' ?  'bg-secondary text-white' : 'text-dark bg-primary'}`}>
                   Join Now
                 </button>
               </a>
@@ -118,12 +118,12 @@ export default function Header() {
               <span className="block">Login</span>
               <a
                 href="/contact"
-                className="block text-white text-sm px-4 py-2 rounded-md shadow"
+                className={`block text-sm px-4 py-2 rounded-md shadow ${theme === 'dark' ? 'text-white' : 'text-dark'}`}
               >
                 Contact
               </a>
               <a href="/registration">
-                <button className="block w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shado">
+                <button className={`w-full text-sm px-4 py-2 rounded-md shadow ${theme === 'dark' ?  'bg-secondary text-white' : 'text-dark bg-primary'}`}>
                   Join Now
                 </button>
               </a>
@@ -140,7 +140,7 @@ export default function Header() {
                 <button className="block w-full my-4">Log In</button>
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
+                <button className={`w-full text-sm px-4 py-2 rounded-md shadow ${theme === 'dark' ?  'bg-secondary text-white' : 'text-dark bg-primary'}`}>
                   Join Now
                 </button>
               </a>
