@@ -48,7 +48,7 @@ export default function Footer() {
     },
   ];
   return (
-    <footer className="bg-white text-dark text-sm px-12 py-12 w-full">
+    <footer className={`text-sm px-12 py-12 w-full ${theme === 'dark' ? 'bg-white text-dark' : 'bg-dark text-white'}`}>
       <div className="max-w-6xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
         {/* Colonne 1 : Logo */}
         <div>
@@ -74,11 +74,11 @@ export default function Footer() {
           &copy; 2025 Weeb, Inc. All rights reserved.
         </p>
         <div className="flex gap-4 text-xl text-dark-icon">
-          <FaYoutube className="hover:text-primary cursor-pointer" />
-          <FaFacebookF className="hover:text-primary cursor-pointer" />
-          <FaTwitter className="hover:text-primary cursor-pointer" />
-          <FaInstagram className="hover:text-primary cursor-pointer" />
-          <FaLinkedinIn className="hover:text-primary cursor-pointer" />
+          <FaYoutube className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
+          <FaFacebookF className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
+          <FaTwitter className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
+          <FaInstagram className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
+          <FaLinkedinIn className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
         </div>
       </div>
     </footer>
