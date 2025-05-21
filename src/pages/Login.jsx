@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { motion } from "framer-motion";
 
 export default function Login() {
   const { theme } = useTheme();
@@ -63,14 +64,17 @@ export default function Login() {
         </div>
 
         {/* Se connecter */}
-        <button
+        <motion.button
           type="submit"
           className={`w-full text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition  ${
             theme === "dark" ? "bg-secondary" : "bg-primary"
           }`}
+          whileHover={{ scale: 1.2 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
           Se connecter
-        </button>
+        </motion.button>
 
         {/* Liens */}
         <div className="text-center text-xs space-y-2">

@@ -1,4 +1,5 @@
 import { useTheme } from "../../context/ThemeContext";
+import { motion } from "framer-motion";
 export default function ContactForm() {
   const { theme } = useTheme();
   return (
@@ -113,15 +114,19 @@ export default function ContactForm() {
           ></textarea>
         </div>
         <div className="text-center">
-          <button
+          <motion.button
             type="submit"
-            className={`px-6 py-2 rounded-md shadow hover:brightness-110 transition ${
-              theme === "dark" ? "bg-secondary" : "bg-primary"
-            }
-              `}
+            className={`px-6 py-2 rounded-md shadow transition ${
+              theme === "dark"
+                ? "bg-secondary text-white"
+                : "bg-primary text-dark"
+            }`}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             Contact
-          </button>
+          </motion.button>
         </div>
       </form>
     </section>
