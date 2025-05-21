@@ -25,7 +25,7 @@ export default function HeroSection() {
         </button>
       </div>
       <motion.img
-        src="src/assets/home/mokup.png"
+        src="/home/mokup.png"
         alt="Mockup"
         className="mt-12 w-full max-w-5xl mx-auto rounded-md shadow-lg"
         style={{
