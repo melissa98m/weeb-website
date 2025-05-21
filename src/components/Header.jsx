@@ -1,33 +1,36 @@
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
+import { useTheme } from "../context/ThemeContext";
+
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+ const { theme, toggleTheme } = useTheme();
 
   const isContactPage = location.pathname === "/contact";
   const isLoginPage = location.pathname === "/login";
 
   return (
-    <header className="bg-dark shadow-md rounded-xl max-w-5xl mx-auto my-4">
+    <header className={` shadow-md rounded-xl max-w-5xl mx-auto my-4 ${theme === 'dark' ? 'bg-dark' : 'bg-gray-100'}`}>
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-8">
-          <div className="text-white font-bold text-lg tracking-wide">
+          <div className={` font-bold text-lg tracking-wide ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
             <a href="/">weeb</a>
           </div>
           {/* Desktop navigation */}
-          <nav className="hidden md:flex items-center space-x-6 text-sm text-white">
+          <nav className={`hidden md:flex items-center space-x-6 text-sm ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
             {isContactPage ? (
               <span>Contact</span>
             ) : isLoginPage ? (
               <span>Login</span>
             ) : (
               <>
-                <a href="/about-us" className="hover:text-white transition">
+                <a href="/about-us" className={`transition ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
                   About Us
                 </a>
-                <a href="/contact" className="hover:text-white transition">
+                <a href="/contact" className={`transition ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>
                   Contact
                 </a>
               </>
@@ -37,20 +40,27 @@ export default function Header() {
 
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-4">
+           <button
+          onClick={toggleTheme}
+          className="text-2xl focus:outline-none"
+          title="Changer de thème"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
           {isContactPage ? (
             <a href="/login">
-              <button className="bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+              <button className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${theme === 'dark' ? 'text-white bg-secondary' : 'text-dark bg-primary'}`}>
                 Se connecter
               </button>
             </a>
           ) : isLoginPage ? (
             
           <>
-           <a href="/contact" className="block py-2">
+           <a href="/contact" className={`text-sm transition py-2 ${theme === 'dark' ? 'text-white/80 hover:text-white' : 'text-dark/80 hover:text-dark'}`}>
                 Contact
               </a>
             <a href="/registration">
-              <button className="bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+              <button className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${theme === 'dark' ? 'text-white bg-secondary' : 'text-dark bg-primary'}`}>
                 Join Now
               </button>
             </a>
@@ -58,12 +68,12 @@ export default function Header() {
           ) : (
             <>
               <a href="/login">
-                <button className="text-sm text-white/80 hover:text-white transition py-2">
+                <button className={`text-sm transition py-2 ${theme === 'dark' ? 'text-white/80 hover:text-white' : 'text-dark/80 hover:text-dark'}`}>
                   Log In
                 </button>
               </a>
               <a href="/registration">
-                <button className="bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}>
                   Join Now
                 </button>
               </a>
@@ -73,7 +83,7 @@ export default function Header() {
 
         {/* Mobile toggle button */}
         <button
-          className="md:hidden text-white bg-secondary"
+          className={`md:hidden  ${theme === 'dark' ? 'bg-secondary text-white' : 'bg-primary text-dark'}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -83,12 +93,12 @@ export default function Header() {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden px-6 pb-4 space-y-4 text-white/90 text-sm ">
+        <div className={`md:hidden px-6 pb-4 space-y-4 text-sm ${theme === 'dark' ?  'text-white/90' : 'text-dark/90'}`}>
           {isContactPage ? (
             <>
-              <span className="block">Contact</span>
+              <span className={`block ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Contact</span>
               <a href="/login">
-                <button className="block w-full my-4">Se connecter</button>
+                <button className={`block w-full my-4 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Se connecter</button>
               </a>
             </>
           ) : isLoginPage ? (
@@ -98,7 +108,7 @@ export default function Header() {
                 Contact
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
                   Join Now
                 </button>
               </a>
@@ -115,12 +125,19 @@ export default function Header() {
                 <button className="block w-full my-4">Log In</button>
               </a>
               <a href="/registration">
-                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition">
+                <button className="w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shadow">
                   Join Now
                 </button>
               </a>
             </>
           )}
+           <button
+          onClick={toggleTheme}
+          className="text-2xl focus:outline-none"
+          title="Changer de thème"
+        >
+          {theme === 'dark' ? '☀️' : '🌙'}
+        </button>
         </div>
       )}
     </header>
