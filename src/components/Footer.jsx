@@ -1,6 +1,52 @@
-import { FaYoutube, FaFacebookF, FaTwitter, FaInstagram, FaLinkedinIn } from "react-icons/fa";
+import {
+  FaYoutube,
+  FaFacebookF,
+  FaTwitter,
+  FaInstagram,
+  FaLinkedinIn,
+} from "react-icons/fa";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Footer() {
+  const { theme } = useTheme();
+  const footerLinks = [
+    {
+      title: "Product",
+      links: [
+        { label: "Pricing", href: "#" },
+        { label: "Overview", href: "#" },
+        { label: "Browse", href: "#" },
+        { label: "Accessibility", href: "#" },
+        { label: "Five", href: "#" },
+      ],
+    },
+    {
+      title: "Solutions",
+      links: [
+        { label: "Brainstorming", href: "#" },
+        { label: "Ideation", href: "#" },
+        { label: "Wireframing", href: "#" },
+        { label: "Research", href: "#" },
+      ],
+    },
+    {
+      title: "Resources",
+      links: [
+        { label: "Help Center", href: "#" },
+        { label: "Blog", href: "#" },
+        { label: "Tutorials", href: "#" },
+      ],
+    },
+    {
+      title: "Company",
+      links: [
+        { label: "About", href: "#" },
+        { label: "Press", href: "#" },
+        { label: "Events", href: "#" },
+        { label: "Careers", href: "#" },
+      ],
+    },
+  ];
   return (
     <footer className="bg-white text-dark text-sm px-12 py-12 w-full">
       <div className="max-w-6xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
@@ -8,55 +54,25 @@ export default function Footer() {
         <div>
           <h2 className="text-xl font-bold">weeb</h2>
         </div>
-
-        {/* Colonne 2 : Product */}
-        <div>
-          <h3 className="font-semibold text-muted uppercase mb-2">Product</h3>
-          <ul className="space-y-1">
-            <li><a href="#">Pricing</a></li>
-            <li><a href="#">Overview</a></li>
-            <li><a href="#">Browse</a></li>
-            <li><a href="#">Accessibility</a></li>
-            <li><a href="#">Five</a></li>
-          </ul>
-        </div>
-
-        {/* Colonne 3 : Solutions */}
-        <div>
-          <h3 className="font-semibold text-muted uppercase mb-2">Solutions</h3>
-          <ul className="space-y-1">
-            <li><a href="#">Brainstorming</a></li>
-            <li><a href="#">Ideation</a></li>
-            <li><a href="#">Wireframing</a></li>
-            <li><a href="#">Research</a></li>
-          </ul>
-        </div>
-
-        {/* Colonne 4 : Resources */}
-        <div>
-          <h3 className="font-semibold text-muted uppercase mb-2">Resources</h3>
-          <ul className="space-y-1">
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Blog</a></li>
-            <li><a href="#">Tutorials</a></li>
-          </ul>
-        </div>
-
-        {/* Colonne 5 : Company */}
-        <div>
-          <h3 className="font-semibold text-muted uppercase mb-2">Company</h3>
-          <ul className="space-y-1">
-            <li><a href="#">About</a></li>
-            <li><a href="#">Press</a></li>
-            <li><a href="#">Events</a></li>
-            <li><a href="#">Careers</a></li>
-          </ul>
-        </div>
+        {footerLinks.map(({ title, links }) => (
+          <div key={title}>
+            <h3 className="font-semibold text-muted uppercase mb-2">{title}</h3>
+            <ul className="space-y-1">
+              {links.map(({ label, href }) => (
+                <li key={label}>
+                  <a href={href}>{label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       {/* Ligne du bas */}
       <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4">
-        <p className="text-muted">&copy; 2025 Weeb, Inc. All rights reserved.</p>
+        <p className="text-muted">
+          &copy; 2025 Weeb, Inc. All rights reserved.
+        </p>
         <div className="flex gap-4 text-xl text-dark-icon">
           <FaYoutube className="hover:text-primary cursor-pointer" />
           <FaFacebookF className="hover:text-primary cursor-pointer" />
