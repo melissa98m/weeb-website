@@ -19,12 +19,12 @@ Un site web moderne construit avec React et Vite, stylisé avec Tailwind CSS. Ce
 
 🚀 Installation
 
-# Cloner le dépôt
-git clone https://github.com/melissa98m/weeb-website/
-cd weeb-website
+    # Cloner le dépôt
+    git clone https://github.com/melissa98m/weeb-website/
+    cd weeb-website
 
-# Installer les dépendances
-npm install
+    # Installer les dépendances
+    npm install
 
 🛠️ Scripts disponibles
 Commande	Description
@@ -32,6 +32,7 @@ npm run dev	Lance le serveur de développement
 npm run build	Génère la version de production
 npm run preview	Prévisualise le build localement
 npm run lint	Vérifie le code avec ESLint
+
 📁 Structure du projet
 
     weeb-website/
