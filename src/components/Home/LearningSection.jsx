@@ -40,7 +40,7 @@ export default function LearningSection() {
         </button>
       </div>
       <motion.img
-        src="src/assets/home/mokup.png"
+        src="/home/mokup.png"
         alt="Mockup 2"
         className="w-full max-w-md rounded-md shadow-lg"
         initial={{ x: 100, opacity: 0 }}
