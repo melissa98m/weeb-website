@@ -27,7 +27,7 @@ export default function HeroSection() {
       <motion.img
         src="/home/mokup.png"
         alt="Mockup"
-        className="mt-12 w-full max-w-5xl mx-auto rounded-md shadow-lg"
+        className="mt-12 w-full max-w-5xl mx-auto rounded-md"
         style={{
           cursor: 'grab',
         }}
