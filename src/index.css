@@ -6,6 +6,7 @@
   --color-background: #0F172A;
   --color-muted: #94A3B8;
   --color-dark: #181e2c;
+  --color-light: #F2F2F2;
   --font-sans: "Roboto", sans-serif;
 }
 
@@ -13,7 +14,7 @@ html.dark{
   background-color: #0F172A;
 }
 html.light{
-  background-color:#94A3B8 ;
+  background-color:#F2F2F2 ;
 }
 
 
