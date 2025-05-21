@@ -1,12 +1,54 @@
-# React + Vite
+weeb-website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Un site web moderne construit avec React et Vite, stylisé avec Tailwind CSS. Ce projet sert de base rapide et modulaire pour construire une interface performante en JavaScript moderne.
+🔧 Stack technique
 
-Currently, two official plugins are available:
+    ⚛️ React — Interface utilisateur déclarative et modulaire
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+    ⚡ Vite — Bundler ultra-rapide
 
-## Expanding the ESLint configuration
+    🎨 Tailwind CSS — Framework CSS utilitaire
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+    🧭 React Router — Gestion des routes côté client
+
+    🌟 React Icons — Icônes vectorielles dans les composants
+
+    ✅ ESLint — Linting et bonnes pratiques JS/TS
+
+    🧪 Pré-configuré pour un développement rapide
+
+🚀 Installation
+
+# Cloner le dépôt
+git clone https://github.com/melissa98m/weeb-website/
+cd weeb-website
+
+# Installer les dépendances
+npm install
+
+🛠️ Scripts disponibles
+Commande	Description
+npm run dev	Lance le serveur de développement
+npm run build	Génère la version de production
+npm run preview	Prévisualise le build localement
+npm run lint	Vérifie le code avec ESLint
+📁 Structure du projet
+
+weeb-website/
+├── index.html               # Entrée HTML principale
+├── vite.config.js           # Configuration Vite
+├── tailwind.config.js       # Configuration Tailwind
+├── postcss.config.js        # Configuration PostCSS
+├── package.json             # Dépendances et scripts
+├── src/                     # Code source React
+│   ├── components/          # Composants réutilisables
+│   ├── pages/               # Pages routées via React Router
+│   ├── App.jsx              # Application principale avec routing
+│   └── main.jsx             # Point d’entrée React
+
+💡 Déploiement
+
+Une fois le projet buildé (npm run build), les fichiers de production sont disponibles dans le dossier dist/. Tu peux les héberger sur Netlify, Vercel ou n’importe quel hébergeur statique.
+🤝 Contribuer
+
+Les contributions sont les bienvenues. Merci d’ouvrir une issue ou une pull request avec une description claire.
