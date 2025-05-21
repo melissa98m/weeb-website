@@ -5,7 +5,6 @@ export default function HeroSection() {
   const { theme } = useTheme();
   return (
     <section className="px-6 py-16 text-center max-w-5xl mx-auto">
-     
       <h1 className="text-7xl md:text-5xl font-bold leading-tight">
         Explorez le <span className={`${theme === 'dark' ? 'text-primary' : 'text-secondary'}`}>Web</span> sous toutes ses 
         <span className={`underline underline-offset-8 ${theme === 'dark' ?  'decoration-primary' : 'decoration-secondary'}`}> facettes</span>

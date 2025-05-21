@@ -12,7 +12,7 @@ function App() {
     const { theme, toggleTheme } = useTheme();
 
   return (
-    <div className="text-white font-sans">
+    <div className="text-white font-sans overflow-x-hidden">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

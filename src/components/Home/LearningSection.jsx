@@ -45,7 +45,7 @@ export default function LearningSection() {
         className="w-full max-w-md rounded-md"
         initial={{ x: 100, opacity: 0 }}
         whileInView={{ x: 0, opacity: 1 }}
-        viewport={{ once: false, amount: 1.0 }}
+        viewport={{ once: false }}
         transition={{ type: "spring", stiffness: 30, damping: 10, mass: 1 }}
       />
     </section>
