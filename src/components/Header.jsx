@@ -98,7 +98,7 @@ export default function Header() {
             <>
               <span className={`block ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Contact</span>
               <a href="/login">
-                <button className={`block w-full my-4 ${theme === 'dark' ? 'text-white' : 'text-dark'}`}>Se connecter</button>
+                <button className={`w-full text-sm px-4 py-2 rounded-md shadow ${theme === 'dark' ?  'bg-secondary text-white' : 'text-dark bg-primary'}`}>Se connecter</button>
               </a>
             </>
           ) : isLoginPage ? (
