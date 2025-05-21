@@ -113,6 +113,21 @@ export default function Header() {
                 </button>
               </a>
             </>
+          ) : isLoginPage ? (
+            <>
+              <span className="block">Login</span>
+              <a
+                href="/contact"
+                className="block text-white text-sm px-4 py-2 rounded-md shadow"
+              >
+                Contact
+              </a>
+              <a href="/registration">
+                <button className="block w-full bg-secondary text-white text-sm px-4 py-2 rounded-md shado">
+                  Join Now
+                </button>
+              </a>
+            </>
           ) : (
             <>
               <a href="/about-us" className="block">
