@@ -13,7 +13,7 @@ export default function Header() {
 
   return (
     <header
-      className={` shadow-md rounded-xl max-w-5xl mx-auto my-4 ${
+      className={`shadow-md fixed md:top-6 translate-x-[-50%] left-[50%] md:rounded-t-xl rounded-b-xl md:w-[95%] max-w-5xl z-1 w-full ${
         theme === "dark" ? "bg-dark" : "bg-gray-100"
       }`}
     >
@@ -134,7 +134,7 @@ export default function Header() {
 
         {/* Mobile toggle button */}
         <button
-          className={`md:hidden  ${
+          className={`md:hidden px-2 py-2 rounded-xl ${
             theme === "dark"
               ? "bg-secondary text-white"
               : "bg-primary text-dark"
@@ -164,8 +164,10 @@ export default function Header() {
               </span>
               <a href="/login">
                 <button
-                  className={`block w-full my-4 ${
-                    theme === "dark" ? "text-white" : "text-dark"
+                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                    theme === "dark"
+                      ? "bg-secondary text-white"
+                      : "text-dark bg-primary"
                   }`}
                 >
                   Se connecter
@@ -176,6 +178,29 @@ export default function Header() {
             <>
               <span className="block font-semibold">Login</span>
               <a href="/contact" className="block">
+                Contact
+              </a>
+              <a href="/registration">
+                <button
+                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                    theme === "dark"
+                      ? "bg-secondary text-white"
+                      : "text-dark bg-primary"
+                  }`}
+                >
+                  Join Now
+                </button>
+              </a>
+            </>
+          ) : isLoginPage ? (
+            <>
+              <span className="block">Login</span>
+              <a
+                href="/contact"
+                className={`block text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark" ? "text-white" : "text-dark"
+                }`}
+              >
                 Contact
               </a>
               <a href="/registration">
@@ -219,7 +244,7 @@ export default function Header() {
               </a>
               <a href="/registration">
                 <button
-                  className={`w-full text-sm px-4 py-2 rounded-md ${
+                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
                     theme === "dark"
                       ? "bg-secondary text-white"
                       : "text-dark bg-primary"

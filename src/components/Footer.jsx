@@ -49,7 +49,7 @@ export default function Footer() {
   ];
   return (
     <footer className={`text-sm px-12 py-12 w-full ${theme === 'dark' ? 'bg-white text-dark' : 'bg-dark text-white'}`}>
-      <div className="max-w-6xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
+      <div className="max-w-5xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
         {/* Colonne 1 : Logo */}
         <div>
           <h2 className="text-xl font-bold">weeb</h2>
@@ -69,10 +69,11 @@ export default function Footer() {
       </div>
 
       {/* Ligne du bas */}
-      <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4">
+      <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto">
         <p>
           &copy; 2025 Weeb, Inc. All rights reserved.
         </p>
+         {/* Reseaux sociaux */}
         <div className="flex gap-4 text-xl text-dark-icon">
           <FaYoutube className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
           <FaFacebookF className={`hover:text-primary cursor-pointer ${theme === 'dark' ? 'hover:text-primary' : 'hover:text-secondary'}`} />
