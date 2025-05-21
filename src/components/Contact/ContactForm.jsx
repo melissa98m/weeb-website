@@ -1,98 +1,98 @@
-import { useTheme } from "../../context/ThemeContext";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { useTheme } from "../../context/ThemeContext";
+
 export default function ContactForm() {
   const { theme } = useTheme();
+
+  // État du formulaire et des erreurs
+  const [form, setForm] = useState({
+    nom: "",
+    prenom: "",
+    telephone: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [shake, setShake] = useState(false);
+
+  // Validation simple
+  const validate = () => {
+    const errs = {};
+    if (!form.nom.trim()) errs.nom = "Veuillez entrer votre nom";
+    if (!form.prenom.trim()) errs.prenom = "Veuillez entrer votre prénom";
+    if (!/^[0-9+ ]{6,15}$/.test(form.telephone))
+      errs.telephone = "Téléphone invalide";
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim()))
+      errs.email = "Email invalide";
+    if (!form.message.trim()) errs.message = "Veuillez entrer un message";
+    return errs;
+  };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.id]: e.target.value });
+    // Clear error on change
+    setErrors({ ...errors, [e.target.id]: null });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+    console.log("send", form);
+  };
+
   return (
     <section className="px-6 pb-20 flex justify-center">
-      <form
-        className={`w-full max-w-3xl bg-[#C084FC1A] bg-opacity-25 p-6 rounded-md border text-sm space-y-6 ${
-          theme === "dark"
-            ? "bg-[#C084FC1A]  border-primary"
-            : "bg-light border-secondary"
-        }`}
+      {/* Shake if the all form is error */}
+      <motion.form
+        onSubmit={handleSubmit}
+        className={`w-full max-w-3xl p-6 rounded-md border text-sm space-y-6
+          ${
+            theme === "dark"
+              ? "bg-[#C084FC1A] border-primary"
+              : "bg-light border-secondary"
+          }`}
+        animate={shake ? { x: [0, -10, 10, -10, 10, 0] } : {}}
+        transition={{ duration: 0.5 }}
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label
-              htmlFor="nom"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              Nom
-            </label>
-            <input
-              type="text"
-              id="nom"
-              className={`w-full bg-transparent border-b  focus:outline-none  py-1 ${
-                theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }
-              `}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="prenom"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              Prénom
-            </label>
-            <input
-              type="text"
-              id="prenom"
-              className={`w-full bg-transparent border-b  focus:outline-none  py-1 ${
-                theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }
-              `}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="telephone"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              Téléphone
-            </label>
-            <input
-              type="text"
-              id="telephone"
-              className={`w-full bg-transparent border-b  focus:outline-none  py-1 ${
-                theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }
-              `}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="email"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              className={`w-full bg-transparent border-b  focus:outline-none  py-1 ${
-                theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }
-              `}
-            />
-          </div>
+          {["nom", "prenom", "telephone", "email"].map((field) => (
+            <div key={field}>
+              <label
+                htmlFor={field}
+                className={`block mb-1 ${
+                  theme === "dark" ? "text-primary" : "text-secondary"
+                }`}
+              >
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </label>
+              <input
+                type={field === "email" ? "email" : "text"}
+                id={field}
+                value={form[field]}
+                onChange={handleChange}
+                className={`w-full bg-transparent border-b py-1 focus:outline-none
+                  ${
+                    errors[field]
+                      ? "border-red-500"
+                      : theme === "dark"
+                      ? "border-primary focus:border-primary"
+                      : "border-secondary focus:border-secondary"
+                  }`}
+              />
+              {errors[field] && (
+                <p className="text-red-500 text-xs mt-1">{errors[field]}</p>
+              )}
+            </div>
+          ))}
         </div>
+
         <div>
           <label
             htmlFor="message"
@@ -104,15 +104,23 @@ export default function ContactForm() {
           </label>
           <textarea
             id="message"
-            rows="2"
-            className={`w-full bg-transparent border-b  focus:outline-none py-1 resize-none ${
-              theme === "dark"
-                ? "border-primary focus:border-primary"
-                : "border-secondary focus:border-secondary"
-            }
-              `}
-          ></textarea>
+            rows="3"
+            value={form.message}
+            onChange={handleChange}
+            className={`w-full bg-transparent border-b py-1 resize-none focus:outline-none
+              ${
+                errors.message
+                  ? "border-red-500"
+                  : theme === "dark"
+                  ? "border-primary focus:border-primary"
+                  : "border-secondary focus:border-secondary"
+              }`}
+          />
+          {errors.message && (
+            <p className="text-red-500 text-xs mt-1">{errors.message}</p>
+          )}
         </div>
+
         <div className="text-center">
           <motion.button
             type="submit"
@@ -121,14 +129,14 @@ export default function ContactForm() {
                 ? "bg-secondary text-white"
                 : "bg-primary text-dark"
             }`}
-            whileHover={{ scale: 1.2 }}
+            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
             Contact
           </motion.button>
         </div>
-      </form>
+      </motion.form>
     </section>
   );
 }
