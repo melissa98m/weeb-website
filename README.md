@@ -34,17 +34,17 @@ npm run preview	Prévisualise le build localement
 npm run lint	Vérifie le code avec ESLint
 📁 Structure du projet
 
-weeb-website/
-├── index.html               # Entrée HTML principale
-├── vite.config.js           # Configuration Vite
-├── tailwind.config.js       # Configuration Tailwind
-├── postcss.config.js        # Configuration PostCSS
-├── package.json             # Dépendances et scripts
-├── src/                     # Code source React
-│   ├── components/          # Composants réutilisables
-│   ├── pages/               # Pages routées via React Router
-│   ├── App.jsx              # Application principale avec routing
-│   └── main.jsx             # Point d’entrée React
+    weeb-website/
+    ├── index.html               # Entrée HTML principale
+    ├── vite.config.js           # Configuration Vite
+    ├── tailwind.config.js       # Configuration Tailwind
+    ├── postcss.config.js        # Configuration PostCSS
+    ├── package.json             # Dépendances et scripts
+    ├── src/                     # Code source React
+    │   ├── components/          # Composants réutilisables
+    │   ├── pages/               # Pages routées via React Router
+    │   ├── App.jsx              # Application principale avec routing
+    │   └── main.jsx             # Point d’entrée React
 
 💡 Déploiement
 
