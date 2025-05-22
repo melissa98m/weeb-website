@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
 import { useTheme } from "../context/ThemeContext";
+import Button from "./Button";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,16 +62,19 @@ export default function Header() {
 
         {/* Desktop buttons */}
         <div className="hidden md:flex space-x-4">
-          <button
+          <Button
             onClick={toggleTheme}
+            aria-label="Changer de thème"
             className="text-2xl focus:outline-none"
             title="Changer de thème"
           >
             {theme === "dark" ? "☀️" : "🌙"}
-          </button>
+          </Button>
+
           {isContactPage ? (
-            <Link to="/login">
-              <button
+            <>
+              <Button
+                to="/login"
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                   theme === "dark"
                     ? "text-white bg-secondary"
@@ -78,8 +82,8 @@ export default function Header() {
                 }`}
               >
                 Se connecter
-              </button>
-            </Link>
+              </Button>
+            </>
           ) : isLoginPage ? (
             <>
               <Link
@@ -92,58 +96,56 @@ export default function Header() {
               >
                 Contact
               </Link>
-              <Link to="/registration">
-                <button
-                  className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                    theme === "dark"
-                      ? "text-white bg-secondary"
-                      : "text-dark bg-primary"
-                  }`}
-                >
-                  Join Now
-                </button>
-              </Link>
+
+              <Button
+                to="/registration"
+                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                  theme === "dark"
+                    ? "text-white bg-secondary"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                Créer un compte
+              </Button>
             </>
           ) : (
             <>
-              <Link to="/login">
-                <button
-                  className={`text-sm transition py-2 ${
-                    theme === "dark"
-                      ? "text-white/80 hover:text-white"
-                      : "text-dark/80 hover:text-dark"
-                  }`}
-                >
-                  Log In
-                </button>
-              </Link>
-              <Link to="/registration">
-                <button
-                  className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                    theme === "dark"
-                      ? "bg-secondary text-white"
-                      : "bg-primary text-dark"
-                  }`}
-                >
-                  Join Now
-                </button>
-              </Link>
+              <Button
+                to="/login"
+                className={`text-sm transition py-2 ${
+                  theme === "dark"
+                    ? "text-white/80 hover:text-white"
+                    : "text-dark/80 hover:text-dark"
+                }`}
+              >
+                Log In
+              </Button>
+              <Button
+                to="/registration"
+                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                  theme === "dark"
+                    ? "text-white bg-secondary"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                Créer un compte
+              </Button>
             </>
           )}
         </div>
 
         {/* Mobile toggle button */}
-        <button
+        <Button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle Menu"
           className={`md:hidden px-2 py-2 rounded-xl ${
             theme === "dark"
               ? "bg-secondary text-white"
               : "bg-primary text-dark"
           }`}
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Toggle Menu"
         >
           {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
-        </button>
+        </Button>
       </div>
 
       {/* Mobile menu */}
@@ -162,17 +164,16 @@ export default function Header() {
               >
                 Contact
               </span>
-              <Link to="/login">
-                <button
-                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                    theme === "dark"
-                      ? "bg-secondary text-white"
-                      : "text-dark bg-primary"
-                  }`}
-                >
-                  Se connecter
-                </button>
-              </Link>
+              <Button
+                to="/login"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                Se connecter
+              </Button>
             </>
           ) : isLoginPage ? (
             <>
@@ -180,17 +181,16 @@ export default function Header() {
               <Link to="/contact" className="block">
                 Contact
               </Link>
-              <Link to="/registration">
-                <button
-                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                    theme === "dark"
-                      ? "bg-secondary text-white"
-                      : "text-dark bg-primary"
-                  }`}
-                >
-                  Join Now
-                </button>
-              </Link>
+              <Button
+                to="/registration"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                Créer un compte
+              </Button>
             </>
           ) : (
             <>
@@ -210,35 +210,34 @@ export default function Header() {
               >
                 Contact
               </Link>
-              <Link to="/login">
-                <button
-                  className={`block w-full my-4 ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
-                  Log In
-                </button>
-              </Link>
-              <Link to="/registration">
-                <button
-                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                    theme === "dark"
-                      ? "bg-secondary text-white"
-                      : "text-dark bg-primary"
-                  }`}
-                >
-                  Join Now
-                </button>
-              </Link>
+              <Button
+                to="/login"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark" ? " text-white" : "text-dark"
+                }`}
+              >
+                Se connecter
+              </Button>
+              <Button
+                to="/registration"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                Créer un compte
+              </Button>
             </>
           )}
-          <button
+          <Button
             onClick={toggleTheme}
+            aria-label="Changer de thème"
             className="text-2xl focus:outline-none"
             title="Changer de thème"
           >
             {theme === "dark" ? "☀️" : "🌙"}
-          </button>
+          </Button>
         </div>
       )}
     </header>
