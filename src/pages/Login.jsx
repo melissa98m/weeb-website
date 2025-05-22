@@ -43,8 +43,8 @@ export default function Login() {
     <section
       className={`min-h-screen flex items-center justify-center px-6 py-12 ${
         theme === "dark"
-          ? "bg-background text-white"
-          : "bg-muted text-background"
+          ?  "text-white"
+          : "text-background"
       }`}
     >
       <motion.form
