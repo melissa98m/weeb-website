@@ -4,11 +4,7 @@ import React from "react";
 export default function Artvenue() {
   const { theme } = useTheme();
   return (
-    <svg
-      viewBox="0 0 167 32"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
+    <svg viewBox="0 0 167 32" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M37.7963 32H50.714L18.7141 0H5.79626L37.7963 32Z"
         fill={`${theme === "dark" ? "white" : "var(--color-dark)"}`}
