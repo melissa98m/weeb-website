@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import homeEn from "../../../locales/en/home.json";
 import homeFr from "../../../locales/fr/home.json";
 import { useLanguage } from "../../context/LanguageContext";
+import { Link } from "react-router-dom";
 
 export default function LearningSection() {
   const { theme } = useTheme();
@@ -37,9 +38,9 @@ export default function LearningSection() {
         <p className="mt-4">
           {language === "fr" ? homeFr.learning : homeEn.learning}
         </p>
-        <button className="mt-6 hover:underline">
+        <Link to="/articles" className="mt-6 hover:underline">
           {language === "fr" ? homeFr.link_2 : homeEn.link_2}
-        </button>
+        </Link>
       </div>
       <motion.img
         src="/home/mokup.png"
