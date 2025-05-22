@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
 import { useTheme } from "../context/ThemeContext";
 
@@ -24,7 +24,7 @@ export default function Header() {
               theme === "dark" ? "text-white" : "text-dark"
             }`}
           >
-            <a href="/">weeb</a>
+            <Link to="/">weeb</Link>
           </div>
           {/* Desktop navigation */}
           <nav
@@ -38,22 +38,22 @@ export default function Header() {
               <span>Login</span>
             ) : (
               <>
-                <a
-                  href="/about-us"
+                <Link
+                  to="/about-us"
                   className={`transition ${
                     theme === "dark" ? "text-white" : "text-dark"
                   }`}
                 >
                   About Us
-                </a>
-                <a
-                  href="/contact"
+                </Link>
+                <Link
+                  to="/contact"
                   className={`transition ${
                     theme === "dark" ? "text-white" : "text-dark"
                   }`}
                 >
                   Contact
-                </a>
+                </Link>
               </>
             )}
           </nav>
@@ -69,7 +69,7 @@ export default function Header() {
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
           {isContactPage ? (
-            <a href="/login">
+            <Link to="/login">
               <button
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                   theme === "dark"
@@ -79,11 +79,11 @@ export default function Header() {
               >
                 Se connecter
               </button>
-            </a>
+            </Link>
           ) : isLoginPage ? (
             <>
-              <a
-                href="/contact"
+              <Link
+                to="/contact"
                 className={`text-sm transition py-2 ${
                   theme === "dark"
                     ? "text-white/80 hover:text-white"
@@ -91,8 +91,8 @@ export default function Header() {
                 }`}
               >
                 Contact
-              </a>
-              <a href="/registration">
+              </Link>
+              <Link to="/registration">
                 <button
                   className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                     theme === "dark"
@@ -102,11 +102,11 @@ export default function Header() {
                 >
                   Join Now
                 </button>
-              </a>
+              </Link>
             </>
           ) : (
             <>
-              <a href="/login">
+              <Link to="/login">
                 <button
                   className={`text-sm transition py-2 ${
                     theme === "dark"
@@ -116,8 +116,8 @@ export default function Header() {
                 >
                   Log In
                 </button>
-              </a>
-              <a href="/registration">
+              </Link>
+              <Link to="/registration">
                 <button
                   className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                     theme === "dark"
@@ -127,7 +127,7 @@ export default function Header() {
                 >
                   Join Now
                 </button>
-              </a>
+              </Link>
             </>
           )}
         </div>
@@ -162,7 +162,7 @@ export default function Header() {
               >
                 Contact
               </span>
-              <a href="/login">
+              <Link to="/login">
                 <button
                   className={`w-full text-sm px-4 py-2 rounded-md shadow ${
                     theme === "dark"
@@ -172,15 +172,15 @@ export default function Header() {
                 >
                   Se connecter
                 </button>
-              </a>
+              </Link>
             </>
           ) : isLoginPage ? (
             <>
               <span className="block font-semibold">Login</span>
-              <a href="/contact" className="block">
+              <Link to="/contact" className="block">
                 Contact
-              </a>
-              <a href="/registration">
+              </Link>
+              <Link to="/registration">
                 <button
                   className={`w-full text-sm px-4 py-2 rounded-md shadow ${
                     theme === "dark"
@@ -190,50 +190,27 @@ export default function Header() {
                 >
                   Join Now
                 </button>
-              </a>
-            </>
-          ) : isLoginPage ? (
-            <>
-              <span className="block">Login</span>
-              <a
-                href="/contact"
-                className={`block text-sm px-4 py-2 rounded-md shadow ${
-                  theme === "dark" ? "text-white" : "text-dark"
-                }`}
-              >
-                Contact
-              </a>
-              <a href="/registration">
-                <button
-                  className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                    theme === "dark"
-                      ? "bg-secondary text-white"
-                      : "text-dark bg-primary"
-                  }`}
-                >
-                  Join Now
-                </button>
-              </a>
+              </Link>
             </>
           ) : (
             <>
-              <a
-                href="/about-us"
+              <Link
+                to="/about-us"
                 className={`block ${
                   theme === "dark" ? "text-white" : "text-dark"
                 }`}
               >
                 About Us
-              </a>
-              <a
-                href="/contact"
+              </Link>
+              <Link
+                to="/contact"
                 className={`block ${
                   theme === "dark" ? "text-white" : "text-dark"
                 }`}
               >
                 Contact
-              </a>
-              <a href="/login">
+              </Link>
+              <Link to="/login">
                 <button
                   className={`block w-full my-4 ${
                     theme === "dark" ? "text-white" : "text-dark"
@@ -241,8 +218,8 @@ export default function Header() {
                 >
                   Log In
                 </button>
-              </a>
-              <a href="/registration">
+              </Link>
+              <Link to="/registration">
                 <button
                   className={`w-full text-sm px-4 py-2 rounded-md shadow ${
                     theme === "dark"
@@ -252,7 +229,7 @@ export default function Header() {
                 >
                   Join Now
                 </button>
-              </a>
+              </Link>
             </>
           )}
           <button
