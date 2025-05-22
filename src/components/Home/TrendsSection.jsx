@@ -1,6 +1,12 @@
 import { useTheme } from "../../context/ThemeContext";
+import homeEn from "../../../locales/en/home.json";
+import homeFr from "../../../locales/fr/home.json";
+import { useLanguage } from "../../context/LanguageContext";
+import { Link } from "react-router-dom";
+
 export default function TrendsSection() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   return (
     <section className="px-6 py-20 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10">
@@ -13,26 +19,24 @@ export default function TrendsSection() {
       </div>
       <div className="lg:w-1/2 text-center lg:text-left">
         <h3 className="text-sm uppercase mb-2">
-          Le web, un écosystème en constante évolution
+          {language === "fr" ? homeFr.home_title_8 : homeEn.home_title_8}
         </h3>
         <h2 className="text-6xl font-bold">
-          Restez informé des dernières{" "}
+          {language === "fr" ? homeFr.home_title_9 : homeEn.home_title_9}{" "}
           <span
             className={`${
               theme === "dark" ? "text-primary" : "text-secondary"
             }`}
           >
-            tendances
+            {language === "fr" ? homeFr.home_title_10 : homeEn.home_title_10}
           </span>
         </h2>
         <p className="mt-4 ">
-          Chaque semaine, nous analysons les nouveautés du web : frameworks
-          émergents, bonnes pratiques SEO, accessibilité, et bien plus encore.
-          Ne manquez aucune actualité du digital !
+          {language === "fr" ? homeFr.last_articles : homeEn.last_articles}
         </p>
-        <button className="mt-6 hover:underline">
-          Lire les articles récents →
-        </button>
+        <Link to="/articles" className="mt-6 hover:underline">
+          {language === "fr" ? homeFr.link_3 : homeEn.link_3}
+        </Link>
       </div>
     </section>
   );
