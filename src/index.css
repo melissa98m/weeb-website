@@ -2,28 +2,26 @@
 
 @theme {
   --color-primary: #c084fc;
-  --color-secondary: #9333EA;
-  --color-background: #0F172A;
-  --color-muted: #94A3B8;
+  --color-secondary: #9333ea;
+  --color-background: #0f172a;
+  --color-muted: #94a3b8;
   --color-dark: #181e2c;
-  --color-light: #F2F2F2;
+  --color-light: #f2f2f2;
   --font-sans: "Roboto", sans-serif;
+  --animate-spin: spin 4s linear infinite
 }
 
-html.dark{
-  background-color: #0F172A;
+html.dark {
+  background-color: #0f172a;
 }
-html.light{
-  background-color:#F2F2F2 ;
+html.light {
+  background-color: #f2f2f2;
 }
-
-
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
 }
-
 
 button:hover {
   border-color: #646cff;
@@ -32,5 +30,3 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
-
-
