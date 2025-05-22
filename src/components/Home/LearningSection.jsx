@@ -1,8 +1,12 @@
 import { useTheme } from "../../context/ThemeContext";
 import { motion } from "framer-motion";
+import homeEn from "../../../locales/en/home.json";
+import homeFr from "../../../locales/fr/home.json";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function LearningSection() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
   return (
     <section className="flex flex-col lg:flex-row items-center gap-10 px-6 py-20 max-w-6xl mx-auto text-left">
       <div className="lg:w-1/2">
@@ -11,7 +15,7 @@ export default function LearningSection() {
             theme === "dark" ? "text-white" : "text-dark"
           }`}
         >
-          Des ressources pour tous les niveaux
+          {language === "fr" ? homeFr.home_title_4 : homeEn.home_title_4}
         </h3>
         <h2 className="text-6xl font-bold">
           <span
@@ -19,24 +23,22 @@ export default function LearningSection() {
               theme === "dark" ? "text-primary" : "text-secondary"
             }`}
           >
-            Apprenez
+            {language === "fr" ? homeFr.home_title_5 : homeEn.home_title_5}
           </span>{" "}
-          et{" "}
+          {language === "fr" ? homeFr.home_title_6 : homeEn.home_title_6}{" "}
           <span
             className={`${
               theme === "dark" ? "text-primary" : "text-secondary"
             }`}
           >
-            progressez
+            {language === "fr" ? homeFr.home_title_7 : homeEn.home_title_7}
           </span>
         </h2>
         <p className="mt-4">
-          Que vous débutiez en développement web ou que vous soyez un expert
-          cherchant à approfondir vos connaissances, nous vous proposons des
-          tutoriels, guides et bonnes pratiques pour apprendre efficacement.
+          {language === "fr" ? homeFr.learning : homeEn.learning}
         </p>
         <button className="mt-6 hover:underline">
-          Explorer les ressources →
+          {language === "fr" ? homeFr.link_2 : homeEn.link_2}
         </button>
       </div>
       <motion.img
