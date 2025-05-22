@@ -1,13 +1,17 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { HiMenu, HiX } from "react-icons/hi";
+import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import Button from "./Button";
+import headerEn from "../../locales/en/header.json";
+import headerFr from "../../locales/fr/header.json";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
+  const { language, toggleLanguage } = useLanguage();
 
   const isContactPage = location.pathname === "/contact";
   const isLoginPage = location.pathname === "/login";
@@ -34,28 +38,38 @@ export default function Header() {
             }`}
           >
             {isContactPage ? (
-              <span>Contact</span>
-            ) : isLoginPage ? (
-              <span>Login</span>
-            ) : (
               <>
-                <Link
-                  to="/about-us"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
-                  About Us
-                </Link>
-                <Link
-                  to="/contact"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
-                  Contact
-                </Link>
+                <span>
+                  {language === "fr" ? headerFr.contact : headerEn.contact}
+                </span>
               </>
+            ) : isLoginPage ? (
+              <>
+              <span>
+              {language === "fr" ? headerFr.login : headerEn.login}
+              </span>
+              </>
+            ) : (
+              (
+                <>
+                  <Link
+                    to="/about-us"
+                    className={`transition ${
+                      theme === "dark" ? "text-white" : "text-dark"
+                    }`}
+                  >
+                    {language === "fr" ? headerFr.about_us : headerEn.about_us}
+                  </Link>
+                  <Link
+                    to="/contact"
+                    className={`transition ${
+                      theme === "dark" ? "text-white" : "text-dark"
+                    }`}
+                  >
+                    {language === "fr" ? headerFr.contact : headerEn.contact}
+                  </Link>
+                </>
+              )
             )}
           </nav>
         </div>
@@ -64,11 +78,19 @@ export default function Header() {
         <div className="hidden md:flex space-x-4">
           <Button
             onClick={toggleTheme}
-            aria-label="Changer de thème"
+            aria-label={language === "fr" ? headerFr.change_theme : headerEn.change_theme}
             className="text-2xl focus:outline-none"
-            title="Changer de thème"
+            title={language === "fr" ? headerFr.change_theme : headerEn.change_theme}
           >
             {theme === "dark" ? "☀️" : "🌙"}
+          </Button>
+          <Button
+            onClick={toggleLanguage}
+            aria-label={language === "fr" ? headerFr.change_language : headerEn.change_language}
+            className="text-2xl focus:outline-none"
+            title={language === "fr" ? headerFr.change_language : headerEn.change_language}
+          >
+            {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
           </Button>
 
           {isContactPage ? (
@@ -81,7 +103,7 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Se connecter
+                {language === "fr" ? headerFr.login : headerEn.login}
               </Button>
             </>
           ) : isLoginPage ? (
@@ -94,7 +116,7 @@ export default function Header() {
                     : "text-dark/80 hover:text-dark"
                 }`}
               >
-                Contact
+                {language === "fr" ? headerFr.contact : headerEn.contact}
               </Link>
 
               <Button
@@ -105,7 +127,7 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Créer un compte
+                {language === "fr" ? headerFr.register : headerEn.register}
               </Button>
             </>
           ) : (
@@ -118,7 +140,7 @@ export default function Header() {
                     : "text-dark/80 hover:text-dark"
                 }`}
               >
-                Log In
+                {language === "fr" ? headerFr.login : headerEn.login}
               </Button>
               <Button
                 to="/registration"
@@ -128,7 +150,7 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Créer un compte
+                {language === "fr" ? headerFr.register : headerEn.register}
               </Button>
             </>
           )}
@@ -162,7 +184,7 @@ export default function Header() {
                   theme === "dark" ? "text-white" : "text-dark"
                 }`}
               >
-                Contact
+                {language === "fr" ? headerFr.contact : headerEn.contact}
               </span>
               <Button
                 to="/login"
@@ -172,14 +194,14 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Se connecter
+                {language === "fr" ? headerFr.login : headerEn.login}
               </Button>
             </>
           ) : isLoginPage ? (
             <>
-              <span className="block font-semibold">Login</span>
+              <span className="block font-semibold">{language === "fr" ? headerFr.login : headerEn.login}</span>
               <Link to="/contact" className="block">
-                Contact
+                {language === "fr" ? headerFr.contact : headerEn.contact}
               </Link>
               <Button
                 to="/registration"
@@ -189,7 +211,7 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Créer un compte
+                {language === "fr" ? headerFr.register : headerEn.register}
               </Button>
             </>
           ) : (
@@ -200,7 +222,7 @@ export default function Header() {
                   theme === "dark" ? "text-white" : "text-dark"
                 }`}
               >
-                About Us
+                {language === "fr" ? headerFr.about_us : headerEn.about_us}
               </Link>
               <Link
                 to="/contact"
@@ -208,7 +230,7 @@ export default function Header() {
                   theme === "dark" ? "text-white" : "text-dark"
                 }`}
               >
-                Contact
+                {language === "fr" ? headerFr.contact : headerEn.contact}
               </Link>
               <Button
                 to="/login"
@@ -216,7 +238,7 @@ export default function Header() {
                   theme === "dark" ? " text-white" : "text-dark"
                 }`}
               >
-                Se connecter
+                {language === "fr" ? headerFr.login : headerEn.login}
               </Button>
               <Button
                 to="/registration"
@@ -226,17 +248,25 @@ export default function Header() {
                     : "text-dark bg-primary"
                 }`}
               >
-                Créer un compte
+               {language === "fr" ? headerFr.register : headerEn.register}
               </Button>
             </>
           )}
           <Button
             onClick={toggleTheme}
-            aria-label="Changer de thème"
+            aria-label={language === "fr" ? headerFr.change_theme : headerEn.change_theme}
             className="text-2xl focus:outline-none"
-            title="Changer de thème"
+            title={language === "fr" ? headerFr.change_theme : headerEn.change_theme}
           >
             {theme === "dark" ? "☀️" : "🌙"}
+          </Button>
+          <Button
+            onClick={toggleLanguage}
+            aria-label={language === "fr" ? headerFr.change_language : headerEn.change_language}
+            className="text-2xl focus:outline-none"
+            title={language === "fr" ? headerFr.change_language : headerEn.change_language}
+          >
+            {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
           </Button>
         </div>
       )}

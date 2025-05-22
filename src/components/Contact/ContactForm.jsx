@@ -1,20 +1,45 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
+import contactEn from "../../../locales/en/contact.json";
+import contactFr from "../../../locales/fr/contact.json";
+import { useLanguage } from "../../context/LanguageContext";
+
 
 export default function ContactForm() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   // État du formulaire et des erreurs
   const [form, setForm] = useState({
-    nom: "",
-    prenom: "",
-    telephone: "",
+    name: "",
+    firstname: "",
+    phone: "",
     email: "",
     message: "",
   });
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
+  const inputName = [
+    {
+      input:{
+        en: contactEn.name,
+        fr: contactFr.name,
+      },
+      input: {
+        en: contactEn.firsname,
+        fr: contactFr.firsname,
+      },
+      input: {
+        en: contactEn.phone,
+        fr: contactFr.phone,
+      },
+      input: {
+        en:contactEn.email,
+        fr: contactFr.email,
+      }
+    }
+  ]
 
   // Validation simple
   const validate = () => {

@@ -1,0 +1,15 @@
+{
+    "contact_title": "Your opinion counts !",
+    "contact_intro": "The web world is constantly evolving, and we're here to guide you through its trends, technologies, and best practices. Whether you're a developer, designer, or digital enthusiast, our blog offers you quality content to stay up-to-date.",
+    "validation_form_1": "Please enter your name",
+    "validation_form_2": "Please enter your firstname",
+    "validation_form_3": "Invalid phone",
+    "validation_form_4": "Invalid email",
+    "input_error": "Please enter the message",
+    "name":"name",
+    "firsname": "firstname",
+    "phone": "phone",
+    "email": "email"
+
+    
+}
