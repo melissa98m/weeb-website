@@ -9,16 +9,22 @@ import Login from "./pages/Login";
 import { useTheme } from "./context/ThemeContext";
 
 function App() {
-    const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   return (
-    <div className="text-white font-sans overflow-x-hidden">
+    <div className="text-white font-sans overflow-x-hidden relative">
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />}/>
-      </Routes>
+      <main
+        className={`pt-[64px] md:pt-[128px] ${
+          theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
+        }`}
+      >
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </main>
       <Footer />
     </div>
   );
