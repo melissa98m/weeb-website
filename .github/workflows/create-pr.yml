@@ -1,22 +1,43 @@
 name: Automatically create / update pull request
 
-# run this workflow only on new feature branches, not when they're merged to main
 on:
   push:
     branches-ignore:
       - "main"
 
 jobs:
-  create_pr_repo_sync:
+  create_and_title_pr:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Create pull request
         id: open-pr
         uses: repo-sync/pull-request@v2
         with:
-          destination_branch: "main"
-          pr_title: "feat: PLACEHOLDER TITLE"
-          pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
-          pr_reviewer: "melissa98m"
+          destination_branch: main
+          pr_title: ${{ github.ref_name }}        
+          pr_template: .github/PULL_REQUEST_TEMPLATE.md
+          pr_reviewer: melissa98m
           pr_draft: false
+
+      - name: Update PR title to include branch + number
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PAT_GITHUB }}
+          script: |
+            // Récupère le numéro de PR créé par l’étape précédente
+            const prNumber = parseInt(steps['open-pr'].outputs.pull_request_number, 10);
+            // Récupère le nom de la branche (sans refs/heads/)
+            const branchName = github.context.ref.replace('refs/heads/', '');
+            // Construit le titre final
+            const newTitle = `${branchName} #${prNumber}`;
+            // Envoie la mise à jour
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              title: newTitle
+            });
+
