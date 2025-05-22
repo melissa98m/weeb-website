@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { motion } from "framer-motion";
+import loginEn from "../../locales/en/login.json";
+import loginFr from "../../locales/fr/login.json";
 
 export default function Login() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -53,7 +57,7 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-sm p-8 space-y-6"
       >
-        <h1 className="text-3xl font-bold text-center">Se connecter</h1>
+        <h1 className="text-3xl font-bold text-center">{language === "fr" ? loginFr.login : loginEn.login}</h1>
 
         {/* Email */}
         <div className="relative">
@@ -73,7 +77,7 @@ export default function Login() {
               }`}
           />
           <label
-            htmlFor="email"
+            htmlFor={language === "fr" ? loginFr.email : loginEn.email}
             className={`absolute left-0 top-2 text-sm transition-all
               peer-placeholder-shown:top-2 peer-focus:-top-5
               ${
@@ -82,7 +86,7 @@ export default function Login() {
                   : "text-secondary peer-focus:text-secondary"
               }`}
           >
-            Email
+           {language === "fr" ? loginFr.email : loginEn.email}
           </label>
           {errors.email && (
             <p className="mt-1 text-xs text-red-500">{errors.email}</p>
@@ -107,7 +111,7 @@ export default function Login() {
               }`}
           />
           <label
-            htmlFor="password"
+            htmlFor={language === "fr" ? loginFr.password : loginEn.password}
             className={`absolute left-0 top-2 text-sm transition-all
               peer-placeholder-shown:top-2 peer-focus:-top-5
               ${
@@ -116,7 +120,7 @@ export default function Login() {
                   : "text-secondary peer-focus:text-secondary"
               }`}
           >
-            Mot de passe
+            {language === "fr" ? loginFr.password : loginEn.password}
           </label>
           {errors.password && (
             <p className="mt-1 text-xs text-red-500">{errors.password}</p>
@@ -136,7 +140,7 @@ export default function Login() {
           whileTap={{ scale: 0.9 }}
           transition={{ type: "spring", stiffness: 400, damping: 17 }}
         >
-          Se connecter
+          {language === "fr" ? loginFr.login : loginEn.login}
         </motion.button>
 
         {/* Liens */}
@@ -147,14 +151,14 @@ export default function Login() {
               theme === "dark" ? "hover:text-primary" : "hover:text-secondary"
             }`}
           >
-            Mot de passe oublié ?
+            {language === "fr" ? loginFr.forgot_password : loginEn.forgot_password}
           </Link>
           <p
             className={`${
               theme === "dark" ? "text-muted" : "text-background/80"
             }`}
           >
-            Pas de compte ?{" "}
+            {language === "fr" ? loginFr.no_account : loginEn.no_account}{" "}
             <Link
               to="/register"
               className={`font-medium underline underline-offset-8 ${
@@ -163,7 +167,7 @@ export default function Login() {
                   : "text-background hover:text-secondary"
               }`}
             >
-              Créez-en un
+              {language === "fr" ? loginFr.create_account : loginEn.create_account}
             </Link>
           </p>
         </div>
