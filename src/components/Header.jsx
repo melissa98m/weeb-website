@@ -97,7 +97,7 @@ export default function Header() {
             <>
               <Button
                 to="/login"
-                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                className={`text-sm px-4 py-2 rounded-md shadow  ${
                   theme === "dark"
                     ? "text-white bg-secondary"
                     : "text-dark bg-primary"
@@ -120,7 +120,7 @@ export default function Header() {
               </Link>
 
               <Button
-                to="/registration"
+                to="/register"
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                   theme === "dark"
                     ? "text-white bg-secondary"
@@ -143,7 +143,7 @@ export default function Header() {
                 {language === "fr" ? headerFr.login : headerEn.login}
               </Button>
               <Button
-                to="/registration"
+                to="/register"
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
                   theme === "dark"
                     ? "text-white bg-secondary"
