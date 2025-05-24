@@ -50,6 +50,14 @@ export default function ContactForm() {
     console.log("send", form);
   };
 
+  const baseInputClasses = `w-full bg-transparent border-b py-2 placeholder-transparent focus:outline-none ${
+    theme === "dark"
+      ? "border-primary focus:border-primary"
+      : "border-secondary focus:border-secondary"
+  }`;
+  const errorBorder = "border-red-500 focus:border-red-500";
+  const labelTextColor = theme === "dark" ? "text-primary" : "text-secondary";
+
   return (
     <section className="px-6 pb-20 flex justify-center">
       <motion.form
@@ -65,112 +73,92 @@ export default function ContactForm() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Nom */}
-          <div>
-            <label
-              htmlFor="nom"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {t.name}
-            </label>
+          <div className="relative">
             <input
               id="nom"
               type="text"
               value={form.nom}
+              placeholder={t.name}
               onChange={handleChange}
-              className={`w-full bg-transparent border-b py-1 focus:outline-none ${
-                errors.nom
-                  ? "border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
+              className={`${baseInputClasses} ${
+                errors.nom ? errorBorder : ""
+              } peer`}
             />
+            <label
+              htmlFor="nom"
+              className={`absolute left-[45%] -top-2 pointer-events-none transition-all ${labelTextColor} peer-focus:-top-5 peer-focus:text-xs peer-focus:font-medium`}
+            >
+              {t.name}
+            </label>
             {errors.nom && (
               <p className="text-red-500 text-xs mt-1">{errors.nom}</p>
             )}
           </div>
 
           {/* Prénom */}
-          <div>
-            <label
-              htmlFor="prenom"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {t.firstname}
-            </label>
+          <div className="relative">
             <input
               id="prenom"
               type="text"
               value={form.prenom}
+              placeholder={t.firstname}
               onChange={handleChange}
-              className={`w-full bg-transparent border-b py-1 focus:outline-none ${
-                errors.prenom
-                  ? "border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
+              className={`${baseInputClasses} ${
+                errors.prenom ? errorBorder : ""
+              } peer`}
             />
+            <label
+              htmlFor="prenom"
+              className={`absolute left-[45%] -top-2 pointer-events-none transition-all ${labelTextColor} peer-focus:-top-5 peer-focus:text-xs peer-focus:font-medium`}
+            >
+              {t.firstname}
+            </label>
             {errors.prenom && (
               <p className="text-red-500 text-xs mt-1">{errors.prenom}</p>
             )}
           </div>
 
           {/* Téléphone */}
-          <div>
-            <label
-              htmlFor="telephone"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {t.phone}
-            </label>
+          <div className="relative">
             <input
               id="telephone"
               type="text"
               value={form.telephone}
+              placeholder={t.phone}
               onChange={handleChange}
-              className={`w-full bg-transparent border-b py-1 focus:outline-none ${
-                errors.telephone
-                  ? "border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
+              className={`${baseInputClasses} ${
+                errors.telephone ? errorBorder : ""
+              } peer`}
             />
+            <label
+              htmlFor="telephone"
+              className={`absolute left-[45%] -top-5 pointer-events-none transition-all ${labelTextColor} peer-focus:-top-5 peer-focus:text-xs peer-focus:font-medium`}
+            >
+              {t.phone}
+            </label>
             {errors.telephone && (
               <p className="text-red-500 text-xs mt-1">{errors.telephone}</p>
             )}
           </div>
 
           {/* Email */}
-          <div>
-            <label
-              htmlFor="email"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {t.email}
-            </label>
+          <div className="relative">
             <input
               id="email"
               type="email"
               value={form.email}
+              placeholder={t.email}
               onChange={handleChange}
-              className={`w-full bg-transparent border-b py-1 focus:outline-none ${
-                errors.email
-                  ? "border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
+              className={`${baseInputClasses} ${
+                errors.email ? errorBorder : ""
+              } peer`}
             />
+            <label
+              htmlFor="email"
+              className={`absolute left-[45%] -top-2 pointer-events-none transition-all ${labelTextColor} peer-focus:-top-5 peer-focus:text-xs peer-focus:font-medium`}
+            >
+              {t.email}
+            </label>
             {errors.email && (
               <p className="text-red-500 text-xs mt-1">{errors.email}</p>
             )}
@@ -178,28 +166,23 @@ export default function ContactForm() {
         </div>
 
         {/* Message */}
-        <div>
-          <label
-            htmlFor="message"
-            className={`block mb-1 ${
-              theme === "dark" ? "text-primary" : "text-secondary"
-            }`}
-          >
-            {t.message}
-          </label>
+        <div className="relative">
           <textarea
             id="message"
             rows="3"
             value={form.message}
+            placeholder={t.message}
             onChange={handleChange}
-            className={`w-full bg-transparent border-b py-1 resize-none focus:outline-none ${
-              errors.message
-                ? "border-red-500"
-                : theme === "dark"
-                ? "border-primary focus:border-primary"
-                : "border-secondary focus:border-secondary"
-            }`}
+            className={`${baseInputClasses} ${
+              errors.message ? errorBorder : ""
+            } peer resize-none`}
           />
+          <label
+            htmlFor="message"
+            className={`absolute left-[45%] top-2 pointer-events-none transition-all ${labelTextColor} peer-focus:-top-5 peer-focus:text-xs peer-focus:font-medium`}
+          >
+            {t.message}
+          </label>
           {errors.message && (
             <p className="text-red-500 text-xs mt-1">{errors.message}</p>
           )}
