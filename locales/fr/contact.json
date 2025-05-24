@@ -1,13 +1,14 @@
 {
     "contact_title": " Votre avis compte !",
     "contact_intro": " Le monde du web évolue constamment, et nous sommes là pour vous guider à travers ses tendances, technologies et meilleures pratiques. Que vous soyez développeur, designer ou passionné du digital, notre blog vous offre du contenu de qualité pour rester à la pointe.",
-    "validation_form_1": "Veuillez entrer votre nom",
-    "validation_form_2": "Veuillez entrer votre prénom",
-    "validation_form_3": "Téléphone invalide",
-    "validation_form_4": "Invalid email",
-    "input_error": "Email invalide",
-    "name":"nom",
-    "firsname": "prénom",
-    "phone": "téléphone",
-    "email": "email"
+    "name_error": "Veuillez entrer votre nom",
+    "firstname_error": "Veuillez entrer votre prénom",
+    "phone_error": "Téléphone invalide",
+    "email_error": "Invalid email",
+    "message_error": "Email invalide",
+    "name":"Nom",
+    "firstname": "Prénom",
+    "phone": "Téléphone",
+    "email": "Email",
+    "message": "Message"
 }
