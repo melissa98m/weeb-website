@@ -1,0 +1,23 @@
+{
+    "name_error": "Veuillez entrer votre nom",
+    "firstname_error": "Veuillez entrer votre prénom",
+    "phone_error": "Téléphone invalide",
+    "email_error": "Email invalide",
+    "password_error": "Entrer le mot de passe",
+    "name":"Nom",
+    "firstname": "Prénom",
+    "phone": "Téléphone",
+    "email": "Email",
+    "password": "Mot de passe",
+    "show": "Montrer",
+    "hide": "Cacher",
+    "min_caractere": "8 caractères minimum",
+    "uppercase": "Une majuscule requise",
+    "number":"Un chiffre requis",
+    "specialchar": "Un caractère spécial requis",
+    "register": "S'enregistrer",
+    "login": "Se connecter"
+
+
+    
+}

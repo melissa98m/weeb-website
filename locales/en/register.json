@@ -1,0 +1,22 @@
+{
+    "name_error": "Please enter your name",
+    "firstname_error": "Please enter your firstname",
+    "phone_error": "Invalid phone",
+    "email_error": "Invalid email",
+    "message_error": "Please enter the message",
+    "name":"Name",
+    "firstname": "Firstname",
+    "phone": "Phone",
+    "email": "Email",
+    "password": "Password",
+    "show": "Show",
+    "hide": "Hide",
+    "min_caractere": "Min. 8 characters",
+    "uppercase": "One uppercase letter required",
+    "number":"One number required",
+    "specialchar": "One special character required",
+    "register": "Register",
+    "login": "Login"
+
+    
+}
