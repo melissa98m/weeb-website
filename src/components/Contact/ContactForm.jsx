@@ -50,7 +50,11 @@ export default function ContactForm() {
     console.log("send", form);
   };
 
-  const baseInputClasses = `w-full bg-transparent border-b py-2 placeholder-transparent focus:outline-none ${theme === "dark" ? "border-primary focus:border-primary" : "border-secondary focus:border-secondary"}`;
+  const baseInputClasses = `w-full bg-transparent border-b py-2 placeholder-transparent focus:outline-none ${
+    theme === "dark"
+      ? "border-primary focus:border-primary"
+      : "border-secondary focus:border-secondary"
+  }`;
   const errorBorder = "border-red-500 focus:border-red-500";
   const labelTextColor = theme === "dark" ? "text-primary" : "text-secondary";
 
@@ -76,7 +80,9 @@ export default function ContactForm() {
               value={form.nom}
               placeholder={t.name}
               onChange={handleChange}
-              className={`${baseInputClasses} ${errors.nom ? errorBorder : ""} peer`}
+              className={`${baseInputClasses} ${
+                errors.nom ? errorBorder : ""
+              } peer`}
             />
             <label
               htmlFor="nom"
@@ -97,7 +103,9 @@ export default function ContactForm() {
               value={form.prenom}
               placeholder={t.firstname}
               onChange={handleChange}
-              className={`${baseInputClasses} ${errors.prenom ? errorBorder : ""} peer`}
+              className={`${baseInputClasses} ${
+                errors.prenom ? errorBorder : ""
+              } peer`}
             />
             <label
               htmlFor="prenom"
@@ -118,7 +126,9 @@ export default function ContactForm() {
               value={form.telephone}
               placeholder={t.phone}
               onChange={handleChange}
-              className={`${baseInputClasses} ${errors.telephone ? errorBorder : ""} peer`}
+              className={`${baseInputClasses} ${
+                errors.telephone ? errorBorder : ""
+              } peer`}
             />
             <label
               htmlFor="telephone"
@@ -139,7 +149,9 @@ export default function ContactForm() {
               value={form.email}
               placeholder={t.email}
               onChange={handleChange}
-              className={`${baseInputClasses} ${errors.email ? errorBorder : ""} peer`}
+              className={`${baseInputClasses} ${
+                errors.email ? errorBorder : ""
+              } peer`}
             />
             <label
               htmlFor="email"
@@ -161,7 +173,9 @@ export default function ContactForm() {
             value={form.message}
             placeholder={t.message}
             onChange={handleChange}
-            className={`${baseInputClasses} ${errors.message ? errorBorder : ""} peer resize-none`}
+            className={`${baseInputClasses} ${
+              errors.message ? errorBorder : ""
+            } peer resize-none`}
           />
           <label
             htmlFor="message"
