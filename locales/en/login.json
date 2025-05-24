@@ -4,6 +4,8 @@
     "password": "Password",
     "forgot_password": "Forgot your password?",
     "no_account": "No account?",
-    "create_account": "Create one"
+    "create_account": "Create one",
+    "email_error": "Invalid email",
+     "password_error": "Entrer le mot de passe"
 
 }
