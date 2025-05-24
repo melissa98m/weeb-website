@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { motion } from "framer-motion";
 import loginEn from "../../locales/en/login.json";
 import loginFr from "../../locales/fr/login.json";
+import Button from "../components/Button";
 
 export default function Login() {
   const { theme } = useTheme();
@@ -46,9 +47,7 @@ export default function Login() {
   return (
     <section
       className={`min-h-screen flex items-center justify-center px-6 py-12 ${
-        theme === "dark"
-          ?  "text-white"
-          : "text-background"
+        theme === "dark" ? "text-white" : "text-background"
       }`}
     >
       <motion.form
@@ -57,7 +56,9 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-sm p-8 space-y-6"
       >
-        <h1 className="text-3xl font-bold text-center">{language === "fr" ? loginFr.login : loginEn.login}</h1>
+        <h1 className="text-3xl font-bold text-center">
+          {language === "fr" ? loginFr.login : loginEn.login}
+        </h1>
 
         {/* Email */}
         <div className="relative">
@@ -86,7 +87,7 @@ export default function Login() {
                   : "text-secondary peer-focus:text-secondary"
               }`}
           >
-           {language === "fr" ? loginFr.email : loginEn.email}
+            {language === "fr" ? loginFr.email : loginEn.email}
           </label>
           {errors.email && (
             <p className="mt-1 text-xs text-red-500">{errors.email}</p>
@@ -128,20 +129,16 @@ export default function Login() {
         </div>
 
         {/* Bouton animé */}
-        <motion.button
+        <Button
           type="submit"
-          className={`w-full px-4 py-2 rounded-md shadow text-sm transition
-            ${
-              theme === "dark"
-                ? "bg-secondary text-white"
-                : "bg-primary text-dark"
-            }`}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          className={`w-full px-4 py-2 rounded-md shadow text-sm ${
+            theme === "dark"
+              ? "bg-secondary text-white hover:bg-secondary/90"
+              : "bg-primary text-dark hover:bg-primary/90"
+          }`}
         >
           {language === "fr" ? loginFr.login : loginEn.login}
-        </motion.button>
+        </Button>
 
         {/* Liens */}
         <div className="text-center text-xs space-y-2">
@@ -151,7 +148,9 @@ export default function Login() {
               theme === "dark" ? "hover:text-primary" : "hover:text-secondary"
             }`}
           >
-            {language === "fr" ? loginFr.forgot_password : loginEn.forgot_password}
+            {language === "fr"
+              ? loginFr.forgot_password
+              : loginEn.forgot_password}
           </Link>
           <p
             className={`${
@@ -167,7 +166,9 @@ export default function Login() {
                   : "text-background hover:text-secondary"
               }`}
             >
-              {language === "fr" ? loginFr.create_account : loginEn.create_account}
+              {language === "fr"
+                ? loginFr.create_account
+                : loginEn.create_account}
             </Link>
           </p>
         </div>
