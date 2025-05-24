@@ -37,17 +37,17 @@ export default function HeroSection() {
       <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
         <Link
           to="/articles"
-          className={`px-6 py-2 rounded-md shadow  ${
+          className={`px-6 py-2 rounded-md shadow transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none ${
             theme === "dark"
-              ? "bg-secondary text-white"
-              : "bg-primary text-dark"
+              ? "bg-secondary text-white hover:bg-secondary/70"
+              : "bg-primary text-dark hover:bg-primary/70"
           }`}
         >
           {language === "fr" ? homeFr.link_1 : homeEn.link_1}
         </Link>
         <Link
           to="/newsletter"
-          className={`border px-6 py-2 rounded-md ${
+          className={`border px-6 py-2 rounded-md transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none ${
             theme === "dark" ? "border-white" : "border-dark"
           }`}
         >
