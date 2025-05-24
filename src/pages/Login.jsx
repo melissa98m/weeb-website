@@ -21,8 +21,8 @@ export default function Login() {
       !form.email.trim() ||
       !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)
     )
-      errs.email = "Email invalide";
-    if (!form.password.trim()) errs.password = "Mot de passe requis";
+      errs.email = language === "fr" ? loginFr.email_error : loginEn.email;
+    if (!form.password.trim()) errs.password = language === "fr" ? loginFr.password_error : password_error;
     return errs;
   };
 
@@ -79,8 +79,8 @@ export default function Login() {
           />
           <label
             htmlFor={language === "fr" ? loginFr.email : loginEn.email}
-            className={`absolute left-0 top-2 text-sm transition-all
-              peer-placeholder-shown:top-2 peer-focus:-top-5
+            className={`absolute left-0 -top-2 text-sm transition-all
+              peer-placeholder-shown:-top-2 peer-focus:-top-5
               ${
                 theme === "dark"
                   ? "text-primary peer-focus:text-primary"
@@ -113,8 +113,8 @@ export default function Login() {
           />
           <label
             htmlFor={language === "fr" ? loginFr.password : loginEn.password}
-            className={`absolute left-0 top-2 text-sm transition-all
-              peer-placeholder-shown:top-2 peer-focus:-top-5
+            className={`absolute left-0 -top-2 text-sm transition-all
+              peer-placeholder-shown:-top-2 peer-focus:-top-5
               ${
                 theme === "dark"
                   ? "text-primary peer-focus:text-primary"
