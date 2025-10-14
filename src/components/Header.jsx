@@ -23,19 +23,25 @@ export default function Header() {
     }
   };
 
+  // Fallback helper for labels (uses header.json if key exists)
+  const t = (key, fallback) =>
+    language === "fr" ? headerFr[key] || fallback : headerEn[key] || fallback;
+
   const isContactPage = location.pathname === "/contact";
   const isLoginPage = location.pathname === "/login";
+  const isBlogPage = location.pathname === "/blog";
+  const isRegisterPage = location.pathname === "/register";
 
   return (
     <header
-      className={`shadow-md fixed md:top-6 translate-x-[-50%] left-[50%] md:rounded-t-xl rounded-b-xl md:w-[95%] max-w-5xl z-1 w-full ${
+      className={`shadow-md fixed md:top-6 translate-x-[-50%] left-[50%] md:rounded-t-xl rounded-b-xl md:w-[95%] max-w-5xl z-10 w-full ${
         theme === "dark" ? "bg-dark" : "bg-gray-100"
       }`}
     >
       <div className="px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div
-            className={` font-bold text-lg tracking-wide ${
+            className={`font-bold text-lg tracking-wide ${
               theme === "dark" ? "text-white" : "text-dark"
             }`}
           >
@@ -49,17 +55,13 @@ export default function Header() {
             }`}
           >
             {isContactPage ? (
-              <>
-                <span>
-                  {language === "fr" ? headerFr.contact : headerEn.contact}
-                </span>
-              </>
+              <span>{t("contact", "Contact")}</span>
             ) : isLoginPage ? (
-              <>
-                <span>
-                  {language === "fr" ? headerFr.login : headerEn.login}
-                </span>
-              </>
+              <span>{t("login", "Login")}</span>
+            ) : isRegisterPage ? (
+              <span>{t("register", "Register")}</span>
+            ) : isBlogPage ? (
+              <span>{t("blog", "Blog")}</span>
             ) : (
               <>
                 <Link
@@ -68,147 +70,128 @@ export default function Header() {
                     theme === "dark" ? "text-white" : "text-dark"
                   }`}
                 >
-                  {language === "fr" ? headerFr.about_us : headerEn.about_us}
+                  {t("about_us", "About us")}
                 </Link>
+
+                {/* Blog link */}
+                <Link
+                  to="/blog"
+                  className={`transition ${
+                    theme === "dark" ? "text-white" : "text-dark"
+                  }`}
+                >
+                  {t("blog", "Blog")}
+                </Link>
+
                 <Link
                   to="/contact"
                   className={`transition ${
                     theme === "dark" ? "text-white" : "text-dark"
                   }`}
                 >
-                  {language === "fr" ? headerFr.contact : headerEn.contact}
+                  {t("contact", "Contact")}
                 </Link>
               </>
             )}
           </nav>
         </div>
 
-        {/* Desktop buttons */}
-        <div className="hidden md:flex space-x-4">
+        {/* Desktop actions */}
+        <div className="hidden md:flex items-center space-x-4">
           <Button
             onClick={toggleTheme}
-            aria-label={
-              language === "fr" ? headerFr.change_theme : headerEn.change_theme
-            }
+            aria-label={t("change_theme", "Change theme")}
             className="text-2xl focus:outline-none"
-            title={
-              language === "fr" ? headerFr.change_theme : headerEn.change_theme
-            }
+            title={t("change_theme", "Change theme")}
           >
             {theme === "dark" ? "☀️" : "🌙"}
           </Button>
 
           <Button
             onClick={toggleLanguage}
-            aria-label={
-              language === "fr"
-                ? headerFr.change_language
-                : headerEn.change_language
-            }
+            aria-label={t("change_language", "Change language")}
             className="text-2xl focus:outline-none"
-            title={
-              language === "fr"
-                ? headerFr.change_language
-                : headerEn.change_language
-            }
+            title={t("change_language", "Change language")}
           >
             {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
           </Button>
 
+          {/* Auth buttons */}
           {user ? (
-            // CONNECTÉ
-            <div className="flex items-center gap-3">
-              <span className="text-sm opacity-80">
-                {(language === "fr" ? headerFr.hello : headerEn.hello) + ", "}
-                {user.first_name || user.username}
-              </span>
-              <button
-                onClick={onLogout}
-                className={`px-3 py-2 rounded-md ${
-                  theme === "dark"
-                    ? "bg-red-500 text-white"
-                    : "bg-red-500 text-white"
-                } hover:opacity-90`}
-              >
-                {language === "fr" ? headerFr.logout : headerEn.logout}
-              </button>
-            </div>
-          ) : (
-            // NON CONNECTÉ (ta logique existante)
             <>
-              {isContactPage ? (
-                <>
-                  <Button
-                    to="/login"
-                    className={`text-sm px-4 py-2 rounded-md shadow  ${
-                      theme === "dark"
-                        ? "text-white bg-secondary"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.login : headerEn.login}
-                  </Button>
-                </>
-              ) : isLoginPage ? (
-                <>
-                  <Link
-                    to="/contact"
-                    className={`text-sm transition py-2 ${
-                      theme === "dark"
-                        ? "text-white/80 hover:text-white"
-                        : "text-dark/80 hover:text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.contact : headerEn.contact}
-                  </Link>
-
-                  <Button
-                    to="/register"
-                    className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                      theme === "dark"
-                        ? "text-white bg-secondary"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.register : headerEn.register}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    to="/login"
-                    className={`text-sm transition py-2 ${
-                      theme === "dark"
-                        ? "text-white/80 hover:text-white"
-                        : "text-dark/80 hover:text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.login : headerEn.login}
-                  </Button>
-                  <Button
-                    to="/register"
-                    className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                      theme === "dark"
-                        ? "text-white bg-secondary"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.register : headerEn.register}
-                  </Button>
-                </>
-              )}
+              <span
+                className={`text-sm ${
+                  theme === "dark" ? "text-white/80" : "text-dark/80"
+                }`}
+              >
+                {user.username || user.email}
+              </span>
+              <Button
+                onClick={onLogout}
+                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                  theme === "dark"
+                    ? "text-white bg-secondary"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                {t("logout", "Logout")}
+              </Button>
+            </>
+          ) : isLoginPage ? (
+            <>
+              <Link
+                to="/contact"
+                className={`text-sm transition py-2 ${
+                  theme === "dark"
+                    ? "text-white/80 hover:text-white"
+                    : "text-dark/80 hover:text-dark"
+                }`}
+              >
+                {t("contact", "Contact")}
+              </Link>
+              <Button
+                to="/register"
+                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                  theme === "dark"
+                    ? "text-white bg-secondary"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                {t("register", "Register")}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                to="/login"
+                className={`text-sm transition py-2 ${
+                  theme === "dark"
+                    ? "text-white/80 hover:text-white"
+                    : "text-dark/80 hover:text-dark"
+                }`}
+              >
+                {t("login", "Login")}
+              </Button>
+              <Button
+                to="/register"
+                className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
+                  theme === "dark"
+                    ? "text-white bg-secondary"
+                    : "text-dark bg-primary"
+                }`}
+              >
+                {t("register", "Register")}
+              </Button>
             </>
           )}
         </div>
 
-        {/* Mobile toggle button */}
+        {/* Mobile toggle */}
         <Button
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
           className={`md:hidden px-2 py-2 rounded-xl ${
-            theme === "dark"
-              ? "bg-secondary text-white"
-              : "bg-primary text-dark"
+            theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
           }`}
         >
           {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
@@ -222,142 +205,133 @@ export default function Header() {
             theme === "dark" ? "text-white/90" : "text-dark/90"
           }`}
         >
+          {/* Links */}
+          <Link
+            to="/about-us"
+            className={`block ${
+              theme === "dark" ? "text-white" : "text-dark"
+            }`}
+            onClick={() => setIsOpen(false)}
+          >
+            {t("about_us", "About us")}
+          </Link>
+
+          {/* Blog link */}
+          <Link
+            to="/blog"
+            className={`block ${
+              theme === "dark" ? "text-white" : "text-dark"
+            }`}
+            onClick={() => setIsOpen(false)}
+          >
+            {t("blog", "Blog")}
+          </Link>
+
+          <Link
+            to="/contact"
+            className={`block ${
+              theme === "dark" ? "text-white" : "text-dark"
+            }`}
+            onClick={() => setIsOpen(false)}
+          >
+            {t("contact", "Contact")}
+          </Link>
+
+          {/* Auth buttons */}
           {user ? (
-            // CONNECTÉ mobile
-            <>
-              <span
-                className={`block ${
-                  theme === "dark" ? "text-white" : "text-dark"
+            <div className="pt-2">
+              <div
+                className={`mb-2 ${
+                  theme === "dark" ? "text-white/80" : "text-dark/80"
                 }`}
               >
-                {(language === "fr" ? headerFr.hello : headerEn.hello) + ", "}
-                {user.first_name || user.username}
-              </span>
-              <button
-                onClick={onLogout}
+                {user.username || user.email}
+              </div>
+              <Button
+                onClick={() => {
+                  setIsOpen(false);
+                  onLogout();
+                }}
                 className={`w-full text-sm px-4 py-2 rounded-md shadow ${
                   theme === "dark"
-                    ? "bg-red-500 text-white"
-                    : "bg-red-500 text-white"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
                 }`}
               >
-                {language === "fr" ? headerFr.logout : headerEn.logout}
-              </button>
+                {t("logout", "Logout")}
+              </Button>
+            </div>
+          ) : isLoginPage ? (
+            <>
+              <Link
+                to="/contact"
+                className="block"
+                onClick={() => setIsOpen(false)}
+              >
+                {t("contact", "Contact")}
+              </Link>
+              <Button
+                to="/register"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                {t("register", "Register")}
+              </Button>
             </>
           ) : (
-            // NON CONNECTÉ mobile — logique existante + corrections
             <>
-              {isContactPage ? (
-                <>
-                  <span
-                    className={`block ${
-                      theme === "dark" ? "text-white" : "text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.contact : headerEn.contact}
-                  </span>
-                  <Button
-                    to="/login"
-                    className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                      theme === "dark"
-                        ? "bg-secondary text-white"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.login : headerEn.login}
-                  </Button>
-                </>
-              ) : isLoginPage ? (
-                <>
-                  <span className="block font-semibold">
-                    {language === "fr" ? headerFr.login : headerEn.login}
-                  </span>
-                  <Link to="/contact" className="block">
-                    {language === "fr" ? headerFr.contact : headerEn.contact}
-                  </Link>
-                  {/* /registration -> /register */}
-                  <Button
-                    to="/register"
-                    className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                      theme === "dark"
-                        ? "bg-secondary text-white"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.register : headerEn.register}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/about-us"
-                    className={`block ${
-                      theme === "dark" ? "text-white" : "text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.about_us : headerEn.about_us}
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className={`block ${
-                      theme === "dark" ? "text-white" : "text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.contact : headerEn.contact}
-                  </Link>
-                  <Button
-                    to="/login"
-                    className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                      theme === "dark" ? " text-white" : "text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.login : headerEn.login}
-                  </Button>
-                  {/* /registration -> /register */}
-                  <Button
-                    to="/register"
-                    className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                      theme === "dark"
-                        ? "bg-secondary text-white"
-                        : "text-dark bg-primary"
-                    }`}
-                  >
-                    {language === "fr" ? headerFr.register : headerEn.register}
-                  </Button>
-                </>
-              )}
+              <Button
+                to="/login"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark" ? " text-white" : "text-dark"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                {t("login", "Login")}
+              </Button>
+              <Button
+                to="/register"
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
+                  theme === "dark"
+                    ? "bg-secondary text-white"
+                    : "text-dark bg-primary"
+                }`}
+                onClick={() => setIsOpen(false)}
+              >
+                {t("register", "Register")}
+              </Button>
             </>
           )}
 
-          {/* Toggles theme/lang (mobile) */}
-          <Button
-            onClick={toggleTheme}
-            aria-label={
-              language === "fr" ? headerFr.change_theme : headerEn.change_theme
-            }
-            className="text-2xl focus:outline-none"
-            title={
-              language === "fr" ? headerFr.change_theme : headerEn.change_theme
-            }
-          >
-            {theme === "dark" ? "☀️" : "🌙"}
-          </Button>
-          <Button
-            onClick={toggleLanguage}
-            aria-label={
-              language === "fr"
-                ? headerFr.change_language
-                : headerEn.change_language
-            }
-            className="text-2xl focus:outline-none"
-            title={
-              language === "fr"
-                ? headerFr.change_language
-                : headerEn.change_language
-            }
-          >
-            {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
-          </Button>
+          {/* Toggles */}
+          <div className="flex items-center gap-3 pt-2">
+            <Button
+              onClick={() => {
+                toggleTheme();
+                setIsOpen(false);
+              }}
+              aria-label={t("change_theme", "Change theme")}
+              className="text-2xl focus:outline-none"
+              title={t("change_theme", "Change theme")}
+            >
+              {theme === "dark" ? "☀️" : "🌙"}
+            </Button>
+            <Button
+              onClick={() => {
+                toggleLanguage();
+                setIsOpen(false);
+              }}
+              aria-label={t("change_language", "Change language")}
+              className="text-2xl focus:outline-none"
+              title={t("change_language", "Change language")}
+            >
+              {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
+            </Button>
+          </div>
         </div>
       )}
     </header>
