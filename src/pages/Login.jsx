@@ -6,10 +6,16 @@ import { motion } from "framer-motion";
 import loginEn from "../../locales/en/login.json";
 import loginFr from "../../locales/fr/login.json";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
@@ -22,7 +28,9 @@ export default function Login() {
       !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)
     )
       errs.email = language === "fr" ? loginFr.email_error : loginEn.email;
-    if (!form.password.trim()) errs.password = language === "fr" ? loginFr.password_error : password_error;
+    if (!form.password.trim())
+      errs.password =
+        language === "fr" ? loginFr.password_error : password_error;
     return errs;
   };
 
@@ -31,7 +39,7 @@ export default function Login() {
     setErrors({ ...errors, [e.target.id]: null });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validation = validate();
     if (Object.keys(validation).length) {
@@ -40,8 +48,14 @@ export default function Login() {
       setTimeout(() => setShake(false), 500);
       return;
     }
-    // TODO: appel API connexion
-    console.log("Connected via :", form);
+    try {
+      await login({ identifier: form.email, password: form.password });
+      navigate(from, { replace: true });
+    } catch (e) {
+      setErrors({ form: language === "fr" ? "Identifiants invalides." : "Invalid credentials." });
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
   };
 
   return (
