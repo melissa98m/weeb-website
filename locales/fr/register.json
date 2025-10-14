@@ -1,23 +1,32 @@
 {
-    "name_error": "Veuillez entrer votre nom",
-    "firstname_error": "Veuillez entrer votre prénom",
-    "phone_error": "Téléphone invalide",
-    "email_error": "Email invalide",
-    "password_error": "Entrer le mot de passe",
-    "name":"Nom",
+    "register": "Créer un compte",
+    "username": "Nom d'utilisateur",
+    "username_placeholder": "Entrez votre nom d'utilisateur",
+    "username_error": "Le nom d'utilisateur est requis.",
+  
+    "name": "Nom",
     "firstname": "Prénom",
-    "phone": "Téléphone",
     "email": "Email",
     "password": "Mot de passe",
-    "show": "Montrer",
-    "hide": "Cacher",
-    "min_caractere": "8 caractères minimum",
-    "uppercase": "Une majuscule requise",
-    "number":"Un chiffre requis",
-    "specialchar": "Un caractère spécial requis",
-    "register": "S'enregistrer",
+  
+    "min_caractere": "Au moins 8 caractères",
+    "uppercase": "Au moins une majuscule",
+    "number": "Au moins un chiffre",
+    "specialchar": "Au moins un caractère spécial",
+  
+    "confirm_password": "Confirmer le mot de passe",
+    "confirm_password_required": "Veuillez confirmer votre mot de passe.",
+    "passwords_not_match": "Les mots de passe ne correspondent pas.",
+  
+    "name_error": "Le nom est requis.",
+    "firstname_error": "Le prénom est requis.",
+    "email_error": "Adresse e-mail invalide.",
+    "password_error": "Mot de passe trop faible.",
+  
+    "show": "Afficher",
+    "hide": "Masquer",
+  
+    "already_account": "Vous avez déjà un compte ?",
     "login": "Se connecter"
-
-
-    
-}
+  }
+  

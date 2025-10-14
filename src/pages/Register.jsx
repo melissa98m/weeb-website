@@ -1,27 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { motion } from "framer-motion";
 import registerEn from "../../locales/en/register.json";
 import registerFr from "../../locales/fr/register.json";
 import Button from "../components/Button";
+import { useAuth } from "../context/AuthContext";
 
 export default function Register() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? registerFr : registerEn;
+  const { register: registerUser } = useAuth();
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
+    username: "",
     nom: "",
     prenom: "",
-    telephone: "",
     email: "",
     password: "",
+    confirmPassword: "",
   });
+
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
+  const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [pwdValidations, setPwdValidations] = useState({
     length: false,
     uppercase: false,
@@ -41,13 +47,24 @@ export default function Register() {
 
   const validate = () => {
     const errs = {};
+    if (!form.username.trim()) errs.username = t.username_error;
     if (!form.nom.trim()) errs.nom = t.name_error;
     if (!form.prenom.trim()) errs.prenom = t.firstname_error;
-    if (!/^[0-9+ ]{6,15}$/.test(form.telephone)) errs.telephone = t.phone_error;
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email))
+
+    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)) {
       errs.email = t.email_error;
-    if (Object.values(pwdValidations).some((ok) => !ok))
+    }
+
+    if (Object.values(pwdValidations).some((ok) => !ok)) {
       errs.password = t.password_error;
+    }
+
+    if (!form.confirmPassword.trim()) {
+      errs.confirmPassword = t.confirm_password_required;
+    } else if (form.confirmPassword !== form.password) {
+      errs.confirmPassword = t.passwords_not_match;
+    }
+
     return errs;
   };
 
@@ -56,7 +73,7 @@ export default function Register() {
     setErrors({ ...errors, [e.target.id]: null });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validation = validate();
     if (Object.keys(validation).length) {
@@ -65,7 +82,28 @@ export default function Register() {
       setTimeout(() => setShake(false), 500);
       return;
     }
-    console.log("Registered:", form);
+
+    try {
+      await registerUser({
+        username: form.username,
+        email: form.email,
+        first_name: form.prenom,
+        last_name: form.nom,
+        password: form.password,
+        password_confirm: form.confirmPassword,
+      });
+      navigate("/");
+    } catch (e) {
+      const d = e.details || {};
+      const map = {};
+      if (d.username) map.username = Array.isArray(d.username) ? d.username.join(" ") : String(d.username);
+      if (d.email) map.email = Array.isArray(d.email) ? d.email.join(" ") : String(d.email);
+      if (d.password) map.password = Array.isArray(d.password) ? d.password.join(" ") : String(d.password);
+      if (d.password_confirm) map.confirmPassword = Array.isArray(d.password_confirm) ? d.password_confirm.join(" ") : String(d.password_confirm);
+      setErrors(map);
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    }
   };
 
   return (
@@ -86,6 +124,29 @@ export default function Register() {
           }`}
       >
         <h1 className="text-3xl font-bold text-center">{t.register}</h1>
+
+        {/* Username */}
+        <div>
+          <label htmlFor="username" className="block font-medium mb-2">
+            {t.username}
+          </label>
+          <input
+            id="username"
+            type="text"
+            value={form.username}
+            onChange={handleChange}
+            className={`w-full p-3 rounded-md border focus:outline-none focus:ring-2 ${
+              theme === "dark"
+                ? "bg-[#1c1c1c] border-[#333] text-white focus:ring-blue-500"
+                : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
+            }`}
+            placeholder={t.username_placeholder}
+          />
+          {errors.username && (
+            <p className="mt-2 text-sm text-red-500">{errors.username}</p>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Nom */}
           <div>
@@ -145,37 +206,8 @@ export default function Register() {
             )}
           </div>
 
-          {/* Téléphone */}
-          <div>
-            <label
-              htmlFor="telephone"
-              className={`block mb-1 ${
-                theme === "dark" ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {t.phone}
-            </label>
-            <input
-              id="telephone"
-              type="tel"
-              value={form.telephone}
-              onChange={handleChange}
-              className={`w-full bg-transparent border-b py-1 focus:outline-none
-                ${
-                  errors.telephone
-                    ? "border-red-500"
-                    : theme === "dark"
-                    ? "border-primary focus:border-primary"
-                    : "border-secondary focus:border-secondary"
-                }`}
-            />
-            {errors.telephone && (
-              <p className="text-red-500 text-xs mt-1">{errors.telephone}</p>
-            )}
-          </div>
-
           {/* Email */}
-          <div>
+          <div className="md:col-span-2">
             <label
               htmlFor="email"
               className={`block mb-1 ${
@@ -241,6 +273,7 @@ export default function Register() {
               {showPwd ? t.hide : t.show}
             </Button>
           </div>
+
           <ul className="mt-2 space-y-1 text-xs">
             <li
               className={`flex items-center ${
@@ -296,6 +329,48 @@ export default function Register() {
           )}
         </div>
 
+        {/* Confirm Password */}
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className={`block mb-1 ${
+              theme === "dark" ? "text-primary" : "text-secondary"
+            }`}
+          >
+            {t.confirm_password}
+          </label>
+          <div className="relative flex items-center">
+            <input
+              id="confirmPassword"
+              type={showConfirmPwd ? "text" : "password"}
+              value={form.confirmPassword}
+              onChange={handleChange}
+              className={`w-full bg-transparent border-b py-1 pr-10 focus:outline-none
+                ${
+                  errors.confirmPassword
+                    ? "border-red-500"
+                    : theme === "dark"
+                    ? "border-primary focus:border-primary"
+                    : "border-secondary focus:border-secondary"
+                }`}
+            />
+            <Button
+              type="button"
+              onClick={() => setShowConfirmPwd((v) => !v)}
+              className={`absolute right-0 mr-2 mb-2 px-2 py-1 rounded-md shadow text-sm border hover:border-none ${
+                theme === "dark"
+                  ? "bg-secondary text-white hover:bg-secondary/70 border-background"
+                  : "bg-primary text-dark hover:bg-primary/70 border-muted"
+              }`}
+            >
+              {showConfirmPwd ? t.hide : t.show}
+            </Button>
+          </div>
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+          )}
+        </div>
+
         {/* Submit */}
         <div className="text-center">
           <Button
@@ -317,7 +392,7 @@ export default function Register() {
               theme === "dark" ? "text-muted" : "text-background/80"
             }`}
           >
-            {t.already_account} {""}
+            {t.already_account}{" "}
             <Link
               to="/login"
               className={`font-medium underline underline-offset-8 ${

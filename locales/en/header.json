@@ -4,6 +4,7 @@
     "login": "Login",
     "change_language": "Change language",
     "register": "Register",
-    "change_theme": "Change theme"
-
+    "change_theme": "Change theme",
+    "logout": "Log out",
+    "hello": "Hello"
 }
