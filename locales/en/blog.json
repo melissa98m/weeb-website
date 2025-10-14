@@ -1,10 +1,24 @@
 {
     "title": "Blog",
-    "subtitle": "News, guides and case studies.",
+    "subtitle": "Browse our latest articles, tutorials and technical guides.",
     "search_placeholder": "Search articles...",
     "read_more": "Read",
     "no_posts": "No posts found.",
     "by": "by",
-    "min_read": "min read"
+    "min_read": "min read",
+    "all_tags": "All",
+    "view_summary": "View summary",
+    "summary_title": "Summary",
+    "key_points": "Key info",
+    "close": "Close",
+    "empty": "No articles found.",
+    "back": "Back to blog",
+    "read_time": "Read",
+    "min": "min",
+    "copy_link": "Copy link",
+    "copied": "Copied!",
+    "not_found_title": "Post not found",
+    "not_found_desc": "This post doesn’t exist or was removed."
+
   }
   
