@@ -10,6 +10,7 @@ import Register from "./pages/Register";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import Blog from "./pages/Blog";
 
 function App() {
   const { theme } = useTheme();
@@ -35,6 +36,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/blog" element={<Blog />} />
         </Routes>
       </main>
       <Footer />
