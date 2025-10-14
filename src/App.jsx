@@ -11,6 +11,8 @@ import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
+
 
 function App() {
   const { theme } = useTheme();
@@ -37,6 +39,7 @@ function App() {
             }
           />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
         </Routes>
       </main>
       <Footer />
