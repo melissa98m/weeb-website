@@ -6,8 +6,10 @@ import Footer from "./components/Footer";
 import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Login from "./pages/Login";
-import Register from "./pages/Register"
+import Register from "./pages/Register";
 import { useTheme } from "./context/ThemeContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Profile from "./pages/Profile";
 
 function App() {
   const { theme } = useTheme();
@@ -25,6 +27,14 @@ function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
       <Footer />

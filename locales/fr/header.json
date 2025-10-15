@@ -4,6 +4,7 @@
     "login": "Se connecter",
     "change_language": "Changer de langue",
     "register": "S'enregistrer",
-    "change_theme": "Changer de thème"
-
+    "change_theme": "Changer de thème",
+    "logout": "Se déconnecter",
+    "hello": "Bonjour"
 }
