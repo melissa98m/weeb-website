@@ -1,22 +1,32 @@
 {
-    "name_error": "Please enter your name",
-    "firstname_error": "Please enter your firstname",
-    "phone_error": "Invalid phone",
-    "email_error": "Invalid email",
-    "message_error": "Please enter the message",
-    "name":"Name",
-    "firstname": "Firstname",
-    "phone": "Phone",
+    "register": "Create an account",
+    "username": "Username",
+    "username_placeholder": "Enter your username",
+    "username_error": "Username is required.",
+  
+    "name": "Last name",
+    "firstname": "First name",
     "email": "Email",
     "password": "Password",
+  
+    "min_caractere": "At least 8 characters",
+    "uppercase": "At least one uppercase letter",
+    "number": "At least one number",
+    "specialchar": "At least one special character",
+  
+    "confirm_password": "Confirm password",
+    "confirm_password_required": "Please confirm your password.",
+    "passwords_not_match": "Passwords do not match.",
+  
+    "name_error": "Last name is required.",
+    "firstname_error": "First name is required.",
+    "email_error": "Invalid email address.",
+    "password_error": "Weak password.",
+  
     "show": "Show",
     "hide": "Hide",
-    "min_caractere": "Min. 8 characters",
-    "uppercase": "One uppercase letter required",
-    "number":"One number required",
-    "specialchar": "One special character required",
-    "register": "Register",
-    "login": "Login"
-
-    
-}
+  
+    "already_account": "Already have an account?",
+    "login": "Log in"
+  }
+  
