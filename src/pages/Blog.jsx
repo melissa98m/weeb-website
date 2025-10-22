@@ -19,7 +19,6 @@ const MOCK_POSTS = [
     excerpt_fr:
       "Techniques clés pour garder votre app fluide et réactive avec les patterns modernes.",
     cover: "https://picsum.photos/seed/react-perf/600/400",
-    tags: ["React", "Frontend", "Performance"],
     author: "Alex Morgan",
     date: "2025-08-21",
     // je laisse l'ancien champ tags si BlogCard l'utilise déjà

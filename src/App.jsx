@@ -12,6 +12,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
+import Formations from "./pages/Formations";
+import FormationModal from "./components/Formations/FormationModal";
 
 
 function App() {
@@ -40,6 +42,8 @@ function App() {
           />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/formations" element={<Formations />} />
+          <Route path="/formation/:id" element={<FormationModal />} />
         </Routes>
       </main>
       <Footer />
