@@ -82,6 +82,14 @@ export default function Header() {
                 >
                   {t("blog", "Blog")}
                 </Link>
+                <Link
+                  to="/formations"
+                  className={`transition ${
+                    theme === "dark" ? "text-white" : "text-dark"
+                  }`}
+                >
+                  {t("formations", "Formations")}
+                </Link>
 
                 <Link
                   to="/contact"
@@ -225,6 +233,13 @@ export default function Header() {
             onClick={() => setIsOpen(false)}
           >
             {t("blog", "Blog")}
+          </Link>
+          <Link
+            to="/formations"
+            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
+            onClick={() => setIsOpen(false)}
+          >
+            {t("formations", "Formations")}
           </Link>
 
           <Link
