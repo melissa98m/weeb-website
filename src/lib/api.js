@@ -5,7 +5,7 @@ const ORIGIN =
   (import.meta?.env?.VITE_API_URL && import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
   (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
 
-const API = `${ORIGIN}/api/auth`;
+const API = `${ORIGIN}/auth`;
 
 /**
  * Récupère/assure le cookie CSRF et retourne le token.
