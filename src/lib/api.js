@@ -67,12 +67,24 @@ export const AuthApi = {
     return r.json();
   },
 
-  async login({ username, password }) {
+  async login({ email, username, identifier, password }) {
+    // Prend la première valeur dispo (email > username > identifier)
+    const id = (email ?? username ?? identifier ?? "").trim();
+    if (!id || !password) {
+      const details = { non_field_errors: ["Username/email and password are required."] };
+      throw Object.assign(new Error("login_failed"), { status: 400, details });
+    }
+
+    // IMPORTANT : ton backend marche avec { email, password } (test Postman)
+    // Pour être blindé, on envoie aussi username/identifier (ignorés si inutiles)
+    const body = { email: id, username: id, identifier: id, password };
+
     const r = await apiFetch("/login/", {
       method: "POST",
       withCsrf: true,
-      body: { username, password }
+      body
     });
+
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       throw Object.assign(new Error("login_failed"), { status: r.status, details: err });

@@ -82,6 +82,8 @@ export default function Header() {
                 >
                   {t("blog", "Blog")}
                 </Link>
+
+                {/* Formations */}
                 <Link
                   to="/formations"
                   className={`transition ${
@@ -127,13 +129,17 @@ export default function Header() {
           {/* Auth buttons */}
           {user ? (
             <>
-              <span
-                className={`text-sm ${
-                  theme === "dark" ? "text-white/80" : "text-dark/80"
+              {/* Username -> lien vers /profile */}
+              <Link
+                to="/profile"
+                title={t("profile", "Profile")}
+                className={`text-sm underline-offset-4 hover:underline ${
+                  theme === "dark" ? "text-white/90 hover:text-white" : "text-dark/90 hover:text-dark"
                 }`}
               >
                 {user.username || user.email}
-              </span>
+              </Link>
+
               <Button
                 onClick={onLogout}
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
@@ -216,24 +222,20 @@ export default function Header() {
           {/* Links */}
           <Link
             to="/about-us"
-            className={`block ${
-              theme === "dark" ? "text-white" : "text-dark"
-            }`}
+            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
             onClick={() => setIsOpen(false)}
           >
             {t("about_us", "About us")}
           </Link>
 
-          {/* Blog link */}
           <Link
             to="/blog"
-            className={`block ${
-              theme === "dark" ? "text-white" : "text-dark"
-            }`}
+            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
             onClick={() => setIsOpen(false)}
           >
             {t("blog", "Blog")}
           </Link>
+
           <Link
             to="/formations"
             className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
@@ -244,24 +246,27 @@ export default function Header() {
 
           <Link
             to="/contact"
-            className={`block ${
-              theme === "dark" ? "text-white" : "text-dark"
-            }`}
+            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
             onClick={() => setIsOpen(false)}
           >
             {t("contact", "Contact")}
           </Link>
 
-          {/* Auth buttons */}
+          {/* Auth (mobile) */}
           {user ? (
-            <div className="pt-2">
-              <div
-                className={`mb-2 ${
-                  theme === "dark" ? "text-white/80" : "text-dark/80"
+            <div className="pt-2 space-y-2">
+              {/* Username -> lien vers /profile */}
+              <Link
+                to="/profile"
+                onClick={() => setIsOpen(false)}
+                className={`block underline-offset-4 hover:underline ${
+                  theme === "dark" ? "text-white/90 hover:text-white" : "text-dark/90 hover:text-dark"
                 }`}
+                title={t("profile", "Profile")}
               >
                 {user.username || user.email}
-              </div>
+              </Link>
+
               <Button
                 onClick={() => {
                   setIsOpen(false);
@@ -278,11 +283,7 @@ export default function Header() {
             </div>
           ) : isLoginPage ? (
             <>
-              <Link
-                to="/contact"
-                className="block"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/contact" className="block" onClick={() => setIsOpen(false)}>
                 {t("contact", "Contact")}
               </Link>
               <Button
