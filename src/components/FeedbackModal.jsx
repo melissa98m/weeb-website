@@ -1,4 +1,3 @@
-// src/components/Modals/FeedbackModal.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { ensureCsrf } from "../lib/api";
 
@@ -11,6 +10,8 @@ export default function FeedbackModal({
   formation,              // { id, name }
   theme = "light",
   language = "fr",
+  onSuccess,              // (createdFeedback) => void
+  existingFeedback = null 
 }) {
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
@@ -26,6 +27,7 @@ export default function FeedbackModal({
         send: "Envoyer",
         success: "Merci ! Votre feedback a été envoyé.",
         required: "Le feedback est requis.",
+        already: "Vous avez déjà envoyé un feedback pour cette formation.",
       }
     : {
         title: "Leave feedback",
@@ -35,6 +37,7 @@ export default function FeedbackModal({
         send: "Send",
         success: "Thanks! Your feedback has been sent.",
         required: "Feedback is required.",
+        already: "You already submitted feedback for this training.",
       };
 
   useEffect(() => {
@@ -77,15 +80,16 @@ export default function FeedbackModal({
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.detail || `HTTP ${res.status}`);
       }
+      const created = await res.json().catch(() => ({}));
       setOk(true);
-      // ferme la modale après un petit délai
-      setTimeout(() => onClose?.(), 900);
+      onSuccess?.(created);
+      setTimeout(() => onClose?.(), 700);
     } catch (e) {
       setErr(String(e.message || e) || "Failed to send feedback.");
     } finally {
       setSending(false);
     }
-  }, [userId, formation, content, onClose, t.required]);
+  }, [userId, formation, content, onClose, onSuccess, t.required]);
 
   if (!open) return null;
 
@@ -93,6 +97,8 @@ export default function FeedbackModal({
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
+
+  const readOnly = !!existingFeedback;
 
   return (
     <>
@@ -123,23 +129,31 @@ export default function FeedbackModal({
             </button>
           </div>
 
+          {readOnly && (
+            <div className="mb-3 text-sm">
+              <span className="text-green-600">✓</span>{" "}
+              {t.already}
+            </div>
+          )}
+
           <label className="block text-sm mb-2">{t.label}</label>
           <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={readOnly ? existingFeedback?.feedback_content ?? "" : content}
+            onChange={(e) => !readOnly && setContent(e.target.value)}
             rows={5}
+            disabled={readOnly}
             className={`w-full resize-y rounded-md border px-3 py-2 outline-none ${
               theme === "dark"
                 ? "bg-[#1c1c1c] border-[#333] text-white placeholder-white/50 focus:ring-2 focus:ring-blue-500"
                 : "bg-white border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500"
-            }`}
+            } ${readOnly ? "opacity-80" : ""}`}
             placeholder={t.placeholder}
           />
 
-          {err && (
+          {!readOnly && err && (
             <p className="mt-2 text-sm text-red-500">{String(err)}</p>
           )}
-          {ok && (
+          {!readOnly && ok && (
             <p className="mt-2 text-sm text-green-600">{t.success}</p>
           )}
 
@@ -154,19 +168,21 @@ export default function FeedbackModal({
             >
               {t.cancel}
             </button>
-            <button
-              onClick={submit}
-              disabled={sending}
-              className={`px-4 py-2 rounded-md shadow text-sm ${
-                sending ? "opacity-70 cursor-not-allowed" : ""
-              } ${
-                theme === "dark"
-                  ? "bg-secondary text-white hover:bg-secondary/90"
-                  : "bg-primary text-dark hover:bg-primary/90"
-              }`}
-            >
-              {sending ? (language === "fr" ? "Envoi…" : "Sending…") : t.send}
-            </button>
+            {!readOnly && (
+              <button
+                onClick={submit}
+                disabled={sending}
+                className={`px-4 py-2 rounded-md shadow text-sm ${
+                  sending ? "opacity-70 cursor-not-allowed" : ""
+                } ${
+                  theme === "dark"
+                    ? "bg-secondary text-white hover:bg-secondary/90"
+                    : "bg-primary text-dark hover:bg-primary/90"
+                }`}
+              >
+                {sending ? (language === "fr" ? "Envoi…" : "Sending…") : t.send}
+              </button>
+            )}
           </div>
         </div>
       </div>

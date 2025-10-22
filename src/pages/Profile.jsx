@@ -1,4 +1,3 @@
-// src/pages/Profile.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -28,6 +27,8 @@ export default function Profile() {
             trainings_error: "Impossible de charger vos formations.",
             trainings_loading: "Chargement…",
             feedback: "Donner un feedback",
+            already_sent: "Feedback déjà envoyé",
+            your_feedback: "Votre feedback",
           }
         : {
             title: "My profile",
@@ -42,6 +43,8 @@ export default function Profile() {
             trainings_error: "Unable to load your trainings.",
             trainings_loading: "Loading…",
             feedback: "Give feedback",
+            already_sent: "Feedback already sent",
+            your_feedback: "Your feedback",
           },
     [language]
   );
@@ -88,18 +91,68 @@ export default function Profile() {
     return () => ctr.abort();
   }, [user]);
 
-  // ---------- Modale feedback ----------
+  // ---------- Feedbacks existants de l'utilisateur ----------
   const userId = user?.id ?? user?.pk ?? user?.user_id ?? null;
+  const [fbMap, setFbMap] = useState({}); // { [formationId]: feedbackObj }
+  const [fbLoading, setFbLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setFbMap({});
+      setFbLoading(false);
+      return;
+    }
+    const ctr = new AbortController();
+    (async () => {
+      try {
+        setFbLoading(true);
+        const res = await fetch(`${API_BASE}/feedbacks/?user=${userId}`, {
+          credentials: "include",
+          signal: ctr.signal,
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : data.results || [];
+        const map = {};
+        for (const item of list) {
+          // formation peut être un id ou un objet
+          const fid = typeof item.formation === "object" ? item.formation.id : item.formation;
+          if (fid != null) map[fid] = item;
+        }
+        setFbMap(map);
+      } catch {
+        setFbMap({});
+      } finally {
+        setFbLoading(false);
+      }
+    })();
+    return () => ctr.abort();
+  }, [userId]);
+
+  // ---------- Modale feedback ----------
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
 
   const openFeedback = (formation) => {
+    // Si feedback déjà existant → on n’ouvre pas la modale d’édition
+    const existing = fbMap[formation.id];
+    if (existing) return; // on bloque
     setSelectedFormation(formation);
     setOpenFb(true);
   };
   const closeFeedback = () => {
     setOpenFb(false);
     setSelectedFormation(null);
+  };
+
+  // Quand on crée un nouveau feedback, on met à jour fbMap pour bloquer la suite
+  const handleFeedbackCreated = (created) => {
+    const fid =
+      typeof created?.formation === "object"
+        ? created.formation?.id
+        : created?.formation ?? selectedFormation?.id;
+    if (!fid) return;
+    setFbMap((m) => ({ ...m, [fid]: created || { formation: fid, feedback_content: "" } }));
   };
 
   return (
@@ -144,20 +197,15 @@ export default function Profile() {
             className="px-4 py-2 rounded-md bg-blue-600 text-white hover:opacity-90"
           >
             {t.refresh}
-          </button>
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded-md bg-red-500 text-white hover:opacity-90"
-          >
-            {t.signout}
-          </button>
+          </button>       
         </div>
 
         {/* -------- Formations de l'utilisateur -------- */}
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">{t.trainings}</h2>
 
-          {fLoading && (
+          {/* States */}
+          {(fLoading || fbLoading) && (
             <div className="grid gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
@@ -175,7 +223,7 @@ export default function Profile() {
             </div>
           )}
 
-          {!fLoading && fError && (
+          {!fLoading && !fbLoading && fError && (
             <div
               className={`rounded-lg border p-4 text-sm ${
                 theme === "dark"
@@ -187,7 +235,7 @@ export default function Profile() {
             </div>
           )}
 
-          {!fLoading && !fError && formations.length === 0 && (
+          {!fLoading && !fbLoading && !fError && formations.length === 0 && (
             <div
               className={`rounded-lg border p-4 text-sm ${
                 theme === "dark"
@@ -199,40 +247,67 @@ export default function Profile() {
             </div>
           )}
 
-          {!fLoading && !fError && formations.length > 0 && (
+          {!fLoading && !fbLoading && !fError && formations.length > 0 && (
             <div className="grid grid-cols-1 gap-4">
-              {formations.map((f) => (
-                <div
-                  key={f.id}
-                  className={`rounded-lg border p-4 flex items-start justify-between gap-4 ${
-                    theme === "dark"
-                      ? "bg-[#1c1c1c] border-[#333]"
-                      : "bg-white border-gray-200"
-                  }`}
-                >
-                  <div>
-                    <div className="text-base font-medium">{f.name || "—"}</div>
+              {formations.map((f) => {
+                const existing = fbMap[f.id];
+                return (
+                  <div
+                    key={f.id}
+                    className={`rounded-lg border p-4 ${
+                      theme === "dark"
+                        ? "bg-[#1c1c1c] border-[#333]"
+                        : "bg-white border-gray-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-base font-medium">{f.name || "—"}</div>
+                      </div>
+
+                      {/* Bouton: caché/désactivé si déjà envoyé */}
+                      {!existing ? (
+                        <button
+                          onClick={() => openFeedback(f)}
+                          className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
+                            theme === "dark"
+                              ? "bg-secondary text-white"
+                              : "bg-primary text-dark"
+                          }`}
+                        >
+                          {t.feedback}
+                        </button>
+                      ) : (
+                        <span className="text-xs px-2 py-1 rounded border border-green-500 text-green-600">
+                          ✓ {t.already_sent}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Feedback existant en lecture seule */}
+                    {existing && (
+                      <div
+                        className={`mt-3 rounded-md border p-3 text-sm ${
+                          theme === "dark"
+                            ? "border-[#333] bg-[#1f1f1f]"
+                            : "border-gray-200 bg-gray-50"
+                        }`}
+                      >
+                        <div className="font-medium mb-1">{t.your_feedback}</div>
+                        <p className={theme === "dark" ? "text-white/80" : "text-gray-700"}>
+                          {existing.feedback_content || "—"}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex-shrink-0">
-                    <button
-                      onClick={() => openFeedback(f)}
-                      className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
-                        theme === "dark"
-                          ? "bg-secondary text-white"
-                          : "bg-primary text-dark"
-                      }`}
-                    >
-                      {t.feedback}
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       </section>
 
-      {/* Modale Feedback */}
+      {/* Modale Feedback — uniquement si pas encore envoyé */}
       <FeedbackModal
         open={openFb}
         onClose={closeFeedback}
@@ -240,6 +315,7 @@ export default function Profile() {
         formation={selectedFormation}
         theme={theme}
         language={language}
+        onSuccess={handleFeedbackCreated}
       />
     </main>
   );
