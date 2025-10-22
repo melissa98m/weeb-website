@@ -7,7 +7,8 @@ import BlogCard from "../components/Blog/BlogCard";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 
-// --- Données de test (a remplacer par l'api) ---
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+
 const MOCK_POSTS = [
   {
     id: 1,
@@ -20,7 +21,9 @@ const MOCK_POSTS = [
     cover: "https://picsum.photos/seed/react-perf/600/400",
     tags: ["React", "Frontend", "Performance"],
     author: "Alex Morgan",
-    date: "2025-08-21"
+    date: "2025-08-21",
+    // je laisse l'ancien champ tags si BlogCard l'utilise déjà
+    tags: ["React", "Frontend", "Performance"]
   },
   {
     id: 2,
@@ -129,6 +132,14 @@ function estimateReadingMinutes(text = "") {
   const words = String(text).trim().split(/\s+/).length || 0;
   return Math.max(1, Math.ceil(words / 200));
 }
+function textColorFor(bgHex) {
+  if (!bgHex || !/^#[0-9A-Fa-f]{6}$/.test(bgHex)) return "#111827";
+  const r = parseInt(bgHex.slice(1, 3), 16);
+  const g = parseInt(bgHex.slice(3, 5), 16);
+  const b = parseInt(bgHex.slice(5, 7), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 140 ? "#111827" : "#ffffff";
+}
 
 function CardSkeleton({ theme }) {
   const card =
@@ -148,7 +159,7 @@ function CardSkeleton({ theme }) {
   );
 }
 
-function SummaryModal({ open, onClose, post, theme, language, t }) {
+function SummaryModal({ open, onClose, post, theme, language, t, genre }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -220,27 +231,30 @@ function SummaryModal({ open, onClose, post, theme, language, t }) {
           <div className={`text-xs mb-4 ${metaColor}`}>
             {post.author} • {formatDate(post.date, language)} • ~{readingMin} min
           </div>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {post.tags.map((tg) => (
+
+          {/* Genre (couleur DB) */}
+          {genre && (
+            <div className="flex flex-wrap gap-2 mb-4">
               <span
-                key={tg}
-                className={`px-2 py-1 rounded-full border text-xs ${
-                  theme === "dark"
-                    ? "bg-[#262626] text-white border-[#333]"
-                    : "bg-white text-gray-900 border-gray-200"
-                }`}
+                className="px-2 py-1 rounded-full border text-xs"
+                style={{
+                  backgroundColor: genre.color,
+                  color: textColorFor(genre.color),
+                  borderColor: genre.color
+                }}
               >
-                {tg}
+                {genre.name}
               </span>
-            ))}
-          </div>
+            </div>
+          )}
+
           <h4 className="font-semibold mb-2">{t.summary_title}</h4>
           <p className={`${metaColor}`}>{excerpt}</p>
           <h4 className="font-semibold mt-5 mb-2">{t.key_points}</h4>
           <ul className={`list-disc pl-5 space-y-1 ${metaColor}`}>
             <li>{language === "fr" ? "Auteur :" : "Author:"} {post.author}</li>
             <li>{language === "fr" ? "Date :" : "Date:"} {formatDate(post.date, language)}</li>
-            <li>{language === "fr" ? "Thèmes :" : "Topics:"} {post.tags.join(", ")}</li>
+            <li>{language === "fr" ? "Genre :" : "Genre:"} {genre ? genre.name : "-"}</li>
             <li>{language === "fr" ? "Lecture estimée :" : "Estimated reading:"} ~{readingMin} {language === "fr" ? "min" : "min"}</li>
           </ul>
           <div className="mt-6 flex items-center justify-end gap-3">
@@ -278,18 +292,45 @@ export default function Blog() {
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState([]);
   const [q, setQ] = useState("");
-  const [tag, setTag] = useState(t.all_tags);
+  const [selectedGenreId, setSelectedGenreId] = useState(null);
   const [visible, setVisible] = useState(6);
+
+  // Genres depuis l'API
+  const [genres, setGenres] = useState([]);
+  const [genresLoading, setGenresLoading] = useState(false);
+  const [genresError, setGenresError] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
+  // Charger posts mock
   useEffect(() => {
     const id = setTimeout(() => {
       setPosts(MOCK_POSTS);
       setLoading(false);
     }, 600);
     return () => clearTimeout(id);
+  }, []);
+
+  // Charger genres depuis API
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setGenresLoading(true);
+        setGenresError(null);
+        const r = await fetch(`${API_BASE}/genres/`, { credentials: "omit" });
+        if (!r.ok) throw new Error("Failed to load genres");
+        const data = await r.json();
+        const list = Array.isArray(data) ? data : data.results || [];
+        if (alive) setGenres(list);
+      } catch (e) {
+        if (alive) setGenresError("Impossible de charger les genres.");
+      } finally {
+        if (alive) setGenresLoading(false);
+      }
+    })();
+    return () => { alive = false; };
   }, []);
 
   const openSummary = useCallback((post) => {
@@ -301,32 +342,45 @@ export default function Blog() {
     setSelected(null);
   }, []);
 
-  const allTags = useMemo(() => {
-    const set = new Set();
-    MOCK_POSTS.forEach((p) => p.tags.forEach((t) => set.add(t)));
-    return [t.all_tags, ...Array.from(set)];
-  }, [t.all_tags]);
+  // Maps utiles
+  const genreByName = useMemo(() => {
+    const map = Object.create(null);
+    genres.forEach((g) => { map[g.name.toLowerCase()] = g; });
+    return map;
+  }, [genres]);
 
+  const genreById = useMemo(() => {
+    const map = Object.create(null);
+    genres.forEach((g) => { map[g.id] = g; });
+    return map;
+  }, [genres]);
+
+  // Liste de chips = "Tous les genres" + genres DB
+  const chips = useMemo(() => {
+    return [{ id: null, name: t.all_genres, color: null }, ...genres];
+  }, [genres, t.all_genres]);
+
+  // Filtrage: texte + genre (en mappant genre_name -> id DB)
   const filtered = useMemo(() => {
     const lower = q.trim().toLowerCase();
     return posts.filter((p) => {
       const title = (language === "fr" ? p.title_fr : p.title) || p.title;
       const excerpt = (language === "fr" ? p.excerpt_fr : p.excerpt) || p.excerpt;
-      const tagOk = tag === t.all_tags || p.tags.includes(tag);
       const text = `${title} ${excerpt} ${p.author}`.toLowerCase();
-      return tagOk && (!lower || text.includes(lower));
+
+      // si un genre est sélectionné, on garde seulement les posts dont le genre_name correspond à ce genre en DB
+      if (selectedGenreId !== null) {
+        const gFromPost = p.genre_name ? genreByName[p.genre_name.toLowerCase()] : null;
+        if (!gFromPost || gFromPost.id !== selectedGenreId) return false;
+      }
+      return !lower || text.includes(lower);
     });
-  }, [posts, q, tag, language, t.all_tags]);
+  }, [posts, q, language, selectedGenreId, genreByName]);
 
   const card =
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
-
-  const chip =
-    theme === "dark"
-      ? "bg-[#262626] text-white hover:bg-[#303030]"
-      : "bg-white text-gray-900 hover:bg-gray-100";
 
   const input =
     theme === "dark"
@@ -344,6 +398,7 @@ export default function Blog() {
 
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between mb-8">
+        {/* Search */}
         <div className="relative w-full md:max-w-md">
           <input
             value={q}
@@ -354,25 +409,42 @@ export default function Blog() {
           <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60">⌘K</span>
         </div>
 
+        {/* Genre chips (couleurs DB) */}
         <div className="flex flex-wrap gap-2">
-          {allTags.map((name) => {
-            const active = tag === name;
-            return (
-              <button
-                key={name}
-                onClick={() => setTag(name)}
-                className={`px-3 py-1.5 text-sm rounded-full border transition ${
-                  active
-                    ? theme === "dark"
-                      ? "bg-primary text-white border-primary"
-                      : "bg-secondary text-white border-secondary"
-                    : `${chip} border-gray-200 dark:border-[#333]`
-                }`}
-              >
-                {name}
-              </button>
-            );
-          })}
+          {genresLoading && (
+            <span className="text-sm opacity-70">
+              {language === "fr" ? "Chargement des genres…" : "Loading genres…"}
+            </span>
+          )}
+          {genresError && (
+            <span className="text-sm text-red-600">{genresError}</span>
+          )}
+          {!genresLoading &&
+            chips.map((g) => {
+              const active = selectedGenreId === g.id;
+              const style = active && g.color
+                ? {
+                    backgroundColor: g.color,
+                    color: textColorFor(g.color),
+                    borderColor: g.color
+                  }
+                : {
+                    backgroundColor: "transparent",
+                    color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
+                    borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb")
+                  };
+
+              return (
+                <button
+                  key={g.id ?? "all"}
+                  onClick={() => setSelectedGenreId(active ? null : g.id)}
+                  className="px-3 py-1.5 text-sm rounded-full border transition hover:scale-105"
+                  style={style}
+                >
+                  {g.name}
+                </button>
+              );
+            })}
         </div>
       </div>
 
@@ -429,6 +501,11 @@ export default function Blog() {
         theme={theme}
         language={language}
         t={t}
+        genre={
+          selected?.genre_name
+            ? genreByName[selected.genre_name.toLowerCase()]
+            : null
+        }
       />
     </main>
   );
