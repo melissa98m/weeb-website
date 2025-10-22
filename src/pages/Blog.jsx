@@ -9,127 +9,22 @@ import blogFr from "../../locales/fr/blog.json";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
-const MOCK_POSTS = [
-  {
-    id: 1,
-    title: "Building a Performant React App",
-    title_fr: "Construire une application React performante",
-    excerpt:
-      "Key techniques to keep your app smooth and responsive with modern patterns.",
-    excerpt_fr:
-      "Techniques clés pour garder votre app fluide et réactive avec les patterns modernes.",
-    cover: "https://picsum.photos/seed/react-perf/600/400",
-    author: "Alex Morgan",
-    date: "2025-08-21",
-    // je laisse l'ancien champ tags si BlogCard l'utilise déjà
-    tags: ["React", "Frontend", "Performance"]
-  },
-  {
-    id: 2,
-    title: "JWT Cookies vs LocalStorage",
-    title_fr: "JWT Cookies vs LocalStorage",
-    excerpt:
-      "Comparing security trade-offs and DX when storing tokens on the client.",
-    excerpt_fr:
-      "Comparer les compromis de sécurité et l’DX pour stocker des tokens côté client.",
-    cover: "https://picsum.photos/seed/jwt-cookies/600/400",
-    tags: ["Security", "Auth", "Django"],
-    author: "Test test",
-    date: "2025-07-12"
-  },
-  {
-    id: 3,
-    title: "Styling Systems with Tailwind",
-    title_fr: "Systèmes de design avec Tailwind",
-    excerpt:
-      "How to structure tokens, utilities and components for scalable UIs.",
-    excerpt_fr:
-      "Comment structurer tokens, utilitaires et composants pour des UI évolutives.",
-    cover: "https://picsum.photos/seed/tailwind-system/600/400",
-    tags: ["Tailwind", "Design", "Frontend"],
-    author: "Lina Tran",
-    date: "2025-06-05"
-  },
-  {
-    id: 4,
-    title: "Caching REST APIs",
-    title_fr: "Mettre en cache des APIs REST",
-    excerpt:
-      "From ETags to stale-while-revalidate: practical recipes you can use today.",
-    excerpt_fr:
-      "Des ETags au stale-while-revalidate : des recettes pratiques à utiliser dès maintenant.",
-    cover: "https://picsum.photos/seed/cache-rest/600/400",
-    tags: ["Backend", "API"],
-    author: "Diego Ramos",
-    date: "2025-05-18"
-  },
-  {
-    id: 5,
-    title: "Accessible UI Patterns",
-    title_fr: "Patrons d’interface accessibles",
-    excerpt:
-      "Common pitfalls and how to ship inclusive experiences without friction.",
-    excerpt_fr:
-      "Erreurs courantes et comment livrer des expériences inclusives sans friction.",
-    cover: "https://picsum.photos/seed/a11y-ui/600/400",
-    tags: ["A11y", "Frontend", "Design"],
-    author: "Sara Chen",
-    date: "2025-04-11"
-  },
-  {
-    id: 6,
-    title: "Django + DRF Best Practices",
-    title_fr: "Bonnes pratiques Django + DRF",
-    excerpt:
-      "Auth, pagination, filters and how to keep your API maintainable.",
-    excerpt_fr:
-      "Auth, pagination, filtres et comment garder votre API maintenable.",
-    cover: "https://picsum.photos/seed/django-drf/600/400",
-    tags: ["Django", "Backend", "API"],
-    author: "Noah Idris",
-    date: "2025-03-03"
-  },
-  {
-    id: 7,
-    title: "State Machines for UI",
-    title_fr: "Machines à états pour l’UI",
-    excerpt:
-      "Modeling complex flows with xstate and keeping bugs at bay.",
-    excerpt_fr:
-      "Modéliser des flux complexes avec xstate et tenir les bugs à distance.",
-    cover: "https://picsum.photos/seed/xstate-ui/600/400",
-    tags: ["Frontend", "Architecture"],
-    author: "Eva Müller",
-    date: "2025-02-10"
-  },
-  {
-    id: 8,
-    title: "Micro-animations that Matter",
-    title_fr: "Micro-animations qui comptent",
-    excerpt:
-      "Small motion details that drastically improve perceived quality.",
-    excerpt_fr:
-      "De petits détails d’animation qui améliorent fortement la qualité perçue.",
-    cover: "https://picsum.photos/seed/micro-anim/600/400",
-    tags: ["Motion", "Design", "Frontend"],
-    author: "Kenji Watanabe",
-    date: "2025-01-22"
-  }
-];
-
+/* ---------- helpers ---------- */
 function formatDate(iso, lang) {
   try {
-    return new Date(iso).toLocaleDateString(
-      lang === "fr" ? "fr-FR" : "en-US",
-      { year: "numeric", month: "short", day: "2-digit" }
-    );
+    return new Date(iso).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
   } catch {
     return iso;
   }
 }
-function estimateReadingMinutes(text = "") {
-  const words = String(text).trim().split(/\s+/).length || 0;
-  return Math.max(1, Math.ceil(words / 200));
+function makeExcerpt(text = "", maxWords = 40) {
+  const words = String(text).trim().split(/\s+/);
+  const cut = words.slice(0, maxWords).join(" ");
+  return words.length > maxWords ? `${cut}…` : cut;
 }
 function textColorFor(bgHex) {
   if (!bgHex || !/^#[0-9A-Fa-f]{6}$/.test(bgHex)) return "#111827";
@@ -140,11 +35,9 @@ function textColorFor(bgHex) {
   return yiq >= 140 ? "#111827" : "#ffffff";
 }
 
+/* ---------- skeleton ---------- */
 function CardSkeleton({ theme }) {
-  const card =
-    theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333]"
-      : "bg-white border-gray-200";
+  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow p-4 ${card} animate-pulse`}>
       <div className="h-40 w-full rounded-lg mb-4 bg-gray-300/30" />
@@ -158,7 +51,8 @@ function CardSkeleton({ theme }) {
   );
 }
 
-function SummaryModal({ open, onClose, post, theme, language, t, genre }) {
+/* ---------- modal ---------- */
+function SummaryModal({ open, onClose, post, theme, language, t }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -169,16 +63,11 @@ function SummaryModal({ open, onClose, post, theme, language, t, genre }) {
   if (!open || !post) return null;
 
   const title = (language === "fr" ? post.title_fr : post.title) || post.title;
-  const excerpt =
-    (language === "fr" ? post.excerpt_fr : post.excerpt) || post.excerpt;
+  const excerpt = (language === "fr" ? post.excerpt_fr : post.excerpt) || post.excerpt;
 
-  const card =
-    theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
-      : "bg-white text-gray-900 border-gray-200";
-
+  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const metaColor = theme === "dark" ? "text-white/70" : "text-gray-600";
-  const readingMin = estimateReadingMinutes(excerpt);
+  const readingMin = Math.max(1, Math.ceil(String(excerpt).split(/\s+/).length / 200));
 
   return (
     <AnimatePresence>
@@ -202,60 +91,48 @@ function SummaryModal({ open, onClose, post, theme, language, t, genre }) {
       >
         {post.cover && (
           <div className="overflow-hidden rounded-t-xl">
-            <img
-              src={post.cover}
-              alt={title}
-              className="h-56 w-full object-cover"
-              loading="lazy"
-            />
+            <img src={post.cover} alt={title} className="h-56 w-full object-cover" loading="lazy" />
           </div>
         )}
         <div className="p-5">
           <div className="flex items-start justify-between gap-3 mb-3">
             <h3 className="text-xl md:text-2xl font-semibold">{title}</h3>
-            <Button
-              type="button"
-              onClick={onClose}
-              className={`px-3 py-1.5 rounded-md border text-sm ${
-                theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
-                  : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
-              }`}
-              aria-label={t.close}
-              title={t.close}
-            >
-              ✕ {t.close}
-            </Button>
           </div>
+
           <div className={`text-xs mb-4 ${metaColor}`}>
             {post.author} • {formatDate(post.date, language)} • ~{readingMin} min
           </div>
 
-          {/* Genre (couleur DB) */}
-          {genre && (
+          {/* Plusieurs genres colorés */}
+          {post._genres?.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              <span
-                className="px-2 py-1 rounded-full border text-xs"
-                style={{
-                  backgroundColor: genre.color,
-                  color: textColorFor(genre.color),
-                  borderColor: genre.color
-                }}
-              >
-                {genre.name}
-              </span>
+              {post._genres.map((g) => (
+                <span
+                  key={g.id}
+                  className="px-2 py-1 rounded-full border text-xs"
+                  style={{
+                    backgroundColor: g.color,
+                    color: textColorFor(g.color),
+                    borderColor: g.color,
+                  }}
+                >
+                  {g.name}
+                </span>
+              ))}
             </div>
           )}
 
           <h4 className="font-semibold mb-2">{t.summary_title}</h4>
           <p className={`${metaColor}`}>{excerpt}</p>
+
           <h4 className="font-semibold mt-5 mb-2">{t.key_points}</h4>
-          <ul className={`list-disc pl-5 space-y-1 ${metaColor}`}>
+          <ul className={` pl-5 space-y-1 ${metaColor}`}>
             <li>{language === "fr" ? "Auteur :" : "Author:"} {post.author}</li>
             <li>{language === "fr" ? "Date :" : "Date:"} {formatDate(post.date, language)}</li>
-            <li>{language === "fr" ? "Genre :" : "Genre:"} {genre ? genre.name : "-"}</li>
+            <li>{language === "fr" ? "Genres :" : "Genres:"} {post._genres.map(g => g.name).join(", ") || "-"}</li>
             <li>{language === "fr" ? "Lecture estimée :" : "Estimated reading:"} ~{readingMin} {language === "fr" ? "min" : "min"}</li>
           </ul>
+
           <div className="mt-6 flex items-center justify-end gap-3">
             <Button
               type="button"
@@ -283,6 +160,7 @@ function SummaryModal({ open, onClose, post, theme, language, t, genre }) {
   );
 }
 
+/* ---------- page ---------- */
 export default function Blog() {
   const { theme } = useTheme();
   const { language } = useLanguage();
@@ -293,44 +171,57 @@ export default function Blog() {
   const [q, setQ] = useState("");
   const [selectedGenreId, setSelectedGenreId] = useState(null);
   const [visible, setVisible] = useState(6);
-
-  // Genres depuis l'API
-  const [genres, setGenres] = useState([]);
-  const [genresLoading, setGenresLoading] = useState(false);
-  const [genresError, setGenresError] = useState(null);
-
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
-  // Charger posts mock
+  // Charge les articles depuis l'API, et normalise pour BlogCard/Modal
   useEffect(() => {
-    const id = setTimeout(() => {
-      setPosts(MOCK_POSTS);
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(id);
-  }, []);
-
-  // Charger genres depuis API
-  useEffect(() => {
-    let alive = true;
+    const ac = new AbortController();
     (async () => {
       try {
-        setGenresLoading(true);
-        setGenresError(null);
-        const r = await fetch(`${API_BASE}/genres/`, { credentials: "omit" });
-        if (!r.ok) throw new Error("Failed to load genres");
+        setLoading(true);
+        const r = await fetch(`${API_BASE}/articles/`, {
+          credentials: "omit",
+          signal: ac.signal,
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
-        const list = Array.isArray(data) ? data : data.results || [];
-        if (alive) setGenres(list);
+        const items = Array.isArray(data) ? data : data.results || [];
+
+        const normalized = items.map((a) => {
+          const genres = Array.isArray(a.genres) ? a.genres : [];
+          const title = a.title || "";
+          const excerpt = makeExcerpt(a.article_content || "");
+          const cover =
+            a.link_image ||
+            `https://picsum.photos/seed/article-${a.id}/600/400`;
+          const author = a.user ? a.author.username : (language === "fr" ? "Auteur" : "Author");
+          const date = a.created_at || a.updated_at || new Date().toISOString();
+          return {
+            id: a.id,
+            title,
+            title_fr: title,         
+            excerpt,
+            excerpt_fr: excerpt,   
+            cover,
+            author,
+            date,
+            tags: genres.map((g) => g.name), 
+            _genres: genres,                  
+            _genreIds: genres.map((g) => g.id),
+          };
+        });
+
+        setPosts(normalized);
       } catch (e) {
-        if (alive) setGenresError("Impossible de charger les genres.");
+        console.error("Failed to load articles:", e);
+        setPosts([]); // fallback
       } finally {
-        if (alive) setGenresLoading(false);
+        setLoading(false);
       }
     })();
-    return () => { alive = false; };
-  }, []);
+    return () => ac.abort();
+  }, [language]);
 
   const openSummary = useCallback((post) => {
     setSelected(post);
@@ -341,50 +232,30 @@ export default function Blog() {
     setSelected(null);
   }, []);
 
-  // Maps utiles
-  const genreByName = useMemo(() => {
-    const map = Object.create(null);
-    genres.forEach((g) => { map[g.name.toLowerCase()] = g; });
-    return map;
-  }, [genres]);
+  // Genres dérivés depuis les posts (évite un fetch séparé)
+  const allGenres = useMemo(() => {
+    const m = new Map();
+    posts.forEach((p) => p._genres?.forEach((g) => m.set(g.id, g)));
+    return [{ id: null, name: t.all_genres, color: null }, ...Array.from(m.values())];
+  }, [posts, t.all_genres]);
 
-  const genreById = useMemo(() => {
-    const map = Object.create(null);
-    genres.forEach((g) => { map[g.id] = g; });
-    return map;
-  }, [genres]);
-
-  // Liste de chips = "Tous les genres" + genres DB
-  const chips = useMemo(() => {
-    return [{ id: null, name: t.all_genres, color: null }, ...genres];
-  }, [genres, t.all_genres]);
-
-  // Filtrage: texte + genre (en mappant genre_name -> id DB)
+  // Filtrage: texte + genre
   const filtered = useMemo(() => {
     const lower = q.trim().toLowerCase();
     return posts.filter((p) => {
-      const title = (language === "fr" ? p.title_fr : p.title) || p.title;
-      const excerpt = (language === "fr" ? p.excerpt_fr : p.excerpt) || p.excerpt;
+      const title = p.title;
+      const excerpt = p.excerpt;
       const text = `${title} ${excerpt} ${p.author}`.toLowerCase();
 
-      // si un genre est sélectionné, on garde seulement les posts dont le genre_name correspond à ce genre en DB
-      if (selectedGenreId !== null) {
-        const gFromPost = p.genre_name ? genreByName[p.genre_name.toLowerCase()] : null;
-        if (!gFromPost || gFromPost.id !== selectedGenreId) return false;
-      }
-      return !lower || text.includes(lower);
+      const genreOk =
+        selectedGenreId === null || p._genreIds?.includes(selectedGenreId);
+
+      return genreOk && (!lower || text.includes(lower));
     });
-  }, [posts, q, language, selectedGenreId, genreByName]);
+  }, [posts, q, selectedGenreId]);
 
-  const card =
-    theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
-      : "bg-white text-gray-900 border-gray-200";
-
-  const input =
-    theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white placeholder-white/50"
-      : "bg-white border-gray-300 text-gray-900 placeholder-gray-400";
+  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const input = theme === "dark" ? "bg-[#1c1c1c] border-[#333] text-white placeholder-white/50" : "bg-white border-gray-300 text-gray-900 placeholder-gray-400";
 
   return (
     <main className="px-6 py-16 max-w-6xl mx-auto">
@@ -410,40 +281,26 @@ export default function Blog() {
 
         {/* Genre chips (couleurs DB) */}
         <div className="flex flex-wrap gap-2">
-          {genresLoading && (
-            <span className="text-sm opacity-70">
-              {language === "fr" ? "Chargement des genres…" : "Loading genres…"}
-            </span>
-          )}
-          {genresError && (
-            <span className="text-sm text-red-600">{genresError}</span>
-          )}
-          {!genresLoading &&
-            chips.map((g) => {
-              const active = selectedGenreId === g.id;
-              const style = active && g.color
-                ? {
-                    backgroundColor: g.color,
-                    color: textColorFor(g.color),
-                    borderColor: g.color
-                  }
-                : {
-                    backgroundColor: "transparent",
-                    color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-                    borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb")
-                  };
-
-              return (
-                <button
-                  key={g.id ?? "all"}
-                  onClick={() => setSelectedGenreId(active ? null : g.id)}
-                  className="px-3 py-1.5 text-sm rounded-full border transition hover:scale-105"
-                  style={style}
-                >
-                  {g.name}
-                </button>
-              );
-            })}
+          {allGenres.map((g) => {
+            const active = selectedGenreId === g.id;
+            const style = active && g.color
+              ? { backgroundColor: g.color, color: textColorFor(g.color), borderColor: g.color }
+              : {
+                  backgroundColor: "transparent",
+                  color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
+                  borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+                };
+            return (
+              <button
+                key={g.id ?? "all"}
+                onClick={() => setSelectedGenreId(active ? null : g.id)}
+                className="px-3 py-1.5 text-sm rounded-full border transition hover:scale-105"
+                style={style}
+              >
+                {g.name}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -500,11 +357,6 @@ export default function Blog() {
         theme={theme}
         language={language}
         t={t}
-        genre={
-          selected?.genre_name
-            ? genreByName[selected.genre_name.toLowerCase()]
-            : null
-        }
       />
     </main>
   );
