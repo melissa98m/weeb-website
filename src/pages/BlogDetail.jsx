@@ -6,11 +6,12 @@ import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
+import RelatedCarousel from "../components/Blog/RelatedCarousel";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-const INDEX_PAGE_SIZE = 200; // augmente si besoin
+const INDEX_PAGE_SIZE = 200;
 
-/* ---------- utils ---------- */
+// ---- Utils
 function formatDate(iso, lang) {
   try {
     return new Date(iso).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
@@ -31,19 +32,14 @@ function asList(data) {
   if (data && Array.isArray(data.results)) return data.results;
   return [];
 }
-// Préfixe les URLs relatives (ex: /media/...) avec l’hôte de l’API
 const API_HOST = (API_BASE || "").replace(/\/api\/?$/, "");
 function resolveImageUrl(src) {
   if (!src) return null;
   return /^https?:\/\//i.test(src) ? src : `${API_HOST}${src}`;
 }
 
-/* ---------- skeleton ---------- */
 function Skeleton({ theme }) {
-  const base =
-    theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333]"
-      : "bg-white border-gray-200";
+  const base = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow overflow-hidden ${base} animate-pulse`}>
       <div className="h-56 w-full bg-gray-300/20" />
@@ -61,7 +57,6 @@ function Skeleton({ theme }) {
   );
 }
 
-/* ---------- page ---------- */
 export default function BlogDetail() {
   const { id } = useParams();
   const currId = Number(id);
@@ -75,35 +70,25 @@ export default function BlogDetail() {
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [coverBroken, setCoverBroken] = useState(false);
-
-  // index global trié asc (ids)
   const [ids, setIds] = useState([]);
 
-  // Remonter en haut + reset état image quand l’id change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
     setCoverBroken(false);
   }, [id]);
 
-  // Progress bar (lecture)
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 20,
-    mass: 0.2,
-  });
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
 
-  // 1) Charger l’article courant
+  // Article courant
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         setLoadingPost(true);
         setError(null);
-        const r = await fetch(`${API_BASE}/articles/${currId}/`, {
-          credentials: "omit",
-        });
+        const r = await fetch(`${API_BASE}/articles/${currId}/`, { credentials: "omit" });
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
         if (!alive) return;
@@ -116,12 +101,10 @@ export default function BlogDetail() {
         if (alive) setLoadingPost(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, [currId]);
 
-  // 2) Charger tous les IDs triés asc (paginé si nécessaire)
+  // Index des IDs (asc)
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -135,14 +118,12 @@ export default function BlogDetail() {
           if (!r.ok) throw new Error(`HTTP ${r.status}`);
           const data = await r.json();
           const list = asList(data);
-          all.push(...list.map((a) => a.id).filter((v) => v != null));
-          url = data.next || null; // DRF PageNumberPagination
+          all.push(...list.map(a => a.id).filter(v => v != null));
+          url = data.next || null;
           if (!data.next && !Array.isArray(data.results)) break;
         }
         if (!alive) return;
-        const uniq = Array.from(new Set(all)).sort(
-          (a, b) => Number(a) - Number(b)
-        );
+        const uniq = Array.from(new Set(all)).sort((a, b) => Number(a) - Number(b));
         setIds(uniq);
       } catch (e) {
         if (!alive) return;
@@ -152,49 +133,26 @@ export default function BlogDetail() {
         if (alive) setLoadingIndex(false);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
   const loading = loadingPost || loadingIndex;
 
-  // Dérivés article
   const title = useMemo(() => post?.title ?? "", [post]);
   const paragraphs = useMemo(() => {
     const raw = post?.article_content ?? "";
-    const parts = raw
-      .split(/\n{2,}|\r?\n\r?\n/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const parts = raw.split(/\n{2,}|\r?\n\r?\n/).map(s => s.trim()).filter(Boolean);
     return parts.length ? parts : raw ? [raw] : [];
   }, [post]);
-  const readingMin = useMemo(
-    () => estimateReadingMinutes(post?.article_content ?? ""),
-    [post]
-  );
+  const readingMin = useMemo(() => estimateReadingMinutes(post?.article_content ?? ""), [post]);
 
-  // Voisins calculés localement
-  const index = useMemo(
-    () => ids.findIndex((v) => Number(v) === currId),
-    [ids, currId]
-  );
+  // voisins
+  const index = useMemo(() => ids.findIndex(v => Number(v) === currId), [ids, currId]);
   const prevId = index > 0 ? ids[index - 1] : null;
   const nextId = index !== -1 && index < ids.length - 1 ? ids[index + 1] : null;
 
-  const card =
-    theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
-      : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const meta = theme === "dark" ? "text-white/70" : "text-gray-600";
-
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    } catch {}
-  };
 
   if (loading) {
     return (
@@ -225,28 +183,21 @@ export default function BlogDetail() {
     );
   }
 
-  // Auteur + date
   const authorLabel =
-    (post.author &&
-      typeof post.author === "object" &&
-      (post.author.username || post.author.email)) ||
+    (post.author && typeof post.author === "object" && (post.author.username || post.author.email)) ||
     (typeof post.author === "string" ? post.author : null) ||
     "—";
   const dateIso = post.created_at || post.updated_at || post.date;
-
-  // Genres depuis l’API
   const chips = Array.isArray(post.genres) ? post.genres : [];
 
-  // Couverture: même logique que la liste (fallback Picsum + préfixe /media)
   const placeholderCover = `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`;
   const coverUrl =
-    resolveImageUrl(
-      post?.link_image || post?.cover || post?.image || post?.image_url
-    ) || placeholderCover;
+    resolveImageUrl(post?.link_image || post?.cover || post?.image || post?.image_url) ||
+    placeholderCover;
 
   return (
     <main className="px-0 md:px-6 py-12 md:py-16">
-      {/* Barre de progression de lecture */}
+      {/* Barre de progression */}
       <motion.div
         style={{ scaleX }}
         className="fixed left-0 top-0 right-0 h-1 origin-left bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-500 z-40"
@@ -269,27 +220,19 @@ export default function BlogDetail() {
 
         {/* Article */}
         <article className={`rounded-xl border shadow overflow-hidden ${card}`}>
-          {coverUrl && !coverBroken ? (
-            <div className="overflow-hidden">
-              <img
-                src={coverUrl}
-                alt={title}
-                className="h-64 md:h-[22rem] w-full object-cover"
-                loading="lazy"
-                onError={() => setCoverBroken(true)}
-              />
-            </div>
-          ) : (
-            // Si l’image échoue, on force le placeholder (évite un écran vide)
-            <div className="overflow-hidden">
-              <img
-                src={placeholderCover}
-                alt={title}
-                className="h-64 md:h-[22rem] w-full object-cover"
-                loading="lazy"
-              />
-            </div>
-          )}
+          <div className="overflow-hidden">
+            <img
+              src={coverUrl}
+              alt={title}
+              className="h-64 md:h-[22rem] w-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                if (e.currentTarget.src !== placeholderCover) {
+                  e.currentTarget.src = placeholderCover;
+                }
+              }}
+            />
+          </div>
 
           <div className="p-6 md:p-8">
             <motion.h1
@@ -327,7 +270,13 @@ export default function BlogDetail() {
                 {/* Copier le lien */}
                 <Button
                   type="button"
-                  onClick={copyLink}
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(window.location.href);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1200);
+                    } catch {}
+                  }}
                   className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
                     theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
                   }`}
@@ -364,17 +313,21 @@ export default function BlogDetail() {
               }`}
             >
               <AnimatePresence>
-                {paragraphs.map((p, i) => (
-                  <motion.p
-                    key={i}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25, delay: i * 0.05 }}
-                    className={`${i === 0 ? "mt-0" : "mt-4"}`}
-                  >
-                    {p}
-                  </motion.p>
-                ))}
+                {(post?.article_content ?? "")
+                  .split(/\n{2,}|\r?\n\r?\n/)
+                  .map((s) => s.trim())
+                  .filter(Boolean)
+                  .map((p, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.05 }}
+                      className={`${i === 0 ? "mt-0" : "mt-4"}`}
+                    >
+                      {p}
+                    </motion.p>
+                  ))}
               </AnimatePresence>
             </div>
           </div>
@@ -414,6 +367,14 @@ export default function BlogDetail() {
             <span />
           )}
         </div>
+
+        {/* Carrousel “même genre” (composant séparé) */}
+        <RelatedCarousel
+          currentId={currId}
+          currentGenres={chips}
+          theme={theme}
+          language={language}
+        />
       </div>
     </main>
   );
