@@ -7,71 +7,43 @@ import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const INDEX_PAGE_SIZE = 200; // augmente si besoin
 
-// --- Données de test (ids alignés avec la page Blog) ---
-const MOCK_POSTS = [
-  {
-    id: 1,
-    title: "Building a Performant React App",
-    title_fr: "Construire une application React performante",
-    cover: "https://picsum.photos/seed/react-perf/1200/600",
-    tags: ["React", "Frontend", "Performance"],
-    author: "Alex Morgan",
-    date: "2025-08-21",
-    content: [
-      "Performance in React goes beyond memoization. It starts with modeling data flow correctly and rendering only what matters.",
-      "Use list virtualization, split components wisely, and lean on Suspense/Transitions for perceived responsiveness.",
-      "Measure, don’t guess. Start with the browser Performance tab and React DevTools Profiler to catch expensive updates."
-    ],
-    content_fr: [
-      "La performance dans React dépasse la simple mémoïsation. Tout commence par un bon modèle de flux de données et un rendu ciblé.",
-      "Utilisez la virtualisation des listes, découpez judicieusement vos composants, et exploitez Suspense/Transitions pour la réactivité perçue.",
-      "Mesurez, ne supposez pas. Débutez avec l’onglet Performance du navigateur et le Profiler de React DevTools pour repérer les mises à jour coûteuses."
-    ]
-  },
-  {
-    id: 2,
-    title: "JWT Cookies vs LocalStorage",
-    title_fr: "JWT Cookies vs LocalStorage",
-    cover: "https://picsum.photos/seed/jwt-cookies/1200/600",
-    tags: ["Security", "Auth", "Django"],
-    author: "Morgan Scholz",
-    date: "2025-07-12",
-    content: [
-      "Cookies (HttpOnly, Secure, SameSite) reduce XSS exfiltration risk, while LocalStorage is easier but exposes tokens to JS.",
-      "Rotate refresh tokens, keep access tokens short-lived, and enforce CSRF protections when needed.",
-      "On the server, validate audience/issuer, and prefer HTTPS everywhere."
-    ],
-    content_fr: [
-      "Les cookies (HttpOnly, Secure, SameSite) réduisent le risque d’exfiltration via XSS, tandis que LocalStorage expose les tokens au JS.",
-      "Faites tourner les refresh tokens, gardez les access tokens de courte durée et appliquez la protection CSRF si nécessaire.",
-      "Côté serveur, validez audience/issuer et privilégiez l’HTTPS partout."
-    ]
-  },
-  // Ajoute d'autres si besoin…
-];
-
-// --- Utils ---
+/* ---------- utils ---------- */
 function formatDate(iso, lang) {
   try {
-    return new Date(iso).toLocaleDateString(
-      lang === "fr" ? "fr-FR" : "en-US",
-      { year: "numeric", month: "short", day: "2-digit" }
-    );
+    return new Date(iso).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
   } catch {
     return iso;
   }
 }
-function estimateReadingMinutes(paragraphs = []) {
-  const text = paragraphs.join(" ");
-  const words = String(text).trim().split(/\s+/).length || 0;
+function estimateReadingMinutes(text = "") {
+  const words = String(text).trim().split(/\s+/).filter(Boolean).length || 0;
   return Math.max(1, Math.ceil(words / 200));
 }
+function asList(data) {
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.results)) return data.results;
+  return [];
+}
+// Préfixe les URLs relatives (ex: /media/...) avec l’hôte de l’API
+const API_HOST = (API_BASE || "").replace(/\/api\/?$/, "");
+function resolveImageUrl(src) {
+  if (!src) return null;
+  return /^https?:\/\//i.test(src) ? src : `${API_HOST}${src}`;
+}
 
+/* ---------- skeleton ---------- */
 function Skeleton({ theme }) {
-  const base = theme === "dark"
-    ? "bg-[#1c1c1c] border-[#333]"
-    : "bg-white border-gray-200";
+  const base =
+    theme === "dark"
+      ? "bg-[#1c1c1c] border-[#333]"
+      : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow overflow-hidden ${base} animate-pulse`}>
       <div className="h-56 w-full bg-gray-300/20" />
@@ -89,52 +61,131 @@ function Skeleton({ theme }) {
   );
 }
 
+/* ---------- page ---------- */
 export default function BlogDetail() {
   const { id } = useParams();
+  const currId = Number(id);
   const { theme } = useTheme();
   const { language } = useLanguage();
   const txt = language === "fr" ? blogFr : blogEn;
-  //const txt = language === "fr" ? T_FR : T_EN;
 
-  const [loading, setLoading] = useState(true);
+  const [loadingPost, setLoadingPost] = useState(true);
+  const [loadingIndex, setLoadingIndex] = useState(true);
   const [post, setPost] = useState(null);
+  const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [coverBroken, setCoverBroken] = useState(false);
 
-  // Simule un fetch DB
+  // index global trié asc (ids)
+  const [ids, setIds] = useState([]);
+
+  // Remonter en haut + reset état image quand l’id change
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const found = MOCK_POSTS.find(p => String(p.id) === String(id));
-      setPost(found || null);
-      setLoading(false);
-    }, 500);
-    return () => clearTimeout(timer);
+    window.scrollTo({ top: 0, behavior: "auto" });
+    setCoverBroken(false);
   }, [id]);
-
-  const title = useMemo(() => {
-    if (!post) return "";
-    return (language === "fr" ? post.title_fr : post.title) || post.title;
-  }, [post, language]);
-
-  const paragraphs = useMemo(() => {
-    if (!post) return [];
-    const arr = (language === "fr" ? post.content_fr : post.content) || post.content || [];
-    return Array.isArray(arr) ? arr : [String(arr)];
-  }, [post, language]);
-
-  const readingMin = useMemo(() => estimateReadingMinutes(paragraphs), [paragraphs]);
 
   // Progress bar (lecture)
   const containerRef = useRef(null);
-  const { scrollYProgress } = useScroll({
-    container: containerRef
+  const { scrollYProgress } = useScroll({ container: containerRef });
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 20,
+    mass: 0.2,
   });
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
+
+  // 1) Charger l’article courant
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setLoadingPost(true);
+        setError(null);
+        const r = await fetch(`${API_BASE}/articles/${currId}/`, {
+          credentials: "omit",
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        if (!alive) return;
+        setPost(data);
+      } catch (e) {
+        if (!alive) return;
+        setError("Unable to load the article.");
+        setPost(null);
+      } finally {
+        if (alive) setLoadingPost(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [currId]);
+
+  // 2) Charger tous les IDs triés asc (paginé si nécessaire)
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        setLoadingIndex(true);
+        setError(null);
+        let all = [];
+        let url = `${API_BASE}/articles/?ordering=id&page_size=${INDEX_PAGE_SIZE}&page=1`;
+        while (url) {
+          const r = await fetch(url, { credentials: "omit" });
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          const data = await r.json();
+          const list = asList(data);
+          all.push(...list.map((a) => a.id).filter((v) => v != null));
+          url = data.next || null; // DRF PageNumberPagination
+          if (!data.next && !Array.isArray(data.results)) break;
+        }
+        if (!alive) return;
+        const uniq = Array.from(new Set(all)).sort(
+          (a, b) => Number(a) - Number(b)
+        );
+        setIds(uniq);
+      } catch (e) {
+        if (!alive) return;
+        setError("Unable to load the article index.");
+        setIds([]);
+      } finally {
+        if (alive) setLoadingIndex(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const loading = loadingPost || loadingIndex;
+
+  // Dérivés article
+  const title = useMemo(() => post?.title ?? "", [post]);
+  const paragraphs = useMemo(() => {
+    const raw = post?.article_content ?? "";
+    const parts = raw
+      .split(/\n{2,}|\r?\n\r?\n/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return parts.length ? parts : raw ? [raw] : [];
+  }, [post]);
+  const readingMin = useMemo(
+    () => estimateReadingMinutes(post?.article_content ?? ""),
+    [post]
+  );
+
+  // Voisins calculés localement
+  const index = useMemo(
+    () => ids.findIndex((v) => Number(v) === currId),
+    [ids, currId]
+  );
+  const prevId = index > 0 ? ids[index - 1] : null;
+  const nextId = index !== -1 && index < ids.length - 1 ? ids[index + 1] : null;
 
   const card =
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
-
   const meta = theme === "dark" ? "text-white/70" : "text-gray-600";
 
   const copyLink = async () => {
@@ -153,7 +204,7 @@ export default function BlogDetail() {
     );
   }
 
-  if (!post) {
+  if (error || !post) {
     return (
       <main className="px-6 py-16 max-w-3xl mx-auto">
         <div className={`rounded-xl border p-8 text-center ${card}`}>
@@ -173,6 +224,25 @@ export default function BlogDetail() {
       </main>
     );
   }
+
+  // Auteur + date
+  const authorLabel =
+    (post.author &&
+      typeof post.author === "object" &&
+      (post.author.username || post.author.email)) ||
+    (typeof post.author === "string" ? post.author : null) ||
+    "—";
+  const dateIso = post.created_at || post.updated_at || post.date;
+
+  // Genres depuis l’API
+  const chips = Array.isArray(post.genres) ? post.genres : [];
+
+  // Couverture: même logique que la liste (fallback Picsum + préfixe /media)
+  const placeholderCover = `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`;
+  const coverUrl =
+    resolveImageUrl(
+      post?.link_image || post?.cover || post?.image || post?.image_url
+    ) || placeholderCover;
 
   return (
     <main className="px-0 md:px-6 py-12 md:py-16">
@@ -197,12 +267,23 @@ export default function BlogDetail() {
           </Button>
         </div>
 
-        {/* Card article */}
+        {/* Article */}
         <article className={`rounded-xl border shadow overflow-hidden ${card}`}>
-          {post.cover && (
+          {coverUrl && !coverBroken ? (
             <div className="overflow-hidden">
               <img
-                src={post.cover}
+                src={coverUrl}
+                alt={title}
+                className="h-64 md:h-[22rem] w-full object-cover"
+                loading="lazy"
+                onError={() => setCoverBroken(true)}
+              />
+            </div>
+          ) : (
+            // Si l’image échoue, on force le placeholder (évite un écran vide)
+            <div className="overflow-hidden">
+              <img
+                src={placeholderCover}
                 alt={title}
                 className="h-64 md:h-[22rem] w-full object-cover"
                 loading="lazy"
@@ -223,21 +304,22 @@ export default function BlogDetail() {
             {/* Meta + actions */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
               <div className={`text-sm ${meta}`}>
-                {post.author} • {formatDate(post.date, language)} • {txt.read_time} ~{readingMin} {txt.min}
+                {authorLabel} • {formatDate(dateIso, language)} • {txt.read_time} ~{readingMin} {txt.min}
               </div>
               <div className="flex items-center gap-2">
-                {/* Tags */}
+                {/* Genres (desktop) */}
                 <div className="hidden md:flex flex-wrap gap-2">
-                  {post.tags.map((tg) => (
+                  {chips.map((g) => (
                     <span
-                      key={tg}
-                      className={`px-2 py-1 rounded-full border text-xs ${
-                        theme === "dark"
-                          ? "bg-[#262626] text-white border-[#333]"
-                          : "bg-white text-gray-900 border-gray-200"
-                      }`}
+                      key={g.id}
+                      className="px-2 py-1 rounded-full border text-xs"
+                      style={{
+                        backgroundColor: "transparent",
+                        borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+                        color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
+                      }}
                     >
-                      {tg}
+                      {g.name}
                     </span>
                   ))}
                 </div>
@@ -255,21 +337,24 @@ export default function BlogDetail() {
               </div>
             </div>
 
-            {/* Tags (mobile) */}
-            <div className="md:hidden flex flex-wrap gap-2 mb-4">
-              {post.tags.map((tg) => (
-                <span
-                  key={tg}
-                  className={`px-2 py-1 rounded-full border text-xs ${
-                    theme === "dark"
-                      ? "bg-[#262626] text-white border-[#333]"
-                      : "bg-white text-gray-900 border-gray-200"
-                  }`}
-                >
-                  {tg}
-                </span>
-              ))}
-            </div>
+            {/* Genres (mobile) */}
+            {chips.length > 0 && (
+              <div className="md:hidden flex flex-wrap gap-2 mb-4">
+                {chips.map((g) => (
+                  <span
+                    key={g.id}
+                    className="px-2 py-1 rounded-full border text-xs"
+                    style={{
+                      backgroundColor: "transparent",
+                      borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+                      color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
+                    }}
+                  >
+                    {g.name}
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Contenu */}
             <div
@@ -295,10 +380,39 @@ export default function BlogDetail() {
           </div>
         </article>
 
-        {/* Navigation simple (placeholder) */}
-        <div className="px-6 flex justify-between">
-          <span className={`${meta}`}>—</span>
-          <span className={`${meta}`}>—</span>
+        {/* Navigation précédente / suivante */}
+        <div className="px-6 flex items-center justify-between gap-3">
+          {prevId ? (
+            <Link
+              to={`/blog/${prevId}`}
+              className={`px-4 py-2 rounded-md border text-sm ${
+                theme === "dark"
+                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
+              }`}
+              onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
+            >
+              ← {txt.prev ?? (language === "fr" ? "Article précédent" : "Previous article")}
+            </Link>
+          ) : (
+            <span />
+          )}
+
+          {nextId ? (
+            <Link
+              to={`/blog/${nextId}`}
+              className={`px-4 py-2 rounded-md border text-sm ${
+                theme === "dark"
+                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
+              }`}
+              onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
+            >
+              {txt.next ?? (language === "fr" ? "Article suivant" : "Next article")} →
+            </Link>
+          ) : (
+            <span />
+          )}
         </div>
       </div>
     </main>

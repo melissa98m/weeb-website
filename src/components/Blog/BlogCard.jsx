@@ -1,4 +1,3 @@
-
 import React from "react";
 import { motion } from "framer-motion";
 import Button from "../Button";
@@ -16,13 +15,19 @@ function formatDate(iso, lang) {
 
 function estimateReadingMinutes(text = "") {
   const words = String(text || "").trim().split(/\s+/).filter(Boolean).length || 0;
-  return Math.max(1, Math.ceil(words / 200)); // ~200 wpm
+  return Math.max(1, Math.ceil(words / 200));
 }
 
 /**
  * BlogCard — carte réutilisable pour un article
  * Props:
- * - post: { id, title, title_fr, excerpt, excerpt_fr, cover, tags[], author, date }
+ * - post: {
+ *     id, title, title_fr, excerpt, excerpt_fr, cover,
+ *     author?: { username?: string, email?: string } | string,
+ *     created_at?: string, date?: string,
+ *     tags?: string[],
+ *     _genres?: Array<{ id:number; name:string; color:string }>
+ *   }
  * - language: "fr" | "en"
  * - theme: "dark" | "light"
  * - idx: index pour décaler l’animation
@@ -43,17 +48,36 @@ export default function BlogCard({
 
   const readingMin = estimateReadingMinutes(excerpt);
 
+  // Auteur: priorise author.username si l'API renvoie un objet, sinon string/fallback
+  const authorLabel =
+    (post.author && typeof post.author === "object" && (post.author.username || post.author.email)) ||
+    (typeof post.author === "string" ? post.author : null) ||
+    "—";
+
+  // Date: priorise created_at, sinon date (fallback ancien champ)
+  const dateIso = post.created_at || post.date;
+  
+
   const cardClass =
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
 
-  const chipClass =
-    theme === "dark"
-      ? "bg-[#262626] text-white hover:bg-[#303030]"
-      : "bg-white text-gray-900 hover:bg-gray-100";
-
   const metaColor = theme === "dark" ? "text-white/60" : "text-gray-500";
+
+  // Chips: genres (couleur) sinon tags (sans couleur)
+  const chips = (Array.isArray(post._genres) && post._genres.length
+    ? post._genres.map(g => ({
+        key: g.id ?? g.name,
+        label: g.name,
+        color: g.color || null,
+      }))
+    : Array.isArray(post.tags) ? post.tags.map(name => ({
+        key: name,
+        label: name,
+        color: null,
+      })) : []
+  ).slice(0, 6);
 
   return (
     <motion.article
@@ -71,7 +95,7 @@ export default function BlogCard({
           className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
-        {/* Badge temps de lecture sur l'image */}
+        {/* Badge temps de lecture */}
         <div
           className={`absolute left-3 top-3 px-2 py-0.5 rounded-md text-xs shadow ${
             theme === "dark" ? "bg-black/60 text-white" : "bg-white/80 text-gray-800"
@@ -93,19 +117,24 @@ export default function BlogCard({
 
         <div className="flex items-center justify-between text-xs mb-4">
           <div className="flex gap-2 flex-wrap">
-            {post.tags.map((tg) => (
+            {chips.map((c) => (
               <span
-                key={tg}
-                className={`px-2 py-1 rounded-full border ${chipClass} ${
-                  theme === "dark" ? "border-[#333]" : "border-gray-200"
-                }`}
+                key={c.key}
+                title={c.label}
+                className="px-2 py-1 rounded-full border"
+                style={{
+                  backgroundColor: "transparent",
+                  borderColor: c.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+                  color: c.color || (theme === "dark" ? "#ffffff" : "#111827")
+                }}
               >
-                {tg}
+                {c.label}
               </span>
             ))}
           </div>
+
           <div className={metaColor}>
-            {post.author} • {formatDate(post.date, language)} • ~{readingMin}{" "}
+            {authorLabel} • {formatDate(dateIso, language)} • ~{readingMin}{" "}
             {language === "fr" ? "min" : "min"}
           </div>
         </div>
