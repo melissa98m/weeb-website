@@ -1,7 +1,9 @@
+// src/pages/Profile.jsx
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import FeedbackModal from "../components/FeedbackModal";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
@@ -25,6 +27,7 @@ export default function Profile() {
             trainings_empty: "Aucune formation suivie.",
             trainings_error: "Impossible de charger vos formations.",
             trainings_loading: "Chargement…",
+            feedback: "Donner un feedback",
           }
         : {
             title: "My profile",
@@ -38,18 +41,19 @@ export default function Profile() {
             trainings_empty: "No trainings yet.",
             trainings_error: "Unable to load your trainings.",
             trainings_loading: "Loading…",
+            feedback: "Give feedback",
           },
     [language]
   );
 
-  if (!user) return null; // déjà filtré par ProtectedRoute
+  if (!user) return null;
 
   const card =
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
 
-  // ---------- Bloc formations (API: /api/formations?user={id}) ----------
+  // ---------- Formations ----------
   const [formations, setFormations] = useState([]);
   const [fLoading, setFLoading] = useState(true);
   const [fError, setFError] = useState(null);
@@ -68,16 +72,11 @@ export default function Profile() {
         setFError(null);
         const res = await fetch(
           `${API_BASE}/formations/?user=${encodeURIComponent(userId)}`,
-          {
-            // Si ton endpoint nécessite les cookies JWT, garde "include"
-            credentials: "include",
-            signal: ctr.signal,
-          }
+          { credentials: "include", signal: ctr.signal }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const list = Array.isArray(data) ? data : data.results || [];
-        // On attend {id, name} (description optionnelle, ignorée ici)
         setFormations(list);
       } catch (e) {
         setFError(e);
@@ -88,6 +87,20 @@ export default function Profile() {
     })();
     return () => ctr.abort();
   }, [user]);
+
+  // ---------- Modale feedback ----------
+  const userId = user?.id ?? user?.pk ?? user?.user_id ?? null;
+  const [openFb, setOpenFb] = useState(false);
+  const [selectedFormation, setSelectedFormation] = useState(null);
+
+  const openFeedback = (formation) => {
+    setSelectedFormation(formation);
+    setOpenFb(true);
+  };
+  const closeFeedback = () => {
+    setOpenFb(false);
+    setSelectedFormation(null);
+  };
 
   return (
     <main className={`min-h-[60vh] px-6 py-16 flex justify-center`}>
@@ -140,11 +153,10 @@ export default function Profile() {
           </button>
         </div>
 
-        {/* -------- Bloc: formations de l'utilisateur -------- */}
+        {/* -------- Formations de l'utilisateur -------- */}
         <div className="mt-10">
           <h2 className="text-xl font-semibold mb-4">{t.trainings}</h2>
 
-          {/* Loading */}
           {fLoading && (
             <div className="grid gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -163,7 +175,6 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Error */}
           {!fLoading && fError && (
             <div
               className={`rounded-lg border p-4 text-sm ${
@@ -176,7 +187,6 @@ export default function Profile() {
             </div>
           )}
 
-          {/* Empty */}
           {!fLoading && !fError && formations.length === 0 && (
             <div
               className={`rounded-lg border p-4 text-sm ${
@@ -189,31 +199,48 @@ export default function Profile() {
             </div>
           )}
 
-          {/* List */}
           {!fLoading && !fError && formations.length > 0 && (
             <div className="grid grid-cols-1 gap-4">
               {formations.map((f) => (
                 <div
                   key={f.id}
-                  className={`rounded-lg border p-4 ${
+                  className={`rounded-lg border p-4 flex items-start justify-between gap-4 ${
                     theme === "dark"
                       ? "bg-[#1c1c1c] border-[#333]"
                       : "bg-white border-gray-200"
                   }`}
                 >
-                  <div className="text-base font-medium">
-                    {f.name || "—"}
+                  <div>
+                    <div className="text-base font-medium">{f.name || "—"}</div>
                   </div>
-                  {/* Si tu ajoutes 'description' plus tard côté API, tu peux décommenter: */}
-                  {/* <div className={`text-sm ${theme === "dark" ? "text-white/70" : "text-gray-600"}`}>
-                    {f.description || "—"}
-                  </div> */}
+                  <div className="flex-shrink-0">
+                    <button
+                      onClick={() => openFeedback(f)}
+                      className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
+                        theme === "dark"
+                          ? "bg-secondary text-white"
+                          : "bg-primary text-dark"
+                      }`}
+                    >
+                      {t.feedback}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {/* Modale Feedback */}
+      <FeedbackModal
+        open={openFb}
+        onClose={closeFeedback}
+        userId={userId}
+        formation={selectedFormation}
+        theme={theme}
+        language={language}
+      />
     </main>
   );
 }
