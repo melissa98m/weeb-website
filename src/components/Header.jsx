@@ -55,13 +55,10 @@ export default function Header() {
   const t = (key, fallback) =>
     language === "fr" ? headerFr[key] || fallback : headerEn[key] || fallback;
 
-  const isContactPage = location.pathname === "/contact";
   const isLoginPage = location.pathname === "/login";
-  const isBlogPage = location.pathname === "/blog";
-  const isRegisterPage = location.pathname === "/register";
 
-  // => calcule ici le droit d'accès Feedback
-  const canSeeFeedback = hasAnyStaffRole(user);
+  // => calcule ici le droit d'accès Feedback / Messages
+  const canSeeCommercialPage = hasAnyStaffRole(user);
 
   return (
     <header
@@ -79,46 +76,45 @@ export default function Header() {
             <Link to="/">weeb</Link>
           </div>
 
-          {/* Desktop navigation */}
+          {/* Desktop navigation — uniformisée sur toutes les pages */}
           <nav
             className={`hidden md:flex items-center space-x-6 text-sm ${
               theme === "dark" ? "text-white" : "text-dark"
             }`}
           >
-            {isContactPage ? (
-              <span>{t("contact", "Contact")}</span>
-            ) : isLoginPage ? (
-              <span>{t("login", "Login")}</span>
-            ) : isRegisterPage ? (
-              <span>{t("register", "Register")}</span>
-            ) : isBlogPage ? (
-              <span>{t("blog", "Blog")}</span>
-            ) : (
-              <>
-                <Link to="/about-us" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
-                  {t("about_us", "About us")}
+            {[
+              { to: "/about-us", label: t("about_us", "About us") },
+              { to: "/blog", label: t("blog", "Blog") },
+              { to: "/formations", label: t("formations", "Formations") },
+              { to: "/contact", label: t("contact", "Contact") },
+              ...(user && canSeeCommercialPage
+                ? [
+                    { to: "/feedbacks", label: t("feedback", "Feedback") },
+                    { to: "/messages", label: t("message", "Message") },
+                  ]
+                : []),
+            ].map(({ to, label }) => {
+              const active = location.pathname === to || location.pathname.startsWith(`${to}/`);
+              return (
+                <Link
+                  key={to}
+                  to={to}
+                  aria-current={active ? "page" : undefined}
+                  className={[
+                    "transition underline-offset-4",
+                    active
+                      ? (theme === "dark"
+                          ? "text-white font-medium underline"
+                          : "text-dark font-medium underline")
+                      : (theme === "dark"
+                          ? "text-white/90 hover:text-white"
+                          : "text-dark/90 hover:text-dark"),
+                  ].join(" ")}
+                >
+                  {label}
                 </Link>
-
-                <Link to="/blog" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
-                  {t("blog", "Blog")}
-                </Link>
-
-                <Link to="/formations" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
-                  {t("formations", "Formations")}
-                </Link>
-
-                <Link to="/contact" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
-                  {t("contact", "Contact")}
-                </Link>
-
-                {/* Lien Feedback visible pour Commercial/Personnel */}
-                {user && canSeeFeedback && (
-                  <Link to="/feedbacks" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
-                    {t("feedback", "Feedback")}
-                  </Link>
-                )}
-              </>
-            )}
+              );
+            })}
           </nav>
         </div>
 
@@ -240,13 +236,22 @@ export default function Header() {
           </Link>
 
           {/* Lien Feedback mobile */}
-          {user && canSeeFeedback && (
+          {user && canSeeCommercialPage && (
             <Link
               to="/feedbacks"
               className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
               onClick={() => setIsOpen(false)}
             >
               {t("feedback", "Feedback")}
+            </Link>
+          )}
+          {user && canSeeCommercialPage && (
+            <Link
+              to="/messages"
+              className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
+              onClick={() => setIsOpen(false)}
+            >
+              {t("message", "Message")}
             </Link>
           )}
 

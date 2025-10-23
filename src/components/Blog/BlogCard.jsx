@@ -4,17 +4,22 @@ import Button from "../Button";
 
 function formatDate(iso, lang) {
   try {
-    return new Date(iso).toLocaleDateString(
-      lang === "fr" ? "fr-FR" : "en-US",
-      { year: "numeric", month: "short", day: "2-digit" }
-    );
+    return new Date(iso).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+    });
   } catch {
     return iso;
   }
 }
 
 function estimateReadingMinutes(text = "") {
-  const words = String(text || "").trim().split(/\s+/).filter(Boolean).length || 0;
+  const words =
+    String(text || "")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length || 0;
   return Math.max(1, Math.ceil(words / 200));
 }
 
@@ -40,23 +45,26 @@ export default function BlogCard({
   theme,
   idx = 0,
   onViewSummary,
-  labels = { viewSummary: "View summary" }
+  labels = { viewSummary: "View summary" },
 }) {
   const title = (language === "fr" ? post.title_fr : post.title) || post.title;
   const excerpt =
-    (language === "fr" ? post.excerpt_fr : post.excerpt) || post.excerpt || title;
+    (language === "fr" ? post.excerpt_fr : post.excerpt) ||
+    post.excerpt ||
+    title;
 
   const readingMin = estimateReadingMinutes(excerpt);
 
   // Auteur: priorise author.username si l'API renvoie un objet, sinon string/fallback
   const authorLabel =
-    (post.author && typeof post.author === "object" && (post.author.username || post.author.email)) ||
+    (post.author &&
+      typeof post.author === "object" &&
+      (post.author.username || post.author.email)) ||
     (typeof post.author === "string" ? post.author : null) ||
     "—";
 
   // Date: priorise created_at, sinon date (fallback ancien champ)
   const dateIso = post.created_at || post.date;
-  
 
   const cardClass =
     theme === "dark"
@@ -66,17 +74,20 @@ export default function BlogCard({
   const metaColor = theme === "dark" ? "text-white/60" : "text-gray-500";
 
   // Chips: genres (couleur) sinon tags (sans couleur)
-  const chips = (Array.isArray(post._genres) && post._genres.length
-    ? post._genres.map(g => ({
-        key: g.id ?? g.name,
-        label: g.name,
-        color: g.color || null,
-      }))
-    : Array.isArray(post.tags) ? post.tags.map(name => ({
-        key: name,
-        label: name,
-        color: null,
-      })) : []
+  const chips = (
+    Array.isArray(post._genres) && post._genres.length
+      ? post._genres.map((g) => ({
+          key: g.id ?? g.name,
+          label: g.name,
+          color: g.color || null,
+        }))
+      : Array.isArray(post.tags)
+      ? post.tags.map((name) => ({
+          key: name,
+          label: name,
+          color: null,
+        }))
+      : []
   ).slice(0, 6);
 
   return (
@@ -88,6 +99,15 @@ export default function BlogCard({
       transition={{ duration: 0.35, delay: idx * 0.04 }}
       className={`rounded-xl overflow-hidden border shadow ${cardClass} group`}
     >
+      {/* Barre d'accent (fine, en haut) — AJOUT */}
+      <div
+        className={
+          theme === "dark"
+            ? "h-1 bg-gradient-to-r from-secondary/80 via-secondary/50 to-transparent"
+            : "h-1 bg-gradient-to-r from-primary/80 via-primary/50 to-transparent"
+        }
+      />
+
       <div className="relative overflow-hidden">
         <img
           src={post.cover}
@@ -98,7 +118,9 @@ export default function BlogCard({
         {/* Badge temps de lecture */}
         <div
           className={`absolute left-3 top-3 px-2 py-0.5 rounded-md text-xs shadow ${
-            theme === "dark" ? "bg-black/60 text-white" : "bg-white/80 text-gray-800"
+            theme === "dark"
+              ? "bg-black/60 text-white"
+              : "bg-white/80 text-gray-800"
           }`}
         >
           ~{readingMin} {language === "fr" ? "min" : "min"}
@@ -124,8 +146,9 @@ export default function BlogCard({
                 className="px-2 py-1 rounded-full border"
                 style={{
                   backgroundColor: "transparent",
-                  borderColor: c.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                  color: c.color || (theme === "dark" ? "#ffffff" : "#111827")
+                  borderColor:
+                    c.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+                  color: c.color || (theme === "dark" ? "#ffffff" : "#111827"),
                 }}
               >
                 {c.label}
@@ -144,7 +167,9 @@ export default function BlogCard({
             type="button"
             onClick={() => onViewSummary?.(post)}
             className={`text-sm px-3 py-2 rounded-md shadow hover:brightness-110 ${
-              theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
+              theme === "dark"
+                ? "bg-secondary text-white"
+                : "bg-primary text-dark"
             }`}
             aria-label={labels.viewSummary}
             title={labels.viewSummary}

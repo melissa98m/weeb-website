@@ -16,6 +16,7 @@ import Formations from "./pages/Formations";
 import FormationModal from "./components/Formations/FormationModal";
 import StaffRoute from "./routes/StaffRoute";
 import Feedbacks from "./pages/Feedbacks";
+import Messages from "./pages/Messages";
 
 function App() {
   const { theme } = useTheme();
@@ -50,6 +51,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Feedbacks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             }
           />
