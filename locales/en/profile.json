@@ -1,0 +1,16 @@
+{
+  "title": "My profile",
+  "username": "Username",
+  "email": "Email",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "refresh": "Refresh",
+  "signout": "Sign out",
+  "trainings": "My trainings",
+  "trainings_empty": "No trainings yet.",
+  "trainings_error": "Unable to load your trainings.",
+  "trainings_loading": "Loading…",
+  "feedback": "Give feedback",
+  "already_sent": "Feedback already sent",
+  "your_feedback": "Your feedback"
+}

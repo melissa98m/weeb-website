@@ -1,0 +1,16 @@
+{
+  "title": "Mon profil",
+  "username": "Nom d'utilisateur",
+  "email": "Email",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "refresh": "Rafraîchir",
+  "signout": "Se déconnecter",
+  "trainings": "Mes formations",
+  "trainings_empty": "Aucune formation suivie.",
+  "trainings_error": "Impossible de charger vos formations.",
+  "trainings_loading": "Chargement…",
+  "feedback": "Donner un feedback",
+  "already_sent": "Feedback déjà envoyé",
+  "your_feedback": "Votre feedback"
+}
