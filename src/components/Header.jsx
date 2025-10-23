@@ -8,6 +8,35 @@ import headerEn from "../../locales/en/header.json";
 import headerFr from "../../locales/fr/header.json";
 import { useAuth } from "../context/AuthContext";
 
+/* ===== Helper rôles: Commercial OU Personnel (robuste) ===== */
+const hasAnyStaffRole = (u) => {
+  if (!u) return false;
+  const toLower = (s) => String(s || "").toLowerCase();
+
+  const collected = [];
+
+  if (Array.isArray(u.groups)) {
+    for (const g of u.groups) {
+      if (g && typeof g === "object" && g.name) collected.push(g.name);
+      else if (typeof g === "string") collected.push(g);
+    }
+  }
+  if (Array.isArray(u.group_names)) collected.push(...u.group_names);
+  if (Array.isArray(u.roles)) collected.push(...u.roles);
+  if (u.role) collected.push(u.role);
+  if (u.profile?.group?.name) collected.push(u.profile.group.name);
+
+  const set = new Set(collected.map(toLower));
+  const inCommercial = set.has("commercial");
+  const inPersonnel = set.has("personnel");
+
+  const flags = !!(u.is_commercial || u.is_personnel);
+  const staffFallback = !!u.is_staff;
+
+  return inCommercial || inPersonnel || flags || staffFallback;
+};
+/* =========================================================== */
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
@@ -23,7 +52,6 @@ export default function Header() {
     }
   };
 
-  // Fallback helper for labels (uses header.json if key exists)
   const t = (key, fallback) =>
     language === "fr" ? headerFr[key] || fallback : headerEn[key] || fallback;
 
@@ -31,6 +59,9 @@ export default function Header() {
   const isLoginPage = location.pathname === "/login";
   const isBlogPage = location.pathname === "/blog";
   const isRegisterPage = location.pathname === "/register";
+
+  // => calcule ici le droit d'accès Feedback
+  const canSeeFeedback = hasAnyStaffRole(user);
 
   return (
     <header
@@ -64,43 +95,28 @@ export default function Header() {
               <span>{t("blog", "Blog")}</span>
             ) : (
               <>
-                <Link
-                  to="/about-us"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
+                <Link to="/about-us" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
                   {t("about_us", "About us")}
                 </Link>
 
-                {/* Blog link */}
-                <Link
-                  to="/blog"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
+                <Link to="/blog" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
                   {t("blog", "Blog")}
                 </Link>
 
-                {/* Formations */}
-                <Link
-                  to="/formations"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
+                <Link to="/formations" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
                   {t("formations", "Formations")}
                 </Link>
 
-                <Link
-                  to="/contact"
-                  className={`transition ${
-                    theme === "dark" ? "text-white" : "text-dark"
-                  }`}
-                >
+                <Link to="/contact" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
                   {t("contact", "Contact")}
                 </Link>
+
+                {/* Lien Feedback visible pour Commercial/Personnel */}
+                {user && canSeeFeedback && (
+                  <Link to="/feedbacks" className={`transition ${theme === "dark" ? "text-white" : "text-dark"}`}>
+                    {t("feedback", "Feedback")}
+                  </Link>
+                )}
               </>
             )}
           </nav>
@@ -126,10 +142,8 @@ export default function Header() {
             {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
           </Button>
 
-          {/* Auth buttons */}
           {user ? (
             <>
-              {/* Username -> lien vers /profile */}
               <Link
                 to="/profile"
                 title={t("profile", "Profile")}
@@ -143,9 +157,7 @@ export default function Header() {
               <Button
                 onClick={onLogout}
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                  theme === "dark"
-                    ? "text-white bg-secondary"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "text-white bg-secondary" : "text-dark bg-primary"
                 }`}
               >
                 {t("logout", "Logout")}
@@ -156,9 +168,7 @@ export default function Header() {
               <Link
                 to="/contact"
                 className={`text-sm transition py-2 ${
-                  theme === "dark"
-                    ? "text-white/80 hover:text-white"
-                    : "text-dark/80 hover:text-dark"
+                  theme === "dark" ? "text-white/80 hover:text-white" : "text-dark/80 hover:text-dark"
                 }`}
               >
                 {t("contact", "Contact")}
@@ -166,9 +176,7 @@ export default function Header() {
               <Button
                 to="/register"
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                  theme === "dark"
-                    ? "text-white bg-secondary"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "text-white bg-secondary" : "text-dark bg-primary"
                 }`}
               >
                 {t("register", "Register")}
@@ -179,9 +187,7 @@ export default function Header() {
               <Button
                 to="/login"
                 className={`text-sm transition py-2 ${
-                  theme === "dark"
-                    ? "text-white/80 hover:text-white"
-                    : "text-dark/80 hover:text-dark"
+                  theme === "dark" ? "text-white/80 hover:text-white" : "text-dark/80 hover:text-dark"
                 }`}
               >
                 {t("login", "Login")}
@@ -189,9 +195,7 @@ export default function Header() {
               <Button
                 to="/register"
                 className={`text-sm px-4 py-2 rounded-md shadow hover:brightness-110 transition ${
-                  theme === "dark"
-                    ? "text-white bg-secondary"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "text-white bg-secondary" : "text-dark bg-primary"
                 }`}
               >
                 {t("register", "Register")}
@@ -219,43 +223,35 @@ export default function Header() {
             theme === "dark" ? "text-white/90" : "text-dark/90"
           }`}
         >
-          {/* Links */}
-          <Link
-            to="/about-us"
-            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
-            onClick={() => setIsOpen(false)}
-          >
+          <Link to="/about-us" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("about_us", "About us")}
           </Link>
 
-          <Link
-            to="/blog"
-            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
-            onClick={() => setIsOpen(false)}
-          >
+          <Link to="/blog" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("blog", "Blog")}
           </Link>
 
-          <Link
-            to="/formations"
-            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
-            onClick={() => setIsOpen(false)}
-          >
+          <Link to="/formations" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("formations", "Formations")}
           </Link>
 
-          <Link
-            to="/contact"
-            className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
-            onClick={() => setIsOpen(false)}
-          >
+          <Link to="/contact" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("contact", "Contact")}
           </Link>
 
-          {/* Auth (mobile) */}
+          {/* Lien Feedback mobile */}
+          {user && canSeeFeedback && (
+            <Link
+              to="/feedbacks"
+              className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
+              onClick={() => setIsOpen(false)}
+            >
+              {t("feedback", "Feedback")}
+            </Link>
+          )}
+
           {user ? (
             <div className="pt-2 space-y-2">
-              {/* Username -> lien vers /profile */}
               <Link
                 to="/profile"
                 onClick={() => setIsOpen(false)}
@@ -273,9 +269,7 @@ export default function Header() {
                   onLogout();
                 }}
                 className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                  theme === "dark"
-                    ? "bg-secondary text-white"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "bg-secondary text-white" : "text-dark bg-primary"
                 }`}
               >
                 {t("logout", "Logout")}
@@ -289,9 +283,7 @@ export default function Header() {
               <Button
                 to="/register"
                 className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                  theme === "dark"
-                    ? "bg-secondary text-white"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "bg-secondary text-white" : "text-dark bg-primary"
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -302,9 +294,7 @@ export default function Header() {
             <>
               <Button
                 to="/login"
-                className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                  theme === "dark" ? " text-white" : "text-dark"
-                }`}
+                className={`w-full text-sm px-4 py-2 rounded-md shadow ${theme === "dark" ? " text-white" : "text-dark"}`}
                 onClick={() => setIsOpen(false)}
               >
                 {t("login", "Login")}
@@ -312,9 +302,7 @@ export default function Header() {
               <Button
                 to="/register"
                 className={`w-full text-sm px-4 py-2 rounded-md shadow ${
-                  theme === "dark"
-                    ? "bg-secondary text-white"
-                    : "text-dark bg-primary"
+                  theme === "dark" ? "bg-secondary text-white" : "text-dark bg-primary"
                 }`}
                 onClick={() => setIsOpen(false)}
               >
@@ -323,7 +311,6 @@ export default function Header() {
             </>
           )}
 
-          {/* Toggles */}
           <div className="flex items-center gap-3 pt-2">
             <Button
               onClick={() => {
