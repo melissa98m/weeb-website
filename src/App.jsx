@@ -14,7 +14,8 @@ import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Formations from "./pages/Formations";
 import FormationModal from "./components/Formations/FormationModal";
-
+import StaffRoute from "./routes/StaffRoute";
+import Feedbacks from "./pages/Feedbacks";
 
 function App() {
   const { theme } = useTheme();
@@ -44,6 +45,14 @@ function App() {
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="/formations" element={<Formations />} />
           <Route path="/formation/:id" element={<FormationModal />} />
+          <Route
+            path="/feedbacks"
+            element={
+              <ProtectedRoute>
+                <Feedbacks />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
       <Footer />
