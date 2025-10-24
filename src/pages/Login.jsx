@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import { motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
+import Button from "../components/Button";
 import loginEn from "../../locales/en/login.json";
 import loginFr from "../../locales/fr/login.json";
-import Button from "../components/Button";
-import { useAuth } from "../context/AuthContext";
-import { useNavigate, useLocation } from "react-router-dom";
 
 export default function Login() {
   const { theme } = useTheme();
@@ -17,46 +16,68 @@ export default function Login() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
 
+  const L = language === "fr" ? loginFr : loginEn;
+
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const validate = () => {
     const errs = {};
-    if (
-      !form.email.trim() ||
-      !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)
-    )
-      errs.email = language === "fr" ? loginFr.email_error : loginEn.email;
-    if (!form.password.trim())
-      errs.password =
-        language === "fr" ? loginFr.password_error : password_error;
+    const emailOk = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim());
+    if (!emailOk) errs.email = L.email_error || "Invalid email address.";
+    if (!form.password.trim()) errs.password = L.password_error || "Password is required.";
     return errs;
   };
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.id]: e.target.value });
-    setErrors({ ...errors, [e.target.id]: null });
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+    setErrors((prev) => ({ ...prev, [id]: null, form: null }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const validation = validate();
-    if (Object.keys(validation).length) {
-      setErrors(validation);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
-      return;
-    }
-    try {
-      await login({ identifier: form.email, password: form.password });
+  e.preventDefault();
+  const validation = validate();
+  if (Object.keys(validation).length) {
+    setErrors(validation);
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+    const id = form.email.trim();
+
+    // Envoie email/username/identifier + password
+    const me = await login({
+      email: id,
+      username: id,
+      identifier: id,
+      password: form.password,
+    });
+
+    if (me) {
+      // redirige (depuis ProtectedRoute ça passera car user est hydraté)
+      const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
-    } catch (e) {
-      setErrors({ form: language === "fr" ? "Identifiants invalides." : "Invalid credentials." });
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+    } else {
+      throw new Error("no_me");
     }
-  };
+  } catch (e) {
+    const apiMsg =
+      e?.details?.non_field_errors?.join(" ") ||
+      e?.details?.detail ||
+      (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
+    setErrors({ form: apiMsg });
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <section
@@ -66,19 +87,25 @@ export default function Login() {
     >
       <motion.form
         onSubmit={handleSubmit}
+        noValidate
         animate={shake ? { x: [0, -8, 8, -8, 8, 0] } : {}}
         transition={{ duration: 0.5 }}
         className="w-full max-w-sm p-8 space-y-6"
       >
-        <h1 className="text-3xl font-bold text-center">
-          {language === "fr" ? loginFr.login : loginEn.login}
-        </h1>
+        <h1 className="text-3xl font-bold text-center">{L.login || "Login"}</h1>
+
+        {errors.form && (
+          <div className="text-sm rounded-md p-3 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+            {errors.form}
+          </div>
+        )}
 
         {/* Email */}
         <div className="relative">
           <input
             type="email"
             id="email"
+            autoComplete="email"
             placeholder=" "
             value={form.email}
             onChange={handleChange}
@@ -90,9 +117,11 @@ export default function Login() {
                   ? "border-primary focus:border-primary"
                   : "border-secondary focus:border-secondary"
               }`}
+            aria-invalid={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
           <label
-            htmlFor={language === "fr" ? loginFr.email : loginEn.email}
+            htmlFor="email"
             className={`absolute left-0 -top-2 text-sm transition-all
               peer-placeholder-shown:-top-2 peer-focus:-top-5
               ${
@@ -101,10 +130,12 @@ export default function Login() {
                   : "text-secondary peer-focus:text-secondary"
               }`}
           >
-            {language === "fr" ? loginFr.email : loginEn.email}
+            {L.email || "Email"}
           </label>
           {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email}</p>
+            <p id="email-error" className="mt-1 text-xs text-red-500">
+              {errors.email}
+            </p>
           )}
         </div>
 
@@ -113,6 +144,7 @@ export default function Login() {
           <input
             type="password"
             id="password"
+            autoComplete="current-password"
             placeholder=" "
             value={form.password}
             onChange={handleChange}
@@ -124,9 +156,11 @@ export default function Login() {
                   ? "border-primary focus:border-primary"
                   : "border-secondary focus:border-secondary"
               }`}
+            aria-invalid={!!errors.password}
+            aria-describedby={errors.password ? "password-error" : undefined}
           />
           <label
-            htmlFor={language === "fr" ? loginFr.password : loginEn.password}
+            htmlFor="password"
             className={`absolute left-0 -top-2 text-sm transition-all
               peer-placeholder-shown:-top-2 peer-focus:-top-5
               ${
@@ -135,43 +169,42 @@ export default function Login() {
                   : "text-secondary peer-focus:text-secondary"
               }`}
           >
-            {language === "fr" ? loginFr.password : loginEn.password}
+            {L.password || "Password"}
           </label>
           {errors.password && (
-            <p className="mt-1 text-xs text-red-500">{errors.password}</p>
+            <p id="password-error" className="mt-1 text-xs text-red-500">
+              {errors.password}
+            </p>
           )}
         </div>
 
-        {/* Bouton animé */}
+        {/* Submit */}
         <Button
           type="submit"
+          disabled={submitting}
           className={`w-full px-4 py-2 rounded-md shadow text-sm ${
             theme === "dark"
               ? "bg-secondary text-white hover:bg-secondary/90"
               : "bg-primary text-dark hover:bg-primary/90"
-          }`}
+          } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
         >
-          {language === "fr" ? loginFr.login : loginEn.login}
+          {submitting
+            ? language === "fr"
+              ? "Connexion..."
+              : "Signing in..."
+            : L.login || "Login"}
         </Button>
 
-        {/* Liens */}
+        {/* Links */}
         <div className="text-center text-xs space-y-2">
           <Link
             to="/forgot-password"
-            className={`block ${
-              theme === "dark" ? "hover:text-primary" : "hover:text-secondary"
-            }`}
+            className={`${theme === "dark" ? "hover:text-primary" : "hover:text-secondary"}`}
           >
-            {language === "fr"
-              ? loginFr.forgot_password
-              : loginEn.forgot_password}
+            {L.forgot_password || "Forgot your password?"}
           </Link>
-          <p
-            className={`${
-              theme === "dark" ? "text-muted" : "text-background/80"
-            }`}
-          >
-            {language === "fr" ? loginFr.no_account : loginEn.no_account}{" "}
+          <p className={`${theme === "dark" ? "text-muted" : "text-background/80"}`}>
+            {L.no_account || "No account yet?"}{" "}
             <Link
               to="/register"
               className={`font-medium underline underline-offset-8 ${
@@ -180,9 +213,7 @@ export default function Login() {
                   : "text-background hover:text-secondary"
               }`}
             >
-              {language === "fr"
-                ? loginFr.create_account
-                : loginEn.create_account}
+              {L.create_account || "Create one"}
             </Link>
           </p>
         </div>

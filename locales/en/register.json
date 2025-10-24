@@ -1,32 +1,29 @@
 {
-    "register": "Create an account",
-    "username": "Username",
-    "username_placeholder": "Enter your username",
-    "username_error": "Username is required.",
-  
-    "name": "Last name",
-    "firstname": "First name",
-    "email": "Email",
-    "password": "Password",
-  
-    "min_caractere": "At least 8 characters",
-    "uppercase": "At least one uppercase letter",
-    "number": "At least one number",
-    "specialchar": "At least one special character",
-  
-    "confirm_password": "Confirm password",
-    "confirm_password_required": "Please confirm your password.",
-    "passwords_not_match": "Passwords do not match.",
-  
-    "name_error": "Last name is required.",
-    "firstname_error": "First name is required.",
-    "email_error": "Invalid email address.",
-    "password_error": "Weak password.",
-  
-    "show": "Show",
-    "hide": "Hide",
-  
-    "already_account": "Already have an account?",
-    "login": "Log in"
-  }
-  
+  "register": "Create an account",
+  "username": "Username",
+  "username_placeholder": "Enter your username",
+  "username_error": "Username is required.",
+  "name": "Last name",
+  "firstname": "First name",
+  "email": "Email",
+  "password": "Password",
+  "min_caractere": "At least 8 characters",
+  "uppercase": "At least one uppercase letter",
+  "number": "At least one number",
+  "specialchar": "At least one special character",
+  "confirm_password": "Confirm password",
+  "confirm_password_required": "Please confirm your password.",
+  "passwords_not_match": "Passwords do not match.",
+  "name_error": "Last name is required.",
+  "firstname_error": "First name is required.",
+  "email_error": "Invalid email address.",
+  "password_error": "Weak password.",
+  "show": "Show",
+  "hide": "Hide",
+  "already_account": "Already have an account?",
+  "login": "Log in",
+  "phone": "Phone",
+  "phone_placeholder": "e.g. +1 212 555 0123",
+  "phone_hint": "Valid examples: +1 212 555 0123 or (212) 555-0123",
+  "phone_error_invalid": "Invalid phone. Use 8–15 digits (may include + ( ) - spaces)."
+}

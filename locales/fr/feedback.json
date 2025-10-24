@@ -1,0 +1,8 @@
+{
+  "title": "Donner un feedback",
+  "placeholder": "Laissez votre feedback…",
+  "cancel": "Annuler",
+  "send": "Envoyer",
+  "success": "Merci ! Votre feedback a bien été envoyé.",
+  "error": "Un problème est survenu. Réessayez."
+}
