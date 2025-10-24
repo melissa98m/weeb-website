@@ -7,6 +7,47 @@ import { useLanguage } from "../../context/LanguageContext";
 
 const API_BASE = import.meta.env.VITE_API_URL;
 
+/* ====================== ANTI-SPAM (front only) ====================== */
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 min
+const RATE_LIMIT_MAX = 3;                    // max 3 envois par fenêtre
+const COOLDOWN_MS = 30 * 1000;               // 30 s entre deux envois
+
+const getNow = () => Date.now();
+const getSubmits = () => {
+  try { return JSON.parse(localStorage.getItem("contact_submissions") || "[]"); }
+  catch { return []; }
+};
+const saveSubmits = (arr) => localStorage.setItem("contact_submissions", JSON.stringify(arr));
+const recentSubmits = () => {
+  const now = getNow();
+  return getSubmits().filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
+};
+const lastSubmitTs = () => {
+  const arr = recentSubmits();
+  return arr.length ? arr[arr.length - 1] : 0;
+};
+const cooldownRemainingMs = () => {
+  const last = lastSubmitTs();
+  if (!last) return 0;
+  const diff = getNow() - last;
+  return diff < COOLDOWN_MS ? COOLDOWN_MS - diff : 0;
+};
+const canSubmitNow = () => {
+  const arr = recentSubmits();
+  const last = arr.length ? arr[arr.length - 1] : 0;
+  if (arr.length >= RATE_LIMIT_MAX) return { ok: false, reason: "rate" };
+  if (last && getNow() - last < COOLDOWN_MS) {
+    return { ok: false, reason: "cooldown", waitMs: COOLDOWN_MS - (getNow() - last) };
+  }
+  return { ok: true, arr };
+};
+const recordSubmit = () => {
+  const arr = recentSubmits();
+  arr.push(getNow());
+  saveSubmits(arr);
+};
+/* ==================================================================== */
+
 export default function ContactForm() {
   const { theme } = useTheme();
   const { language } = useLanguage();
@@ -16,19 +57,34 @@ export default function ContactForm() {
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
-    telephone: "",       // optionnel (max_length=10)
+    telephone: "",
     email: "",
-    subject: "",         // id (ForeignKey) ou "" pour null
+    subject: "",
     message_content: "",
+    _website: "",            // honeypot (doit rester vide)
+    _started_at: Date.now(), // garde-temps minimal
   });
 
-  // Erreurs: { field: "message" } (client + serveur DRF)
+  // Erreurs: { field: "message" }
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [serverMsg, setServerMsg] = useState(null); // succès/erreur globale
+  const [serverMsg, setServerMsg] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
+
+  // Cooldown restant en secondes pour informer l'utilisateur
+  const [cooldownSec, setCooldownSec] = useState(
+    Math.ceil(cooldownRemainingMs() / 1000)
+  );
+
+  // Tick chaque seconde pour mettre a jour le cooldown affiche
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCooldownSec(Math.ceil(cooldownRemainingMs() / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Charger la liste des sujets (ForeignKey)
   useEffect(() => {
@@ -41,7 +97,6 @@ export default function ContactForm() {
         const data = await r.json();
         if (active) setSubjects(Array.isArray(data) ? data : data.results || []);
       } catch (e) {
-        // on affiche juste un message global discret
         setServerMsg({ type: "error", text: t?.subjects_load_error || "Unable to load subjects." });
       } finally {
         setLoadingSubjects(false);
@@ -50,37 +105,27 @@ export default function ContactForm() {
     return () => { active = false; };
   }, []);
 
-  // Validation front cohérente avec le modèle
+  // Validation front
   const validate = () => {
     const e = {};
-
-    // last_name (Nom) et first_name (Prénom) requis, <= 50
     if (!form.last_name.trim()) e.last_name = t?.lastname_error || "Last name is required.";
     else if (form.last_name.trim().length > 50) e.last_name = t?.lastname_max || "Max 50 characters.";
 
     if (!form.first_name.trim()) e.first_name = t?.firstname_error || "First name is required.";
     else if (form.first_name.trim().length > 50) e.first_name = t?.firstname_max || "Max 50 characters.";
 
-    // email requis (Django EmailField vérifiera aussi)
     if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim()))
       e.email = t?.email_error || "Invalid email.";
 
-    // telephone optionnel: si rempli => digits only, <= 10
     const tel = form.telephone.trim();
     if (tel) {
-      if (!/^\d{6,10}$/.test(tel)) {
-        e.telephone = t?.phone_error || "Phone must be 6 to 10 digits.";
-      }
-      if (tel.length > 10) {
-        e.telephone = t?.phone_max || "Max 10 digits.";
-      }
+      if (!/^\d{6,10}$/.test(tel)) e.telephone = t?.phone_error || "Phone must be 6 to 10 digits.";
+      if (tel.length > 10) e.telephone = t?.phone_max || "Max 10 digits.";
     }
 
-    // message_content requis, <= 5000
     if (!form.message_content.trim()) e.message_content = t?.message_error || "Message is required.";
     else if (form.message_content.trim().length > 5000) e.message_content = t?.message_max || "Max 5000 characters.";
 
-    // subject optionnel (ForeignKey): si non vide, doit être un id numérique
     if (form.subject && !/^\d+$/.test(String(form.subject))) {
       e.subject = t?.subject_error || "Invalid subject.";
     }
@@ -99,6 +144,35 @@ export default function ContactForm() {
     e.preventDefault();
     setServerMsg(null);
 
+    // Anti-spam 1: rate-limit navigateur
+    const gate = canSubmitNow();
+    if (!gate.ok) {
+      setServerMsg({
+        type: "error",
+        text:
+          gate.reason === "rate"
+            ? (t?.too_many || "Trop de tentatives. Réessayez plus tard.")
+            : (t?.cooldown || `Patientez ${Math.ceil((gate.waitMs || 0) / 1000)} s avant un nouvel envoi.`),
+      });
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+
+    // Anti-spam 2: honeypot
+    if (form._website) {
+      // Bot probable. On ne dit rien. On sort.
+      return;
+    }
+
+    // Anti-spam 3: garde-temps minimal
+    if (Date.now() - form._started_at < 2000) {
+      setServerMsg({ type: "error", text: t?.too_fast || "Formulaire envoyé trop vite." });
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+
     const validationErrors = validate();
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -111,7 +185,7 @@ export default function ContactForm() {
     const payload = {
       ...form,
       subject: form.subject ? Number(form.subject) : null,
-      telephone: form.telephone.trim(), // <=10, digits only côté front
+      telephone: form.telephone.trim(),
       first_name: form.first_name.trim(),
       last_name: form.last_name.trim(),
       email: form.email.trim(),
@@ -122,14 +196,16 @@ export default function ContactForm() {
       setSubmitting(true);
       const r = await fetch(`${API_BASE}/messages/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        credentials: "include", // utile si cookies/CSRF
+        credentials: "include",
       });
 
       if (r.ok) {
+        // Enregistrement client de la soumission pour le rate-limit
+        recordSubmit();
+        setCooldownSec(Math.ceil(cooldownRemainingMs() / 1000));
+
         setForm({
           first_name: "",
           last_name: "",
@@ -137,13 +213,14 @@ export default function ContactForm() {
           email: "",
           subject: "",
           message_content: "",
+          _website: "",
+          _started_at: Date.now(),
         });
         setErrors({});
         setServerMsg({ type: "success", text: t?.sent_ok || "Message sent. Thank you!" });
         return;
       }
 
-      // Erreurs DRF typiques: { field: ["msg1", "msg2"], non_field_errors: ["..."] }
       if (r.status === 400) {
         const data = await r.json();
         const fieldErrors = {};
@@ -154,8 +231,6 @@ export default function ContactForm() {
         setErrors(fieldErrors);
         setShake(true);
         setTimeout(() => setShake(false), 500);
-
-        // Message global lisible si non_field_errors
         if (data.non_field_errors && data.non_field_errors.length) {
           setServerMsg({ type: "error", text: data.non_field_errors.join(" ") });
         } else {
@@ -164,7 +239,6 @@ export default function ContactForm() {
         return;
       }
 
-      // Autres erreurs (500, 403, etc.)
       setServerMsg({ type: "error", text: t?.server_error || "Server error. Please try again later." });
     } catch (err) {
       setServerMsg({ type: "error", text: t?.network_error || "Network error. Check your connection." });
@@ -194,7 +268,7 @@ export default function ContactForm() {
         transition={{ duration: 0.5 }}
         noValidate
       >
-        {/* Message global succès/erreur */}
+        {/* Message global */}
         {serverMsg && (
           <div
             className={`p-3 rounded text-sm ${
@@ -207,8 +281,15 @@ export default function ContactForm() {
           </div>
         )}
 
+        {/* Info cooldown si actif */}
+        {cooldownSec > 0 && (
+          <div className="text-xs">
+            {t?.cooldown_info || "Veuillez patienter avant un nouvel envoi."} {cooldownSec}s
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Last Name (Nom) -> last_name */}
+          {/* Last Name */}
           <div className="relative">
             <input
               id="last_name"
@@ -229,7 +310,7 @@ export default function ContactForm() {
             {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
           </div>
 
-          {/* First Name (Prénom) -> first_name */}
+          {/* First Name */}
           <div className="relative">
             <input
               id="first_name"
@@ -250,7 +331,7 @@ export default function ContactForm() {
             {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
           </div>
 
-          {/* Telephone (optionnel, <=10 digits) */}
+          {/* Telephone */}
           <div className="relative">
             <input
               id="telephone"
@@ -258,7 +339,6 @@ export default function ContactForm() {
               value={form.telephone}
               placeholder={t.phone}
               onChange={(e) => {
-                // autoriser uniquement digits, couper à 10
                 const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
                 handleChange({ target: { id: "telephone", value: digits } });
               }}
@@ -296,7 +376,7 @@ export default function ContactForm() {
             {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
-          {/* Subject (optionnel) */}
+          {/* Subject */}
           <div className="relative md:col-span-2">
             <select
               id="subject"
@@ -324,7 +404,7 @@ export default function ContactForm() {
           </div>
         </div>
 
-        {/* Message -> message_content */}
+        {/* Message */}
         <div className="relative">
           <textarea
             id="message_content"
@@ -343,6 +423,18 @@ export default function ContactForm() {
             {t.message}
           </label>
           {errors.message_content && <p className="text-red-500 text-xs mt-1">{errors.message_content}</p>}
+        </div>
+
+        {/* Honeypot invisible */}
+        <div className="hidden" aria-hidden="true">
+          <input
+            id="_website"
+            type="text"
+            value={form._website}
+            onChange={(e) => setForm((p) => ({ ...p, _website: e.target.value }))}
+            tabIndex={-1}
+            autoComplete="off"
+          />
         </div>
 
         {/* Submit */}
