@@ -1,32 +1,29 @@
 {
-    "register": "Créer un compte",
-    "username": "Nom d'utilisateur",
-    "username_placeholder": "Entrez votre nom d'utilisateur",
-    "username_error": "Le nom d'utilisateur est requis.",
-  
-    "name": "Nom",
-    "firstname": "Prénom",
-    "email": "Email",
-    "password": "Mot de passe",
-  
-    "min_caractere": "Au moins 8 caractères",
-    "uppercase": "Au moins une majuscule",
-    "number": "Au moins un chiffre",
-    "specialchar": "Au moins un caractère spécial",
-  
-    "confirm_password": "Confirmer le mot de passe",
-    "confirm_password_required": "Veuillez confirmer votre mot de passe.",
-    "passwords_not_match": "Les mots de passe ne correspondent pas.",
-  
-    "name_error": "Le nom est requis.",
-    "firstname_error": "Le prénom est requis.",
-    "email_error": "Adresse e-mail invalide.",
-    "password_error": "Mot de passe trop faible.",
-  
-    "show": "Afficher",
-    "hide": "Masquer",
-  
-    "already_account": "Vous avez déjà un compte ?",
-    "login": "Se connecter"
-  }
-  
+  "register": "Créer un compte",
+  "username": "Nom d'utilisateur",
+  "username_placeholder": "Entrez votre nom d'utilisateur",
+  "username_error": "Le nom d'utilisateur est requis.",
+  "name": "Nom",
+  "firstname": "Prénom",
+  "email": "Email",
+  "password": "Mot de passe",
+  "min_caractere": "Au moins 8 caractères",
+  "uppercase": "Au moins une majuscule",
+  "number": "Au moins un chiffre",
+  "specialchar": "Au moins un caractère spécial",
+  "confirm_password": "Confirmer le mot de passe",
+  "confirm_password_required": "Veuillez confirmer votre mot de passe.",
+  "passwords_not_match": "Les mots de passe ne correspondent pas.",
+  "name_error": "Le nom est requis.",
+  "firstname_error": "Le prénom est requis.",
+  "email_error": "Adresse e-mail invalide.",
+  "password_error": "Mot de passe trop faible.",
+  "show": "Afficher",
+  "hide": "Masquer",
+  "already_account": "Vous avez déjà un compte ?",
+  "login": "Se connecter",
+  "phone": "Téléphone",
+  "phone_placeholder": "Ex. +33 6 12 34 56 78",
+  "phone_hint": "Exemples valides : +33 6 12 34 56 78 ou (06) 12-34-56-78",
+  "phone_error_invalid": "Numéro invalide. Utilisez 8–15 chiffres (peuvent contenir + ( ) - espaces)."
+}

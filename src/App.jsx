@@ -10,6 +10,13 @@ import Register from "./pages/Register";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Profile from "./pages/Profile";
+import Blog from "./pages/Blog";
+import BlogDetail from "./pages/BlogDetail";
+import Formations from "./pages/Formations";
+import FormationModal from "./components/Formations/FormationModal";
+import StaffRoute from "./routes/StaffRoute";
+import Feedbacks from "./pages/Feedbacks";
+import Messages from "./pages/Messages";
 
 function App() {
   const { theme } = useTheme();
@@ -32,6 +39,26 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/formations" element={<Formations />} />
+          <Route path="/formation/:id" element={<FormationModal />} />
+          <Route
+            path="/feedbacks"
+            element={
+              <ProtectedRoute>
+                <Feedbacks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              <ProtectedRoute>
+                <Messages />
               </ProtectedRoute>
             }
           />
