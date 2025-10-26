@@ -36,7 +36,7 @@ export default function HeroSection() {
       </p>
       <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
         <Link
-          to="/articles"
+          to="/blog"
           className={`px-6 py-2 rounded-md shadow transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none ${
             theme === "dark"
               ? "bg-secondary text-white hover:bg-secondary/70"
