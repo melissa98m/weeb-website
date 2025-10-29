@@ -13,10 +13,22 @@ const API = `${ORIGIN}/auth`;
 export async function ensureCsrf() {
   const existing = getCookie("csrftoken");
   if (existing) return existing;
-  const r = await fetch(`${API}/csrf/`, { credentials: "include" });
-  if (!r.ok) throw new Error("Failed to obtain CSRF token");
-  const data = await r.json().catch(() => ({}));
-  return data?.csrfToken || getCookie("csrftoken");
+
+  const url = `${API}/csrf/`;
+  let r;
+  try {
+    r = await fetch(url, { credentials: "include" });
+  } catch (e) {
+    throw new Error(`CSRF request failed (network/502?) → ${url}`);
+  }
+  if (!r.ok) throw new Error(`CSRF ${r.status} at ${url}`);
+
+  // Certaines implémentations renvoient 204/texte : on ignore le JSON silencieusement
+  try { await r.clone().json(); } catch (_) {}
+
+  const token = getCookie("csrftoken");
+  if (!token) throw new Error("CSRF cookie not found after call (check cookie domain/samesite).");
+  return token;
 }
 
 async function refreshAccess() {
