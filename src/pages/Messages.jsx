@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import AdminAccessFooter from "../components/admin/AdminAccessFooter";
+import { STAFF_ROLES } from "../utils/roles";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
@@ -88,10 +90,20 @@ export default function Messages() {
 
   const canSee = hasAnyStaffRole(user);
 
-  const card =
+  const panel =
     theme === "dark"
       ? "bg-[#262626] text-white border-[#333]"
       : "bg-white text-gray-900 border-gray-200";
+  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
+  const btnPrimary =
+    theme === "dark"
+      ? "bg-secondary text-white hover:brightness-110"
+      : "bg-primary text-dark hover:brightness-110";
+  const btnGhost =
+    theme === "dark"
+      ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+      : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -177,7 +189,7 @@ export default function Messages() {
         });
         break;
       case "to_process":
-        // non traités (is_processed=false) en haut
+        // non traités en haut
         arr.sort((a, b) => Number(a.is_processed) - Number(b.is_processed));
         break;
       default:
@@ -203,28 +215,176 @@ export default function Messages() {
       );
     } catch (e) {
       console.error(e);
-      // TODO: toast d'erreur
     }
   };
 
   if (!canSee) {
     return (
-      <main className="px-6 py-16 max-w-5xl mx-auto">
-        <div className={`rounded-xl border p-6 ${card}`}>
+      <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+        <div className={`rounded-xl border p-6 ${panel}`}>
           <h1 className="text-xl font-semibold mb-2">{t.title}</h1>
-          <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
-            {t.no_access}
-          </p>
+          <p className={muted}>{t.no_access}</p>
         </div>
       </main>
     );
   }
 
-  return (
-    <main className="px-6 py-16 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">{t.title}</h1>
+  /* ---------- États communs ---------- */
+  const renderState = (content, tone = "muted") => (
+    <div
+      className={`p-4 text-sm ${
+        tone === "error"
+          ? theme === "dark"
+            ? "text-red-400"
+            : "text-red-600"
+          : muted
+      }`}
+    >
+      {content}
+    </div>
+  );
 
+  /* ---------- Mobile: cartes (< md) ---------- */
+  const MobileCards = () => (
+    <div className="md:hidden">
+      {loading
+        ? renderState(t.loading)
+        : err
+        ? renderState(t.error, "error")
+        : sorted.length === 0
+        ? renderState(t.empty)
+        : (
+          <ul className="divide-y" role="list">
+            {sorted.map((row) => (
+              <li key={row.id ?? `${row.email}-${row.created_at}`} className="p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="font-medium break-words">{row.name}</div>
+                    <div className={`text-sm ${muted} break-words`}>
+                      {row.email} • {row.phone}
+                    </div>
+                  </div>
+                  <span className="shrink-0 text-xs px-2 py-0.5 rounded-full border">
+                    {row.subjectName}
+                  </span>
+                </div>
+
+                {row.message_content && (
+                  <div className={`mt-2 text-sm ${muted} break-words max-h-16 overflow-hidden`}>
+                    “{row.message_content}”
+                  </div>
+                )}
+
+                <div className="mt-3">
+                  {row.is_processed ? (
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-white/80"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {t.processed}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => markProcessed(row)}
+                      className={`px-3 py-1.5 rounded-md shadow text-xs transition ${btnPrimary}`}
+                    >
+                      {t.mark_done}
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  );
+
+  /* ---------- Desktop: table (≥ md) ---------- */
+  const DesktopTable = () => (
+    <div className="hidden md:block overflow-x-auto">
+      <table className="min-w-full text-sm table-fixed" aria-busy={loading ? "true" : "false"}>
+        <colgroup>
+          <col className="w-[22%]" />
+          <col className="w-[16%]" />
+          <col className="w-[22%]" />
+          <col className="w-[20%]" />
+          <col className="w-[20%]" />
+        </colgroup>
+        <thead>
+          <tr className={`${headRow} text-center`}>
+            <th className="px-4 py-2 font-medium">{t.user}</th>
+            <th className="px-4 py-2 font-medium">{t.phone}</th>
+            <th className="px-4 py-2 font-medium">{t.email}</th>
+            <th className="px-4 py-2 font-medium">{t.subject}</th>
+            <th className="px-4 py-2 font-medium">{t.to_process}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {loading ? (
+            <tr><td className="px-4 py-2" colSpan={5}>{t.loading}</td></tr>
+          ) : err ? (
+            <tr><td className="px-4 py-2 text-red-600 dark:text-red-400" colSpan={5}>{t.error}</td></tr>
+          ) : sorted.length === 0 ? (
+            <tr><td className={`px-4 py-2 ${muted}`} colSpan={5}>{t.empty}</td></tr>
+          ) : (
+            sorted.map((row) => (
+              <tr key={row.id ?? `${row.email}-${row.created_at}`} className="border-t border-gray-200 dark:border-[#333]">
+                <td className="px-4 py-2 align-top">
+                  <div className="truncate" title={row.name}>{row.name}</div>
+                  {row.message_content && (
+                    <div className={`mt-0.5 text-xs ${muted} overflow-hidden`}>
+                      “{row.message_content}”
+                    </div>
+                  )}
+                </td>
+                <td className="px-4 py-2 align-top">
+                  <div className="truncate" title={row.phone}>{row.phone}</div>
+                </td>
+                <td className="px-4 py-2 align-top">
+                  <div className="truncate" title={row.email}>{row.email}</div>
+                </td>
+                <td className="px-4 py-2 align-top">
+                  <div className="truncate" title={row.subjectName}>{row.subjectName}</div>
+                </td>
+                <td className="px-4 py-2 align-top">
+                  {row.is_processed ? (
+                    <span
+                      className={`px-2 py-0.5 rounded text-xs ${
+                        theme === "dark"
+                          ? "bg-gray-700 text-white/80"
+                          : "bg-gray-100 text-gray-700"
+                      }`}
+                    >
+                      {t.processed}
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => markProcessed(row)}
+                      className={`px-3 py-1.5 rounded-md shadow text-xs transition ${btnPrimary}`}
+                    >
+                      {t.mark_done}
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+      {/* Header responsive */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
+        <h1 className="text-xl sm:text-2xl font-semibold">{t.title}</h1>
+
+        {/* tri compact sur mobile */}
         <div className="flex items-center gap-2">
           <label className="text-sm">{t.sort_by}</label>
           <select
@@ -243,79 +403,25 @@ export default function Messages() {
         </div>
       </div>
 
-      <div className={`rounded-xl border shadow ${card}`}>
-        {/* states */}
-        {loading && <div className="p-6 text-sm">{t.loading}</div>}
-        {!loading && err && (
-          <div className="p-6 text-sm text-red-500">{t.error}</div>
-        )}
-        {!loading && !err && sorted.length === 0 && (
-          <div className="p-6 text-sm">{t.empty}</div>
-        )}
+      <section className={`rounded-2xl border ${panel}`}>
+        {/* Mobile cards */}
+        <MobileCards />
+        {/* Desktop table */}
+        <DesktopTable />
+      </section>
 
-        {!loading && !err && sorted.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className={theme === "dark" ? "bg-[#232323]" : "bg-gray-50"}>
-                  <th className="text-left px-4 py-2 border-b">{t.user}</th>
-                  <th className="text-left px-4 py-2 border-b">{t.phone}</th>
-                  <th className="text-left px-4 py-2 border-b">{t.email}</th>
-                  <th className="text-left px-4 py-2 border-b">{t.subject}</th>
-                  <th className="text-left px-4 py-2 border-b">{t.to_process}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((row) => (
-                  <tr key={row.id ?? `${row.email}-${row.created_at}`}>
-                    <td className="px-4 py-2 border-b align-top">
-                      <div className="font-medium">{row.name}</div>
-                      {row.message_content && (
-                        <div
-                          className={
-                            theme === "dark" ? "text-white/70" : "text-gray-600"
-                          }
-                        >
-                          “{row.message_content}”
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-2 border-b align-top">{row.phone}</td>
-                    <td className="px-4 py-2 border-b align-top">{row.email}</td>
-                    <td className="px-4 py-2 border-b align-top">
-                      {row.subjectName}
-                    </td>
-                    <td className="px-4 py-2 border-b align-top">
-                      {row.is_processed ? (
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs ${
-                            theme === "dark"
-                              ? "bg-gray-700 text-white/80"
-                              : "bg-gray-100 text-gray-700"
-                          }`}
-                        >
-                          {t.processed}
-                        </span>
-                      ) : (
-                        <button
-                          onClick={() => markProcessed(row)}
-                          className={`px-3 py-1.5 rounded-md shadow text-xs hover:brightness-110 ${
-                            theme === "dark"
-                              ? "bg-secondary text-white"
-                              : "bg-primary text-dark"
-                          }`}
-                        >
-                          {t.mark_done}
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+      {/* Bouton recharger visible si erreur (mobile + desktop) */}
+      {err && (
+        <div className="mt-3">
+          <button
+            onClick={fetchMessages}
+            className={`rounded-xl border px-3 py-1 text-sm ${btnGhost}`}
+          >
+            Recharger
+          </button>
+        </div>
+      )}
+      <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );
 }

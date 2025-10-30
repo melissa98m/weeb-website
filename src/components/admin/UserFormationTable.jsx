@@ -22,8 +22,8 @@ function UserFormationTable({
 
   const btn =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
-      : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+      ? "bg-red-400 text-white border-[#333] hover:bg-[#222]"
+      : "bg-red-400 text-gray-900 border-gray-200 hover:bg-gray-50";
 
   /* ---------- ÉTATS COMMUNS ---------- */
   const renderState = (content) => (

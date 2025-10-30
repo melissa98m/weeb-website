@@ -8,7 +8,7 @@ import React, {
 import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { useTheme } from "../../context/ThemeContext";
-
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import FormationDetailsModal from "../../components/admin/FormationDetailsModal";
@@ -175,7 +175,7 @@ export default function FormationsManager() {
     return <div className="p-6 text-red-600">Accès refusé. Cette page est réservée au personnel.</div>;
 
   return (
-    <main className="pt-[64px] md:pt-[128px] bg-background text-white p-6">
+    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
       {/* Header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
@@ -270,6 +270,8 @@ export default function FormationsManager() {
         onCreated={handleCreated}
         apiBase={API_BASE}
       />
+      <AdminAccessFooter allowedRoles={PERSONNEL_ROLE} />
     </main>
+    
   );
 }
