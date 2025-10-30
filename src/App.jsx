@@ -17,6 +17,7 @@ import FormationModal from "./components/Formations/FormationModal";
 import Feedbacks from "./pages/Feedbacks";
 import Messages from "./pages/Messages";
 import PersonnelFormationAdmin from "./pages/admin/PersonnelFormationAdmin";
+import FormationsManager from "./pages/admin/FormationsManager";
 
 function App() {
   const { theme } = useTheme();
@@ -63,10 +64,18 @@ function App() {
             }
           />
           <Route
-          path="/admin/formations"
+          path="/admin/user-formations"
           element={
             <ProtectedRoute>
               <PersonnelFormationAdmin />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/admin/formations"
+          element={
+            <ProtectedRoute>
+              <FormationsManager />
             </ProtectedRoute>
           }
         />

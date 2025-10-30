@@ -308,11 +308,6 @@ export default function PersonnelFormationAdmin() {
     }
   }, [page]);
 
-  const handleCreatedFormation = useCallback((created) => {
-    setFormations((prev) => [fmtFormation(created), ...prev]);
-    setAddFormationId(created?.id ?? null);
-  }, [fmtFormation]);
-
   const ctaClass =
     theme === "dark"
       ? "bg-secondary text-white border-secondary hover:brightness-110"
@@ -328,7 +323,7 @@ export default function PersonnelFormationAdmin() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start md:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold leading-tight truncate">
-            Gestion des formations
+            Gestion des inscritptions aux formations
           </h1>
           <div className="mt-0.5 text-xs text-gray-500 dark:text-white/60 sm:hidden">
             Accès réservé au personnel
@@ -336,14 +331,6 @@ export default function PersonnelFormationAdmin() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <button
-            type="button"
-            className={`rounded-xl border px-4 py-2 ${ctaClass}`}
-            onClick={() => setShowCreate(true)}
-          >
-            + Nouvelle formation
-          </button>
-
           <Pill color="primary" variant="soft" size="md">
             {users.length} utilisateurs
           </Pill>
@@ -428,13 +415,6 @@ export default function PersonnelFormationAdmin() {
       <footer className="text-xs text-gray-500">
         Accès réservé : {PERSONNEL_ROLE.join(", ") || "Personnel"}.
       </footer>
-
-      <CreateFormationModal
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-        onCreated={handleCreatedFormation}
-        apiBase={API_BASE}
-      />
     </div>
   );
 }
