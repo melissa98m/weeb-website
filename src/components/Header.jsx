@@ -89,8 +89,8 @@ export default function Header() {
               { to: "/contact", label: t("contact", "Contact") },
               ...(user && canSeeCommercialPage
                 ? [
-                    { to: "/feedbacks", label: t("feedback", "Feedback") },
-                    { to: "/messages", label: t("message", "Message") },
+                    { to: "/admin/feedbacks", label: t("feedback", "Feedback") },
+                    { to: "/admin/messages", label: t("message", "Message") },
                   ]
                 : []),
             ].map(({ to, label }) => {
@@ -238,7 +238,7 @@ export default function Header() {
           {/* Lien Feedback mobile */}
           {user && canSeeCommercialPage && (
             <Link
-              to="/feedbacks"
+              to="/admin/feedbacks"
               className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
               onClick={() => setIsOpen(false)}
             >
@@ -247,7 +247,7 @@ export default function Header() {
           )}
           {user && canSeeCommercialPage && (
             <Link
-              to="/messages"
+              to="/admin/messages"
               className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
               onClick={() => setIsOpen(false)}
             >
