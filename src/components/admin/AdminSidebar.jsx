@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { NavLink } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -24,11 +24,8 @@ function IconBase({ children, size = 18 }) {
 function IconLink() {
   return (
     <IconBase>
-      {/* maillon gauche */}
       <path d="M8 7h2a4 4 0 0 1 0 8H8" />
-      {/* maillon droit */}
       <path d="M16 17h-2a4 4 0 0 1 0-8h2" />
-      {/* jonction */}
       <path d="M9 12h6" />
     </IconBase>
   );
@@ -61,16 +58,39 @@ function IconInbox() {
   );
 }
 
+/* ==== Mini badge "à traiter" ==== */
+function MiniBadge({ children, theme = "light", title = "À traiter" }) {
+  const base = "px-1.5 py-0.5 rounded-full text-[10px] leading-none font-semibold border";
+  const light = "bg-amber-200 text-amber-800 border-amber-200";
+  const dark = "bg-amber-600/20 text-amber-300 border-amber-700/40";
+  return (
+    <span className={`${base} ${theme === "dark" ? dark : light}`} title={title}>
+      {children}
+    </span>
+  );
+}
+
 /* ===== Items de navigation ===== */
-const navItems = [
-  { label: "Affectations", to: "/admin/user-formations", icon: IconLink },
-  { label: "Formations", to: "/admin/formations", icon: IconCap },
-  { label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
-  { label: "Messages", to: "/admin/messages", icon: IconInbox },
+const NAV = [
+  { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
+  { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
+  { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
+  { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
 ];
+
+// Normalise toujours vers .../api
+const API_BASE = (() => {
+  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const base = raw.replace(/\/$/, "");
+  return base.endsWith("/api") ? base : `${base}/api`;
+})();
 
 export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const { theme } = useTheme();
+
+  const [fbPending, setFbPending] = useState(null);
+  const [msgPending, setMsgPending] = useState(null);
+  const ctrlRef = useRef(null);
 
   const panel =
     theme === "dark"
@@ -82,6 +102,49 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const itemDark = "hover:bg-[#262626] focus:ring-[#444]";
   const activeLight = "bg-gray-100 font-medium";
   const activeDark = "bg-[#262626] font-medium";
+
+  const fetchCount = useCallback(async (url, signal) => {
+    const r = await fetch(url, { credentials: "include", signal });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const ct = r.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) return 0;
+    const data = await r.json();
+    if (typeof data?.count === "number") return data.count;
+    if (Array.isArray(data)) return data.length;
+    if (Array.isArray(data?.results)) return data.results.length;
+    return 0;
+  }, []);
+
+  const loadCounts = useCallback(async () => {
+    ctrlRef.current?.abort();
+    const ctrl = new AbortController();
+    ctrlRef.current = ctrl;
+
+    try {
+      // Feedbacks "à traiter"
+      const count = await fetchCount(`${API_BASE}/feedbacks/?to_process=false`, ctrl.signal);
+      setFbPending(count);
+    } catch {
+      setFbPending(null);
+    }
+
+    try {
+      // Messages "à traiter"
+      const count = await fetchCount(`${API_BASE}/messages/?is_processed=false`, ctrl.signal);
+      setMsgPending(count);
+    } catch {
+      setMsgPending(null);
+    }
+  }, [fetchCount]);
+
+  useEffect(() => {
+    loadCounts();
+    const id = setInterval(loadCounts, 30000);
+    return () => {
+      clearInterval(id);
+      ctrlRef.current?.abort();
+    };
+  }, [loadCounts]);
 
   return (
     <>
@@ -95,9 +158,13 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
       />
 
       {/* Sidebar */}
-      <aside
-        className={`fixed z-50 md:z-auto md:static top-0 md:top-auto h-full md:h-auto w-72 md:w-64 border md:rounded-2xl md:sticky md:self-start md:top-24
-          transition-transform md:transition-none ${panel}
+       <aside
+        className={`fixed md:sticky z-50 md:z-auto left-0 md:left-auto 
+          top-[64px] md:top-[128px]
+          h-[calc(100%-64px)] md:h-[calc(100vh-128px)]
+          w-72 md:w-64 border md:rounded-2xl
+          ${panel}
+          transition-transform md:transition-none
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         role="navigation"
         aria-label="Menu d’administration"
@@ -116,22 +183,36 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
 
         <div className="p-3 md:p-4">
           <ul className="space-y-1">
-            {navItems.map(({ label, to, icon: Icon }) => (
-              <li key={to}>
-                <NavLink
-                  to={to}
-                  className={({ isActive }) =>
-                    `${itemBase} ${theme === "dark" ? itemDark : itemLight} ${
-                      isActive ? (theme === "dark" ? activeDark : activeLight) : ""
-                    }`
-                  }
-                  onClick={onClose}
-                >
-                  <Icon />
-                  <span className="truncate">{label}</span>
-                </NavLink>
-              </li>
-            ))}
+            {NAV.map(({ key, label, to, icon: Icon }) => {
+              const isFb = key === "fb";
+              const isMsg = key === "msg";
+              const pending = isFb ? fbPending : isMsg ? msgPending : null;
+
+              return (
+                <li key={to}>
+                  <NavLink
+                    to={to}
+                    className={({ isActive }) =>
+                      `${itemBase} ${theme === "dark" ? itemDark : itemLight} ${
+                        isActive ? (theme === "dark" ? activeDark : activeLight) : ""
+                      }`
+                    }
+                    onClick={onClose}
+                  >
+                    <Icon />
+                    <span className="truncate">{label}</span>
+
+                    {(isFb || isMsg) && pending !== null && (
+                      <span className="ml-auto">
+                        <MiniBadge theme={theme === "dark" ? "dark" : "light"}>
+                          {pending}
+                        </MiniBadge>
+                      </span>
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </aside>
