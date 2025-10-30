@@ -17,3 +17,49 @@ export function hasAnyStaffRole(user) {
 
   return false;
 }
+
+export const PERSONNEL_ROLE = ["personnel"];
+
+function collectNames(arr) {
+  if (!Array.isArray(arr)) return [];
+  // supporte ['Personnel'] ou [{name:'Personnel'}]
+  return arr
+    .map(v => (typeof v === "string" ? v : v?.name))
+    .filter(Boolean)
+    .map(s => String(s).toLowerCase());
+}
+
+/** True si l'utilisateur est "Personnel" via groupe, flag ou staff/admin */
+export function hasPersonnelRole(u) {
+  if (!u) return false;
+
+  const bag = new Set([
+    ...collectNames(u.groups),        // ex: ['Personnel']
+    ...collectNames(u.group_names),   // ex: ['Personnel']
+    ...collectNames(u.roles),         // ex: ['Personnel']
+    ...(u.role ? [String(u.role).toLowerCase()] : []),
+    ...(u.profile?.group?.name ? [String(u.profile.group.name).toLowerCase()] : []),
+  ]);
+
+  // flags backend
+  if (u.is_personnel) return true;
+
+  // groupe attendu
+  if (PERSONNEL_ROLE.some(r => bag.has(r))) return true;
+
+  // fallback: staff/admin
+  if (u.is_staff || u.is_superuser) return true;
+
+  // fallback (optionnel) : permissions explicites
+  if (Array.isArray(u.perms)) {
+    const p = new Set(u.perms);
+    if (
+      p.has("api.view_userformation") ||
+      p.has("api.add_userformation") ||
+      p.has("api.change_userformation") ||
+      p.has("api.delete_userformation")
+    ) return true;
+  }
+
+  return false;
+}

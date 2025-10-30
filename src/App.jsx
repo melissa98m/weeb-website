@@ -14,9 +14,9 @@ import Blog from "./pages/Blog";
 import BlogDetail from "./pages/BlogDetail";
 import Formations from "./pages/Formations";
 import FormationModal from "./components/Formations/FormationModal";
-import StaffRoute from "./routes/StaffRoute";
 import Feedbacks from "./pages/Feedbacks";
 import Messages from "./pages/Messages";
+import PersonnelFormationAdmin from "./pages/admin/PersonnelFormationAdmin";
 
 function App() {
   const { theme } = useTheme();
@@ -62,6 +62,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+          path="/admin/formations"
+          element={
+            <ProtectedRoute>
+              <PersonnelFormationAdmin />
+            </ProtectedRoute>
+          }
+        />
         </Routes>
       </main>
       <Footer />
