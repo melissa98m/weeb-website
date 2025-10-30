@@ -27,7 +27,7 @@ function App() {
     <div className="text-white font-sans overflow-x-hidden relative">
       <Header />
       <main
-        className={`pt-[64px] md:pt-[128px] ${
+        className={`pt-[24px] md:pt-[58px] ${
           theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
         }`}
       >

@@ -15,11 +15,11 @@ export default function AdminLayout({ children }) {
     return <div className="p-6 text-red-600">Accès refusé. Cette zone est réservée au personnel.</div>;
 
   const bg = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
-  const topPadding = "pt-[64px] md:pt-[128px]"; // pour ne pas passer sous le Header global
+  const topPadding = "pt-[34px] md:pt-[58px]"; // pour ne pas passer sous le Header global
 
   return (
     <div className={`relative ${bg} ${topPadding}`}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+      <div className="mx-auto px-4 md:px-6 py-6">
         {/* Bouton burger mobile */}
         <div className="md:hidden mb-3">
           <button
