@@ -19,6 +19,7 @@ import PersonnelFormationAdmin from "./pages/admin/PersonnelFormationAdmin";
 import FormationsManager from "./pages/admin/FormationsManager";
 import AdminLayout from "./layouts/AdminLayout";
 import PersonnelRoute from "./routes/PersonnelRoute";
+import ArticlesManager from "./pages/admin/ArticlesManager";
 
 function App() {
   const { theme } = useTheme();
@@ -91,6 +92,16 @@ function App() {
                   <PersonnelFormationAdmin />
                 </AdminLayout>
               </PersonnelRoute>
+            }
+          />
+          <Route
+            path="/admin/articles"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ArticlesManager />
+                </AdminLayout>
+              </ProtectedRoute>
             }
           />
         </Routes>

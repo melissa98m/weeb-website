@@ -1,6 +1,12 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { NavLink } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import {
+  hasPersonnelRole,
+  hasAnyStaffRole,
+  hasAnyRedactionRole,
+} from "../../utils/roles";
 
 /* ==== Icônes inline (SVG) sans dépendance ==== */
 function IconBase({ children, size = 18 }) {
@@ -57,10 +63,29 @@ function IconInbox() {
     </IconBase>
   );
 }
+function IconPen() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
+  );
+}
 
 /* ==== Mini badge "à traiter" ==== */
 function MiniBadge({ children, theme = "light", title = "À traiter" }) {
-  const base = "px-1.5 py-0.5 rounded-full text-[10px] leading-none font-semibold border";
+  const base =
+    "px-1.5 py-0.5 rounded-full text-[10px] leading-none font-semibold border";
   const light = "bg-amber-200 text-amber-800 border-amber-200";
   const dark = "bg-amber-600/20 text-amber-300 border-amber-700/40";
   return (
@@ -70,10 +95,11 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
   );
 }
 
-/* ===== Items de navigation ===== */
-const NAV = [
+/* ===== Items de navigation (toutes les entrées potentielles) ===== */
+const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
+  { key: "articles", label: "Articles", to: "/admin/articles", icon: IconPen },
   { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
   { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
 ];
@@ -86,6 +112,7 @@ const API_BASE = (() => {
 })();
 
 export default function AdminSidebar({ open = false, onClose = () => {} }) {
+  const { user } = useAuth();
   const { theme } = useTheme();
 
   const [fbPending, setFbPending] = useState(null);
@@ -102,6 +129,30 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const itemDark = "hover:bg-[#262626] focus:ring-[#444]";
   const activeLight = "bg-gray-100 font-medium";
   const activeDark = "bg-[#262626] font-medium";
+
+  // Capacités par rôle
+  const canPersonnel = hasPersonnelRole(user);
+  const canStaff = hasAnyStaffRole(user); // ex: Commercial OU Personnel
+  const canRedaction = hasAnyRedactionRole(user);
+  const isAdmin = !!(user?.is_staff || user?.is_superuser);
+
+  // Filtrage des onglets visibles selon rôles
+  const NAV = useMemo(() => {
+    return NAV_ALL.filter(({ key }) => {
+      switch (key) {
+        case "affect":
+        case "forms":
+          return canPersonnel || isAdmin;
+        case "articles":
+          return canRedaction || isAdmin;
+        case "fb":
+        case "msg":
+          return canStaff || isAdmin;
+        default:
+          return false;
+      }
+    });
+  }, [canPersonnel, canStaff, canRedaction, isAdmin]);
 
   const fetchCount = useCallback(async (url, signal) => {
     const r = await fetch(url, { credentials: "include", signal });
@@ -120,22 +171,35 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
 
-    try {
-      // Feedbacks "à traiter"
-      const count = await fetchCount(`${API_BASE}/feedbacks/?to_process=false`, ctrl.signal);
-      setFbPending(count);
-    } catch {
+    // On ne charge les compteurs que si les onglets sont visibles
+    if (NAV.some((x) => x.key === "fb")) {
+      try {
+        const count = await fetchCount(
+          `${API_BASE}/feedbacks/?to_process=false`,
+          ctrl.signal
+        );
+        setFbPending(count);
+      } catch {
+        setFbPending(null);
+      }
+    } else {
       setFbPending(null);
     }
 
-    try {
-      // Messages "à traiter"
-      const count = await fetchCount(`${API_BASE}/messages/?is_processed=false`, ctrl.signal);
-      setMsgPending(count);
-    } catch {
+    if (NAV.some((x) => x.key === "msg")) {
+      try {
+        const count = await fetchCount(
+          `${API_BASE}/messages/?is_processed=false`,
+          ctrl.signal
+        );
+        setMsgPending(count);
+      } catch {
+        setMsgPending(null);
+      }
+    } else {
       setMsgPending(null);
     }
-  }, [fetchCount]);
+  }, [fetchCount, NAV]);
 
   useEffect(() => {
     loadCounts();
@@ -158,10 +222,10 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
       />
 
       {/* Sidebar */}
-       <aside
+      <aside
         className={`fixed md:sticky z-50 md:z-auto left-0 md:left-auto 
           top-[64px] md:top-[128px]
-          h-[calc(100%-64px)] md:h-[calc(100vh-128px)]
+          h-[calc(80%-64px)] md:h-[calc(80vh-128px)]
           w-72 md:w-64 border md:rounded-2xl
           ${panel}
           transition-transform md:transition-none
@@ -182,38 +246,44 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         </div>
 
         <div className="p-3 md:p-4">
-          <ul className="space-y-1">
-            {NAV.map(({ key, label, to, icon: Icon }) => {
-              const isFb = key === "fb";
-              const isMsg = key === "msg";
-              const pending = isFb ? fbPending : isMsg ? msgPending : null;
+          {NAV.length === 0 ? (
+            <div className="text-sm opacity-70 px-2">
+              Aucun module disponible pour votre rôle.
+            </div>
+          ) : (
+            <ul className="space-y-1">
+              {NAV.map(({ key, label, to, icon: Icon }) => {
+                const isFb = key === "fb";
+                const isMsg = key === "msg";
+                const pending = isFb ? fbPending : isMsg ? msgPending : null;
 
-              return (
-                <li key={to}>
-                  <NavLink
-                    to={to}
-                    className={({ isActive }) =>
-                      `${itemBase} ${theme === "dark" ? itemDark : itemLight} ${
-                        isActive ? (theme === "dark" ? activeDark : activeLight) : ""
-                      }`
-                    }
-                    onClick={onClose}
-                  >
-                    <Icon />
-                    <span className="truncate">{label}</span>
+                return (
+                  <li key={to}>
+                    <NavLink
+                      to={to}
+                      className={({ isActive }) =>
+                        `${itemBase} ${theme === "dark" ? itemDark : itemLight} ${
+                          isActive ? (theme === "dark" ? activeDark : activeLight) : ""
+                        }`
+                      }
+                      onClick={onClose}
+                    >
+                      <Icon />
+                      <span className="truncate">{label}</span>
 
-                    {(isFb || isMsg) && pending !== null && (
-                      <span className="ml-auto">
-                        <MiniBadge theme={theme === "dark" ? "dark" : "light"}>
-                          {pending}
-                        </MiniBadge>
-                      </span>
-                    )}
-                  </NavLink>
-                </li>
-              );
-            })}
-          </ul>
+                      {(isFb || isMsg) && pending !== null && (
+                        <span className="ml-auto">
+                          <MiniBadge theme={theme === "dark" ? "dark" : "light"}>
+                            {pending}
+                          </MiniBadge>
+                        </span>
+                      )}
+                    </NavLink>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </div>
       </aside>
     </>
