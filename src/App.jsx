@@ -20,6 +20,7 @@ import FormationsManager from "./pages/admin/FormationsManager";
 import AdminLayout from "./layouts/AdminLayout";
 import PersonnelRoute from "./routes/PersonnelRoute";
 import ArticlesManager from "./pages/admin/ArticlesManager";
+import AdminHome from "./pages/admin/AdminHome";
 
 function App() {
   const { theme } = useTheme();
@@ -100,6 +101,16 @@ function App() {
               <ProtectedRoute>
                 <AdminLayout>
                   <ArticlesManager />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminHome />
                 </AdminLayout>
               </ProtectedRoute>
             }
