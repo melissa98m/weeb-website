@@ -17,6 +17,7 @@ import AddUserFormationForm from "../../components/admin/AddUserFormation";
 import UserFormationTable from "../../components/admin/UserFormationTable";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
+import CreateFormationModal from "../../components/admin/CreateFormationModal";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
@@ -46,15 +47,25 @@ export default function PersonnelFormationAdmin() {
   const [searchUser, setSearchUser] = useState("");
   const searchQ = useDeferredValue(searchUser.trim().toLowerCase());
 
+  // debounce pour la recherche (évite les fetchs à chaque frappe)
+  const [searchTrigger, setSearchTrigger] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setSearchTrigger(searchQ), 250);
+    return () => clearTimeout(t);
+  }, [searchQ]);
+
   // pagination
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // <- défaut 10
+  const [pageSize, setPageSize] = useState(10);
 
   // ajout / suppression
   const [addUserId, setAddUserId] = useState(null);
   const [addFormationId, setAddFormationId] = useState(null);
   const [busy, setBusy] = useState(false);
+
+  // modal de création
+  const [showCreate, setShowCreate] = useState(false);
 
   // 2 contrôleurs séparés
   const bootCtrlRef = useRef(null);
@@ -111,11 +122,24 @@ export default function PersonnelFormationAdmin() {
     ref.current?.abort();
     const ctrl = new AbortController();
     ref.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => {
+      try { ctrl.abort(); } catch {}
+    }, ms);
+
+    const isAbortError = (e) => {
+      const msg = String(e?.message || "");
+      // Traite aussi certains messages navigateur (“Failed to fetch”, “NetworkError”)
+      return (
+        ctrl.signal.aborted ||
+        e?.name === "AbortError" ||
+        /aborted|AbortError|Failed to fetch|NetworkError/i.test(msg)
+      );
+    };
+
     return {
       signal: ctrl.signal,
       done: () => { clearTimeout(t); if (ref.current === ctrl) ref.current = null; },
-      isAbortError: (e) => e?.name === "AbortError" || /aborted/i.test(String(e?.message || "")),
+      isAbortError,
     };
   }, []);
 
@@ -141,7 +165,7 @@ export default function PersonnelFormationAdmin() {
     }
   }, [fetchJSON, startTask, fmtUser, fmtFormation]);
 
-  // charge liens (pagination + filtres serveur si dispos)
+  // charge liens (pagination + filtres serveur + recherche)
   const loadLinks = useCallback(async (p = 1) => {
     setLinksLoading(true);
     setLinksError("");
@@ -149,13 +173,10 @@ export default function PersonnelFormationAdmin() {
     try {
       const params = new URLSearchParams();
       params.set("page", String(p));
-      params.set("page_size", String(pageSize)); // <- prend la valeur sélectionnée
-      // Optionnel pour compat LimitOffset (si jamais activé côté API) :
-      // params.set("limit", String(pageSize));
-      // params.set("offset", String((p - 1) * pageSize));
+      params.set("page_size", String(pageSize));
       if (filterUser) params.set("user", String(filterUser));
       if (filterFormation) params.set("formation", String(filterFormation));
-      // si SearchFilter ajouté côté API : if (searchQ) params.set("search", searchQ);
+      if (searchTrigger) params.set("search", searchTrigger);
 
       const candidates = [
         `${API_BASE}/user-formations/`,
@@ -168,7 +189,7 @@ export default function PersonnelFormationAdmin() {
           data = await fetchJSON(`${base}?${params.toString()}`, task.signal);
           break;
         } catch (e) {
-          if (task.isAbortError(e)) return;
+          if (task.isAbortError(e)) return; // ne pas afficher d'erreur si juste annulé
           lastErr = e;
         }
       }
@@ -186,7 +207,6 @@ export default function PersonnelFormationAdmin() {
       });
       setLinks(mapped);
 
-      // calcule pageCount selon le pageSize actuel
       const total = typeof data?.count === "number"
         ? data.count
         : (data?.next || data?.previous) ? (p + (data?.next ? 1 : 0)) * pageSize : raw.length;
@@ -197,7 +217,7 @@ export default function PersonnelFormationAdmin() {
       task.done();
       setLinksLoading(false);
     }
-  }, [fetchJSON, startTask, fmtUser, fmtFormation, filterUser, filterFormation, pageSize /*, searchQ*/]);
+  }, [fetchJSON, startTask, fmtUser, fmtFormation, filterUser, filterFormation, pageSize, searchTrigger]);
 
   // initial
   useEffect(() => {
@@ -209,10 +229,10 @@ export default function PersonnelFormationAdmin() {
     return () => { mounted = false; };
   }, [loadBootstrap, loadLinks]);
 
-  // reset page si filtres OU pageSize changent
+  // reset page si filtres / pageSize / recherche changent
   useEffect(() => {
     setPage(1);
-  }, [filterUser, filterFormation, pageSize /*, searchQ*/]);
+  }, [filterUser, filterFormation, pageSize, searchTrigger]);
 
   // recharge quand page change
   useEffect(() => {
@@ -229,47 +249,45 @@ export default function PersonnelFormationAdmin() {
     [formations]
   );
 
-  // filtrage client (au cas où tu gardes une recherche côté front)
+  // filtrage client sur la page chargée (optionnel)
   const filteredLinks = useMemo(() => {
     let arr = links;
     if (filterUser) arr = arr.filter((l) => String(l.user?.id) === String(filterUser));
     if (filterFormation) arr = arr.filter((l) => String(l.formation?.id) === String(filterFormation));
-    if (searchQ) {
+    if (searchTrigger) {
+      const q = searchTrigger;
       arr = arr.filter(
         (l) =>
-          (l.user?.username ?? "").toLowerCase().includes(searchQ) ||
-          (l.user?.email ?? "").toLowerCase().includes(searchQ)
+          (l.user?.username ?? "").toLowerCase().includes(q) ||
+          (l.user?.email ?? "").toLowerCase().includes(q)
       );
     }
     return arr;
-  }, [links, filterUser, filterFormation, searchQ]);
+  }, [links, filterUser, filterFormation, searchTrigger]);
 
   // actions
-  const onSubmitAdd = useCallback(
-    async (e) => {
-      e.preventDefault();
-      if (!addUserId || !addFormationId) return;
-      setBusy(true);
-      try {
-        const csrf = await ensureCsrf();
-        const res = await fetch(`${API_BASE}/user-formations/`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
-          body: JSON.stringify({ user: Number(addUserId), formation: Number(addFormationId) }),
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status} POST /user-formations/`);
-        setAddUserId(null);
-        setAddFormationId(null);
-        await loadLinks(page); // recharge la page courante
-      } catch (e2) {
-        setLinksError(String(e2.message || e2));
-      } finally {
-        setBusy(false);
-      }
-    },
-    [addUserId, addFormationId, loadLinks, page]
-  );
+  const onSubmitAdd = useCallback(async (e) => {
+    e.preventDefault();
+    if (!addUserId || !addFormationId) return;
+    setBusy(true);
+    try {
+      const csrf = await ensureCsrf();
+      const res = await fetch(`${API_BASE}/user-formations/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+        body: JSON.stringify({ user: Number(addUserId), formation: Number(addFormationId) }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status} POST /user-formations/`);
+      setAddUserId(null);
+      setAddFormationId(null);
+      await loadLinks(page);
+    } catch (e2) {
+      setLinksError(String(e2.message || e2));
+    } finally {
+      setBusy(false);
+    }
+  }, [addUserId, addFormationId, loadLinks, page]);
 
   const removeLink = useCallback(async (id) => {
     if (!id) return;
@@ -283,13 +301,22 @@ export default function PersonnelFormationAdmin() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status} DELETE /user-formations/${id}/`);
       setLinks((prev) => prev.filter((l) => l.id !== id));
-      // Option: await loadLinks(page); // si tu veux recalcul strict côté serveur
     } catch (e) {
       setLinksError(String(e.message || e));
     } finally {
       setBusy(false);
     }
-  }, [page /*, loadLinks*/]);
+  }, [page]);
+
+  const handleCreatedFormation = useCallback((created) => {
+    setFormations((prev) => [fmtFormation(created), ...prev]);
+    setAddFormationId(created?.id ?? null);
+  }, [fmtFormation]);
+
+  const ctaClass =
+    theme === "dark"
+      ? "bg-secondary text-white border-secondary hover:brightness-110"
+      : "bg-primary text-dark border-primary hover:brightness-110";
 
   // guards
   if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
@@ -309,6 +336,14 @@ export default function PersonnelFormationAdmin() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+          <button
+            type="button"
+            className={`rounded-xl border px-4 py-2 ${ctaClass}`}
+            onClick={() => setShowCreate(true)}
+          >
+            + Nouvelle formation
+          </button>
+
           <Pill color="primary" variant="soft" size="md">
             {users.length} utilisateurs
           </Pill>
@@ -354,7 +389,6 @@ export default function PersonnelFormationAdmin() {
         setSearchUser={setSearchUser}
       />
 
-      {/* Contrôles de liste : taille de page à droite */}
       <div className="flex items-center justify-end">
         <PageSizer pageSize={pageSize} onChange={setPageSize} />
       </div>
@@ -374,7 +408,7 @@ export default function PersonnelFormationAdmin() {
         loading={linksLoading}
         error={linksError}
         links={links}
-        filteredLinks={links}   // pagination serveur -> on affiche directement la page courante
+        filteredLinks={filteredLinks}
         onRemove={removeLink}
         busy={busy}
         page={page}
@@ -394,6 +428,13 @@ export default function PersonnelFormationAdmin() {
       <footer className="text-xs text-gray-500">
         Accès réservé : {PERSONNEL_ROLE.join(", ") || "Personnel"}.
       </footer>
+
+      <CreateFormationModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={handleCreatedFormation}
+        apiBase={API_BASE}
+      />
     </div>
   );
 }
