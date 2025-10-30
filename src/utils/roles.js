@@ -1,13 +1,13 @@
 // --- Déclarations de familles de rôles (affichage) ---
 export const STAFF_ROLES = ["Commercial", "Personnel"];
-export const REDACTION_ROLES = ["Rédacteur", "Personnel"];
+export const REDACTION_ROLES = ["Redacteur", "Personnel"];
 export const PERSONNEL_ROLE = ["Personnel"]; // unique
 
 // Mappe les flags booléens potentiels vers des noms de rôles (pour la détection)
 const FLAG_TO_ROLE = {
   is_commercial: "Commercial",
   is_personnel: "Personnel",
-  is_redacteur: "Rédacteur",
+  is_redacteur: "Redacteur",
 };
 
 // Permissions qui donnent implicitement l'accès "Personnel" (fallback)
