@@ -10,7 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
 import { useTheme } from "../../context/ThemeContext";
-
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import Pill from "../../components/ui/Pill";
 import FiltersBar from "../../components/admin/FiltersBar";
 import AddUserFormationForm from "../../components/admin/AddUserFormation";
@@ -35,6 +35,11 @@ export default function PersonnelFormationAdmin() {
   const [users, setUsers] = useState([]);
   const [formations, setFormations] = useState([]);
 
+  // === Totaux ===
+  const [usersTotal, setUsersTotal] = useState(0);
+  const [formationsTotal, setFormationsTotal] = useState(0);
+  const [linksTotal, setLinksTotal] = useState(0);
+
   // liens (user-formations)
   const [links, setLinks] = useState([]);
   const [linksLoading, setLinksLoading] = useState(true);
@@ -46,10 +51,17 @@ export default function PersonnelFormationAdmin() {
   const [searchUser, setSearchUser] = useState("");
   const searchQ = useDeferredValue(searchUser.trim().toLowerCase());
 
+  // debounce pour la recherche (évite les fetchs à chaque frappe)
+  const [searchTrigger, setSearchTrigger] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setSearchTrigger(searchQ), 250);
+    return () => clearTimeout(t);
+  }, [searchQ]);
+
   // pagination
   const [page, setPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // <- défaut 10
+  const [pageSize, setPageSize] = useState(10);
 
   // ajout / suppression
   const [addUserId, setAddUserId] = useState(null);
@@ -111,15 +123,27 @@ export default function PersonnelFormationAdmin() {
     ref.current?.abort();
     const ctrl = new AbortController();
     ref.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => {
+      try { ctrl.abort(); } catch {}
+    }, ms);
+
+    const isAbortError = (e) => {
+      const msg = String(e?.message || "");
+      return (
+        ctrl.signal.aborted ||
+        e?.name === "AbortError" ||
+        /aborted|AbortError|Failed to fetch|NetworkError/i.test(msg)
+      );
+    };
+
     return {
       signal: ctrl.signal,
       done: () => { clearTimeout(t); if (ref.current === ctrl) ref.current = null; },
-      isAbortError: (e) => e?.name === "AbortError" || /aborted/i.test(String(e?.message || "")),
+      isAbortError,
     };
   }, []);
 
-  // charge users + formations
+  // charge users + formations (+ totaux)
   const loadBootstrap = useCallback(async () => {
     setBootLoading(true);
     setBootError("");
@@ -129,10 +153,33 @@ export default function PersonnelFormationAdmin() {
         fetchJSON(`${API_BASE}/users/`, task.signal),
         fetchJSON(`${API_BASE}/formations/`, task.signal),
       ]);
-      const usersList = Array.isArray(usersData?.results) ? usersData.results : Array.isArray(usersData) ? usersData : [];
-      const formsList = Array.isArray(formsData?.results) ? formsData.results : Array.isArray(formsData) ? formsData : [];
+
+      // users
+      const usersList = Array.isArray(usersData?.results)
+        ? usersData.results
+        : Array.isArray(usersData)
+        ? usersData
+        : [];
+      const uCount =
+        typeof usersData?.count === "number"
+          ? usersData.count
+          : usersList.length;
+
+      // formations
+      const formsList = Array.isArray(formsData?.results)
+        ? formsData.results
+        : Array.isArray(formsData)
+        ? formsData
+        : [];
+      const fCount =
+        typeof formsData?.count === "number"
+          ? formsData.count
+          : formsList.length;
+
       setUsers(usersList.map(fmtUser));
       setFormations(formsList.map(fmtFormation));
+      setUsersTotal(uCount);
+      setFormationsTotal(fCount);
     } catch (e) {
       if (!task.isAbortError(e)) setBootError(String(e?.message || e));
     } finally {
@@ -141,63 +188,83 @@ export default function PersonnelFormationAdmin() {
     }
   }, [fetchJSON, startTask, fmtUser, fmtFormation]);
 
-  // charge liens (pagination + filtres serveur si dispos)
-  const loadLinks = useCallback(async (p = 1) => {
-    setLinksLoading(true);
-    setLinksError("");
-    const task = startTask(linksCtrlRef, 15000);
-    try {
-      const params = new URLSearchParams();
-      params.set("page", String(p));
-      params.set("page_size", String(pageSize)); // <- prend la valeur sélectionnée
-      // Optionnel pour compat LimitOffset (si jamais activé côté API) :
-      // params.set("limit", String(pageSize));
-      // params.set("offset", String((p - 1) * pageSize));
-      if (filterUser) params.set("user", String(filterUser));
-      if (filterFormation) params.set("formation", String(filterFormation));
-      // si SearchFilter ajouté côté API : if (searchQ) params.set("search", searchQ);
+  // charge liens (pagination + filtres + recherche) et met à jour linksTotal
+  const loadLinks = useCallback(
+    async (p = 1) => {
+      setLinksLoading(true);
+      setLinksError("");
+      const task = startTask(linksCtrlRef, 15000);
+      try {
+        const params = new URLSearchParams();
+        params.set("page", String(p));
+        params.set("page_size", String(pageSize));
+        if (filterUser) params.set("user", String(filterUser));
+        if (filterFormation) params.set("formation", String(filterFormation));
+        if (searchTrigger) params.set("search", searchTrigger);
 
-      const candidates = [
-        `${API_BASE}/user-formations/`,
-        `${API_BASE}/userformations/`,
-        `${API_BASE}/user_formations/`,
-      ];
-      let data = null, lastErr = null;
-      for (const base of candidates) {
-        try {
-          data = await fetchJSON(`${base}?${params.toString()}`, task.signal);
-          break;
-        } catch (e) {
-          if (task.isAbortError(e)) return;
-          lastErr = e;
+        const candidates = [
+          `${API_BASE}/user-formations/`,
+          `${API_BASE}/userformations/`,
+          `${API_BASE}/user_formations/`,
+        ];
+        let data = null,
+          lastErr = null;
+        for (const base of candidates) {
+          try {
+            data = await fetchJSON(`${base}?${params.toString()}`, task.signal);
+            break;
+          } catch (e) {
+            if (task.isAbortError(e)) return; // annulation silencieuse
+            lastErr = e;
+          }
         }
+        if (!data)
+          throw lastErr || new Error("Impossible de charger la ressource user-formations.");
+
+        const raw = Array.isArray(data?.results)
+          ? data.results
+          : Array.isArray(data)
+          ? data
+          : [];
+        const mapped = raw.map((l) => {
+          const userObj =
+            (typeof l.user === "object" && l.user) ||
+            l.user_detail ||
+            l.user_details ||
+            null;
+          const formationObj =
+            (typeof l.formation === "object" && l.formation) ||
+            l.formation_detail ||
+            l.formation_details ||
+            null;
+          return {
+            id: l.id ?? l.pk,
+            user: fmtUser(userObj ?? l.user ?? null),
+            formation: fmtFormation(formationObj ?? l.formation ?? null),
+          };
+        });
+        setLinks(mapped);
+
+        // Totaux renvoyés par l'API si paginée
+        const total =
+          typeof data?.count === "number"
+            ? data.count
+            : // fallback approximatif si pas de count
+              (data?.next || data?.previous)
+            ? (p + (data?.next ? 1 : 0)) * pageSize
+            : raw.length;
+
+        setLinksTotal(total);
+        setPageCount(Math.max(1, Math.ceil(total / pageSize)));
+      } catch (e) {
+        if (!task.isAbortError(e)) setLinksError(String(e?.message || e));
+      } finally {
+        task.done();
+        setLinksLoading(false);
       }
-      if (!data) throw lastErr || new Error("Impossible de charger la ressource user-formations.");
-
-      const raw = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : [];
-      const mapped = raw.map((l) => {
-        const userObj = (typeof l.user === "object" && l.user) || l.user_detail || l.user_details || null;
-        const formationObj = (typeof l.formation === "object" && l.formation) || l.formation_detail || l.formation_details || null;
-        return {
-          id: l.id ?? l.pk,
-          user: fmtUser(userObj ?? l.user ?? null),
-          formation: fmtFormation(formationObj ?? l.formation ?? null),
-        };
-      });
-      setLinks(mapped);
-
-      // calcule pageCount selon le pageSize actuel
-      const total = typeof data?.count === "number"
-        ? data.count
-        : (data?.next || data?.previous) ? (p + (data?.next ? 1 : 0)) * pageSize : raw.length;
-      setPageCount(Math.max(1, Math.ceil(total / pageSize)));
-    } catch (e) {
-      if (!task.isAbortError(e)) setLinksError(String(e?.message || e));
-    } finally {
-      task.done();
-      setLinksLoading(false);
-    }
-  }, [fetchJSON, startTask, fmtUser, fmtFormation, filterUser, filterFormation, pageSize /*, searchQ*/]);
+    },
+    [fetchJSON, startTask, fmtUser, fmtFormation, filterUser, filterFormation, pageSize, searchTrigger]
+  );
 
   // initial
   useEffect(() => {
@@ -206,13 +273,15 @@ export default function PersonnelFormationAdmin() {
       await loadBootstrap();
       if (mounted) await loadLinks(1);
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [loadBootstrap, loadLinks]);
 
-  // reset page si filtres OU pageSize changent
+  // reset page si filtres / pageSize / recherche changent
   useEffect(() => {
     setPage(1);
-  }, [filterUser, filterFormation, pageSize /*, searchQ*/]);
+  }, [filterUser, filterFormation, pageSize, searchTrigger]);
 
   // recharge quand page change
   useEffect(() => {
@@ -221,7 +290,11 @@ export default function PersonnelFormationAdmin() {
 
   // options filtres
   const userOptions = useMemo(
-    () => (users || []).map((u) => ({ value: u.id, label: u.username || u.email || `user#${u.id}` })),
+    () =>
+      (users || []).map((u) => ({
+        value: u.id,
+        label: u.username || u.email || `user#${u.id}`,
+      })),
     [users]
   );
   const formationOptions = useMemo(
@@ -229,20 +302,25 @@ export default function PersonnelFormationAdmin() {
     [formations]
   );
 
-  // filtrage client (au cas où tu gardes une recherche côté front)
+  // filtrage client (sur la page courante)
   const filteredLinks = useMemo(() => {
     let arr = links;
-    if (filterUser) arr = arr.filter((l) => String(l.user?.id) === String(filterUser));
-    if (filterFormation) arr = arr.filter((l) => String(l.formation?.id) === String(filterFormation));
-    if (searchQ) {
+    if (filterUser)
+      arr = arr.filter((l) => String(l.user?.id) === String(filterUser));
+    if (filterFormation)
+      arr = arr.filter(
+        (l) => String(l.formation?.id) === String(filterFormation)
+      );
+    if (searchTrigger) {
+      const q = searchTrigger;
       arr = arr.filter(
         (l) =>
-          (l.user?.username ?? "").toLowerCase().includes(searchQ) ||
-          (l.user?.email ?? "").toLowerCase().includes(searchQ)
+          (l.user?.username ?? "").toLowerCase().includes(q) ||
+          (l.user?.email ?? "").toLowerCase().includes(q)
       );
     }
     return arr;
-  }, [links, filterUser, filterFormation, searchQ]);
+  }, [links, filterUser, filterFormation, searchTrigger]);
 
   // actions
   const onSubmitAdd = useCallback(
@@ -256,12 +334,16 @@ export default function PersonnelFormationAdmin() {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
-          body: JSON.stringify({ user: Number(addUserId), formation: Number(addFormationId) }),
+          body: JSON.stringify({
+            user: Number(addUserId),
+            formation: Number(addFormationId),
+          }),
         });
-        if (!res.ok) throw new Error(`HTTP ${res.status} POST /user-formations/`);
+        if (!res.ok)
+          throw new Error(`HTTP ${res.status} POST /user-formations/`);
         setAddUserId(null);
         setAddFormationId(null);
-        await loadLinks(page); // recharge la page courante
+        await loadLinks(page);
       } catch (e2) {
         setLinksError(String(e2.message || e2));
       } finally {
@@ -271,37 +353,47 @@ export default function PersonnelFormationAdmin() {
     [addUserId, addFormationId, loadLinks, page]
   );
 
-  const removeLink = useCallback(async (id) => {
-    if (!id) return;
-    setBusy(true);
-    try {
-      const csrf = await ensureCsrf();
-      const res = await fetch(`${API_BASE}/user-formations/${id}/`, {
-        method: "DELETE",
-        credentials: "include",
-        headers: { "X-CSRFToken": csrf },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status} DELETE /user-formations/${id}/`);
-      setLinks((prev) => prev.filter((l) => l.id !== id));
-      // Option: await loadLinks(page); // si tu veux recalcul strict côté serveur
-    } catch (e) {
-      setLinksError(String(e.message || e));
-    } finally {
-      setBusy(false);
-    }
-  }, [page /*, loadLinks*/]);
+  const removeLink = useCallback(
+    async (id) => {
+      if (!id) return;
+      setBusy(true);
+      try {
+        const csrf = await ensureCsrf();
+        const res = await fetch(`${API_BASE}/user-formations/${id}/`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "X-CSRFToken": csrf },
+        });
+        if (!res.ok)
+          throw new Error(
+            `HTTP ${res.status} DELETE /user-formations/${id}/`
+          );
+        setLinks((prev) => prev.filter((l) => l.id !== id));
+        // on ne touche pas linksTotal ici — optionnel: recharger la page pour exactitude
+      } catch (e) {
+        setLinksError(String(e.message || e));
+      } finally {
+        setBusy(false);
+      }
+    },
+    [page]
+  );
 
   // guards
   if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
   if (!hasPersonnelRole(user))
-    return <div className="p-6 text-red-600">Accès refusé. Cette page est réservée au personnel.</div>;
+    return (
+      <div className="p-6 text-red-600">
+        Accès refusé. Cette page est réservée au personnel.
+      </div>
+    );
 
   return (
     <div className="p-6 space-y-6">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start md:items-center sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight truncate">
-            Gestion des formations
+          <h1 className="text-xl sm:text-2xl font-bold leading-tight">
+            Gestion des inscriptions aux formations
           </h1>
           <div className="mt-0.5 text-xs text-gray-500 dark:text-white/60 sm:hidden">
             Accès réservé au personnel
@@ -310,22 +402,29 @@ export default function PersonnelFormationAdmin() {
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Pill color="primary" variant="soft" size="md">
-            {users.length} utilisateurs
+            {usersTotal} utilisateurs
           </Pill>
           <Pill color="info" variant="soft" size="md">
-            {formations.length} formations
+            {formationsTotal} formations
           </Pill>
           <Pill color="success" variant="soft" size="md">
-            {links.length} liens
+            {linksTotal} liens
           </Pill>
         </div>
       </header>
 
       {bootError && (
-        <div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800" role="alert">
+        <div
+          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+          role="alert"
+        >
           {bootError}
           <div className="mt-2">
-            <button className="rounded-xl border px-3 py-1 text-sm" onClick={loadBootstrap} disabled={bootLoading}>
+            <button
+              className="rounded-xl border px-3 py-1 text-sm"
+              onClick={loadBootstrap}
+              disabled={bootLoading}
+            >
               Recharger utilisateurs/formations
             </button>
           </div>
@@ -333,10 +432,17 @@ export default function PersonnelFormationAdmin() {
       )}
 
       {linksError && (
-        <div className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800" role="alert">
+        <div
+          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+          role="alert"
+        >
           {linksError}
           <div className="mt-2">
-            <button className="rounded-xl border px-3 py-1 text-sm" onClick={() => loadLinks(page)} disabled={linksLoading}>
+            <button
+              className="rounded-xl border px-3 py-1 text-sm"
+              onClick={() => loadLinks(page)}
+              disabled={linksLoading}
+            >
               Recharger les liens
             </button>
           </div>
@@ -354,7 +460,6 @@ export default function PersonnelFormationAdmin() {
         setSearchUser={setSearchUser}
       />
 
-      {/* Contrôles de liste : taille de page à droite */}
       <div className="flex items-center justify-end">
         <PageSizer pageSize={pageSize} onChange={setPageSize} />
       </div>
@@ -374,7 +479,7 @@ export default function PersonnelFormationAdmin() {
         loading={linksLoading}
         error={linksError}
         links={links}
-        filteredLinks={links}   // pagination serveur -> on affiche directement la page courante
+        filteredLinks={filteredLinks}
         onRemove={removeLink}
         busy={busy}
         page={page}
@@ -391,9 +496,7 @@ export default function PersonnelFormationAdmin() {
         />
       </div>
 
-      <footer className="text-xs text-gray-500">
-        Accès réservé : {PERSONNEL_ROLE.join(", ") || "Personnel"}.
-      </footer>
+      <AdminAccessFooter allowedRoles={PERSONNEL_ROLE} />
     </div>
   );
 }

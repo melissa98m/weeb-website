@@ -7,35 +7,7 @@ import Button from "./Button";
 import headerEn from "../../locales/en/header.json";
 import headerFr from "../../locales/fr/header.json";
 import { useAuth } from "../context/AuthContext";
-
-/* ===== Helper rôles: Commercial OU Personnel (robuste) ===== */
-const hasAnyStaffRole = (u) => {
-  if (!u) return false;
-  const toLower = (s) => String(s || "").toLowerCase();
-
-  const collected = [];
-
-  if (Array.isArray(u.groups)) {
-    for (const g of u.groups) {
-      if (g && typeof g === "object" && g.name) collected.push(g.name);
-      else if (typeof g === "string") collected.push(g);
-    }
-  }
-  if (Array.isArray(u.group_names)) collected.push(...u.group_names);
-  if (Array.isArray(u.roles)) collected.push(...u.roles);
-  if (u.role) collected.push(u.role);
-  if (u.profile?.group?.name) collected.push(u.profile.group.name);
-
-  const set = new Set(collected.map(toLower));
-  const inCommercial = set.has("commercial");
-  const inPersonnel = set.has("personnel");
-
-  const flags = !!(u.is_commercial || u.is_personnel);
-  const staffFallback = !!u.is_staff;
-
-  return inCommercial || inPersonnel || flags || staffFallback;
-};
-/* =========================================================== */
+import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../utils/roles";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,8 +29,9 @@ export default function Header() {
 
   const isLoginPage = location.pathname === "/login";
 
-  // => calcule ici le droit d'accès Feedback / Messages
-  const canSeeCommercialPage = hasAnyStaffRole(user);
+  // Accès à l’administration si au moins un des rôles suivants
+  const canAdmin =
+    !!user && (hasAnyStaffRole(user) || hasAnyRedactionRole(user) || hasPersonnelRole(user));
 
   return (
     <header
@@ -76,7 +49,7 @@ export default function Header() {
             <Link to="/">weeb</Link>
           </div>
 
-          {/* Desktop navigation — uniformisée sur toutes les pages */}
+          {/* Desktop navigation */}
           <nav
             className={`hidden md:flex items-center space-x-6 text-sm ${
               theme === "dark" ? "text-white" : "text-dark"
@@ -87,12 +60,7 @@ export default function Header() {
               { to: "/blog", label: t("blog", "Blog") },
               { to: "/formations", label: t("formations", "Formations") },
               { to: "/contact", label: t("contact", "Contact") },
-              ...(user && canSeeCommercialPage
-                ? [
-                    { to: "/feedbacks", label: t("feedback", "Feedback") },
-                    { to: "/messages", label: t("message", "Message") },
-                  ]
-                : []),
+              ...(canAdmin ? [{ to: "/admin", label: t("administration", "Administration") }] : []),
             ].map(({ to, label }) => {
               const active = location.pathname === to || location.pathname.startsWith(`${to}/`);
               return (
@@ -103,12 +71,12 @@ export default function Header() {
                   className={[
                     "transition underline-offset-4",
                     active
-                      ? (theme === "dark"
-                          ? "text-white font-medium underline"
-                          : "text-dark font-medium underline")
-                      : (theme === "dark"
-                          ? "text-white/90 hover:text-white"
-                          : "text-dark/90 hover:text-dark"),
+                      ? theme === "dark"
+                        ? "text-white font-medium underline"
+                        : "text-dark font-medium underline"
+                      : theme === "dark"
+                      ? "text-white/90 hover:text-white"
+                      : "text-dark/90 hover:text-dark",
                   ].join(" ")}
                 >
                   {label}
@@ -235,23 +203,14 @@ export default function Header() {
             {t("contact", "Contact")}
           </Link>
 
-          {/* Lien Feedback mobile */}
-          {user && canSeeCommercialPage && (
+          {/* Administration (mobile) */}
+          {canAdmin && (
             <Link
-              to="/feedbacks"
+              to="/admin"
               className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
               onClick={() => setIsOpen(false)}
             >
-              {t("feedback", "Feedback")}
-            </Link>
-          )}
-          {user && canSeeCommercialPage && (
-            <Link
-              to="/messages"
-              className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
-              onClick={() => setIsOpen(false)}
-            >
-              {t("message", "Message")}
+              {t("administration", "Administration")}
             </Link>
           )}
 

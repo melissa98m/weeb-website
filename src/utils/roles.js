@@ -1,65 +1,94 @@
+// --- Déclarations de familles de rôles (affichage) ---
 export const STAFF_ROLES = ["Commercial", "Personnel"];
+export const REDACTION_ROLES = ["Redacteur", "Personnel"];
+export const PERSONNEL_ROLE = ["Personnel"]; // unique
 
-/** Retourne true si l'utilisateur a au moins un rôle parmi STAFF_ROLES */
-export function hasAnyStaffRole(user) {
+// Mappe les flags booléens potentiels vers des noms de rôles (pour la détection)
+const FLAG_TO_ROLE = {
+  is_commercial: "Commercial",
+  is_personnel: "Personnel",
+  is_redacteur: "Redacteur",
+};
+
+// Permissions qui donnent implicitement l'accès "Personnel" (fallback)
+const PERMS_FOR_PERSONNEL = [
+  "api.view_userformation",
+  "api.add_userformation",
+  "api.change_userformation",
+  "api.delete_userformation",
+];
+
+// --- Utils internes ---
+function norm(s) {
+  return String(s || "").normalize("NFKD").toLowerCase().trim();
+}
+
+function pickNames(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((v) => (typeof v === "string" ? v : v?.name))
+    .filter(Boolean);
+}
+
+/**
+ * Collecte TOUTES les sources possibles de rôles côté user
+ * et renvoie un Set de NOMS DE RÔLES normalisés (lowercase).
+ */
+export function collectUserRoleNames(user) {
+  if (!user) return new Set();
+
+  const names = [
+    ...pickNames(user.groups),
+    ...pickNames(user.group_names),
+    ...pickNames(user.roles),
+    user.role,
+    user.profile?.group?.name,
+    // Flags booléens -> noms de rôle
+    ...Object.entries(FLAG_TO_ROLE)
+      .filter(([flag]) => !!user?.[flag])
+      .map(([, roleName]) => roleName),
+  ].filter(Boolean);
+
+  return new Set(names.map(norm));
+}
+
+/**
+ * Test générique : l'utilisateur a-t-il AU MOINS UN rôle dans allowedRoles ?
+ * + fallbacks staff/superuser
+ * + (optionnel) si extraPerms est fourni, vérifie les permissions explicites.
+ */
+export function hasAnyRole(user, allowedRoles, extraPerms = []) {
   if (!user) return false;
 
-  // format: user.groups = [{id, name}, ...]
-  if (Array.isArray(user.groups) && user.groups.some(g => STAFF_ROLES.includes(g?.name))) {
-    return true;
+  // Staff/superuser -> accès
+  if (user.is_staff || user.is_superuser) return true;
+
+  const want = new Set((allowedRoles || []).map(norm));
+  const have = collectUserRoleNames(user);
+
+  for (const r of want) {
+    if (have.has(r)) return true;
   }
-  // format: user.group_names = ["Commercial", ...]
-  if (Array.isArray(user.group_names) && user.group_names.some(n => STAFF_ROLES.includes(n))) {
-    return true;
+
+  // Fallback permissions explicites (si exposées côté backend)
+  if (Array.isArray(extraPerms) && Array.isArray(user?.perms)) {
+    const p = new Set(user.perms);
+    if (extraPerms.some((perm) => p.has(perm))) return true;
   }
-  // indicateurs booléens (si ton backend renvoie ça)
-  if (user.is_commercial || user.is_personnel) return true;
 
   return false;
 }
 
-export const PERSONNEL_ROLE = ["personnel"];
-
-function collectNames(arr) {
-  if (!Array.isArray(arr)) return [];
-  // supporte ['Personnel'] ou [{name:'Personnel'}]
-  return arr
-    .map(v => (typeof v === "string" ? v : v?.name))
-    .filter(Boolean)
-    .map(s => String(s).toLowerCase());
+// --- Spécialisations conviviales ---
+export function hasAnyStaffRole(user) {
+  return hasAnyRole(user, STAFF_ROLES);
 }
 
-/** True si l'utilisateur est "Personnel" via groupe, flag ou staff/admin */
-export function hasPersonnelRole(u) {
-  if (!u) return false;
+export function hasPersonnelRole(user) {
+  // autorise via rôle "Personnel" ou via permissions liées aux user-formations
+  return hasAnyRole(user, PERSONNEL_ROLE, PERMS_FOR_PERSONNEL);
+}
 
-  const bag = new Set([
-    ...collectNames(u.groups),        // ex: ['Personnel']
-    ...collectNames(u.group_names),   // ex: ['Personnel']
-    ...collectNames(u.roles),         // ex: ['Personnel']
-    ...(u.role ? [String(u.role).toLowerCase()] : []),
-    ...(u.profile?.group?.name ? [String(u.profile.group.name).toLowerCase()] : []),
-  ]);
-
-  // flags backend
-  if (u.is_personnel) return true;
-
-  // groupe attendu
-  if (PERSONNEL_ROLE.some(r => bag.has(r))) return true;
-
-  // fallback: staff/admin
-  if (u.is_staff || u.is_superuser) return true;
-
-  // fallback (optionnel) : permissions explicites
-  if (Array.isArray(u.perms)) {
-    const p = new Set(u.perms);
-    if (
-      p.has("api.view_userformation") ||
-      p.has("api.add_userformation") ||
-      p.has("api.change_userformation") ||
-      p.has("api.delete_userformation")
-    ) return true;
-  }
-
-  return false;
+export function hasAnyRedactionRole(user) {
+  return hasAnyRole(user, REDACTION_ROLES);
 }

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import "./App.css";
 import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
@@ -17,6 +16,11 @@ import FormationModal from "./components/Formations/FormationModal";
 import Feedbacks from "./pages/Feedbacks";
 import Messages from "./pages/Messages";
 import PersonnelFormationAdmin from "./pages/admin/PersonnelFormationAdmin";
+import FormationsManager from "./pages/admin/FormationsManager";
+import AdminLayout from "./layouts/AdminLayout";
+import PersonnelRoute from "./routes/PersonnelRoute";
+import ArticlesManager from "./pages/admin/ArticlesManager";
+import AdminHome from "./pages/admin/AdminHome";
 
 function App() {
   const { theme } = useTheme();
@@ -25,15 +29,22 @@ function App() {
     <div className="text-white font-sans overflow-x-hidden relative">
       <Header />
       <main
-        className={`pt-[64px] md:pt-[128px] ${
+        className={`pt-[24px] md:pt-[58px] ${
           theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
         }`}
       >
         <Routes>
+          {/* Public */}
           <Route path="/" element={<Home />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogDetail />} />
+          <Route path="/formations" element={<Formations />} />
+          <Route path="/formation/:id" element={<FormationModal />} />
+
+          {/* Auth-required (non admin layout) */}
           <Route
             path="/profile"
             element={
@@ -42,34 +53,68 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:id" element={<BlogDetail />} />
-          <Route path="/formations" element={<Formations />} />
-          <Route path="/formation/:id" element={<FormationModal />} />
           <Route
-            path="/feedbacks"
+            path="/admin/feedbacks"
             element={
               <ProtectedRoute>
-                <Feedbacks />
+                <AdminLayout>
+                  <Feedbacks />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
           <Route
-            path="/messages"
+            path="/admin/messages"
             element={
               <ProtectedRoute>
-                <Messages />
+                <AdminLayout>
+                  <Messages />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/formations"
+            element={
+              <PersonnelRoute>
+                <AdminLayout>
+                  <FormationsManager />
+                </AdminLayout>
+              </PersonnelRoute>
+            }
+          />
+
+          <Route
+            path="/admin/user-formations"
+            element={
+              <PersonnelRoute>
+                <AdminLayout>
+                  <PersonnelFormationAdmin />
+                </AdminLayout>
+              </PersonnelRoute>
+            }
+          />
+          <Route
+            path="/admin/articles"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <ArticlesManager />
+                </AdminLayout>
               </ProtectedRoute>
             }
           />
           <Route
-          path="/admin/formations"
-          element={
-            <ProtectedRoute>
-              <PersonnelFormationAdmin />
-            </ProtectedRoute>
-          }
-        />
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <AdminHome />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
       <Footer />
