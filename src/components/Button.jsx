@@ -1,41 +1,63 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import { Link } from "react-router-dom";
 
 /**
- * Button générique réutilisable sur tout le site
- * Props:
- * - to: chemin à passer à Link (optionnel)
- * - onClick: fonction à exécuter au clic (optionnel)
- * - className: classes Tailwind supplémentaires
- * - children: contenu du bouton
+ * Button générique
+ * - Si `to` est fourni => <Link>
+ * - Sinon => <button>
+ * - Par défaut, type="submit" dans un formulaire (sauf si onClick est fourni)
  */
-export default function Button({
-  to,
-  children,
-  className = "",
-  type,           
-  onClick,
-  ...rest
-}) {
-  const baseClasses = 'transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none';
+const Button = forwardRef(function Button(
+  {
+    to,
+    children,
+    className = "",
+    type,
+    onClick,
+    disabled = false,
+    ...rest
+  },
+  ref
+) {
+  const baseClasses =
+    "transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none";
   const combinedClasses = `${baseClasses} ${className}`.trim();
 
   if (to) {
-    // Lien de navigation (pas de <button> imbriqué)
+    // Lien de navigation
     return (
-      <Link to={to} className={`${baseClasses} ${className}`} {...rest}>
+      <Link
+        to={to}
+        className={combinedClasses}
+        aria-disabled={disabled || undefined}
+        onClick={(e) => {
+          if (disabled) e.preventDefault();
+          if (onClick) onClick(e);
+        }}
+        {...rest}
+      >
         {children}
       </Link>
     );
   }
 
-  // Bouton natif
+  // Heuristique : si aucun type n'est fourni, on met "submit" par défaut,
+  // sauf si onClick est présent (cas bouton d'action hors submit).
+  const computedType = type ?? (onClick ? "button" : "submit");
+
   return (
     <button
-      type={type || "button"}
+      ref={ref}
+      type={computedType}
       onClick={onClick}
-      className={combinedClasses}>
+      className={combinedClasses}
+      disabled={disabled}
+      aria-disabled={disabled || undefined}
+      {...rest}
+    >
       {children}
     </button>
   );
-}
+});
+
+export default Button;

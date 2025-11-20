@@ -1,46 +1,30 @@
 import { getCookie } from "./cookies";
 
-// Normalise une base API propre (avec /api au besoin)
-function normalizeApiBase() {
-  const raw =
-    (import.meta?.env?.VITE_API_URL && String(import.meta.env.VITE_API_URL).replace(/\/+$/, "")) ||
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
-  // si VITE_API_URL pointe déjà sur .../api, garde tel quel
-  return /\/api$/i.test(raw) ? raw : `${raw}/api`;
-}
-
-const API_BASE = normalizeApiBase();
+// Construit toujours .../api/auth
+const RAW = (import.meta?.env?.VITE_API_URL?.replace(/\/$/, "")) ||
+            (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
+const API_BASE = RAW.endsWith("/api") ? RAW : `${RAW}/api`;
 const API = `${API_BASE}/auth`;
 
-/**
- * Assure un token CSRF.
- * - Appelle toujours /auth/csrf/ avec credentials: 'include'
- * - Lit d'abord le token renvoyé en JSON (csrfToken/csrf/token)
- * - Fallback: tente le cookie "csrftoken" si présent (dev / non-HttpOnly)
- */
+/** Récupère/assure le cookie CSRF et retourne le token. */
 export async function ensureCsrf() {
+  const existing = getCookie("csrftoken");
+  if (existing) return existing;
+
   const url = `${API}/csrf/`;
   let r;
   try {
-    r = await fetch(url, { credentials: "include", headers: { Accept: "application/json" } });
-  } catch (e) {
-    throw new Error(`CSRF request failed (network/502?) → ${url}`);
+    r = await fetch(url, { credentials: "include" });
+  } catch {
+    throw new Error(`CSRF request failed → ${url}`);
   }
   if (!r.ok) throw new Error(`CSRF ${r.status} at ${url}`);
 
-  // Essaye de lire le token dans le JSON
-  let token = null;
-  try {
-    const data = await r.clone().json();
-    token = data?.csrfToken || data?.csrf || data?.token || null;
-  } catch {
-    // ok si endpoint renvoie 204/texte
-  }
+  // Ignore le body s'il n'y en a pas
+  try { await r.clone().json(); } catch {}
 
-  // Fallback cookie (utile en dev ou si CSRF_COOKIE_HTTPONLY=False)
-  if (!token) token = getCookie("csrftoken");
-
-  if (!token) throw new Error("CSRF token not found (check cookie domain/samesite or JSON payload).");
+  const token = getCookie("csrftoken");
+  if (!token) throw new Error("CSRF cookie not found after call (check cookie domain/samesite).");
   return token;
 }
 
@@ -49,47 +33,33 @@ async function refreshAccess() {
   const r = await fetch(`${API}/refresh/`, {
     method: "POST",
     credentials: "include",
-    headers: {
-      "X-CSRFToken": csrf,
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-    body: JSON.stringify({}),
+    headers: { "X-CSRFToken": csrf, "Content-Type": "application/json" },
+    body: JSON.stringify({})
   });
   if (!r.ok) throw new Error("refresh_failed");
   return true;
 }
 
-/**
- * Appel générique API avec gestion CSRF + refresh sur 401.
- */
-export async function apiFetch(
-  path,
-  { method = "GET", body = null, json = true, withCsrf = false, retry = true } = {}
-) {
-  const init = { method, credentials: "include", headers: { Accept: "application/json" } };
-
+/** Appel API générique avec CSRF + retry 401 via /refresh/ */
+export async function apiFetch(path, { method="GET", body=null, json=true, withCsrf=false, retry=true } = {}) {
+  const init = { method, credentials: "include", headers: {} };
   if (json) init.headers["Content-Type"] = "application/json";
   if (withCsrf && method.toUpperCase() !== "GET") {
-    const csrf = await ensureCsrf();
+    const csrf = getCookie("csrftoken") || (await ensureCsrf());
     init.headers["X-CSRFToken"] = csrf;
   }
-  if (body != null) init.body = json ? JSON.stringify(body) : body;
+  if (body) init.body = json ? JSON.stringify(body) : body;
 
   const url = `${API}${path}`;
   const res1 = await fetch(url, init);
+  if (res1.status !== 401 || !retry) return res1;
 
-  // 401 → tentative refresh + retry une fois
-  if (res1.status === 401 && retry) {
-    try {
-      await refreshAccess();
-      return await fetch(url, init);
-    } catch {
-      return res1;
-    }
+  try {
+    await refreshAccess();
+    return await fetch(url, init);
+  } catch {
+    return res1;
   }
-
-  return res1;
 }
 
 export const AuthApi = {
@@ -98,44 +68,39 @@ export const AuthApi = {
     if (!r.ok) throw new Error(`me_${r.status}`);
     return r.json();
   },
-
   async login({ email, username, identifier, password }) {
     const id = (email ?? username ?? identifier ?? "").trim();
     if (!id || !password) {
-      const details = { non_field_errors: ["Username/email and password are required."] };
+      const details = { non_field_errors: ["Identifier and password are required."] };
       throw Object.assign(new Error("login_failed"), { status: 400, details });
     }
-
-    const body = { email: id, username: id, identifier: id, password };
-    const r = await apiFetch("/login/", { method: "POST", withCsrf: true, body });
-
+    const r = await apiFetch("/login/", {
+      method: "POST",
+      withCsrf: true,
+      body: { email: id, username: id, identifier: id, password }
+    });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       throw Object.assign(new Error("login_failed"), { status: r.status, details: err });
     }
     return { ok: true };
   },
-
-  async register({ username, email, first_name, last_name, password, password_confirm }) {
-    const r = await apiFetch("/register/", {
-      method: "POST",
-      withCsrf: true,
-      body: { username, email, first_name, last_name, password, password_confirm },
-    });
+  async register(payload) {
+    const r = await apiFetch("/register/", { method: "POST", withCsrf: true, body: payload });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
       throw Object.assign(new Error("register_failed"), { status: r.status, details: err });
     }
     return { ok: true };
   },
-
-  async refresh() {
-    await refreshAccess();
-    return { ok: true };
-  },
-
-  async logout() {
-    const r = await apiFetch("/logout/", { method: "POST", withCsrf: true, body: {} });
-    return r.ok;
-  },
+  async refresh() { await refreshAccess(); return { ok: true }; },
+  async logout() { const r = await apiFetch("/logout/", { method: "POST", withCsrf: true, body: {} }); return r.ok; }
 };
+
+// petit helper cookie si besoin ici
+export function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(";").shift();
+  return null;
+}
