@@ -1,33 +1,46 @@
 import { getCookie } from "./cookies";
 
-// Base API : utilise VITE_API_URL si défini, sinon même origine (pratique derrière un reverse proxy)
-const ORIGIN =
-  (import.meta?.env?.VITE_API_URL && import.meta.env.VITE_API_URL.replace(/\/$/, "")) ||
-  (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
+// Normalise une base API propre (avec /api au besoin)
+function normalizeApiBase() {
+  const raw =
+    (import.meta?.env?.VITE_API_URL && String(import.meta.env.VITE_API_URL).replace(/\/+$/, "")) ||
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:8000");
+  // si VITE_API_URL pointe déjà sur .../api, garde tel quel
+  return /\/api$/i.test(raw) ? raw : `${raw}/api`;
+}
 
-const API = `${ORIGIN}/auth`;
+const API_BASE = normalizeApiBase();
+const API = `${API_BASE}/auth`;
 
 /**
- * Récupère/assure le cookie CSRF et retourne le token.
+ * Assure un token CSRF.
+ * - Appelle toujours /auth/csrf/ avec credentials: 'include'
+ * - Lit d'abord le token renvoyé en JSON (csrfToken/csrf/token)
+ * - Fallback: tente le cookie "csrftoken" si présent (dev / non-HttpOnly)
  */
 export async function ensureCsrf() {
-  const existing = getCookie("csrftoken");
-  if (existing) return existing;
-
   const url = `${API}/csrf/`;
   let r;
   try {
-    r = await fetch(url, { credentials: "include" });
+    r = await fetch(url, { credentials: "include", headers: { Accept: "application/json" } });
   } catch (e) {
     throw new Error(`CSRF request failed (network/502?) → ${url}`);
   }
   if (!r.ok) throw new Error(`CSRF ${r.status} at ${url}`);
 
-  // Certaines implémentations renvoient 204/texte : on ignore le JSON silencieusement
-  try { await r.clone().json(); } catch (_) {}
+  // Essaye de lire le token dans le JSON
+  let token = null;
+  try {
+    const data = await r.clone().json();
+    token = data?.csrfToken || data?.csrf || data?.token || null;
+  } catch {
+    // ok si endpoint renvoie 204/texte
+  }
 
-  const token = getCookie("csrftoken");
-  if (!token) throw new Error("CSRF cookie not found after call (check cookie domain/samesite).");
+  // Fallback cookie (utile en dev ou si CSRF_COOKIE_HTTPONLY=False)
+  if (!token) token = getCookie("csrftoken");
+
+  if (!token) throw new Error("CSRF token not found (check cookie domain/samesite or JSON payload).");
   return token;
 }
 
@@ -36,42 +49,49 @@ async function refreshAccess() {
   const r = await fetch(`${API}/refresh/`, {
     method: "POST",
     credentials: "include",
-    headers: { "X-CSRFToken": csrf, "Content-Type": "application/json" },
-    body: JSON.stringify({})
+    headers: {
+      "X-CSRFToken": csrf,
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({}),
   });
   if (!r.ok) throw new Error("refresh_failed");
   return true;
 }
 
 /**
- * Appel générique API avec gestion CSRF + refresh automatique sur 401.
+ * Appel générique API avec gestion CSRF + refresh sur 401.
  */
 export async function apiFetch(
   path,
   { method = "GET", body = null, json = true, withCsrf = false, retry = true } = {}
 ) {
-  const init = { method, credentials: "include", headers: {} };
+  const init = { method, credentials: "include", headers: { Accept: "application/json" } };
 
   if (json) init.headers["Content-Type"] = "application/json";
   if (withCsrf && method.toUpperCase() !== "GET") {
-    const csrf = getCookie("csrftoken") || (await ensureCsrf());
+    const csrf = await ensureCsrf();
     init.headers["X-CSRFToken"] = csrf;
   }
-  if (body) init.body = json ? JSON.stringify(body) : body;
+  if (body != null) init.body = json ? JSON.stringify(body) : body;
 
-  const res1 = await fetch(`${API}${path}`, init);
-  if (res1.status !== 401 || !retry) return res1;
+  const url = `${API}${path}`;
+  const res1 = await fetch(url, init);
 
-  // Tentative de refresh du token d'accès puis retry une fois
-  try {
-    await refreshAccess();
-    return await fetch(`${API}${path}`, init);
-  } catch {
-    return res1;
+  // 401 → tentative refresh + retry une fois
+  if (res1.status === 401 && retry) {
+    try {
+      await refreshAccess();
+      return await fetch(url, init);
+    } catch {
+      return res1;
+    }
   }
+
+  return res1;
 }
 
-// API haut niveau
 export const AuthApi = {
   async me() {
     const r = await apiFetch("/me/", { method: "GET" });
@@ -80,22 +100,14 @@ export const AuthApi = {
   },
 
   async login({ email, username, identifier, password }) {
-    // Prend la première valeur dispo (email > username > identifier)
     const id = (email ?? username ?? identifier ?? "").trim();
     if (!id || !password) {
       const details = { non_field_errors: ["Username/email and password are required."] };
       throw Object.assign(new Error("login_failed"), { status: 400, details });
     }
 
-    // IMPORTANT : ton backend marche avec { email, password } (test Postman)
-    // Pour être blindé, on envoie aussi username/identifier (ignorés si inutiles)
     const body = { email: id, username: id, identifier: id, password };
-
-    const r = await apiFetch("/login/", {
-      method: "POST",
-      withCsrf: true,
-      body
-    });
+    const r = await apiFetch("/login/", { method: "POST", withCsrf: true, body });
 
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
@@ -108,7 +120,7 @@ export const AuthApi = {
     const r = await apiFetch("/register/", {
       method: "POST",
       withCsrf: true,
-      body: { username, email, first_name, last_name, password, password_confirm }
+      body: { username, email, first_name, last_name, password, password_confirm },
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
@@ -125,5 +137,5 @@ export const AuthApi = {
   async logout() {
     const r = await apiFetch("/logout/", { method: "POST", withCsrf: true, body: {} });
     return r.ok;
-  }
+  },
 };
