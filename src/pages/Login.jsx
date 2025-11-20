@@ -18,18 +18,15 @@ export default function Login() {
 
   const L = language === "fr" ? loginFr : loginEn;
 
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const validate = () => {
-    const errs = {};
-    const emailOk = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim());
-    if (!emailOk) errs.email = L.email_error || "Invalid email address.";
-    if (!form.password.trim()) errs.password = L.password_error || "Password is required.";
-    return errs;
-  };
+  const inputBorder =
+    theme === "dark"
+      ? "border-primary focus:border-primary"
+      : "border-secondary focus:border-secondary";
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -38,46 +35,51 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const validation = validate();
-  if (Object.keys(validation).length) {
-    setErrors(validation);
-    setShake(true);
-    setTimeout(() => setShake(false), 500);
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-    const id = form.email.trim();
-
-    // Envoie email/username/identifier + password
-    const me = await login({
-      email: id,
-      username: id,
-      identifier: id,
-      password: form.password,
-    });
-
-    if (me) {
-      // redirige (depuis ProtectedRoute ça passera car user est hydraté)
-      const from = location.state?.from?.pathname || "/";
-      navigate(from, { replace: true });
-    } else {
-      throw new Error("no_me");
+    e.preventDefault();
+    // Validation minimale : non vide
+    const errs = {};
+    if (!form.identifier.trim()) {
+      errs.identifier =
+        language === "fr" ? "Identifiant requis (email ou nom d’utilisateur)." : "Identifier required (email or username).";
     }
-  } catch (e) {
-    const apiMsg =
-      e?.details?.non_field_errors?.join(" ") ||
-      e?.details?.detail ||
-      (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
-    setErrors({ form: apiMsg });
-    setShake(true);
-    setTimeout(() => setShake(false), 500);
-  } finally {
-    setSubmitting(false);
-  }
-};
+    if (!form.password.trim()) {
+      errs.password = language === "fr" ? "Mot de passe requis." : "Password is required.";
+    }
+    if (Object.keys(errs).length) {
+      setErrors(errs);
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const id = form.identifier.trim();
+
+      const me = await login({
+        identifier: id,
+        email: id,       // ton AuthContext relaie vers AuthApi
+        username: id,
+        password: form.password,
+      });
+
+      if (me) {
+        navigate(from, { replace: true });
+      } else {
+        throw new Error("no_me");
+      }
+    } catch (e2) {
+      const apiMsg =
+        e2?.details?.non_field_errors?.join(" ") ||
+        e2?.details?.detail ||
+        (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
+      setErrors({ form: apiMsg });
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section
@@ -100,41 +102,30 @@ export default function Login() {
           </div>
         )}
 
-        {/* Email */}
+        {/* Identifier (email OU username) */}
         <div className="relative">
           <input
-            type="email"
-            id="email"
-            autoComplete="email"
+            type="text"
+            id="identifier"
+            autoComplete="username"
             placeholder=" "
-            value={form.email}
+            value={form.identifier}
             onChange={handleChange}
-            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none
-              ${
-                errors.email
-                  ? "border-red-500 focus:border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? "email-error" : undefined}
+            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none ${errors.identifier ? "border-red-500" : inputBorder}`}
+            aria-invalid={!!errors.identifier}
+            aria-describedby={errors.identifier ? "identifier-error" : undefined}
           />
           <label
-            htmlFor="email"
-            className={`absolute left-0 -top-2 text-sm transition-all
-              peer-placeholder-shown:-top-2 peer-focus:-top-5
-              ${
-                theme === "dark"
-                  ? "text-primary peer-focus:text-primary"
-                  : "text-secondary peer-focus:text-secondary"
-              }`}
+            htmlFor="identifier"
+            className={`absolute left-0 -top-2 text-sm transition-all peer-placeholder-shown:-top-2 peer-focus:-top-5 ${
+              theme === "dark" ? "text-primary peer-focus:text-primary" : "text-secondary peer-focus:text-secondary"
+            }`}
           >
-            {L.email || "Email"}
+            {language === "fr" ? "Email ou nom d’utilisateur" : "Email or username"}
           </label>
-          {errors.email && (
-            <p id="email-error" className="mt-1 text-xs text-red-500">
-              {errors.email}
+          {errors.identifier && (
+            <p id="identifier-error" className="mt-1 text-xs text-red-500">
+              {errors.identifier}
             </p>
           )}
         </div>
@@ -148,26 +139,15 @@ export default function Login() {
             placeholder=" "
             value={form.password}
             onChange={handleChange}
-            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none
-              ${
-                errors.password
-                  ? "border-red-500 focus:border-red-500"
-                  : theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
-              }`}
+            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none ${errors.password ? "border-red-500" : inputBorder}`}
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? "password-error" : undefined}
           />
           <label
             htmlFor="password"
-            className={`absolute left-0 -top-2 text-sm transition-all
-              peer-placeholder-shown:-top-2 peer-focus:-top-5
-              ${
-                theme === "dark"
-                  ? "text-primary peer-focus:text-primary"
-                  : "text-secondary peer-focus:text-secondary"
-              }`}
+            className={`absolute left-0 -top-2 text-sm transition-all peer-placeholder-shown:-top-2 peer-focus:-top-5 ${
+              theme === "dark" ? "text-primary peer-focus:text-primary" : "text-secondary peer-focus:text-secondary"
+            }`}
           >
             {L.password || "Password"}
           </label>
@@ -183,24 +163,14 @@ export default function Login() {
           type="submit"
           disabled={submitting}
           className={`w-full px-4 py-2 rounded-md shadow text-sm ${
-            theme === "dark"
-              ? "bg-secondary text-white hover:bg-secondary/90"
-              : "bg-primary text-dark hover:bg-primary/90"
+            theme === "dark" ? "bg-secondary text-white hover:bg-secondary/90" : "bg-primary text-dark hover:bg-primary/90"
           } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
         >
-          {submitting
-            ? language === "fr"
-              ? "Connexion..."
-              : "Signing in..."
-            : L.login || "Login"}
+          {submitting ? (language === "fr" ? "Connexion..." : "Signing in...") : (L.login || "Login")}
         </Button>
 
-        {/* Links */}
         <div className="text-center text-xs space-y-2">
-          <Link
-            to="/forgot-password"
-            className={`${theme === "dark" ? "hover:text-primary" : "hover:text-secondary"}`}
-          >
+          <Link to="/forgot-password" className={`${theme === "dark" ? "hover:text-primary" : "hover:text-secondary"}`}>
             {L.forgot_password || "Forgot your password?"}
           </Link>
           <p className={`${theme === "dark" ? "text-muted" : "text-background/80"}`}>
@@ -208,9 +178,7 @@ export default function Login() {
             <Link
               to="/register"
               className={`font-medium underline underline-offset-8 ${
-                theme === "dark"
-                  ? "text-white hover:text-primary"
-                  : "text-background hover:text-secondary"
+                theme === "dark" ? "text-white hover:text-primary" : "text-background hover:text-secondary"
               }`}
             >
               {L.create_account || "Create one"}
