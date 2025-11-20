@@ -6,12 +6,11 @@ const API_BASE = (() => {
   if (env) return env;
   if (typeof window !== "undefined") {
     const host = window.location.hostname;
-    // En local (vite) on parle au backend local
     if (/^(localhost|127\.0\.0\.1)$/.test(host)) return "http://localhost:8000/api";
   }
-  // Fallback de secours (prod) : backend public
   return "https://weebbackend.melissa-mangione.com/api";
 })();
+console.debug("[API_BASE]", API_BASE); // ← vérifie dans la console
 
 const API = `${API_BASE}/auth`;
 
