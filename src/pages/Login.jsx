@@ -18,6 +18,7 @@ export default function Login() {
 
   const L = language === "fr" ? loginFr : loginEn;
 
+  // ⚠️ identifiant libre (email OU username)
   const [form, setForm] = useState({ identifier: "", password: "" });
   const [errors, setErrors] = useState({});
   const [shake, setShake] = useState(false);
@@ -26,7 +27,7 @@ export default function Login() {
   const validate = () => {
     const errs = {};
     if (!form.identifier.trim()) {
-      errs.identifier = language === "fr" ? "Saisissez votre email ou nom d’utilisateur." : "Enter email or username.";
+      errs.identifier = language === "fr" ? "Identifiant requis." : "Identifier is required.";
     }
     if (!form.password.trim()) {
       errs.password = L.password_error || "Password is required.";
@@ -53,13 +54,25 @@ export default function Login() {
     try {
       setSubmitting(true);
       const id = form.identifier.trim();
-      const me = await login({ email: id, username: id, identifier: id, password: form.password });
-      if (me) navigate(from, { replace: true });
-      else throw new Error("no_me");
-    } catch (e2) {
+      console.debug("[LOGIN] submit with id=", id);
+
+      const me = await login({
+        email: id,
+        username: id,
+        identifier: id,
+        password: form.password,
+      });
+
+      if (me) {
+        navigate(from, { replace: true });
+      } else {
+        throw new Error("no_me");
+      }
+    } catch (e) {
+      console.error("[LOGIN] error:", e);
       const apiMsg =
-        e2?.details?.non_field_errors?.join(" ") ||
-        e2?.details?.detail ||
+        e?.details?.non_field_errors?.join(" ") ||
+        e?.details?.detail ||
         (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
       setErrors({ form: apiMsg });
       setShake(true);
@@ -68,6 +81,9 @@ export default function Login() {
       setSubmitting(false);
     }
   };
+
+  const inputBorder =
+    theme === "dark" ? "border-primary focus:border-primary" : "border-secondary focus:border-secondary";
 
   return (
     <section className={`min-h-screen flex items-center justify-center px-6 py-12 ${theme === "dark" ? "text-white" : "text-background"}`}>
@@ -86,20 +102,18 @@ export default function Login() {
           </div>
         )}
 
-        {/* Identifier (email ou username) */}
+        {/* Identifier (email OU username) */}
         <div className="relative">
           <input
             type="text"
             id="identifier"
-            autoComplete="username"
+            autoComplete="username email"
             placeholder=" "
             value={form.identifier}
             onChange={handleChange}
-            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none
-              ${errors.identifier
-                ? "border-red-500 focus:border-red-500"
-                : theme === "dark" ? "border-primary focus:border-primary" : "border-secondary focus:border-secondary"
-              }`}
+            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none ${
+              errors.identifier ? "border-red-500 focus:border-red-500" : inputBorder
+            }`}
             aria-invalid={!!errors.identifier}
             aria-describedby={errors.identifier ? "identifier-error" : undefined}
           />
@@ -109,7 +123,7 @@ export default function Login() {
               theme === "dark" ? "text-primary peer-focus:text-primary" : "text-secondary peer-focus:text-secondary"
             }`}
           >
-            {language === "fr" ? "Email ou nom d’utilisateur" : "Email or username"}
+            {language === "fr" ? "Email ou nom d'utilisateur" : "Email or username"}
           </label>
           {errors.identifier && (
             <p id="identifier-error" className="mt-1 text-xs text-red-500">
@@ -127,11 +141,9 @@ export default function Login() {
             placeholder=" "
             value={form.password}
             onChange={handleChange}
-            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none
-              ${errors.password
-                ? "border-red-500 focus:border-red-500"
-                : theme === "dark" ? "border-primary focus:border-primary" : "border-secondary focus:border-secondary"
-              }`}
+            className={`peer w-full bg-transparent border-b-2 py-2 focus:outline-none ${
+              errors.password ? "border-red-500 focus:border-red-500" : inputBorder
+            }`}
             aria-invalid={!!errors.password}
             aria-describedby={errors.password ? "password-error" : undefined}
           />
@@ -150,7 +162,6 @@ export default function Login() {
           )}
         </div>
 
-        {/* Submit */}
         <Button
           type="submit"
           disabled={submitting}
@@ -161,7 +172,6 @@ export default function Login() {
           {submitting ? (language === "fr" ? "Connexion..." : "Signing in...") : (L.login || "Login")}
         </Button>
 
-        {/* Links */}
         <div className="text-center text-xs space-y-2">
           <Link to="/forgot-password" className={`${theme === "dark" ? "hover:text-primary" : "hover:text-secondary"}`}>
             {L.forgot_password || "Forgot your password?"}
@@ -170,9 +180,7 @@ export default function Login() {
             {L.no_account || "No account yet?"}{" "}
             <Link
               to="/register"
-              className={`font-medium underline underline-offset-8 ${
-                theme === "dark" ? "text-white hover:text-primary" : "text-background hover:text-secondary"
-              }`}
+              className={`font-medium underline underline-offset-8 ${theme === "dark" ? "text-white hover:text-primary" : "text-background hover:text-secondary"}`}
             >
               {L.create_account || "Create one"}
             </Link>
