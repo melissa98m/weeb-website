@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
-import { motion } from "framer-motion";
 import registerEn from "../../locales/en/register.json";
 import registerFr from "../../locales/fr/register.json";
 import Button from "../components/Button";
@@ -14,6 +14,8 @@ export default function Register() {
   const t = language === "fr" ? registerFr : registerEn;
   const { register: registerUser } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || "/";
 
   const [form, setForm] = useState({
     username: "",
@@ -29,6 +31,8 @@ export default function Register() {
   const [shake, setShake] = useState(false);
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const [pwdValidations, setPwdValidations] = useState({
     length: false,
     uppercase: false,
@@ -57,14 +61,12 @@ export default function Register() {
 
   const validate = () => {
     const errs = {};
-
     if (!form.username.trim()) errs.username = t.username_error;
     if (!form.nom.trim()) errs.nom = t.name_error;
     if (!form.prenom.trim()) errs.prenom = t.firstname_error;
 
-    if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email)) {
-      errs.email = t.email_error;
-    }
+    const emailOk = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim());
+    if (!emailOk) errs.email = t.email_error;
 
     if (form.telephone && !phoneLooksOk(form.telephone)) {
       errs.telephone =
@@ -77,13 +79,11 @@ export default function Register() {
     if (Object.values(pwdValidations).some((ok) => !ok)) {
       errs.password = t.password_error;
     }
-
     if (!form.confirmPassword.trim()) {
       errs.confirmPassword = t.confirm_password_required;
     } else if (form.confirmPassword !== form.password) {
       errs.confirmPassword = t.passwords_not_match;
     }
-
     return errs;
   };
 
@@ -98,8 +98,8 @@ export default function Register() {
       return;
     }
 
-    setForm({ ...form, [id]: value });
-    setErrors({ ...errors, [id]: null });
+    setForm((prev) => ({ ...prev, [id]: value }));
+    setErrors((prev) => ({ ...prev, [id]: null, form: null }));
   };
 
   const handleSubmit = async (e) => {
@@ -113,36 +113,44 @@ export default function Register() {
     }
 
     try {
+      setSubmitting(true);
+      // Envoie les 2 clés phone/telephone pour compat backend
       await registerUser({
-        username: form.username,
-        email: form.email,
-        first_name: form.prenom,
-        last_name: form.nom,
-        // adapte la clé ci-dessous si ton backend attend "telephone"
+        username: form.username.trim(),
+        email: form.email.trim(),
+        first_name: form.prenom.trim(),
+        last_name: form.nom.trim(),
         phone: form.telephone || undefined,
+        telephone: form.telephone || undefined,
         password: form.password,
         password_confirm: form.confirmPassword,
       });
-      navigate("/");
-    } catch (e) {
-      const d = e.details || {};
+      navigate(redirectTo, { replace: true });
+    } catch (e2) {
+      const d = e2?.details || {};
       const map = {};
       if (d.username) map.username = Array.isArray(d.username) ? d.username.join(" ") : String(d.username);
       if (d.email) map.email = Array.isArray(d.email) ? d.email.join(" ") : String(d.email);
+      if (d.first_name) map.prenom = Array.isArray(d.first_name) ? d.first_name.join(" ") : String(d.first_name);
+      if (d.last_name) map.nom = Array.isArray(d.last_name) ? d.last_name.join(" ") : String(d.last_name);
       if (d.password) map.password = Array.isArray(d.password) ? d.password.join(" ") : String(d.password);
       if (d.password_confirm) map.confirmPassword = Array.isArray(d.password_confirm) ? d.password_confirm.join(" ") : String(d.password_confirm);
       if (d.phone || d.telephone) {
-        map.telephone = Array.isArray(d.phone || d.telephone)
-          ? (d.phone || d.telephone).join(" ")
-          : String(d.phone || d.telephone);
+        const v = d.phone || d.telephone;
+        map.telephone = Array.isArray(v) ? v.join(" ") : String(v);
       }
+      map.form =
+        d.non_field_errors?.join(" ") ||
+        d.detail ||
+        (language === "fr" ? "Échec de l’inscription." : "Registration failed.");
       setErrors(map);
       setShake(true);
       setTimeout(() => setShake(false), 500);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // --- style unifié pour TOUS les champs ---
   const fieldClass = (hasError) =>
     `w-full p-3 rounded-md border focus:outline-none focus:ring-2 ${
       hasError
@@ -160,6 +168,7 @@ export default function Register() {
     >
       <motion.form
         onSubmit={handleSubmit}
+        noValidate
         animate={shake ? { x: [0, -10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.5 }}
         className={`w-full max-w-3xl p-6 rounded-md border text-sm space-y-6 ${
@@ -167,6 +176,12 @@ export default function Register() {
         }`}
       >
         <h1 className="text-3xl font-bold text-center">{t.register}</h1>
+
+        {errors.form && (
+          <div className="text-sm rounded-md p-3 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">
+            {errors.form}
+          </div>
+        )}
 
         {/* Username */}
         <div>
@@ -190,13 +205,7 @@ export default function Register() {
             <label htmlFor="nom" className="block font-medium mb-2">
               {t.name}
             </label>
-            <input
-              id="nom"
-              type="text"
-              value={form.nom}
-              onChange={handleChange}
-              className={fieldClass(!!errors.nom)}
-            />
+            <input id="nom" type="text" value={form.nom} onChange={handleChange} className={fieldClass(!!errors.nom)} />
             {errors.nom && <p className="text-red-500 text-xs mt-1">{errors.nom}</p>}
           </div>
 
@@ -265,7 +274,7 @@ export default function Register() {
               type={showPwd ? "text" : "password"}
               value={form.password}
               onChange={handleChange}
-              className={`${fieldClass(!!errors.password)} pr-20`} // espace pour le bouton
+              className={`${fieldClass(!!errors.password)} pr-20`}
             />
             <Button
               type="button"
@@ -333,13 +342,18 @@ export default function Register() {
         <div className="text-center">
           <Button
             type="submit"
+            disabled={submitting}
             className={`px-6 py-2 rounded-md shadow text-sm ${
               theme === "dark"
                 ? "bg-secondary text-white hover:bg-secondary/90"
                 : "bg-primary text-dark hover:bg-primary/90"
-            }`}
+            } ${submitting ? "opacity-70 cursor-not-allowed" : ""}`}
           >
-            {t.register}
+            {submitting
+              ? language === "fr"
+                ? "Création du compte…"
+                : "Creating account…"
+              : t.register}
           </Button>
         </div>
 
