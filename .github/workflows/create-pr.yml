@@ -1,20 +1,190 @@
-name: Automatically create / update pull request
-# run this workflow only on new feature branches, not when they're merged to main
+name: Auto Pull Request
+
 on:
   push:
     branches-ignore:
-      - "main"
+      - main
+      - master
+
 jobs:
-  create_pr_repo_sync:
+  create-or-update-pr:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Create pull request
-        id: open-pr
-        uses: repo-sync/pull-request@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          destination_branch: "main"
-          pr_title: "feat: PLACEHOLDER TITLE"
-          pr_template: ".github/PULL_REQUEST_TEMPLATE.md"
-          pr_reviewer: "melissa98m"
-          pr_draft: false
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get branch name
+        id: branch
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "branch_name=$BRANCH_NAME" >> "$GITHUB_OUTPUT"
+          echo "Branch: $BRANCH_NAME"
+
+      - name: Get base branch
+        id: base
+        run: |
+          git fetch origin main master 2>/dev/null || true
+          if git show-ref --verify --quiet refs/remotes/origin/main; then
+            BASE_BRANCH="main"
+          elif git show-ref --verify --quiet refs/remotes/origin/master; then
+            BASE_BRANCH="master"
+          else
+            BASE_BRANCH="main"
+          fi
+          echo "base_branch=$BASE_BRANCH" >> "$GITHUB_OUTPUT"
+          echo "Base branch: $BASE_BRANCH"
+
+      - name: Get all commit messages
+        id: commits
+        run: |
+          BASE_BRANCH="${{ steps.base.outputs.base_branch }}"
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+
+          COMMIT_MESSAGES=$(git log "origin/$BASE_BRANCH..HEAD" --pretty=format:"### %s%n%b" --reverse \
+            | sed '/^$/d' \
+            | sed 's/^###/-/')
+
+          if [ -z "$COMMIT_MESSAGES" ]; then
+            COMMIT_MESSAGES="- Aucun commit trouvé"
+          fi
+
+          cat > /tmp/pr_description.txt <<EOF
+          ## Messages de commit
+
+          $COMMIT_MESSAGES
+
+          ---
+          *Cette pull request a été créée automatiquement.*
+          EOF
+
+          echo "Commit messages:"
+          echo "$COMMIT_MESSAGES"
+
+      - name: Check if PR exists
+        id: check-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          BASE_BRANCH="${{ steps.base.outputs.base_branch }}"
+          REPO="${{ github.repository }}"
+          OWNER="${{ github.repository_owner }}"
+
+          PR_RESPONSE=$(curl -s \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$REPO/pulls?head=$OWNER:$BRANCH_NAME&base=$BASE_BRANCH&state=open")
+
+          PR_NUMBER=$(echo "$PR_RESPONSE" | jq -r '.[0].number // empty')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "pr_exists=false" >> "$GITHUB_OUTPUT"
+            echo "PR does not exist, will create new one"
+          else
+            echo "pr_exists=true" >> "$GITHUB_OUTPUT"
+            echo "pr_number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+            echo "PR #$PR_NUMBER exists, will update it"
+          fi
+
+      - name: Create Pull Request
+        if: steps.check-pr.outputs.pr_exists == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          BASE_BRANCH="${{ steps.base.outputs.base_branch }}"
+          REPO="${{ github.repository }}"
+
+          TITLE="Pull Request: $BRANCH_NAME"
+          BODY_JSON=$(jq -Rs '.' < /tmp/pr_description.txt)
+
+          PR_DATA=$(jq -n \
+            --arg title "$TITLE" \
+            --arg head "$BRANCH_NAME" \
+            --arg base "$BASE_BRANCH" \
+            --argjson body "$BODY_JSON" \
+            '{title:$title, head:$head, base:$base, body:$body}')
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/pulls" \
+            -d "$PR_DATA")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_CODE" -eq 201 ]; then
+            echo "Pull request créée avec succès"
+            echo "$BODY" | jq -r '.number'
+          else
+            echo "Erreur lors de la création de la PR (HTTP $HTTP_CODE):"
+            echo "$BODY"
+            exit 1
+          fi
+
+      - name: Update Pull Request
+        if: steps.check-pr.outputs.pr_exists == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER="${{ steps.check-pr.outputs.pr_number }}"
+          BASE_BRANCH="${{ steps.base.outputs.base_branch }}"
+          BRANCH_NAME="${{ steps.branch.outputs.branch_name }}"
+          REPO="${{ github.repository }}"
+
+          NEW_COMMIT_MESSAGES=$(git log "origin/$BASE_BRANCH..HEAD" --pretty=format:"### %s%n%b" --reverse \
+            | sed '/^$/d' \
+            | sed 's/^###/-/')
+
+          if [ -z "$NEW_COMMIT_MESSAGES" ]; then
+            NEW_COMMIT_MESSAGES="- Aucun commit trouvé"
+          fi
+
+          cat > /tmp/update_pr_description.txt <<EOF
+          ## Messages de commit
+
+          $NEW_COMMIT_MESSAGES
+
+          ---
+          *Cette pull request a été créée automatiquement et mise à jour à chaque push.*
+          EOF
+
+          BODY_JSON=$(jq -Rs '.' < /tmp/update_pr_description.txt)
+          UPDATE_DATA=$(jq -n --argjson body "$BODY_JSON" '{body:$body}')
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/$REPO/pulls/$PR_NUMBER" \
+            -d "$UPDATE_DATA")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            echo "Pull request mise à jour avec succès"
+          else
+            echo "Erreur lors de la mise à jour de la PR (HTTP $HTTP_CODE):"
+            echo "$BODY"
+            exit 1
+          fi
