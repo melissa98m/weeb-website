@@ -2,6 +2,28 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/((?!api|.*\\..*).*)", "destination": "/index.html" }
+    {
+      "source": "/api/:path*",
+      "destination": "https://weebbackend.melissa-mangione.com/api/:path*"
+    },
+    {
+      "source": "/((?!api|.*\\..*).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/:path*",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://melissa-mangione.com"
+        }
+      ]
+    }
   ]
 }
