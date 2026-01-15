@@ -7,26 +7,41 @@ const DEV_API_URL = import.meta?.env?.VITE_DEV_API_URL?.replace(/\/$/, "") || im
 
 function resolveApiBase() {
   const isProduction = import.meta.env.MODE === "production";
-  
+
+  // Détection de l'environnement runtime
+  if (typeof window !== "undefined") {
+    const hostname = window.location.hostname;
+    const protocol = window.location.protocol;
+    const isLocalhost = hostname === "localhost" || hostname === "127.0.0.1";
+    const isPreviewLocal = isLocalhost && (window.location.port === "4173" || window.location.port === "5173");
+    const isVercel = /\.vercel\.app$/i.test(hostname);
+    const isProductionDomain = /melissa-mangione\.com$/i.test(hostname);
+    const isHttps = protocol === "https:";
+
+    // 2a) Preview local (npm run preview) : utiliser DEV_API_URL ou localhost
+    if (isPreviewLocal) {
+      if (DEV_API_URL) return DEV_API_URL;
+      return "http://localhost:8000/api";
+    }
+
+    // 2b) Mode production sur domaine public (prod ou preview) : utiliser le proxy
+    if (isProduction && isHttps && (isProductionDomain || isVercel)) {
+      return "/api"; // Proxy via Vercel (évite les cookies tiers)
+    }
+
+    // 2c) Mode production sur Vercel preview : utiliser PROD_API_URL ou backend direct
+    if (isProduction && (isHttps || isVercel)) {
+      if (PROD_API_URL) return PROD_API_URL;
+      return "https://weebbackend.melissa-mangione.com/api";
+    }
+  }
+
   // 1) Priorité: variable d'env Vite explicite (build-time)
   const explicitUrl = import.meta?.env?.VITE_API_URL?.replace(/\/$/, "");
   if (explicitUrl) return explicitUrl;
 
-  // 2) Mode production: utilise PROD_API_URL
-  if (isProduction) {
-    if (PROD_API_URL) return PROD_API_URL;
-    // Fallback: détection HTTPS/Vercel en production
-    if (typeof window !== "undefined") {
-      const isHttps = window.location.protocol === "https:";
-      const isVercel = /\.vercel\.app$/i.test(window.location.hostname);
-      if (isHttps || isVercel) {
-        return PROD_API_URL || "https://weebbackend.melissa-mangione.com/api";
-      }
-    }
-  }
-
   // 3) Mode développement: utilise DEV_API_URL
-  if (DEV_API_URL) return DEV_API_URL;
+  if (!isProduction && DEV_API_URL) return DEV_API_URL;
   
   // 4) Dernier recours: dev local par défaut
   return "http://localhost:8000/api";
