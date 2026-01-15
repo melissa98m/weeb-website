@@ -1,7 +1,6 @@
 import React from "react";
 
 export default function ProfileInfo({ user, t, theme, onRefresh, onSignout }) {
-    console.log(user)
   const card =
     theme === "dark"
       ? "bg-[#1c1c1c] text-white border-[#333]"

@@ -19,16 +19,43 @@ async function fetchJSON(url, { signal } = {}) {
   const ct = r.headers.get("content-type") || "";
   if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
   if (!ct.includes("application/json")) {
-    const txt = await r.text();
-    throw new Error(`Réponse non-JSON (ct=${ct}). ${txt.slice(0, 160)}`);
+    try {
+      return await r.json();
+    } catch {
+      const txt = await r.text();
+      throw new Error(`Réponse non-JSON (ct=${ct}). ${txt.slice(0, 160)}`);
+    }
   }
   return r.json();
+}
+
+async function formatApiError(r, fallbackLabel) {
+  const ct = r.headers.get("content-type") || "";
+  let detail = "";
+  if (ct.includes("application/json")) {
+    try {
+      const data = await r.json();
+      if (data) {
+        if (typeof data === "string") detail = data;
+        else if (data.detail) detail = data.detail;
+        else detail = JSON.stringify(data);
+      }
+    } catch {}
+  } else {
+    try {
+      detail = (await r.text()).trim();
+    } catch {}
+  }
+  const base = `${r.status} ${r.statusText}`.trim();
+  const msg = detail ? `${base} - ${detail}` : base;
+  return fallbackLabel ? `${fallbackLabel} (${msg})` : msg;
 }
 
 export default function ArticleEditorModal({
   open = false,
   onClose = () => {},
   apiBase,
+  userId = null,
   article = null,             // null => création ; sinon objet article
   onSaved = () => {},
   onDeleted = () => {},
@@ -103,6 +130,7 @@ export default function ArticleEditorModal({
   /* ---------- CRUD Article ---------- */
   const postArticle = useCallback(async (payload, signal) => {
     const csrf = await ensureCsrf();
+    let lastError = "";
     for (const base of ARTICLE_ENDPOINTS(apiBase)) {
       const r = await fetch(base, {
         method: "POST",
@@ -112,12 +140,14 @@ export default function ArticleEditorModal({
         body: JSON.stringify(payload),
       });
       if (r.ok) return r.json();
+      lastError = await formatApiError(r, `POST ${base} a échoué`);
     }
-    throw new Error("Impossible de créer l’article (endpoints indisponibles).");
+    throw new Error(lastError || "Impossible de créer l’article (endpoints indisponibles).");
   }, [apiBase]);
 
   const patchArticle = useCallback(async (id, payload, signal) => {
     const csrf = await ensureCsrf();
+    let lastError = "";
     for (const base of ARTICLE_ENDPOINTS(apiBase)) {
       const r = await fetch(`${base}${id}/`, {
         method: "PATCH",
@@ -127,12 +157,14 @@ export default function ArticleEditorModal({
         body: JSON.stringify(payload),
       });
       if (r.ok) return r.json();
+      lastError = await formatApiError(r, `PATCH ${base}${id}/ a échoué`);
     }
-    throw new Error(`Impossible de mettre à jour l’article #${id}.`);
+    throw new Error(lastError || `Impossible de mettre à jour l’article #${id}.`);
   }, [apiBase]);
 
   const deleteArticle = useCallback(async (id, signal) => {
     const csrf = await ensureCsrf();
+    let lastError = "";
     for (const base of ARTICLE_ENDPOINTS(apiBase)) {
       const r = await fetch(`${base}${id}/`, {
         method: "DELETE",
@@ -141,8 +173,9 @@ export default function ArticleEditorModal({
         headers: { "X-CSRFToken": csrf },
       });
       if (r.ok || r.status === 204) return true;
+      lastError = await formatApiError(r, `DELETE ${base}${id}/ a échoué`);
     }
-    throw new Error(`Impossible de supprimer l’article #${id}.`);
+    throw new Error(lastError || `Impossible de supprimer l’article #${id}.`);
   }, [apiBase]);
 
   /* ---------- Synchro associations article-genre (ultra-safe) ---------- */
@@ -276,6 +309,7 @@ export default function ArticleEditorModal({
         article_content: content,
         link_image: imageUrl.trim() || null,
       };
+      if (!isEditing && userId != null) payload.user = userId;
 
       let saved;
       if (isEditing) {
@@ -339,7 +373,7 @@ export default function ArticleEditorModal({
       />
 
       {/* Dialog */}
-      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 md:p-6 overflow-auto">
+      <div className="fixed inset-0 z-50 flex items-start justify-center p-4 md:p-6 overflow-auto" data-testid="article-modal">
         <div className={`w-full max-w-3xl rounded-2xl border shadow ${card}`}>
           {/* Header */}
           <header className="flex items-center justify-between px-4 py-3 border-b">

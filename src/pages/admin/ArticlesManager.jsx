@@ -210,15 +210,17 @@ export default function ArticlesManager() {
       </header>
 
       {/* Filtres genres (chips comme blog) */}
-      <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-        <div className="text-sm opacity-80 mb-2">Filtrer par genre</div>
-        <GenreChips
-          genres={genresForChips}
-          selectedId={selectedGenreId}
-          onChange={(id) => setSelectedGenreId(id)} // id peut être null (“Tous”)
-          theme={theme}
-        />
-      </section>
+      {!open && (
+        <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
+          <div className="text-sm opacity-80 mb-2">Filtrer par genre</div>
+          <GenreChips
+            genres={genresForChips}
+            selectedId={selectedGenreId}
+            onChange={(id) => setSelectedGenreId(id)} // id peut être null (“Tous”)
+            theme={theme}
+          />
+        </section>
+      )}
 
       {/* Liste */}
       <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
@@ -297,6 +299,7 @@ export default function ArticlesManager() {
         open={open}
         onClose={() => setOpen(false)}
         apiBase={API_BASE}
+        userId={user?.id ?? user?.pk ?? null}
         article={current}
         onSaved={onSaved}
         onDeleted={onDeleted}

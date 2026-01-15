@@ -1,0 +1,23 @@
+{
+  "results": [
+    {
+      "id": 1,
+      "title": "Premier article",
+      "article_content": "Contenu du premier article. Ceci est un texte de test pour le blog.",
+      "link_image": "https://picsum.photos/seed/article-1/600/400",
+      "author": { "username": "Melissa" },
+      "created_at": "2024-01-01T12:00:00Z",
+      "genres": [{ "id": 1, "name": "Tech", "color": "#ff3b30" }]
+    },
+    {
+      "id": 2,
+      "title": "Deuxieme article",
+      "article_content": "Autre contenu pour valider la recherche et les filtres.",
+      "link_image": "https://picsum.photos/seed/article-2/600/400",
+      "author": "Alex",
+      "created_at": "2024-02-01T12:00:00Z",
+      "genres": [{ "id": 2, "name": "Design", "color": "#34c759" }]
+    }
+  ],
+  "next": null
+}

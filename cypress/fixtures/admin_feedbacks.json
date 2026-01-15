@@ -1,0 +1,13 @@
+{
+  "results": [
+    {
+      "id": 7,
+      "user": { "id": 1, "username": "alice", "email": "alice@example.com", "phone": "0600000000" },
+      "formation": { "id": 10, "name": "Formation React" },
+      "feedback_content": "Tres bon",
+      "satisfaction": true,
+      "to_process": false
+    }
+  ],
+  "count": 1
+}
