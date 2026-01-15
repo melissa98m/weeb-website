@@ -34,7 +34,7 @@ export default function TrendsSection() {
         <p className="mt-4 ">
           {language === "fr" ? homeFr.last_articles : homeEn.last_articles}
         </p>
-        <Link to="/articles" className="mt-6 hover:underline">
+        <Link to="/blog" className="mt-6 hover:underline">
           {language === "fr" ? homeFr.link_3 : homeEn.link_3}
         </Link>
       </div>

@@ -1,0 +1,9 @@
+[
+  { "id": 1, "name": "Formation React", "description": "Apprendre React de A a Z." },
+  { "id": 2, "name": "Formation Node", "description": "Creer une API robuste." },
+  { "id": 3, "name": "Formation UI", "description": "Design system et accessibilite." },
+  { "id": 4, "name": "Formation DevOps", "description": "CI/CD et deploiement." },
+  { "id": 5, "name": "Formation Tests", "description": "Tests unitaires et e2e." },
+  { "id": 6, "name": "Formation TypeScript", "description": "Types et architecture." },
+  { "id": 7, "name": "Formation Performance", "description": "Optimiser vos apps web." }
+]

@@ -35,36 +35,33 @@ function resolveApiBase() {
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
 
-if (typeof window !== "undefined") {
+const isDev = import.meta.env.DEV;
+
+
+if (typeof window !== "undefined" && isDev) {
   window.__API_BASE__ = API_BASE; // pratique debug
-  console.log("[API_BASE]", API_BASE);
 }
 
 /** ========== CSRF ========== */
 export async function ensureCsrf() {
   const existing = getCookie("csrftoken");
   if (existing) {
-    console.log("[CSRF] cookie présent");
     return existing;
   }
 
   const url = `${API}/csrf/`;
-  console.log("[CSRF] GET", url);
   let r;
   try {
     r = await fetch(url, { credentials: "include" });
   } catch (e) {
-    console.error("[CSRF] network error", e);
     throw new Error(`CSRF request failed (network/502?) → ${url}`);
   }
   if (!r.ok) {
-    console.error("[CSRF] status", r.status);
     throw new Error(`CSRF ${r.status} at ${url}`);
   }
 
   try { await r.clone().json(); } catch (_) {}
   const token = getCookie("csrftoken");
-  console.log("[CSRF] après appel:", token ? "OK" : "ABSENT");
   if (!token) throw new Error("CSRF cookie not found after call (check cookie domain/samesite).");
   return token;
 }

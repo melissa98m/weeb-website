@@ -46,12 +46,12 @@ export default function HeroSection() {
           {language === "fr" ? homeFr.link_1 : homeEn.link_1}
         </Link>
         <Link
-          to="/newsletter"
+          to="/formations"
           className={`border px-6 py-2 rounded-md transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none ${
             theme === "dark" ? "border-white" : "border-dark"
           }`}
         >
-          {language === "fr" ? homeFr.newsletter : homeEn.newsletter}
+          {language === "fr" ? homeFr.link_1_secondary : homeEn.link_1_secondary}
         </Link>
       </div>
       <motion.img

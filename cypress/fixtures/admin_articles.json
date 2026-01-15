@@ -1,0 +1,12 @@
+{
+  "results": [
+    {
+      "id": 55,
+      "title": "Article A",
+      "article_content": "Contenu A",
+      "link_image": "",
+      "genres": [{ "id": 1, "name": "Tech", "color": "#ff0000" }]
+    }
+  ],
+  "count": 1
+}
