@@ -56,17 +56,20 @@ export default function Header() {
             }`}
           >
             {[
-              { to: "/about-us", label: t("about_us", "About us") },
-              { to: "/blog", label: t("blog", "Blog") },
-              { to: "/formations", label: t("formations", "Formations") },
-              { to: "/contact", label: t("contact", "Contact") },
-              ...(canAdmin ? [{ to: "/admin", label: t("administration", "Administration") }] : []),
-            ].map(({ to, label }) => {
+              { to: "/about-us", label: t("about_us", "About us"), testid: "nav-about" },
+              { to: "/blog", label: t("blog", "Blog"), testid: "nav-blog" },
+              { to: "/formations", label: t("formations", "Formations"), testid: "nav-formations" },
+              { to: "/contact", label: t("contact", "Contact"), testid: "nav-contact" },
+              ...(canAdmin
+                ? [{ to: "/admin", label: t("administration", "Administration"), testid: "nav-admin" }]
+                : []),
+            ].map(({ to, label, testid }) => {
               const active = location.pathname === to || location.pathname.startsWith(`${to}/`);
               return (
                 <Link
                   key={to}
                   to={to}
+                  data-testid={testid}
                   aria-current={active ? "page" : undefined}
                   className={[
                     "transition underline-offset-4",
@@ -187,19 +190,19 @@ export default function Header() {
             theme === "dark" ? "text-white/90" : "text-dark/90"
           }`}
         >
-          <Link to="/about-us" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
+          <Link to="/about-us" data-testid="nav-about" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("about_us", "About us")}
           </Link>
 
-          <Link to="/blog" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
+          <Link to="/blog" data-testid="nav-blog" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("blog", "Blog")}
           </Link>
 
-          <Link to="/formations" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
+          <Link to="/formations" data-testid="nav-formations" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("formations", "Formations")}
           </Link>
 
-          <Link to="/contact" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
+          <Link to="/contact" data-testid="nav-contact" className={`block ${theme === "dark" ? "text-white" : "text-dark"}`} onClick={() => setIsOpen(false)}>
             {t("contact", "Contact")}
           </Link>
 
@@ -207,6 +210,7 @@ export default function Header() {
           {canAdmin && (
             <Link
               to="/admin"
+              data-testid="nav-admin"
               className={`block ${theme === "dark" ? "text-white" : "text-dark"}`}
               onClick={() => setIsOpen(false)}
             >

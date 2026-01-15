@@ -27,6 +27,7 @@ export default function GenrePicker({
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState("#6b7280"); // gris par défaut
   const [creating, setCreating] = useState(false);
+  const lastColorRef = useRef(new Map());
 
   const ctrlRef = useRef(null);
   const startTask = useCallback((ms = 15000) => {
@@ -71,6 +72,12 @@ export default function GenrePicker({
   }, [apiBase, startTask]);
 
   const selectedIds = useMemo(() => new Set(value.map(v => v.id)), [value]);
+  useEffect(() => {
+    value.forEach((g) => {
+      if (g?.id == null) return;
+      lastColorRef.current.set(g.id, g.color || "#6b7280");
+    });
+  }, [value]);
 
   const filtered = useMemo(() => {
     const qq = q.trim().toLowerCase();
@@ -110,6 +117,13 @@ export default function GenrePicker({
       if (!task.isAbortError(e)) setErr(String(e?.message || e));
     } finally { task.done(); }
   }, [apiBase, onChange, startTask, value]);
+
+  const maybePatchColor = useCallback((id, next) => {
+    const last = lastColorRef.current.get(id);
+    if (last === next) return;
+    lastColorRef.current.set(id, next);
+    patchColor(id, next);
+  }, [patchColor]);
 
   // Créer un genre (avec couleur)
   const createGenre = useCallback(async () => {
@@ -164,9 +178,11 @@ export default function GenrePicker({
               <input
                 type="color"
                 value={(g.color && /^#[0-9A-Fa-f]{6}$/.test(g.color)) ? g.color : "#6b7280"}
-                onChange={(e) => patchColor(g.id, e.target.value)}
+                onChange={(e) => maybePatchColor(g.id, e.target.value)}
+                onInput={(e) => maybePatchColor(g.id, e.target.value)}
                 className="w-5 h-5 p-0 border-0 bg-transparent cursor-pointer"
                 title="Changer la couleur"
+                data-testid="genre-color"
               />
               <button
                 type="button"

@@ -1,0 +1,10 @@
+{
+  "results": [
+    {
+      "id": 100,
+      "user": { "id": 1, "username": "alice", "email": "alice@example.com" },
+      "formation": { "id": 10, "title": "Formation React" }
+    }
+  ],
+  "count": 1
+}
