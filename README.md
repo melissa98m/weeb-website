@@ -155,13 +155,18 @@ npm install
 Créez un fichier `.env` à la racine du projet avec les variables suivantes :
 
 ```env
-# URL de l'API backend
+# URL de l'API backend (utilisée si définie, priorité absolue)
 VITE_API_URL=http://localhost:8000/api
 
 # URLs spécifiques par environnement (optionnel)
 VITE_DEV_API_URL=http://localhost:8000/api
 VITE_PROD_API_URL=https://weebbackend.melissa-mangione.com/api
 ```
+
+**Note importante pour le preview local (`npm run preview`)** :
+- Le preview local détecte automatiquement `localhost:4173` et utilise `VITE_DEV_API_URL` ou `http://localhost:8000/api` par défaut
+- Si vous testez avec un backend distant, assurez-vous que le backend autorise `localhost:4173` dans ses CORS
+- Pour forcer une URL spécifique en preview, définissez `VITE_DEV_API_URL` dans votre `.env`
 
 ## 🛠 Scripts disponibles
 

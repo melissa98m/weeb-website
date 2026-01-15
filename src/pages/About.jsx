@@ -5,7 +5,46 @@ import AboutIntro from "../components/About/AboutIntro";
 import aboutEn from "../../locales/en/about.json";
 import aboutFr from "../../locales/fr/about.json";
 import { motion } from "framer-motion";
-import { FaAward, FaRocket, FaUsers, FaUniversalAccess } from "react-icons/fa";
+
+
+function IconAward({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="7"></circle>
+      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+    </svg>
+  );
+}
+
+function IconRocket({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="2" x2="12" y2="22"></line>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    </svg>
+  );
+}
+
+function IconUsers({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+      <circle cx="9" cy="7" r="4"></circle>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    </svg>
+  );
+}
+
+function IconUniversalAccess({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M12 2v20M2 12h20"></path>
+      <circle cx="12" cy="12" r="2"></circle>
+    </svg>
+  );
+}
 
 export default function About() {
   const { theme } = useTheme();
@@ -133,10 +172,10 @@ export default function About() {
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
-            { key: "quality", title: t.value_quality, desc: t.value_quality_desc, icon: FaAward },
-            { key: "innovation", title: t.value_innovation, desc: t.value_innovation_desc, icon: FaRocket },
-            { key: "community", title: t.value_community, desc: t.value_community_desc, icon: FaUsers },
-            { key: "accessibility", title: t.value_accessibility, desc: t.value_accessibility_desc, icon: FaUniversalAccess },
+            { key: "quality", title: t.value_quality, desc: t.value_quality_desc, icon: IconAward },
+            { key: "innovation", title: t.value_innovation, desc: t.value_innovation_desc, icon: IconRocket },
+            { key: "community", title: t.value_community, desc: t.value_community_desc, icon: IconUsers },
+            { key: "accessibility", title: t.value_accessibility, desc: t.value_accessibility_desc, icon: IconUniversalAccess },
           ].map((value, index) => {
             const IconComponent = value.icon;
             return (

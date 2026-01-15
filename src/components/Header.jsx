@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
-import { HiMenu, HiX } from "react-icons/hi";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import Button from "./Button";
@@ -8,6 +7,26 @@ import headerEn from "../../locales/en/header.json";
 import headerFr from "../../locales/fr/header.json";
 import { useAuth } from "../context/AuthContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../utils/roles";
+
+
+function IconMenu({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  );
+}
+
+function IconX({ size = 24 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  );
+}
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -179,7 +198,7 @@ export default function Header() {
             theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
           }`}
         >
-          {isOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+          {isOpen ? <IconX size={24} /> : <IconMenu size={24} />}
         </Button>
       </div>
 
