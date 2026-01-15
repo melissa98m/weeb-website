@@ -1,0 +1,7 @@
+{
+  "results": [
+    { "id": 10, "name": "Formation React", "description": "React avance" },
+    { "id": 11, "name": "Formation Node", "description": "API Node" }
+  ],
+  "count": 2
+}

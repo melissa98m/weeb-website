@@ -1,0 +1,7 @@
+{
+  "results": [
+    { "id": 1, "name": "Tech", "color": "#ff0000" },
+    { "id": 2, "name": "Design", "color": "#00ff00" }
+  ],
+  "count": 2
+}

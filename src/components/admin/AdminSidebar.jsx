@@ -82,6 +82,15 @@ function IconPen() {
   );
 }
 
+function IconTag() {
+  return (
+    <IconBase>
+      <path d="M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41L12 2Z" />
+      <circle cx="7" cy="7" r="1.5" />
+    </IconBase>
+  );
+}
+
 /* ==== Mini badge "à traiter" ==== */
 function MiniBadge({ children, theme = "light", title = "À traiter" }) {
   const base =
@@ -100,6 +109,7 @@ const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
   { key: "articles", label: "Articles", to: "/admin/articles", icon: IconPen },
+  { key: "genres", label: "Genres", to: "/admin/genres", icon: IconTag },
   { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
   { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
 ];
@@ -144,6 +154,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         case "forms":
           return canPersonnel || isAdmin;
         case "articles":
+        case "genres":
           return canRedaction || isAdmin;
         case "fb":
         case "msg":

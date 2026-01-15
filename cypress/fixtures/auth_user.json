@@ -1,0 +1,8 @@
+{
+  "id": 10,
+  "username": "melissa",
+  "email": "melissa@example.com",
+  "is_staff": true,
+  "is_personnel": true,
+  "roles": ["Personnel", "Commercial", "Redacteur"]
+}

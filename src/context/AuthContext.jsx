@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { AuthApi, ensureCsrf } from "../lib/api";
 
 const AuthContext = createContext(null);
@@ -7,6 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const didInitRef = useRef(false);
 
   const fetchMe = useCallback(async () => {
     try {
@@ -24,14 +25,43 @@ export function AuthProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    // Prépare le CSRF puis tente /me
-    (async () => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+
+    const run = async () => {
+      // Prépare le CSRF puis tente /me
       try {
         await ensureCsrf();
       } finally {
         await fetchMe();
       }
+    };
+
+    const isProtectedPath = (() => {
+      if (typeof window === "undefined") return false;
+      const path = window.location.pathname || "";
+      return path === "/profile" || path.startsWith("/admin");
     })();
+
+    if (isProtectedPath || (typeof window !== "undefined" && window.Cypress)) {
+      run();
+      return;
+    }
+
+    let idleId;
+    let timeoutId;
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(() => run(), { timeout: 1500 });
+    } else {
+      timeoutId = setTimeout(() => run(), 1200);
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && idleId) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [fetchMe]);
 
   //  Accepte email/username/identifier + password, pose les cookies, puis charge /me
@@ -65,17 +95,22 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const value = useMemo(
+    () => ({
+      user,
+      loading,
+      error,
+      login,
+      register,
+      logout,
+      reload: fetchMe,
+    }),
+    [user, loading, error, login, register, logout, fetchMe]
+  );
+
   return (
     <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        error,
-        login,
-        register,
-        logout,
-        reload: fetchMe,
-      }}
+      value={value}
     >
       {children}
     </AuthContext.Provider>

@@ -38,7 +38,7 @@ export default function LearningSection() {
         <p className="mt-4">
           {language === "fr" ? homeFr.learning : homeEn.learning}
         </p>
-        <Link to="/articles" className="mt-6 hover:underline">
+        <Link to="/formations" className="mt-6 hover:underline">
           {language === "fr" ? homeFr.link_2 : homeEn.link_2}
         </Link>
       </div>
