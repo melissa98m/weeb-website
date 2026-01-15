@@ -1,0 +1,25 @@
+{
+    "about_title": "À propos de nous",
+    "about_subtitle": "Découvrez qui nous sommes et notre mission",
+    "mission_title": "Notre mission",
+    "mission_text": "Nous sommes passionnés par le web et l'innovation numérique. Notre objectif est de partager nos connaissances, nos expériences et les meilleures pratiques du développement web moderne. Que vous soyez débutant ou expert, nous vous accompagnons dans votre parcours d'apprentissage.",
+    "vision_title": "Notre vision",
+    "vision_text": "Créer une communauté dynamique où les développeurs, designers et passionnés du digital peuvent apprendre, partager et grandir ensemble. Nous croyons en un web accessible, performant et centré sur l'utilisateur.",
+    "values_title": "Nos valeurs",
+    "value_quality": "Qualité",
+    "value_quality_desc": "Nous nous engageons à fournir du contenu de haute qualité, vérifié et à jour.",
+    "value_innovation": "Innovation",
+    "value_innovation_desc": "Nous suivons les dernières tendances et technologies pour vous offrir les meilleures ressources.",
+    "value_community": "Communauté",
+    "value_community_desc": "Nous favorisons l'entraide et le partage de connaissances au sein de notre communauté.",
+    "value_accessibility": "Accessibilité",
+    "value_accessibility_desc": "Nous rendons le web accessible à tous, quel que soit le niveau d'expertise.",
+    "team_title": "Notre équipe",
+    "team_text": "Une équipe de passionnés dédiés à votre réussite",
+    "cta_title": "Rejoignez-nous",
+    "cta_text": "Prêt à commencer votre parcours d'apprentissage ?",
+    "cta_blog": "Explorer le blog",
+    "cta_formations": "Découvrir les formations",
+    "cta_contact": "Nous contacter"
+}
+

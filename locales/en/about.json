@@ -1,0 +1,25 @@
+{
+    "about_title": "About us",
+    "about_subtitle": "Discover who we are and our mission",
+    "mission_title": "Our mission",
+    "mission_text": "We are passionate about the web and digital innovation. Our goal is to share our knowledge, experiences, and best practices of modern web development. Whether you're a beginner or an expert, we're here to support you in your learning journey.",
+    "vision_title": "Our vision",
+    "vision_text": "Create a dynamic community where developers, designers, and digital enthusiasts can learn, share, and grow together. We believe in an accessible, performant, and user-centered web.",
+    "values_title": "Our values",
+    "value_quality": "Quality",
+    "value_quality_desc": "We are committed to providing high-quality, verified, and up-to-date content.",
+    "value_innovation": "Innovation",
+    "value_innovation_desc": "We follow the latest trends and technologies to offer you the best resources.",
+    "value_community": "Community",
+    "value_community_desc": "We promote mutual support and knowledge sharing within our community.",
+    "value_accessibility": "Accessibility",
+    "value_accessibility_desc": "We make the web accessible to everyone, regardless of expertise level.",
+    "team_title": "Our team",
+    "team_text": "A team of passionate people dedicated to your success",
+    "cta_title": "Join us",
+    "cta_text": "Ready to start your learning journey?",
+    "cta_blog": "Explore the blog",
+    "cta_formations": "Discover trainings",
+    "cta_contact": "Contact us"
+}
+
