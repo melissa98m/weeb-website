@@ -1,3 +1,7 @@
-# Problem Context
+## Messages de commit
 
-## Changes
+{{COMMIT_MESSAGES}}
+
+---
+*Cette pull request a été créée automatiquement.*
+
