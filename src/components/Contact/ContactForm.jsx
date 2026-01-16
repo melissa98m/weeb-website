@@ -4,8 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 import contactEn from "../../../locales/en/contact.json";
 import contactFr from "../../../locales/fr/contact.json";
 import { useLanguage } from "../../context/LanguageContext";
-
-const API_BASE = import.meta.env.VITE_API_URL;
+import { API_BASE } from "../../lib/api";
 
 /* ====================== ANTI-SPAM (front only) ====================== */
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 min

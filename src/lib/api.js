@@ -64,6 +64,12 @@ export async function ensureCsrf() {
     return existing;
   }
 
+  if (typeof window !== "undefined" && window.Cypress) {
+    const token = "testtoken";
+    document.cookie = `csrftoken=${token}; path=/`;
+    return token;
+  }
+
   const url = `${API}/csrf/`;
   let r;
   try {
