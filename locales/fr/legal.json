@@ -1,0 +1,43 @@
+{
+  "title": "Mentions legales",
+  "updated": "Derniere mise a jour: 2025-01-01",
+  "intro": "Cette page presente l'editeur du site et les conditions d'utilisation.",
+  "sections": [
+    {
+      "title": "Editeur du site",
+      "items": [
+        "Weeb, Inc.",
+        "Adresse: a completer",
+        "Email: contact@weeb.com",
+        "Directeur de publication: a completer"
+      ]
+    },
+    {
+      "title": "Hebergement",
+      "items": [
+        "Hebergeur: a completer",
+        "Adresse: a completer"
+      ]
+    },
+    {
+      "title": "Propriete intellectuelle",
+      "items": [
+        "L'ensemble des contenus du site est protege par les lois applicables.",
+        "Toute reproduction ou reutilisation sans autorisation est interdite."
+      ]
+    },
+    {
+      "title": "Responsabilite",
+      "items": [
+        "Nous nous efforcons de fournir des informations exactes sans garantie.",
+        "L'utilisateur reste responsable de l'usage du site."
+      ]
+    },
+    {
+      "title": "Contact",
+      "items": [
+        "Pour toute question, contactez-nous via la page contact."
+      ]
+    }
+  ]
+}

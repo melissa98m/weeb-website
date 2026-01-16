@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import Button from "./Button";
@@ -34,12 +34,15 @@ export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage } = useLanguage();
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const onLogout = async () => {
     try {
       await logout();
     } catch (e) {
       console.error(e);
+    } finally {
+      navigate("/login", { replace: true });
     }
   };
 

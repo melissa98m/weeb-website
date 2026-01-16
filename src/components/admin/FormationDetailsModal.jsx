@@ -94,7 +94,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
       const candidates = [
         `${apiBase}/user-formations/`,
         `${apiBase}/userformations/`,
-        `${apiBase}/user_formations/`,
+        
       ];
       let data = null, lastErr = null;
       for (const base of candidates) {

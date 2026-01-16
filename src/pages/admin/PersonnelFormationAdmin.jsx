@@ -204,8 +204,6 @@ export default function PersonnelFormationAdmin() {
 
         const candidates = [
           `${API_BASE}/user-formations/`,
-          `${API_BASE}/userformations/`,
-          `${API_BASE}/user_formations/`,
         ];
         let data = null,
           lastErr = null;

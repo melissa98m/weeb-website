@@ -19,5 +19,16 @@
     "press": "Presse",
     "events": "Evenements",
     "careers": "Emplois",
-    "copyright": "2025 Weeb, Inc. Tous droits réservés."
+    "legal_notice": "Mentions legales",
+    "privacy_policy": "Politique de confidentialite",
+    "copyright": "2025 Weeb, Inc. Tous droits réservés.",
+    "newsletter_title": "Recevez la newsletter",
+    "newsletter_subtitle": "Chaque mois : actus produit, ressources et inspirations. Pas de spam.",
+    "newsletter_placeholder": "Adresse email",
+    "newsletter_cta": "S'inscrire",
+    "newsletter_loading": "Inscription...",
+    "newsletter_privacy": "Votre email sert uniquement a vous envoyer la newsletter. Desinscription possible a tout moment.",
+    "newsletter_consent": "J'accepte de recevoir des emails de Weeb.",
+    "newsletter_success": "Merci ! Vous etes inscrit.",
+    "newsletter_error": "Echec de l'inscription. Reessayez."
 }

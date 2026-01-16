@@ -1,0 +1,61 @@
+{
+  "title": "Privacy Policy",
+  "updated": "Last updated: 2026-01-20",
+  "intro": "We take data protection seriously. This policy explains how we collect and use personal data.",
+  "sections": [
+    {
+      "title": "Data we collect",
+      "items": [
+        "Account data (name, email, profile details).",
+        "Contact form messages and related metadata.",
+        "Newsletter subscription data (email address).",
+        "Technical data such as logs and device information."
+      ]
+    },
+    {
+      "title": "Purposes",
+      "items": [
+        "Create and manage user accounts.",
+        "Respond to requests and provide support.",
+        "Send newsletters with your consent.",
+        "Improve the service and ensure security."
+      ]
+    },
+    {
+      "title": "Legal bases",
+      "items": [
+        "Contract performance for account services.",
+        "Consent for newsletters and optional communications.",
+        "Legitimate interest for security and service improvement."
+      ]
+    },
+    {
+      "title": "Retention",
+      "items": [
+        "Data is kept for the duration of the relationship.",
+        "Contact data is kept up to 3 years after the last interaction."
+      ]
+    },
+    {
+      "title": "Your rights",
+      "items": [
+        "Access, rectification, erasure, and restriction.",
+        "Objection and data portability.",
+        "Withdraw consent at any time."
+      ]
+    },
+    {
+      "title": "Contact",
+      "items": [
+        "For privacy requests, contact: contact@weebbackend.melissa-mangione.com."
+      ]
+    },
+    {
+      "title": "Cookies",
+      "items": [
+        "We use necessary cookies for site operation.",
+        "Optional cookies are only set with your consent."
+      ]
+    }
+  ]
+}
