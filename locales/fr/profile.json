@@ -12,5 +12,22 @@
   "trainings_loading": "Chargement…",
   "feedback": "Donner un feedback",
   "already_sent": "Feedback déjà envoyé",
-  "your_feedback": "Votre feedback"
+  "your_feedback": "Votre feedback",
+  "gdpr_title": "Mes donnees",
+  "gdpr_intro": "Acceder, telecharger ou supprimer vos donnees personnelles a tout moment.",
+  "gdpr_view": "Voir mes donnees",
+  "gdpr_view_title": "Apercu des donnees",
+  "gdpr_download": "Telecharger mes donnees",
+  "gdpr_loading": "Chargement…",
+  "gdpr_data_error": "Impossible de charger vos donnees.",
+  "gdpr_data_empty": "Aucune donnee retournee.",
+  "gdpr_download_error": "Impossible de telecharger vos donnees.",
+  "gdpr_delete_title": "Supprimer mon compte",
+  "gdpr_delete_intro": "Cette action est definitive et supprime vos donnees personnelles.",
+  "gdpr_delete_check": "Je comprends que cette action est irreversible.",
+  "gdpr_delete_type": "Tapez SUPPRIMER pour confirmer.",
+  "gdpr_delete_keyword": "SUPPRIMER",
+  "gdpr_delete_cta": "Supprimer mon compte",
+  "gdpr_delete_error": "Impossible de supprimer votre compte.",
+  "gdpr_delete_success": "Votre compte a ete supprime."
 }

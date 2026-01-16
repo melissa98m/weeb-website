@@ -12,5 +12,22 @@
   "trainings_loading": "Loading…",
   "feedback": "Give feedback",
   "already_sent": "Feedback already sent",
-  "your_feedback": "Your feedback"
+  "your_feedback": "Your feedback",
+  "gdpr_title": "My data",
+  "gdpr_intro": "Access, download, or delete your personal data at any time.",
+  "gdpr_view": "View my data",
+  "gdpr_view_title": "Data preview",
+  "gdpr_download": "Download my data",
+  "gdpr_loading": "Loading…",
+  "gdpr_data_error": "Unable to load your data.",
+  "gdpr_data_empty": "No data returned.",
+  "gdpr_download_error": "Unable to download your data.",
+  "gdpr_delete_title": "Delete my account",
+  "gdpr_delete_intro": "This action is permanent and removes your personal data.",
+  "gdpr_delete_check": "I understand this action is irreversible.",
+  "gdpr_delete_type": "Type DELETE to confirm.",
+  "gdpr_delete_keyword": "DELETE",
+  "gdpr_delete_cta": "Delete my account",
+  "gdpr_delete_error": "Unable to delete your account.",
+  "gdpr_delete_success": "Your account has been deleted."
 }
