@@ -94,7 +94,7 @@ async function fetchCsrfToken(url) {
 
   const token = bodyToken || getCookie("csrftoken");
   if (typeof window !== "undefined") {
-    console.debug("[CSRF] ok response", {
+    console.log("[CSRF] ok response", {
       url,
       status: r.status,
       hasCookie: !!token,
@@ -129,7 +129,7 @@ export async function ensureCsrf() {
     } catch (e) {
       lastError = e;
       if (typeof window !== "undefined") {
-        console.debug("[CSRF] failed", { url, status: e?.status, message: e?.message });
+        console.log("[CSRF] failed", { url, status: e?.status, message: e?.message });
       }
       if (e?.status !== 404) break;
     }
