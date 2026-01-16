@@ -25,5 +25,8 @@
     "phone_max": "Le numéro de téléphone ne doit pas dépasser 10 chiffres.",
     "message_error": "Le message est obligatoire.",
     "message_max": "Le message ne doit pas dépasser 5000 caractères.",
-    "subject_error": "Sujet invalide."
+    "subject_error": "Sujet invalide.",
+    "privacy_notice": "Vos données sont utilisées uniquement pour traiter votre demande.",
+    "consent_label": "J'accepte le traitement de mes données pour répondre à ma demande.",
+    "consent_error": "Veuillez accepter le traitement de vos données."
 }

@@ -1,0 +1,15 @@
+{
+  "title": "Cookies et vie privee",
+  "description": "Nous utilisons des cookies strictement necessaires au fonctionnement du site. Les cookies non essentiels ne seront deposes qu'avec votre accord. Votre choix est conserve pendant 6 mois.",
+  "required_title": "Cookies obligatoires",
+  "required_label": "Fonctionnement du site",
+  "required_desc": "cookie_consent, csrftoken, cookies de session.",
+  "optional_title": "Cookies optionnels",
+  "optional_label": "Mesure d'audience",
+  "optional_desc": "Actives uniquement si vous acceptez.",
+  "reject": "Refuser",
+  "accept_all": "Tout accepter",
+  "save": "Enregistrer",
+  "remove_choice": "Supprimer mon choix",
+  "manage_button": "Gerer les cookies"
+}

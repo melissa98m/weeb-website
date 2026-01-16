@@ -19,6 +19,7 @@ describe("contact", () => {
     cy.get("#email").type("jane.doe@example.com");
     cy.get("#subject").select("10");
     cy.get("#message_content").type("Bonjour, ceci est un message de test.");
+    cy.get("#consent").check();
 
     cy.wait(2100);
     cy.contains("button", "Contact").click();
