@@ -76,10 +76,30 @@ async function fetchCsrfToken(url) {
     throw err;
   }
 
-  try { await r.clone().json(); } catch (_) {}
-  const token = getCookie("csrftoken");
+  let bodyToken = null;
+  try {
+    const data = await r.clone().json();
+    bodyToken =
+      data?.csrfToken ||
+      data?.csrf_token ||
+      data?.csrftoken ||
+      data?.csrf ||
+      data?.token ||
+      null;
+  } catch (_) {}
+
+  if (bodyToken) {
+    setCookie("csrftoken", bodyToken);
+  }
+
+  const token = bodyToken || getCookie("csrftoken");
   if (typeof window !== "undefined") {
-    console.debug("[CSRF] ok response", { url, status: r.status, hasCookie: !!token });
+    console.debug("[CSRF] ok response", {
+      url,
+      status: r.status,
+      hasCookie: !!token,
+      tokenFromBody: !!bodyToken,
+    });
   }
   if (!token) {
     const err = new Error("CSRF cookie not found after call (check cookie domain/samesite).");
