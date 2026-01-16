@@ -25,5 +25,8 @@
     "phone_max": "The phone number must not exceed 10 digits.",
     "message_error": "Message is required.",
     "message_max": "The message must not exceed 5000 characters.",
-    "subject_error": "Invalid subject."
+    "subject_error": "Invalid subject.",
+    "privacy_notice": "Your data is used only to process your request.",
+    "consent_label": "I agree to the processing of my data for this request.",
+    "consent_error": "Please accept data processing to continue."
 }
