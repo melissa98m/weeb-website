@@ -11,7 +11,11 @@ describe("auth", () => {
       cy.visit("/login");
       cy.get("#identifier").type("melissa");
       cy.get("#password").type("Test123!");
-      cy.get("button[type='submit']").click();
+      cy.get("#identifier")
+        .closest("form")
+        .within(() => {
+          cy.get("button[type='submit']").click();
+        });
 
       cy.location("pathname").should("eq", "/");
       cy.contains("a", "melissa").should("be.visible");
@@ -33,7 +37,11 @@ describe("auth", () => {
       cy.get("#password").type("Test123!");
       cy.get("#confirmPassword").type("Test123!");
 
-      cy.get("button[type='submit']").click();
+      cy.get("#username")
+        .closest("form")
+        .within(() => {
+          cy.get("button[type='submit']").click();
+        });
       cy.location("pathname").should("eq", "/");
     });
   });
@@ -51,7 +59,8 @@ describe("auth", () => {
       cy.wait("@logout");
 
       cy.contains("a", "melissa").should("not.exist");
-      cy.get("header").find("a[href='/login']").filter(":visible").should("be.visible");
+      cy.location("pathname").should("eq", "/login");
+      cy.get("header").find("a[href='/register']").filter(":visible").should("be.visible");
     });
   });
 });
