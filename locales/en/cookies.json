@@ -1,0 +1,15 @@
+{
+  "title": "Cookies and privacy",
+  "description": "We use strictly necessary cookies for site operation. Non-essential cookies will only be set with your consent. Your choice is kept for 6 months.",
+  "required_title": "Required cookies",
+  "required_label": "Site operation",
+  "required_desc": "cookie_consent, csrftoken, session cookies.",
+  "optional_title": "Optional cookies",
+  "optional_label": "Audience measurement",
+  "optional_desc": "Enabled only if you accept.",
+  "reject": "Reject",
+  "accept_all": "Accept all",
+  "save": "Save",
+  "remove_choice": "Remove my choice",
+  "manage_button": "Manage cookies"
+}
