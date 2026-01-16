@@ -91,8 +91,11 @@ export function AuthProvider({ children }) {
   );
 
   const logout = useCallback(async () => {
-    await AuthApi.logout();
-    setUser(null);
+    try {
+      await AuthApi.logout();
+    } finally {
+      setUser(null);
+    }
   }, []);
 
   const value = useMemo(
