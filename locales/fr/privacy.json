@@ -1,0 +1,61 @@
+{
+  "title": "Politique de confidentialite",
+  "updated": "Derniere mise a jour: 2025-01-01",
+  "intro": "Nous attachons une grande importance a la protection des donnees personnelles.",
+  "sections": [
+    {
+      "title": "Donnees collectees",
+      "items": [
+        "Donnees de compte (nom, email, profil).",
+        "Messages du formulaire de contact et metadonnees associees.",
+        "Inscription newsletter (adresse email).",
+        "Donnees techniques comme les logs et informations appareil."
+      ]
+    },
+    {
+      "title": "Finalites",
+      "items": [
+        "Creer et gerer les comptes utilisateurs.",
+        "Repondre aux demandes et fournir l'assistance.",
+        "Envoyer la newsletter avec votre consentement.",
+        "Ameliorer le service et assurer la securite."
+      ]
+    },
+    {
+      "title": "Bases legales",
+      "items": [
+        "Execution du contrat pour les services de compte.",
+        "Consentement pour la newsletter et communications optionnelles.",
+        "Interet legitime pour la securite et l'amelioration du service."
+      ]
+    },
+    {
+      "title": "Conservation",
+      "items": [
+        "Les donnees sont conservees pendant la relation.",
+        "Les donnees de contact sont conservees jusqu'a 3 ans apres le dernier contact."
+      ]
+    },
+    {
+      "title": "Vos droits",
+      "items": [
+        "Acces, rectification, effacement et limitation.",
+        "Opposition et portabilite.",
+        "Retrait du consentement a tout moment."
+      ]
+    },
+    {
+      "title": "Contact",
+      "items": [
+        "Pour toute demande, contactez: contact@weeb.com."
+      ]
+    },
+    {
+      "title": "Cookies",
+      "items": [
+        "Nous utilisons des cookies necessaires au fonctionnement du site.",
+        "Les cookies optionnels ne sont deposees qu'avec votre consentement."
+      ]
+    }
+  ]
+}

@@ -19,5 +19,16 @@
     "press": "Press",
     "events": "Events",
     "careers": "Carrers",
-    "copyright": "2025 Weeb, Inc. All rights reserved."
+    "legal_notice": "Legal Notice",
+    "privacy_policy": "Privacy Policy",
+    "copyright": "2025 Weeb, Inc. All rights reserved.",
+    "newsletter_title": "Join the newsletter",
+    "newsletter_subtitle": "Monthly insights, product updates, and curated resources. No spam.",
+    "newsletter_placeholder": "Email address",
+    "newsletter_cta": "Subscribe",
+    "newsletter_loading": "Subscribing...",
+    "newsletter_privacy": "Your email is only used to send you our newsletter. You can unsubscribe at any time.",
+    "newsletter_consent": "I agree to receive emails from Weeb.",
+    "newsletter_success": "Thanks! You're subscribed.",
+    "newsletter_error": "Subscription failed. Please try again."
 }

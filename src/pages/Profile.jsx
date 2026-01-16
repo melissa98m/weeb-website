@@ -5,6 +5,7 @@ import { useLanguage } from "../context/LanguageContext";
 import ProfileInfo from "../components/profile/ProfileInfo";
 import TrainingsList from "../components/profile/TrainingsList";
 import FeedbackModal from "../components/FeedbackModal";
+import DataRights from "../components/profile/DataRights";
 
 import profileFr from "../../locales/fr/profile.json";
 import profileEn from "../../locales/en/profile.json";
@@ -226,6 +227,8 @@ export default function Profile() {
           t={t}
           onGiveFeedback={openFeedback}
         />
+
+        <DataRights theme={theme} t={t} onSignedOut={logout} />
       </div>
 
       <FeedbackModal

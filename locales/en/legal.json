@@ -1,0 +1,43 @@
+{
+  "title": "Legal Notice",
+  "updated": "Last updated: 2026-01-20",
+  "intro": "This page describes the publisher and the terms of use for this website.",
+  "sections": [
+    {
+      "title": "Publisher",
+      "items": [
+        "Weeb, Inc.",
+        "Address: to be completed",
+        "Email: contact@weebbackend.melissa-mangione.com",
+        "Publication director: to be completed"
+      ]
+    },
+    {
+      "title": "Hosting",
+      "items": [
+        "Hosting provider: to be completed",
+        "Address: to be completed"
+      ]
+    },
+    {
+      "title": "Intellectual property",
+      "items": [
+        "All content on this site is protected by applicable intellectual property laws.",
+        "Any reproduction or reuse without authorization is prohibited."
+      ]
+    },
+    {
+      "title": "Liability",
+      "items": [
+        "We strive to provide accurate information but cannot guarantee it.",
+        "Users are responsible for their use of the site."
+      ]
+    },
+    {
+      "title": "Contact",
+      "items": [
+        "For any question, please use the contact page."
+      ]
+    }
+  ]
+}
