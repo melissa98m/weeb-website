@@ -17,6 +17,7 @@ function mockArticles() {
 describe("blog", () => {
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
+    cy.setCookie("cookie_consent", JSON.stringify({ optional: true }));
     cy.intercept("GET", "**/api/auth/me/", { statusCode: 401, body: { detail: "Unauthorized" } });
     mockArticles();
   });

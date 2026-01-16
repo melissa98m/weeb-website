@@ -1,6 +1,7 @@
 describe("admin", () => {
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
+    cy.setCookie("cookie_consent", JSON.stringify({ optional: true }));
     cy.fixture("auth_user").then((user) => {
       cy.intercept("GET", "**/api/auth/me/", { statusCode: 200, body: user }).as("me");
     });
