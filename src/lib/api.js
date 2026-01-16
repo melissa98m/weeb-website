@@ -61,6 +61,31 @@ function clearAuthTokens() {
 }
 
 /** ========== CSRF ========== */
+async function fetchCsrfToken(url) {
+  let r;
+  try {
+    r = await fetch(url, { credentials: "include" });
+  } catch (e) {
+    const err = new Error(`CSRF request failed (network/502?) → ${url}`);
+    err.cause = e;
+    throw err;
+  }
+  if (!r.ok) {
+    const err = new Error(`CSRF ${r.status} at ${url}`);
+    err.status = r.status;
+    throw err;
+  }
+
+  try { await r.clone().json(); } catch (_) {}
+  const token = getCookie("csrftoken");
+  if (!token) {
+    const err = new Error("CSRF cookie not found after call (check cookie domain/samesite).");
+    err.status = 200;
+    throw err;
+  }
+  return token;
+}
+
 export async function ensureCsrf() {
   const existing = getCookie("csrftoken");
   if (existing) {
@@ -73,21 +98,16 @@ export async function ensureCsrf() {
     return token;
   }
 
-  const url = `${API}/csrf/`;
-  let r;
-  try {
-    r = await fetch(url, { credentials: "include" });
-  } catch (e) {
-    throw new Error(`CSRF request failed (network/502?) → ${url}`);
+  const urls = [`${API}/csrf/`, `${API_BASE}/csrf/`];
+  let lastError;
+  for (const url of urls) {
+    try {
+      return await fetchCsrfToken(url);
+    } catch (e) {
+      lastError = e;
+    }
   }
-  if (!r.ok) {
-    throw new Error(`CSRF ${r.status} at ${url}`);
-  }
-
-  try { await r.clone().json(); } catch (_) {}
-  const token = getCookie("csrftoken");
-  if (!token) throw new Error("CSRF cookie not found after call (check cookie domain/samesite).");
-  return token;
+  throw lastError ?? new Error("CSRF fetch failed.");
 }
 
 async function authRequest(path, { method = "GET", body, headers = {}, csrf = false } = {}) {
