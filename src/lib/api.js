@@ -154,4 +154,10 @@ export const AuthApi = {
   logout() {
     return authRequest("/logout/", { method: "POST", csrf: true });
   },
+  requestPasswordReset(payload) {
+    return authRequest("/forgot-password/", { method: "POST", body: payload, csrf: true });
+  },
+  confirmPasswordReset(payload) {
+    return authRequest("/reset-password/", { method: "POST", body: payload, csrf: true });
+  },
 };

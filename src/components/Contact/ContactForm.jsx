@@ -61,6 +61,7 @@ export default function ContactForm() {
     email: "",
     subject: "",
     message_content: "",
+    consent: false,
     _website: "",            // honeypot (doit rester vide)
     _started_at: Date.now(), // garde-temps minimal
   });
@@ -130,12 +131,16 @@ export default function ContactForm() {
       e.subject = t?.subject_error || "Invalid subject.";
     }
 
+    if (!form.consent) {
+      e.consent = t?.consent_error || "Consent is required.";
+    }
+
     return e;
   };
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
-    setForm((prev) => ({ ...prev, [id]: value }));
+    const { id, value, type, checked } = e.target;
+    setForm((prev) => ({ ...prev, [id]: type === "checkbox" ? checked : value }));
     setErrors((prev) => ({ ...prev, [id]: null }));
     setServerMsg(null);
   };
@@ -184,6 +189,7 @@ export default function ContactForm() {
     // Normaliser les données pour l’API (subject null si vide)
     const payload = {
       ...form,
+      consent: undefined,
       subject: form.subject ? Number(form.subject) : null,
       telephone: form.telephone.trim(),
       first_name: form.first_name.trim(),
@@ -213,6 +219,7 @@ export default function ContactForm() {
           email: "",
           subject: "",
           message_content: "",
+          consent: false,
           _website: "",
           _started_at: Date.now(),
         });
@@ -435,6 +442,25 @@ export default function ContactForm() {
             tabIndex={-1}
             autoComplete="off"
           />
+        </div>
+
+        {/* RGPD consent */}
+        <div className="space-y-2 text-xs">
+          <p className={theme === "dark" ? "text-slate-300" : "text-slate-600"}>
+            {t?.privacy_notice || "Your data is used only to process your request."}
+          </p>
+          <label className="flex items-start gap-2">
+            <input
+              id="consent"
+              type="checkbox"
+              checked={form.consent}
+              onChange={handleChange}
+              className="mt-0.5 h-4 w-4 accent-slate-600"
+              aria-invalid={!!errors.consent}
+            />
+            <span>{t?.consent_label || "I agree to the processing of my data for this request."}</span>
+          </label>
+          {errors.consent && <p className="text-red-500 text-xs">{errors.consent}</p>}
         </div>
 
         {/* Submit */}
