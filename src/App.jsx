@@ -11,6 +11,8 @@ import PersonnelRoute from "./routes/PersonnelRoute";
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
 const About = lazy(() => import("./pages/About"));
+const Legal = lazy(() => import("./pages/Legal"));
+const Privacy = lazy(() => import("./pages/Privacy"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -45,6 +47,8 @@ function App() {
             {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/about-us" element={<About />} />
+            <Route path="/mentions-legales" element={<Legal />} />
+            <Route path="/politique-confidentialite" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

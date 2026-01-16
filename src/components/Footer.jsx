@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import footerEn from "../../locales/en/footer.json";
 import footerFr from "../../locales/fr/footer.json";
 import { useLanguage } from "../context/LanguageContext";
+import { NewsletterApi } from "../lib/api";
 
 function IconYoutube({ className }) {
   return (
@@ -46,6 +48,11 @@ function IconLinkedin({ className }) {
 export default function Footer() {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const t = language === "fr" ? footerFr : footerEn;
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
+  const [newsletterConsentAt, setNewsletterConsentAt] = useState("");
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const footerLinks = [
     {
       title: {
@@ -189,6 +196,20 @@ export default function Footer() {
           },
           href: "#",
         },
+        {
+          label: {
+            en: footerEn.legal_notice,
+            fr: footerFr.legal_notice,
+          },
+          href: "/mentions-legales",
+        },
+        {
+          label: {
+            en: footerEn.privacy_policy,
+            fr: footerFr.privacy_policy,
+          },
+          href: "/politique-confidentialite",
+        },
       ],
     },
   ];
@@ -199,6 +220,114 @@ export default function Footer() {
         theme === "dark" ? "bg-white text-dark" : "bg-dark text-white"
       }`}
     >
+      <div
+        className={`max-w-5xl mx-auto mb-10 rounded-2xl border px-6 py-6 sm:px-8 ${
+          theme === "dark" ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10"
+        }`}
+      >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-xl">
+            <p
+              className={`text-xs uppercase tracking-[0.2em] ${
+                theme === "dark" ? "text-slate-500" : "text-slate-400"
+              }`}
+            >
+              Newsletter
+            </p>
+            <h3 className="text-lg font-semibold">{t.newsletter_title}</h3>
+            <p className={theme === "dark" ? "text-slate-600" : "text-slate-300"}>
+              {t.newsletter_subtitle}
+            </p>
+          </div>
+          <form
+            className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              if (!newsletterConsent || newsletterStatus === "loading") return;
+              try {
+                setNewsletterStatus("loading");
+                const consentAt = newsletterConsentAt || new Date().toISOString();
+                await NewsletterApi.subscribe({
+                  email: newsletterEmail.trim(),
+                  consent: true,
+                  consented_at: consentAt,
+                });
+                setNewsletterStatus("success");
+                setNewsletterEmail("");
+                setNewsletterConsent(false);
+                setNewsletterConsentAt("");
+              } catch (_) {
+                setNewsletterStatus("error");
+              }
+            }}
+          >
+            <label htmlFor="newsletter-email" className="sr-only">
+              {t.newsletter_placeholder}
+            </label>
+            <input
+              id="newsletter-email"
+              type="email"
+              required
+              placeholder={t.newsletter_placeholder}
+              className={`w-full rounded-md border bg-transparent px-3 py-2 focus:outline-none sm:w-64 ${
+                theme === "dark"
+                  ? "border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-500"
+                  : "border-white/30 text-white placeholder-slate-400 focus:border-white/60"
+              }`}
+              autoComplete="email"
+              value={newsletterEmail}
+              onChange={(event) => setNewsletterEmail(event.target.value)}
+            />
+            <input type="hidden" name="consent_at" value={newsletterConsentAt} />
+            <button
+              type="submit"
+              disabled={!newsletterConsent || newsletterStatus === "loading"}
+              className={`rounded-md px-4 py-2 font-medium transition-colors ${
+                newsletterConsent && newsletterStatus !== "loading"
+                  ? theme === "dark"
+                    ? "bg-dark text-white hover:bg-dark/80"
+                    : "bg-primary text-dark hover:bg-primary/80"
+                  : "bg-gray-400 text-white cursor-not-allowed"
+              }`}
+            >
+              {newsletterStatus === "loading" ? t.newsletter_loading : t.newsletter_cta}
+            </button>
+          </form>
+          <div className={`text-xs ${theme === "dark" ? "text-slate-600" : "text-slate-300"}`}>
+            <p id="newsletter-privacy">
+              {t.newsletter_privacy}{" "}
+              <a href="/politique-confidentialite" className="underline">
+                {t.privacy_policy}
+              </a>
+            </p>
+            <label className="mt-2 flex items-start gap-2">
+              <input
+                id="newsletter-consent"
+                type="checkbox"
+                required
+                className={`mt-0.5 h-4 w-4 ${
+                  theme === "dark" ? "accent-slate-600" : "accent-primary"
+                }`}
+                aria-describedby="newsletter-privacy"
+                checked={newsletterConsent}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+                  setNewsletterConsent(checked);
+                  setNewsletterConsentAt(checked ? new Date().toISOString() : "");
+                }}
+              />
+              <span>{t.newsletter_consent}</span>
+            </label>
+            {newsletterStatus === "success" && (
+              <p className="mt-2 text-xs text-green-500">{t.newsletter_success}</p>
+            )}
+            {newsletterStatus === "error" && (
+              <p className="mt-2 text-xs text-red-500">{t.newsletter_error}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-5xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
         {/* Colonne 1 : Logo */}
         <div>
@@ -223,7 +352,7 @@ export default function Footer() {
       {/* Ligne du bas */}
       <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto">
         <p>
-          &copy; {language === "fr" ? footerFr.copyright : footerEn.copyright}
+          &copy; {t.copyright}
         </p>
         {/* Reseaux sociaux */}
         <div className="flex gap-4 text-xl text-dark-icon">
