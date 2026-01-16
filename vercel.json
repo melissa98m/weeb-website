@@ -21,7 +21,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "https://melissa-mangione.com"
+          "value": "https://weebbackend.melissa-mangione.com"
         }
       ]
     }
