@@ -78,6 +78,9 @@ async function fetchCsrfToken(url) {
 
   try { await r.clone().json(); } catch (_) {}
   const token = getCookie("csrftoken");
+  if (typeof window !== "undefined") {
+    console.debug("[CSRF] ok response", { url, status: r.status, hasCookie: !!token });
+  }
   if (!token) {
     const err = new Error("CSRF cookie not found after call (check cookie domain/samesite).");
     err.status = 200;
@@ -105,6 +108,10 @@ export async function ensureCsrf() {
       return await fetchCsrfToken(url);
     } catch (e) {
       lastError = e;
+      if (typeof window !== "undefined") {
+        console.debug("[CSRF] failed", { url, status: e?.status, message: e?.message });
+      }
+      if (e?.status !== 404) break;
     }
   }
   throw lastError ?? new Error("CSRF fetch failed.");
