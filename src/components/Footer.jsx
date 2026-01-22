@@ -65,35 +65,21 @@ export default function Footer() {
             en: footerEn.pricing,
             fr: footerFr.pricing,
           },
-          href: "#",
+          href: "/formations",
         },
         {
           label: {
             en: footerEn.overview,
             fr: footerFr.overview,
           },
-          href: "#",
+          href: "/",
         },
         {
           label: {
             en: footerEn.browse,
             fr: footerFr.browse,
           },
-          href: "#",
-        },
-        {
-          label: {
-            en: footerEn.accessibility,
-            fr: footerFr.accessibility,
-          },
-          href: "#",
-        },
-        {
-          label: {
-            en: footerEn.five,
-            fr: footerFr.five,
-          },
-          href: "#",
+          href: "/formations",
         },
       ],
     },
@@ -105,31 +91,10 @@ export default function Footer() {
       links: [
         {
           label: {
-            en: footerEn.brainstorming,
-            fr: footerFr.brainstorming,
-          },
-          href: "#",
-        },
-        {
-          label: {
-            en: footerEn.ideation,
-            fr: footerFr.ideation,
-          },
-          href: "#",
-        },
-        {
-          label: {
-            en: footerEn.wireframing,
-            fr: footerFr.wireframing,
-          },
-          href: "#",
-        },
-        {
-          label: {
             en: footerEn.research,
             fr: footerFr.research,
           },
-          href: "#",
+          href: "/blog",
         },
       ],
     },
@@ -144,21 +109,21 @@ export default function Footer() {
             en: footerEn.help_center,
             fr: footerFr.help_center,
           },
-          href: "#",
+          href: "/contact",
         },
         {
           label: {
             en: footerEn.blog,
             fr: footerFr.blog,
           },
-          href: "#",
+          href: "/blog",
         },
         {
           label: {
             en: footerEn.tutorials,
             fr: footerFr.tutorials,
           },
-          href: "#",
+          href: "/blog",
         },
       ],
     },
@@ -173,28 +138,21 @@ export default function Footer() {
             en: footerEn.about,
             fr: footerFr.about,
           },
-          href: "#",
+          href: "/about-us",
         },
         {
           label: {
             en: footerEn.press,
             fr: footerFr.press,
           },
-          href: "#",
+          href: "/blog",
         },
         {
           label: {
             en: footerEn.events,
             fr: footerFr.events,
           },
-          href: "#",
-        },
-        {
-          label: {
-            en: footerEn.careers,
-            fr: footerFr.careers,
-          },
-          href: "#",
+          href: "/blog",
         },
         {
           label: {
