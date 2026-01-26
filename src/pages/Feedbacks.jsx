@@ -66,6 +66,7 @@ export default function Feedback() {
             sort_to_process: "À traiter",
             yes: "Oui",
             no: "Non",
+            neutral: "Neutre",
           }
         : {
             title: "Feedback",
@@ -88,6 +89,7 @@ export default function Feedback() {
             sort_to_process: "To process",
             yes: "Yes",
             no: "No",
+            neutral: "Neutral",
           },
     [language]
   );
@@ -174,7 +176,7 @@ export default function Feedback() {
             typeof it.formation === "number" ? it.formation : formationObj?.id ?? null,
           formationName,
           feedback_content: it.feedback_content ?? "",
-          satisfaction: !!it.satisfaction,
+          satisfaction: it.satisfaction ?? null,
           to_process: !!it.to_process,
           confidence,
           raw: it,
@@ -210,20 +212,68 @@ export default function Feedback() {
     const arr = [...items];
     switch (sort) {
       case "satisfaction":
-        arr.sort((a, b) => Number(a.satisfaction) - Number(b.satisfaction));
+        arr.sort((a, b) => {
+          const aNum = Number(a.satisfaction);
+          const bNum = Number(b.satisfaction);
+          const aVal = Number.isFinite(aNum) ? aNum : -1;
+          const bVal = Number.isFinite(bNum) ? bNum : -1;
+          return aVal - bVal;
+        });
         break;
       case "to_process":
         arr.sort((a, b) => Number(a.to_process) - Number(b.to_process));
         break;
       default:
         arr.sort((a, b) => {
-          const aKey = (a.satisfaction ? 1 : 0) + (a.to_process ? 1 : 0);
-          const bKey = (b.satisfaction ? 1 : 0) + (b.to_process ? 1 : 0);
+          const aKey = (Number(a.satisfaction) ? 1 : 0) + (a.to_process ? 1 : 0);
+          const bKey = (Number(b.satisfaction) ? 1 : 0) + (b.to_process ? 1 : 0);
           return aKey - bKey;
         });
     }
     return arr;
   }, [items, sort]);
+
+  const getSatisfactionMeta = useCallback(
+    (value) => {
+      const num =
+        value === null || value === undefined || value === "" ? null : Number(value);
+      const hasNum = Number.isFinite(num);
+      const isZero = hasNum && num === 0;
+      const isOne = hasNum && num === 1;
+      const isTwo = hasNum && num === 2;
+
+      const cls = isTwo
+        ? theme === "dark"
+          ? "bg-yellow-600/20 text-yellow-400"
+          : "bg-yellow-100 text-yellow-700"
+        : isOne
+        ? theme === "dark"
+          ? "bg-green-600/20 text-green-400"
+          : "bg-green-100 text-green-700"
+        : isZero
+        ? theme === "dark"
+          ? "bg-red-600/20 text-red-400"
+          : "bg-red-100 text-red-700"
+        : theme === "dark"
+        ? "bg-red-600/20 text-red-400"
+        : "bg-red-100 text-red-700";
+
+      const label = hasNum
+        ? num === 0
+          ? t.no
+          : num === 1
+          ? t.yes
+          : num === 2
+          ? t.neutral
+          : String(num)
+        : value
+        ? t.yes
+        : t.no;
+
+      return { cls, label };
+    },
+    [theme, t]
+  );
 
   const markProcessed = async (row) => {
     if (!row?.id) return;
@@ -270,13 +320,9 @@ export default function Feedback() {
       ) : (
         <ul className="divide-y first:divide-y-0" role="list">
           {sorted.map((row) => {
-            const satCls = row.satisfaction
-              ? theme === "dark"
-                ? "bg-green-600/20 text-green-400"
-                : "bg-green-100 text-green-700"
-              : theme === "dark"
-              ? "bg-red-600/20 text-red-400"
-              : "bg-red-100 text-red-700";
+            const { cls: satCls, label: satLabel } = getSatisfactionMeta(
+              row.satisfaction
+            );
             const confVal = row.confidence;
             const confOk = typeof confVal === "number" && confVal >= 0.7;
             const confCls =
@@ -306,7 +352,7 @@ export default function Feedback() {
                     {/* Satisfaction badge en mobile */}
                     <div className="mt-1 flex flex-wrap gap-2">
                       <span className={`px-2 py-0.5 rounded text-xs ${satCls}`}>
-                        {t.satisfaction}: {row.satisfaction ? t.yes : t.no}
+                        {t.satisfaction}: {satLabel}
                       </span>
                       <span className={`px-2 py-0.5 rounded text-xs ${confCls}`}>
                         {t.confidence}: {confText}
@@ -395,13 +441,9 @@ export default function Feedback() {
             <tr><td className={`px-4 py-2 ${muted}`} colSpan={7}>{t.empty}</td></tr>
           ) : (
             sorted.map((row) => {
-              const satCls = row.satisfaction
-                ? theme === "dark"
-                  ? "bg-green-600/20 text-green-400"
-                  : "bg-green-100 text-green-700"
-                : theme === "dark"
-                ? "bg-red-600/20 text-red-400"
-                : "bg-red-100 text-red-700";
+              const { cls: satCls, label: satLabel } = getSatisfactionMeta(
+                row.satisfaction
+              );
               const confVal = row.confidence;
               const confOk = typeof confVal === "number" && confVal >= 0.7;
               const confCls =
@@ -442,7 +484,7 @@ export default function Feedback() {
                   </td>
                   <td className="px-4 py-2 align-top">
                     <span className={`px-2 py-0.5 rounded text-xs ${satCls}`}>
-                      {row.satisfaction ? t.yes : t.no}
+                      {satLabel}
                     </span>
                   </td>
                   <td className="px-4 py-2 align-top">
