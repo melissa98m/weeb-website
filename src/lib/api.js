@@ -302,10 +302,10 @@ export const AuthApi = {
     return authRequest("/me/");
   },
   data() {
-    return authRequest("/me/data/");
+    return authRequest("/gdpr/");
   },
   async exportData() {
-    const response = await authRequestRaw("/me/export/");
+    const response = await authRequestRaw("/gdpr/");
     const contentType = response.headers.get("content-type") || "";
     let blob;
     if (contentType.includes("application/json")) {
