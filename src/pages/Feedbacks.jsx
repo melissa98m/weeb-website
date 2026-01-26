@@ -3,6 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import AdminAccessFooter from "../components/admin/AdminAccessFooter";
+import PageSizer from "../components/ui/PageSizer";
+import Pagination from "../components/ui/Pagination";
 import { STAFF_ROLES } from "../utils/roles";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
@@ -54,6 +56,7 @@ export default function Feedback() {
             email: "Email",
             formation: "Formation",
             satisfaction: "Satisfaction",
+            confidence: "Confiance",
             to_process: "À traiter",
             mark_done: "Marquer comme traité",
             processed: "Traité",
@@ -75,6 +78,7 @@ export default function Feedback() {
             email: "Email",
             formation: "Training",
             satisfaction: "Satisfaction",
+            confidence: "Confidence",
             to_process: "To process",
             mark_done: "Mark as processed",
             processed: "Processed",
@@ -101,13 +105,19 @@ export default function Feedback() {
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState(null);
   const [sort, setSort] = useState("priority"); // priority | satisfaction | to_process
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
 
   const fetchFeedbacks = useCallback(async () => {
     if (!canSee) return;
     setLoading(true);
     setErr(null);
     try {
-      const res = await fetch(`${API_BASE}/feedbacks/`, {
+      const params = new URLSearchParams();
+      params.set("page", String(page));
+      params.set("page_size", String(pageSize));
+      const res = await fetch(`${API_BASE}/feedbacks/?${params.toString()}`, {
         credentials: "include",
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -147,6 +157,13 @@ export default function Feedback() {
 
         const formationName = formationObj?.name || `#${it.formation}`;
 
+        const confidenceRaw = it.confidence ?? it.confidence_score ?? null;
+        const confidenceParsed =
+          confidenceRaw === null || confidenceRaw === undefined
+            ? null
+            : Number(confidenceRaw);
+        const confidence = Number.isFinite(confidenceParsed) ? confidenceParsed : null;
+
         return {
           id: it.id ?? it.pk ?? null,
           userId: typeof it.user === "number" ? it.user : userObj?.id ?? null,
@@ -159,22 +176,35 @@ export default function Feedback() {
           feedback_content: it.feedback_content ?? "",
           satisfaction: !!it.satisfaction,
           to_process: !!it.to_process,
+          confidence,
           raw: it,
         };
       });
 
       setItems(normalized);
+      const total =
+        typeof data?.count === "number"
+          ? data.count
+          : data?.next || data?.previous
+          ? (page + (data?.next ? 1 : 0)) * pageSize
+          : normalized.length;
+      setPageCount(Math.max(1, Math.ceil(total / pageSize)));
     } catch (e) {
       setErr(e);
       setItems([]);
+      setPageCount(1);
     } finally {
       setLoading(false);
     }
-  }, [canSee]);
+  }, [canSee, page, pageSize]);
 
   useEffect(() => {
     fetchFeedbacks();
   }, [fetchFeedbacks]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
 
   const sorted = useMemo(() => {
     const arr = [...items];
@@ -247,6 +277,22 @@ export default function Feedback() {
               : theme === "dark"
               ? "bg-red-600/20 text-red-400"
               : "bg-red-100 text-red-700";
+            const confVal = row.confidence;
+            const confOk = typeof confVal === "number" && confVal >= 0.7;
+            const confCls =
+              typeof confVal === "number"
+                ? confOk
+                  ? theme === "dark"
+                    ? "bg-green-600/20 text-green-400"
+                    : "bg-green-100 text-green-700"
+                  : theme === "dark"
+                  ? "bg-orange-600/20 text-orange-400"
+                  : "bg-orange-100 text-orange-700"
+                : theme === "dark"
+                ? "bg-gray-700 text-white/80"
+                : "bg-gray-100 text-gray-700";
+            const confText =
+              typeof confVal === "number" ? confVal.toFixed(2) : "—";
             return (
               <li
                 key={row.id ?? `${row.userId}-${row.formationId}`}
@@ -258,9 +304,12 @@ export default function Feedback() {
                       {row.userName}
                     </div>
                     {/* Satisfaction badge en mobile */}
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-wrap gap-2">
                       <span className={`px-2 py-0.5 rounded text-xs ${satCls}`}>
                         {t.satisfaction}: {row.satisfaction ? t.yes : t.no}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs ${confCls}`}>
+                        {t.confidence}: {confText}
                       </span>
                     </div>
                   </div>
@@ -318,12 +367,13 @@ export default function Feedback() {
         aria-busy={loading ? "true" : "false"}
       >
         <colgroup>
-          <col className="w-[26%]" />
-          <col className="w-[14%]" />
-          <col className="w-[22%]" />
-          <col className="w-[18%]" />
+          <col className="w-[24%]" />
+          <col className="w-[13%]" />
+          <col className="w-[21%]" />
+          <col className="w-[16%]" />
           <col className="w-[10%]" />
-          <col className="w-[10%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
         </colgroup>
         <thead>
           <tr className={`${headRow} text-left`}>
@@ -332,16 +382,17 @@ export default function Feedback() {
             <th className="px-4 py-2 font-medium">{t.email}</th>
             <th className="px-4 py-2 font-medium">{t.formation}</th>
             <th className="px-4 py-2 font-medium">{t.satisfaction}</th>
+            <th className="px-4 py-2 font-medium">{t.confidence}</th>
             <th className="px-4 py-2 font-medium">{t.to_process}</th>
           </tr>
         </thead>
         <tbody>
           {loading ? (
-            <tr><td className="px-4 py-2" colSpan={6}>{t.loading}</td></tr>
+            <tr><td className="px-4 py-2" colSpan={7}>{t.loading}</td></tr>
           ) : err ? (
-            <tr><td className="px-4 py-2 text-red-600 dark:text-red-400" colSpan={6}>{t.error}</td></tr>
+            <tr><td className="px-4 py-2 text-red-600 dark:text-red-400" colSpan={7}>{t.error}</td></tr>
           ) : sorted.length === 0 ? (
-            <tr><td className={`px-4 py-2 ${muted}`} colSpan={6}>{t.empty}</td></tr>
+            <tr><td className={`px-4 py-2 ${muted}`} colSpan={7}>{t.empty}</td></tr>
           ) : (
             sorted.map((row) => {
               const satCls = row.satisfaction
@@ -351,6 +402,22 @@ export default function Feedback() {
                 : theme === "dark"
                 ? "bg-red-600/20 text-red-400"
                 : "bg-red-100 text-red-700";
+              const confVal = row.confidence;
+              const confOk = typeof confVal === "number" && confVal >= 0.7;
+              const confCls =
+                typeof confVal === "number"
+                  ? confOk
+                    ? theme === "dark"
+                      ? "bg-green-600/20 text-green-400"
+                      : "bg-green-100 text-green-700"
+                    : theme === "dark"
+                    ? "bg-orange-600/20 text-orange-400"
+                    : "bg-orange-100 text-orange-700"
+                  : theme === "dark"
+                  ? "bg-gray-700 text-white/80"
+                  : "bg-gray-100 text-gray-700";
+              const confText =
+                typeof confVal === "number" ? confVal.toFixed(2) : "—";
               return (
                 <tr
                   key={row.id ?? `${row.userId}-${row.formationId}`}
@@ -376,6 +443,11 @@ export default function Feedback() {
                   <td className="px-4 py-2 align-top">
                     <span className={`px-2 py-0.5 rounded text-xs ${satCls}`}>
                       {row.satisfaction ? t.yes : t.no}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 align-top">
+                    <span className={`px-2 py-0.5 rounded text-xs ${confCls}`}>
+                      {confText}
                     </span>
                   </td>
                   <td className="px-4 py-2 align-top">
@@ -417,21 +489,24 @@ export default function Feedback() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
         <h1 className="text-xl sm:text-2xl font-semibold">{t.title}</h1>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm">{t.sort_by}</label>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className={`px-2 py-1 rounded-md border text-sm ${
-              theme === "dark"
-                ? "bg-[#1c1c1c] text-white border-[#333]"
-                : "bg-white text-gray-900 border-gray-200"
-            }`}
-          >
-            <option value="priority">{t.sort_priority}</option>
-            <option value="satisfaction">{t.sort_satisfaction}</option>
-            <option value="to_process">{t.sort_to_process}</option>
-          </select>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm">{t.sort_by}</label>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className={`px-2 py-1 rounded-md border text-sm ${
+                theme === "dark"
+                  ? "bg-[#1c1c1c] text-white border-[#333]"
+                  : "bg-white text-gray-900 border-gray-200"
+              }`}
+            >
+              <option value="priority">{t.sort_priority}</option>
+              <option value="satisfaction">{t.sort_satisfaction}</option>
+              <option value="to_process">{t.sort_to_process}</option>
+            </select>
+          </div>
+          <PageSizer pageSize={pageSize} onChange={setPageSize} />
         </div>
       </div>
 
@@ -441,6 +516,9 @@ export default function Feedback() {
         <MobileList />
         {/* Desktop table */}
         <DesktopTable />
+      </div>
+      <div className="mt-4">
+        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
       </div>
       <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>

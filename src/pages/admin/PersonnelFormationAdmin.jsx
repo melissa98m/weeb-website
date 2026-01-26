@@ -67,6 +67,7 @@ export default function PersonnelFormationAdmin() {
   const [addUserId, setAddUserId] = useState(null);
   const [addFormationId, setAddFormationId] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [addError, setAddError] = useState("");
 
   // 2 contrôleurs séparés
   const bootCtrlRef = useRef(null);
@@ -326,6 +327,7 @@ export default function PersonnelFormationAdmin() {
       e.preventDefault();
       if (!addUserId || !addFormationId) return;
       setBusy(true);
+      setAddError("");
       try {
         const csrf = await ensureCsrf();
         const res = await fetch(`${API_BASE}/user-formations/`, {
@@ -337,13 +339,53 @@ export default function PersonnelFormationAdmin() {
             formation: Number(addFormationId),
           }),
         });
-        if (!res.ok)
-          throw new Error(`HTTP ${res.status} POST /user-formations/`);
+        
+        if (!res.ok) {
+          // Essayer de lire le message d'erreur de l'API
+          let errorMessage = `Erreur HTTP ${res.status}`;
+          try {
+            const errorData = await res.json();
+            const errorText = 
+              errorData?.detail ||
+              errorData?.message ||
+              errorData?.error ||
+              (Array.isArray(errorData?.non_field_errors) && errorData.non_field_errors[0]) ||
+              (typeof errorData === "string" ? errorData : null);
+            
+            if (errorText) {
+              errorMessage = errorText;
+            }
+            
+            // Détecter si c'est une erreur de duplication
+            const errorLower = errorMessage.toLowerCase();
+            if (
+              res.status === 400 ||
+              res.status === 409 ||
+              errorLower.includes("déjà") ||
+              errorLower.includes("deja") ||
+              errorLower.includes("already") ||
+              errorLower.includes("exists") ||
+              errorLower.includes("unique") ||
+              errorLower.includes("duplicate")
+            ) {
+              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+            }
+          } catch (parseError) {
+            // Si on ne peut pas parser le JSON, utiliser le message par défaut
+            if (res.status === 400 || res.status === 409) {
+              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+            }
+          }
+          throw new Error(errorMessage);
+        }
+        
         setAddUserId(null);
         setAddFormationId(null);
+        setAddError("");
         await loadLinks(page);
       } catch (e2) {
-        setLinksError(String(e2.message || e2));
+        const errorMsg = String(e2.message || e2);
+        setAddError(errorMsg);
       } finally {
         setBusy(false);
       }
@@ -463,14 +505,19 @@ export default function PersonnelFormationAdmin() {
       </div>
 
       <AddUserFormationForm
-        userOptions={userOptions}
-        formationOptions={formationOptions}
         addUserId={addUserId}
-        setAddUserId={setAddUserId}
+        setAddUserId={(value) => {
+          setAddUserId(value);
+          if (addError) setAddError("");
+        }}
         addFormationId={addFormationId}
-        setAddFormationId={setAddFormationId}
+        setAddFormationId={(value) => {
+          setAddFormationId(value);
+          if (addError) setAddError("");
+        }}
         onSubmit={onSubmitAdd}
         busy={busy}
+        error={addError}
       />
 
       <UserFormationTable
