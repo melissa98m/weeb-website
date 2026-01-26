@@ -1,11 +1,11 @@
 # 🚀 Weeb Website
 
-Site web complet de l'entreprise **Weeb**, développé en React avec un système d'authentification, un panneau d'administration, un blog, des formations et bien plus encore.
+Site web complet de l'entreprise **Weeb**, développé en React avec authentification, panneau d'administration, blog, formations et pages légales.
 
 ## 🗂 Table des matières
 
 1. [📖 Présentation](#-présentation)
-2. [⚙️ Stack technique](#-stack-technique)
+2. [⚙️ Stack technique](#️-stack-technique)
 3. [📁 Arborescence du projet](#-arborescence-du-projet)
 4. [💾 Installation](#-installation)
 5. [🛠 Scripts disponibles](#-scripts-disponibles)
@@ -44,71 +44,73 @@ Le design suit les maquettes fournies par l'équipe Weeb et utilise **Tailwind C
 - ⚛️ **React** (v19.1.0)
 - 🏎 **Vite** (v6.3.5)
 - 🎨 **Tailwind CSS** (v4.1.7)
-- 🌐 **react-router-dom** (v7.6.0) - Routing et navigation
+- 🌐 **react-router-dom** (v7.6.0)
 
 ### UI & Animations
-- 🎬 **Framer Motion** (v12.12.1) - Animations fluides
-- 📦 **React Icons** (v5.5.0) - Bibliothèque d'icônes SVG
+- 🎬 **Framer Motion** (v12.12.1)
+- 📦 **React Icons** (v5.5.0)
 
 ### Qualité de code
 - 🔍 **ESLint** (v9.25.0) - Linting avec règles React Hooks et React Refresh
 - 🎨 **Prettier** - Formatage automatique (recommandé)
 
 ### Tests
-- 🧪 **Cypress** (v14.5.4) - Tests E2E et composants
+- 🧪 **Cypress** (v14.5.4)
 
 ### DevOps
-- 🤖 **GitHub Actions** - CI/CD automatisé
-- 🐳 **Docker** - Containerisation
-- ☁️ **Vercel** - Déploiement (configuré)
+- 🤖 **GitHub Actions**
+- 🐳 **Docker**
+- ☁️ **Vercel**
 
 ## 📁 Arborescence du projet
 
 ```text
 weeb-website/
 ├── .github/
-│   └── workflows/          # Workflows CI/CD GitHub Actions
+│   ├── workflows/          # CI/CD GitHub Actions
+│   │   ├── ci.yml
+│   │   └── create-pr.yml
+│   └── PULL_REQUEST_TEMPLATE.md
 ├── cypress/
 │   ├── e2e/                # Tests end-to-end
 │   ├── fixtures/           # Données de test
 │   └── support/            # Commandes et configuration Cypress
 ├── dist/                   # Build de production
-├── locales/
-│   ├── en/                 # Traductions anglaises
-│   └── fr/                 # Traductions françaises
+├── locales/                # Traductions FR/EN
 ├── public/                 # Ressources statiques (images, SVG)
 ├── src/
-│   ├── assets/             # Logos, illustrations
-│   ├── components/         # Composants UI réutilisables
-│   │   ├── About/          # Composants de la page À propos
-│   │   ├── admin/          # Composants du panneau admin
-│   │   ├── Blog/           # Composants du blog
-│   │   ├── Contact/        # Composants de contact
-│   │   ├── Formations/     # Composants des formations
-│   │   ├── Home/           # Composants de la page d'accueil
-│   │   ├── Icon/           # Composants d'icônes
-│   │   ├── profile/        # Composants du profil
-│   │   └── ui/             # Composants UI génériques
-│   ├── context/            # Contextes React
-│   │   ├── AuthContext.jsx     # Gestion de l'authentification
-│   │   ├── LanguageContext.jsx  # Gestion de l'i18n
-│   │   └── ThemeContext.jsx     # Gestion du thème dark/light
-│   ├── layouts/            # Layouts réutilisables
-│   │   └── AdminLayout.jsx # Layout du panneau admin
-│   ├── lib/                # Bibliothèques utilitaires
-│   │   ├── api.js          # Client API avec gestion CSRF
-│   │   └── cookies.js      # Gestion des cookies
-│   ├── pages/              # Pages de l'application
-│   │   ├── admin/          # Pages du panneau admin
+│   ├── assets/
+│   ├── components/
+│   │   ├── admin/           # UI admin
+│   │   ├── About/
+│   │   ├── Blog/
+│   │   ├── Contact/
+│   │   ├── Formations/
+│   │   ├── Home/
+│   │   ├── Icon/
+│   │   ├── profile/
+│   │   ├── ui/
+│   │   ├── CookieBanner.jsx
+│   │   ├── Footer.jsx
+│   │   ├── Header.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── context/             # Contexts (Auth, Language, Theme)
+│   ├── layouts/             # Layouts réutilisables
+│   ├── lib/                 # Client API + cookies
+│   ├── pages/
+│   │   ├── admin/           # Pages admin
 │   │   ├── About.jsx
 │   │   ├── Blog.jsx
 │   │   ├── BlogDetail.jsx
 │   │   ├── Contact.jsx
 │   │   ├── Feedbacks.jsx
+│   │   ├── ForgotPassword.jsx
 │   │   ├── Formations.jsx
 │   │   ├── Home.jsx
+│   │   ├── Legal.jsx
 │   │   ├── Login.jsx
 │   │   ├── Messages.jsx
+│   │   ├── Privacy.jsx
 │   │   ├── Profile.jsx
 │   │   └── Register.jsx
 │   ├── routes/             # Routes protégées
@@ -137,8 +139,8 @@ weeb-website/
 
 ### Prérequis
 
-- **Node.js** (v20 ou supérieur recommandé)
-- **npm** (v9 ou supérieur)
+- **Node.js** (v20 ou supérieur recommandé, CI en v22)
+- **npm**
 - **Git**
 
 ### Étapes d'installation
@@ -154,32 +156,24 @@ npm install
 
 ### Variables d'environnement
 
-Créez un fichier `.env` à la racine du projet avec les variables suivantes :
+Créez un fichier `.env` à la racine du projet avec la variable suivante :
 
 ```env
-# URL de l'API backend (utilisée si définie, priorité absolue)
 VITE_API_URL=http://localhost:8000/api
-
-# URLs spécifiques par environnement (optionnel)
-VITE_DEV_API_URL=http://localhost:8000/api
-VITE_PROD_API_URL=https://weebbackend.melissa-mangione.com/api
 ```
 
-**Note importante pour le preview local (`npm run preview`)** :
-- Le preview local détecte automatiquement `localhost:4173` et utilise `VITE_DEV_API_URL` ou `http://localhost:8000/api` par défaut
-- Si vous testez avec un backend distant, assurez-vous que le backend autorise `localhost:4173` dans ses CORS
-- Pour forcer une URL spécifique en preview, définissez `VITE_DEV_API_URL` dans votre `.env`
+Si `VITE_API_URL` n'est pas défini, l'application utilise `http://localhost:8000/api` par défaut.
 
 ## 🛠 Scripts disponibles
 
-| Commande                | Description                                           |
-| ----------------------- | ----------------------------------------------------- |
-| `npm run dev`           | 🔄 Lancer le serveur de développement (HMR)            |
-| `npm run build`         | 📦 Générer le build de production                     |
-| `npm run preview`       | 👀 Prévisualiser le build local                       |
-| `npm run lint`          | 🔍 Exécuter ESLint pour vérifier le code              |
-| `npm run cypress:open`  | 🧪 Ouvrir l'interface Cypress (tests interactifs)     |
-| `npm run cypress:run`   | 🧪 Exécuter les tests Cypress en mode headless        |
+| Commande               | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| `npm run dev`          | 🔄 Lancer le serveur de développement (HMR)       |
+| `npm run build`        | 📦 Générer le build de production                 |
+| `npm run preview`      | 👀 Prévisualiser le build local                   |
+| `npm run lint`         | 🔍 Exécuter ESLint                                |
+| `npm run cypress:open` | 🧪 Ouvrir l'interface Cypress                     |
+| `npm run cypress:run`  | 🧪 Exécuter les tests Cypress (headless)          |
 
 ## ✨ Fonctionnalités
 
@@ -210,15 +204,13 @@ VITE_PROD_API_URL=https://weebbackend.melissa-mangione.com/api
 
 ### 🛡️ Panneau d'administration
 
-Toutes les pages admin nécessitent une authentification et les permissions appropriées :
-
-- **🏠 Tableau de bord** (`/admin`) : Vue d'ensemble de l'administration
-- **📝 Articles** (`/admin/articles`) : Gestion CRUD des articles de blog
-- **📚 Formations** (`/admin/formations`) : Gestion des formations (accès Personnel requis)
-- **👥 Formations utilisateurs** (`/admin/user-formations`) : Gestion des formations assignées aux utilisateurs (accès Personnel requis)
-- **🏷️ Genres** (`/admin/genres`) : Gestion des genres pour les articles
-- **💬 Messages** (`/admin/messages`) : Gestion des messages de contact
-- **⭐ Feedbacks** (`/admin/feedbacks`) : Gestion des retours utilisateurs
+- **🏠 Tableau de bord** (`/admin`)
+- **📝 Articles** (`/admin/articles`)
+- **📚 Formations** (`/admin/formations`)
+- **👥 Formations utilisateurs** (`/admin/user-formations`)
+- **🏷️ Genres** (`/admin/genres`)
+- **💬 Messages** (`/admin/messages`)
+- **⭐ Feedbacks** (`/admin/feedbacks`)
 
 ### 🎨 Fonctionnalités transversales
 
@@ -236,7 +228,7 @@ Toutes les pages admin nécessitent une authentification et les permissions appr
 
 ### Système d'authentification
 
-L'application utilise un système d'authentification basé sur des cookies avec protection CSRF. Le contexte `AuthContext` gère :
+L'application utilise un système d'authentification basé sur des cookies avec protection CSRF. `AuthContext` centralise :
 
 - **Connexion** (`login`) : Accepte email/username/identifier + password, pose les cookies, puis charge `/me`
 - **Inscription** (`register`) : Création de compte puis connexion automatique
@@ -314,12 +306,7 @@ La bannière de cookies (`CookieBanner`) gère le consentement RGPD avec :
 
 ### Développement avec Docker
 
-```bash
-# Lancer avec Docker Compose
-docker-compose up
-
-# L'application sera accessible sur http://localhost:5173
-```
+Le fichier `docker-compose.yml` référence actuellement `Dockerfile.dev` (non présent). Deux options :
 
 Le fichier `docker-compose.yml` configure :
 - Volume pour le code source (hot-reload avec `--watch`)
@@ -347,13 +334,8 @@ Le `Dockerfile` utilise Node.js 20 (bookworm) et configure l'environnement pour 
 
 ### Tests Cypress
 
-L'application inclut une suite de tests E2E avec Cypress :
-
 ```bash
-# Ouvrir Cypress en mode interactif
 npm run cypress:open
-
-# Exécuter tous les tests en mode headless
 npm run cypress:run
 ```
 
@@ -382,24 +364,17 @@ Les fixtures de test sont dans `cypress/fixtures/` avec des données mockées po
 
 ### Vercel
 
-Le projet est configuré pour être déployé sur Vercel :
+Le projet est configuré pour Vercel :
 
-1. Connectez votre dépôt GitHub à Vercel
-2. Configurez les variables d'environnement dans Vercel
-3. Le déploiement se fait automatiquement à chaque push sur `main`
-
-La configuration est dans `vercel.json` :
 - Build command : `npm run build`
 - Output directory : `dist`
-- Rewrites pour le routing SPA
+- Rewrites SPA vers `/index.html`
+- Rewrites `/api/*` vers `http://localhost:8000/api/*` (à ajuster pour un backend distant)
 
 ### Build de production
 
 ```bash
-# Générer le build
 npm run build
-
-# Le dossier dist/ contient les fichiers statiques prêts à être déployés
 ```
 
 ## 📚 Architecture et structure
@@ -451,27 +426,20 @@ Le `vite.config.js` configure :
 
 ### 🌳 Branches
 
-- `main` : Branche stable de production
-- `issueNumber-name` : Branches de fonctionnalités (ex: `42-add-blog-page`)
+- `main` : branche stable de production
+- `issueNumber-name` : branches de fonctionnalités (ex: `42-add-blog-page`)
 
 ### 📝 Commits
 
 Utilisez des messages de commit conventionnels :
 
-- `feat:` : Ajout d'une nouvelle fonctionnalité
-- `fix:` : Correction d'un bug
-- `style:` : Modification de style sans impact fonctionnel
-- `refactor:` : Refactorisation du code
-- `test:` : Ajout ou modification de tests
-- `docs:` : Modification de la documentation
-- `chore:` : Tâches de maintenance
-
-Exemple :
-```
-feat: ajout de la page blog avec pagination
-fix: correction du bug d'authentification
-style: amélioration du responsive sur mobile
-```
+- `feat:` ajout d'une fonctionnalité
+- `fix:` correction d'un bug
+- `style:` modification de style sans impact fonctionnel
+- `refactor:` refactorisation du code
+- `test:` ajout/modif de tests
+- `docs:` documentation
+- `chore:` maintenance
 
 ### 🤖 CI/CD
 
@@ -562,4 +530,4 @@ Pour toute question ou problème, contactez l'équipe Weeb.
 
 ---
 
-**Développé avec ❤️ par l'équipe Weeb**
+**Développé avec ❤️ par melissa98m**
