@@ -44,6 +44,7 @@ export default function BlogCard({
   language,
   theme,
   idx = 0,
+  isLcp = false,
   onViewSummary,
   labels = { viewSummary: "View summary" },
 }) {
@@ -113,7 +114,9 @@ export default function BlogCard({
           src={post.cover}
           alt={title}
           className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
+          loading={isLcp ? "eager" : "lazy"}
+          fetchPriority={isLcp ? "high" : "auto"}
+          decoding="async"
         />
         {/* Badge temps de lecture */}
         <div

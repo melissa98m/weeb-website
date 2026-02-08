@@ -23,7 +23,8 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 1000,
     // Optimisations supplémentaires
-    target: 'es2015', // Compatibilité avec les navigateurs modernes
+    // Cible plus moderne pour éviter transpilation/polyfills inutiles (Lighthouse Legacy JS)
+    target: 'es2020',
     reportCompressedSize: false, // Accélère le build
   },
 })

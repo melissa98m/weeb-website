@@ -222,6 +222,7 @@ export default function Blog() {
                   language={language}
                   theme={theme}
                   idx={idx}
+                  isLcp={idx === 0}
                   onViewSummary={openSummary}
                   labels={{ viewSummary: t.view_summary }}
                 />
