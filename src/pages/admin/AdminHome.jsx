@@ -72,6 +72,21 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
   );
 }
 
+function TestComponent({ className = "" }) {
+  const handleCrash = () => {
+    const user = undefined;
+    // This will throw
+    // eslint-disable-next-line no-console
+    console.log(user.name);
+  };
+
+  return (
+    <button onClick={handleCrash} className={className}>
+      Crash Test
+    </button>
+  );
+}
+
 export default function AdminHome() {
   const { user } = useAuth();
   const { theme } = useTheme();
@@ -205,6 +220,7 @@ export default function AdminHome() {
           <button onClick={loadCounts} className={`rounded-lg border px-3 py-1.5 text-sm ${ghostBtn}`}>
             Recharger les compteurs
           </button>
+          <TestComponent className={`rounded-lg border px-3 py-1.5 text-sm ${ghostBtn}`} />
         </div>
       </section>
 
