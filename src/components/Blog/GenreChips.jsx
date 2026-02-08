@@ -9,17 +9,35 @@ function textColorFor(bgHex) {
   return yiq >= 140 ? "#111827" : "#ffffff";
 }
 
+function hexToRgba(hex, alpha) {
+  if (!hex || !/^#[0-9A-Fa-f]{6}$/.test(hex)) return `rgba(255,255,255,${alpha})`;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function GenreChips({ genres, selectedId, onChange, theme }) {
   return (
     <div className="flex flex-wrap gap-2">
       {genres.map((g) => {
         const active = selectedId === g.id;
+        const isDark = theme === "dark";
+        const inactiveText = isDark ? "#f9fafb" : "#111827";
         const style = active && g.color
           ? { backgroundColor: g.color, color: textColorFor(g.color), borderColor: g.color }
           : {
-              backgroundColor: "transparent",
-              color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-              borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
+              backgroundColor: g.color
+                ? hexToRgba(g.color, isDark ? 0.22 : 0.12)
+                : isDark
+                  ? "rgba(255,255,255,0.08)"
+                  : "transparent",
+              color: inactiveText,
+              borderColor: g.color
+                ? hexToRgba(g.color, isDark ? 0.7 : 0.5)
+                : isDark
+                  ? "#4b5563"
+                  : "#e5e7eb",
             };
         return (
           <button

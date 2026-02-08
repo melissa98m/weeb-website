@@ -28,8 +28,14 @@ describe("admin post endpoints", () => {
     cy.visit("/admin/user-formations");
     cy.wait(["@users", "@formations", "@links"]);
 
-    cy.get("#add-user").select("1");
-    cy.get("#add-formation").select("10");
+    cy.get("#add-user").type("al");
+    cy.wait("@users");
+    cy.get("#add-user-listbox").contains("alice").click();
+
+    cy.get("#add-formation").type("Fo");
+    cy.wait("@formations");
+    cy.get("#add-formation-listbox").contains("Formation React").click();
+
     cy.contains("button", "Ajouter").click();
     cy.wait("@addLink");
 
