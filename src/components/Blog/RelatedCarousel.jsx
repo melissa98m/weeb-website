@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { safeChipStyle } from "../../utils/colors";
+import { getEnv } from "../../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 const RELATED_PAGE_SIZE = 60;
 
 /* ---------- utils ---------- */

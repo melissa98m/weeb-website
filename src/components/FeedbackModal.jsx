@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import feedbackFr from "../../locales/fr/feedback.json";
 import feedbackEn from "../../locales/en/feedback.json";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 export default function FeedbackModal({
   open,

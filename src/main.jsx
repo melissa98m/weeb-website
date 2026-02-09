@@ -7,9 +7,10 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { appEnv } from "./lib/env";
 
-const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
-const sentryEnabled = import.meta.env.PROD && Boolean(sentryDsn);
+const sentryDsn = appEnv.VITE_SENTRY_DSN;
+const sentryEnabled = appEnv.PROD && Boolean(sentryDsn);
 
 if (sentryEnabled) {
   const integrations = [];

@@ -6,8 +6,9 @@ import AdminAccessFooter from "../components/admin/AdminAccessFooter";
 import PageSizer from "../components/ui/PageSizer";
 import Pagination from "../components/ui/Pagination";
 import { STAFF_ROLES } from "../utils/roles";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 /* ----- Helper rôles (Commercial ou Personnel) ----- */
 const hasAnyStaffRole = (u) => {
