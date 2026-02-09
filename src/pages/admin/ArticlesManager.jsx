@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { hasAnyRedactionRole } from "../../utils/roles";
+import { safeChipStyle } from "../../utils/colors";
 import PageSizer from "../../components/ui/PageSizer";
 import Pagination from "../../components/ui/Pagination";
 import ArticleEditorModal from "../../components/admin/ArticleEditorModal";
@@ -265,11 +266,7 @@ export default function ArticlesManager() {
                           <span
                             key={g.id}
                             className="px-2 py-0.5 rounded-full border text-xs"
-                            style={{
-                              backgroundColor: "transparent",
-                              borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                              color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-                            }}
+                            style={safeChipStyle(g.color, theme)}
                           >
                             {g.name}
                           </span>

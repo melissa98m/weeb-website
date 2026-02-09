@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
+import { safeChipStyle } from "../../utils/colors";
 
 export default function GenrePicker({
   apiBase,
@@ -167,11 +168,7 @@ export default function GenrePicker({
             <span
               key={g.id}
               className={`${chipCls} flex items-center gap-2`}
-              style={{
-                backgroundColor: "transparent",
-                borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-              }}
+              style={safeChipStyle(g.color, theme)}
             >
               {g.name}
               {/* Color picker inline pour le genre sélectionné */}

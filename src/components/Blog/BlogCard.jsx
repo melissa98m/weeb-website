@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Button from "../Button";
+import { safeChipStyle } from "../../utils/colors";
 
 function formatDate(iso, lang) {
   try {
@@ -131,7 +132,7 @@ export default function BlogCard({
       </div>
 
       <div className="p-5">
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2">{title}</h3>
+        <h2 className="text-lg font-semibold mb-2 line-clamp-2">{title}</h2>
         <p
           className={`text-sm mb-4 line-clamp-3 ${
             theme === "dark" ? "text-white/70" : "text-gray-600"
@@ -147,12 +148,7 @@ export default function BlogCard({
                 key={c.key}
                 title={c.label}
                 className="px-2 py-1 rounded-full border"
-                style={{
-                  backgroundColor: "transparent",
-                  borderColor:
-                    c.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                  color: c.color || (theme === "dark" ? "#ffffff" : "#111827"),
-                }}
+                style={safeChipStyle(c.color, theme)}
               >
                 {c.label}
               </span>

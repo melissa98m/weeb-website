@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "../Button";
+import { safeChipStyle } from "../../utils/colors";
 
 function formatDate(iso, lang) {
   try {
@@ -70,11 +71,7 @@ export default function SummaryModal({ open, onClose, post, theme, language, t }
                 <span
                   key={g.id}
                   className="px-2 py-1 rounded-full border text-xs"
-                  style={{
-                    backgroundColor: "transparent",
-                    color: g.color,
-                    borderColor: g.color,
-                  }}
+                  style={safeChipStyle(g.color, theme)}
                 >
                   {g.name}
                 </span>
