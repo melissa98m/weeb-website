@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
@@ -15,6 +15,7 @@ const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 export default function Formations() {
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const reduceMotion = useReducedMotion();
   const t = language === "fr" ? formationsFr : formationsEn;
 
   const [loading, setLoading] = useState(true);
@@ -25,6 +26,15 @@ export default function Formations() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined" && window.Cypress) {
+      const mock = window.__formationsMock__;
+      if (Array.isArray(mock)) {
+        setItems(mock);
+        setLoading(false);
+        return;
+      }
+    }
+
     const ctr = new AbortController();
     (async () => {
       try {
@@ -70,7 +80,11 @@ export default function Formations() {
 
   return (
     <main className="px-6 py-16 max-w-6xl mx-auto">
-      <motion.header initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+      <motion.header
+        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8"
+      >
         <h1 className="text-3xl md:text-4xl font-bold mb-2">{t.title}</h1>
         <p className={`text-sm md:text-base ${theme === "dark" ? "text-white/70" : "text-gray-600"}`}>{t.subtitle}</p>
       </motion.header>

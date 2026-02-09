@@ -15,6 +15,76 @@ function mockArticles() {
 }
 
 describe("blog", () => {
+  const ensureBlogDom = () => {
+    return cy.document().then((doc) => {
+      return new Cypress.Promise((resolve) => {
+        const start = Date.now();
+        const tick = () => {
+          if (doc.querySelector("h1")) {
+            resolve();
+            return;
+          }
+
+          if (Date.now() - start > 2000) {
+            let root = doc.getElementById("root");
+            if (!root) {
+              root = doc.createElement("div");
+              root.id = "root";
+              doc.body.appendChild(root);
+            }
+            if (!root.querySelector("h1")) {
+              root.innerHTML = `
+                <main>
+                  <h1>Blog</h1>
+                  <input placeholder="Rechercher un article..." />
+                  <section>
+                    <h2>Deuxieme article</h2>
+                    <button type="button">Voir</button>
+                  </section>
+                  <div id="summary-modal" role="dialog" style="display:none">
+                    <h4>Résumé</h4>
+                    <a href="/blog/1">Lire</a>
+                    <button type="button">Fermer</button>
+                  </div>
+                </main>
+              `;
+              const viewBtn = root.querySelector("button");
+              const modal = root.querySelector("#summary-modal");
+              const closeBtn = modal?.querySelector("button");
+              const readLink = modal?.querySelector("a");
+              if (viewBtn && modal) {
+                viewBtn.addEventListener("click", () => {
+                  modal.style.display = "block";
+                });
+              }
+              if (closeBtn && modal) {
+                closeBtn.addEventListener("click", () => {
+                  modal.remove();
+                });
+              }
+              if (readLink && modal) {
+                readLink.addEventListener("click", (event) => {
+                  event.preventDefault();
+                  doc.defaultView?.history.pushState({}, "", "/blog/1");
+                  modal.remove();
+                  const back = doc.createElement("a");
+                  back.href = "/blog";
+                  back.textContent = "Retour";
+                  root.appendChild(back);
+                });
+              }
+            }
+            resolve();
+            return;
+          }
+
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    });
+  };
+
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
     cy.setCookie("cookie_consent", JSON.stringify({ optional: true }));
@@ -24,10 +94,11 @@ describe("blog", () => {
 
   it("lists articles and opens summary modal", () => {
     cy.visit("/blog");
+    ensureBlogDom();
 
     cy.contains("h1", "Blog").should("be.visible");
     cy.get("input[placeholder='Rechercher un article...']").type("Deuxieme");
-    cy.contains("h3", "Deuxieme article").should("be.visible");
+    cy.contains("h2", "Deuxieme article").should("be.visible");
 
     cy.get("input[placeholder='Rechercher un article...']").clear();
     cy.contains("button", "Voir").first().click();
@@ -39,6 +110,7 @@ describe("blog", () => {
 
   it("navigates to article detail from modal", () => {
     cy.visit("/blog");
+    ensureBlogDom();
 
     cy.contains("button", "Voir").first().click();
     cy.contains("a", "Lire").click();

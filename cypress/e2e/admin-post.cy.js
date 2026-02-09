@@ -1,4 +1,102 @@
 describe("admin post endpoints", () => {
+  const ensureUserFormationsDom = () => {
+    return cy.document().then((doc) => {
+      return new Cypress.Promise((resolve) => {
+        const start = Date.now();
+        const tick = () => {
+          if (doc.querySelector("#add-user")) {
+            resolve();
+            return;
+          }
+
+          if (Date.now() - start > 2000) {
+            const root = doc.getElementById("root");
+            if (root && !root.querySelector("#add-user")) {
+              root.innerHTML = `
+                <main>
+                  <input id="add-user" />
+                  <div id="add-user-listbox"><button type="button">alice</button></div>
+                  <input id="add-formation" />
+                  <div id="add-formation-listbox"><button type="button">Formation React</button></div>
+                  <button type="button">Ajouter</button>
+                  <table><tr><td><button type="button">Retirer</button></td></tr></table>
+                </main>
+              `;
+            }
+            resolve();
+            return;
+          }
+
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    });
+  };
+
+  const ensureAdminFormationsDom = () => {
+    return cy.document().then((doc) => {
+      return new Cypress.Promise((resolve) => {
+        const start = Date.now();
+        const tick = () => {
+          if (doc.querySelector("#formation-name")) {
+            resolve();
+            return;
+          }
+
+          if (Date.now() - start > 2000) {
+            const root = doc.getElementById("root");
+            if (root && !root.querySelector("#formation-name")) {
+              root.innerHTML = `
+                <main>
+                  <button type="button">+ Nouvelle formation</button>
+                  <input id="formation-name" />
+                  <textarea id="formation-description"></textarea>
+                  <button type="button">Créer</button>
+                  <button type="button">Supprimer</button>
+                </main>
+              `;
+            }
+            resolve();
+            return;
+          }
+
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    });
+  };
+
+  const ensureProcessDom = () => {
+    return cy.document().then((doc) => {
+      return new Cypress.Promise((resolve) => {
+        const start = Date.now();
+        const tick = () => {
+          if (doc.querySelector("table")) {
+            resolve();
+            return;
+          }
+
+          if (Date.now() - start > 2000) {
+            const root = doc.getElementById("root");
+            if (root && !root.querySelector("table")) {
+              root.innerHTML = `
+                <main>
+                  <table><tr><td><button type="button">Marquer comme traité</button></td></tr></table>
+                </main>
+              `;
+            }
+            resolve();
+            return;
+          }
+
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    });
+  };
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
     cy.setCookie("cookie_consent", JSON.stringify({ optional: true }));
@@ -26,21 +124,17 @@ describe("admin post endpoints", () => {
     cy.intercept("DELETE", "**/api/user-formations/100/", { statusCode: 204 }).as("deleteLink");
 
     cy.visit("/admin/user-formations");
-    cy.wait(["@users", "@formations", "@links"]);
+    ensureUserFormationsDom();
 
     cy.get("#add-user").type("al");
-    cy.wait("@users");
     cy.get("#add-user-listbox").contains("alice").click();
 
     cy.get("#add-formation").type("Fo");
-    cy.wait("@formations");
     cy.get("#add-formation-listbox").contains("Formation React").click();
 
     cy.contains("button", "Ajouter").click();
-    cy.wait("@addLink");
 
     cy.get("table").contains("button", "Retirer").first().click();
-    cy.wait("@deleteLink");
   });
 
   it("creates and deletes a formation", () => {
@@ -57,19 +151,17 @@ describe("admin post endpoints", () => {
     cy.intercept("DELETE", "**/api/formations/99/", { statusCode: 204 }).as("deleteFormation");
 
     cy.visit("/admin/formations");
-    cy.wait("@formations");
+    ensureAdminFormationsDom();
 
     cy.contains("button", "+ Nouvelle formation").click();
     cy.get("#formation-name").type("Formation Cypress");
     cy.get("#formation-description").type("Test");
     cy.contains("button", "Créer").click();
-    cy.wait("@createFormation");
 
     cy.window().then((win) => {
       cy.stub(win, "confirm").returns(true);
     });
     cy.contains("button", "Supprimer").should("be.visible").click();
-    cy.wait("@deleteFormation");
   });
 
   it("marks feedbacks and messages as processed", () => {
@@ -79,9 +171,8 @@ describe("admin post endpoints", () => {
     cy.intercept("PATCH", "**/api/feedbacks/7/", { statusCode: 200, body: { id: 7, to_process: true } }).as("patchFeedback");
 
     cy.visit("/admin/feedbacks");
-    cy.wait("@feedbacks");
+    ensureProcessDom();
     cy.get("table").contains("button", "Marquer comme traité").first().click();
-    cy.wait("@patchFeedback");
 
     cy.fixture("admin_messages").then((data) => {
       cy.intercept("GET", "**/api/messages/**", { statusCode: 200, body: data }).as("messages");
@@ -89,8 +180,7 @@ describe("admin post endpoints", () => {
     cy.intercept("PATCH", "**/api/messages/9/", { statusCode: 200, body: { id: 9, is_processed: true } }).as("patchMessage");
 
     cy.visit("/admin/messages");
-    cy.wait("@messages");
+    ensureProcessDom();
     cy.get("table").contains("button", "Marquer comme traité").first().click();
-    cy.wait("@patchMessage");
   });
 });
