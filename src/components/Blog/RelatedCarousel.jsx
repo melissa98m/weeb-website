@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { safeChipStyle } from "../../utils/colors";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 const RELATED_PAGE_SIZE = 60;
@@ -75,11 +76,7 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
             <span
               key={`${item.id}-${g.id}`}
               className="px-1.5 py-0.5 rounded-full border text-[11px]"
-              style={{
-                backgroundColor: "transparent",
-                borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-              }}
+              style={safeChipStyle(g.color, theme)}
             >
               {g.name}
             </span>
