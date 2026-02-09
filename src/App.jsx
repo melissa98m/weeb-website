@@ -7,6 +7,7 @@ import CookieBanner from "./components/CookieBanner";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
+import Formations from "./pages/Formations";
 
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -20,7 +21,6 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogDetail = lazy(() => import("./pages/BlogDetail"));
-const Formations = lazy(() => import("./pages/Formations"));
 const FormationModal = lazy(() => import("./components/Formations/FormationModal"));
 const Feedbacks = lazy(() => import("./pages/Feedbacks"));
 const Messages = lazy(() => import("./pages/Messages"));
