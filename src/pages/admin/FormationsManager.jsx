@@ -13,10 +13,11 @@ import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import FormationDetailsModal from "../../components/admin/FormationDetailsModal";
 import CreateFormationModal from "../../components/admin/CreateFormationModal";
+import { getEnv } from "../../lib/env";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

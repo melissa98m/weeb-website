@@ -8,8 +8,9 @@ import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 import RelatedCarousel from "../components/Blog/RelatedCarousel";
 import { safeChipStyle } from "../utils/colors";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 const INDEX_PAGE_SIZE = 200;
 
 // ---- Utils

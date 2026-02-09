@@ -3,9 +3,10 @@ import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { hasAnyRedactionRole } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
+import { getEnv } from "../../lib/env";
 
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

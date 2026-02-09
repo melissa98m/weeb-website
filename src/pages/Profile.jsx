@@ -9,8 +9,9 @@ import DataRights from "../components/profile/DataRights";
 
 import profileFr from "../../locales/fr/profile.json";
 import profileEn from "../../locales/en/profile.json";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 export default function Profile() {
   const { user, loading: authLoading, reload, logout } = useAuth();
