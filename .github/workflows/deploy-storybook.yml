@@ -7,12 +7,16 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
     steps:
       # Job 1: Récupérer le code
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       # Job 2: Installer les dépendances
@@ -22,21 +26,21 @@ jobs:
       - run: npm run build-storybook
 
       - name: Vérifier VERCEL_TOKEN
-        if: ${{ !secrets.VERCEL_TOKEN }}
+        if: ${{ !env.VERCEL_TOKEN }}
         run: |
           echo "ERREUR: le secret GitHub 'VERCEL_TOKEN' est manquant."
           echo "Ajoutez-le via Settings > Secrets and variables > Actions."
           exit 1
 
       - name: Vérifier VERCEL_PROJECT_ID
-        if: ${{ !secrets.VERCEL_PROJECT_ID }}
+        if: ${{ !env.VERCEL_PROJECT_ID }}
         run: |
           echo "ERREUR: le secret GitHub 'VERCEL_PROJECT_ID' est manquant."
           echo "Ajoutez-le via Settings > Secrets and variables > Actions."
           exit 1
 
       - name: Vérifier VERCEL_ORG_ID
-        if: ${{ !secrets.VERCEL_ORG_ID }}
+        if: ${{ !env.VERCEL_ORG_ID }}
         run: |
           echo "ERREUR: le secret GitHub 'VERCEL_ORG_ID' est manquant."
           echo "Ajoutez-le via Settings > Secrets and variables > Actions."
@@ -46,10 +50,10 @@ jobs:
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-token: ${{ env.VERCEL_TOKEN }}
           # ... autres secrets stockés dans GitHub > Settings > Secrets
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
+          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
           working-directory: storybook-static
           # Optionnel: arguments Vercel supplémentaires
           # vercel-args: "--prod"
