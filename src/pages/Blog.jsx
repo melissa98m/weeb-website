@@ -105,10 +105,15 @@ export default function Blog() {
         setPage(1);
         setVisible(6);
       } catch (e) {
+        if (e?.name === "AbortError" || ac.signal.aborted) {
+          return;
+        }
         console.error("Failed to load articles:", e);
         setAllPosts([]);
       } finally {
-        setLoading(false);
+        if (!ac.signal.aborted) {
+          setLoading(false);
+        }
       }
     })();
     return () => ac.abort();
