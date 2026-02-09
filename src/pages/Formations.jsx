@@ -8,8 +8,9 @@ import formationsFr from "../../locales/fr/formations.json";
 import FormationCard from "../components/Formations/FormationCard";
 import FormationModal from "../components/Formations/FormationModal";
 import SkeletonCard from "../components/Formations/SkeletonCard";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 export default function Formations() {
   const { theme } = useTheme();

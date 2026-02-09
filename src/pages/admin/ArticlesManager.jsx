@@ -7,9 +7,10 @@ import PageSizer from "../../components/ui/PageSizer";
 import Pagination from "../../components/ui/Pagination";
 import ArticleEditorModal from "../../components/admin/ArticleEditorModal";
 import GenreChips from "../../components/Blog/GenreChips";
+import { getEnv } from "../../lib/env";
 
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

@@ -8,15 +8,17 @@ Site web complet de l'entreprise **Weeb**, développé en React avec authentific
 2. [⚙️ Stack technique](#️-stack-technique)
 3. [📁 Arborescence du projet](#-arborescence-du-projet)
 4. [💾 Installation](#-installation)
-5. [🛠 Scripts disponibles](#-scripts-disponibles)
-6. [✨ Fonctionnalités](#-fonctionnalités)
-7. [🔐 Authentification et rôles](#-authentification-et-rôles)
-8. [🌐 Configuration](#-configuration)
-9. [🐳 Docker](#-docker)
-10. [🧪 Tests](#-tests)
-11. [🚀 Déploiement](#-déploiement)
-12. [📚 Architecture et structure](#-architecture-et-structure)
-13. [🔧 Conventions Git et CI/CD](#-conventions-git-et-cicd)
+5. [🌐 Configuration & variables d'environnement](#-configuration--variables-denvironnement)
+6. [🛠 Scripts disponibles](#-scripts-disponibles)
+7. [✨ Fonctionnalités](#-fonctionnalités)
+8. [🔐 Authentification et rôles](#-authentification-et-rôles)
+9. [🧪 Tests](#-tests)
+10. [📘 Storybook](#-storybook)
+11. [🐳 Docker](#-docker)
+12. [🚀 Déploiement](#-déploiement)
+13. [📚 Architecture et structure](#-architecture-et-structure)
+14. [🔧 Conventions Git et CI/CD](#-conventions-git-et-cicd)
+15. [🐛 Dépannage](#-dépannage)
 
 ---
 
@@ -46,20 +48,24 @@ Le design suit les maquettes fournies par l'équipe Weeb et utilise **Tailwind C
 - 🎨 **Tailwind CSS** (v4.1.7)
 - 🌐 **react-router-dom** (v7.6.0)
 
-### UI & Animations
+### UI & Observabilité
 - 🎬 **Framer Motion** (v12.12.1)
 - 📦 **React Icons** (v5.5.0)
+- 🧭 **Sentry** (monitoring erreurs + perf, activé en prod si `VITE_SENTRY_DSN`)
 
 ### Qualité de code
-- 🔍 **ESLint** (v9.25.0) - Linting avec règles React Hooks et React Refresh
+- 🔍 **ESLint** (v9.x) avec règles React Hooks, React Refresh et Storybook
 - 🎨 **Prettier** - Formatage automatique (recommandé)
 
 ### Tests
-- 🧪 **Cypress** (v14.5.4)
+- 🧪 **Vitest** + **Testing Library** (tests unitaires / composants)
+- 🧪 **Cypress** (E2E)
+- 🧪 **Storybook** + **Vitest Addon** (tests de stories)
+- 🧪 **Playwright** (exécution headless des tests Storybook)
 
 ### DevOps
 - 🤖 **GitHub Actions**
-- 🐳 **Docker**
+- 🐳 **Docker / Docker Compose**
 - ☁️ **Vercel**
 
 ## 📁 Arborescence du projet
@@ -69,8 +75,10 @@ weeb-website/
 ├── .github/
 │   ├── workflows/          # CI/CD GitHub Actions
 │   │   ├── ci.yml
-│   │   └── create-pr.yml
+│   │   ├── create-pr.yml
+│   │   └── deploy-storybook.yml
 │   └── PULL_REQUEST_TEMPLATE.md
+├── .storybook/             # Configuration Storybook
 ├── cypress/
 │   ├── e2e/                # Tests end-to-end
 │   ├── fixtures/           # Données de test
@@ -96,7 +104,7 @@ weeb-website/
 │   │   └── ProtectedRoute.jsx
 │   ├── context/             # Contexts (Auth, Language, Theme)
 │   ├── layouts/             # Layouts réutilisables
-│   ├── lib/                 # Client API + cookies
+│   ├── lib/                 # Client API + cookies + env
 │   ├── pages/
 │   │   ├── admin/           # Pages admin
 │   │   ├── About.jsx
@@ -122,10 +130,10 @@ weeb-website/
 │   ├── App.css             # Styles globaux
 │   ├── main.jsx            # Point d'entrée de l'application
 │   └── index.css           # Styles de base
-├── .gitignore
+├── .env                    # Variables locales (exemple, non versionné en prod)
 ├── cypress.config.js       # Configuration Cypress
 ├── docker-compose.yml      # Configuration Docker Compose
-├── Dockerfile              # Image Docker pour développement (référencé comme Dockerfile.dev dans docker-compose.yml)
+├── Dockerfile              # Image Docker pour développement
 ├── eslint.config.js        # Configuration ESLint
 ├── index.html              # Template HTML
 ├── package.json            # Dépendances & scripts
@@ -139,7 +147,7 @@ weeb-website/
 
 ### Prérequis
 
-- **Node.js** (v20 ou supérieur recommandé, CI en v22)
+- **Node.js** (v20+ recommandé, CI en v22)
 - **npm**
 - **Git**
 
@@ -154,26 +162,31 @@ cd weeb-website
 npm install
 ```
 
-### Variables d'environnement
+## 🌐 Configuration & variables d'environnement
 
-Créez un fichier `.env` à la racine du projet avec la variable suivante :
+Créez ou mettez à jour un fichier `.env` à la racine du projet :
 
 ```env
 VITE_API_URL=http://localhost:8000/api
+VITE_SENTRY_DSN=__votre_dsn_sentry__
 ```
 
-Si `VITE_API_URL` n'est pas défini, l'application utilise `http://localhost:8000/api` par défaut.
+- `VITE_API_URL` : URL du backend Django. **Si non défini**, l'app utilise par défaut `https://weebbackend.melissa-mangione.com/api`.
+- `VITE_SENTRY_DSN` : DSN Sentry. **Si défini en production**, active le reporting d'erreurs et les traces/replays.
 
 ## 🛠 Scripts disponibles
 
-| Commande               | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `npm run dev`          | 🔄 Lancer le serveur de développement (HMR)       |
-| `npm run build`        | 📦 Générer le build de production                 |
-| `npm run preview`      | 👀 Prévisualiser le build local                   |
-| `npm run lint`         | 🔍 Exécuter ESLint                                |
-| `npm run cypress:open` | 🧪 Ouvrir l'interface Cypress                     |
-| `npm run cypress:run`  | 🧪 Exécuter les tests Cypress (headless)          |
+| Commande                | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `npm run dev`           | 🔄 Lancer le serveur de développement (HMR)        |
+| `npm run build`         | 📦 Générer le build de production                  |
+| `npm run preview`       | 👀 Prévisualiser le build local                    |
+| `npm run lint`          | 🔍 Exécuter ESLint                                 |
+| `npm test`              | 🧪 Lancer les tests Vitest (unitaires + stories)   |
+| `npm run cypress:open`  | 🧪 Ouvrir l'interface Cypress                      |
+| `npm run cypress:run`   | 🧪 Exécuter les tests Cypress (headless)           |
+| `npm run storybook`     | 📚 Lancer Storybook                                |
+| `npm run build-storybook` | 📦 Build statique Storybook                      |
 
 ## ✨ Fonctionnalités
 
@@ -185,6 +198,7 @@ Si `VITE_API_URL` n'est pas défini, l'application utilise `http://localhost:800
 - **📝 Blog** (`/blog`) : Liste des articles de blog avec pagination et filtres par genre
 - **📄 Détail article** (`/blog/:id`) : Page de détail d'un article avec contenu complet
 - **📚 Formations** (`/formations`) : Catalogue des formations disponibles avec modal de détail
+- **🪟 Détail formation** (`/formation/:id`) : Route dédiée au modal de formation
 - **🔐 Connexion** (`/login`) : Page de connexion avec validation et animations
 - **📝 Inscription** (`/register`) : Page d'inscription avec validation
 - **🔑 Mot de passe oublié** (`/forgot-password`) : Demande de réinitialisation de mot de passe
@@ -206,23 +220,23 @@ Si `VITE_API_URL` n'est pas défini, l'application utilise `http://localhost:800
 
 - **🏠 Tableau de bord** (`/admin`)
 - **📝 Articles** (`/admin/articles`)
-- **📚 Formations** (`/admin/formations`)
-- **👥 Formations utilisateurs** (`/admin/user-formations`)
+- **📚 Formations** (`/admin/formations`) *(Personnel requis)*
+- **👥 Formations utilisateurs** (`/admin/user-formations`) *(Personnel requis)*
 - **🏷️ Genres** (`/admin/genres`)
 - **💬 Messages** (`/admin/messages`)
 - **⭐ Feedbacks** (`/admin/feedbacks`)
 
 ### 🎨 Fonctionnalités transversales
 
-- **🌗 Thème Dark/Light** : Switch accessible dans le header, persistance dans localStorage, synchronisation avec l'attribut `data-theme` du DOM
-- **🌐 Internationalisation** : Support FR/EN via `LanguageContext` et fichiers JSON dans `locales/`, synchronisation avec l'attribut `lang` du DOM
-- **📱 Responsive Design** : Design mobile-first avec breakpoints Tailwind, optimisé pour tous les écrans
-- **⚡ Lazy Loading** : Chargement différé des composants avec `React.lazy()` et `Suspense` pour optimiser les performances
+- **🌗 Thème Dark/Light** : Switch accessible dans le header, persistance dans localStorage, synchronisation via `class` et `data-theme`
+- **🌐 Internationalisation** : Support FR/EN via `LanguageContext` et fichiers JSON dans `locales/`, synchronisation avec `lang` et `data-lang`
+- **📱 Responsive Design** : Design mobile-first avec breakpoints Tailwind
+- **⚡ Lazy Loading** : Chargement différé des composants avec `React.lazy()` et `Suspense`
 - **🔄 Gestion CSRF** : Protection contre les attaques CSRF avec tokens automatiques, récupération automatique si manquant
-- **🍪 Bannière de cookies** : Bannière RGPD avec gestion du consentement (cookies requis/optionnels), persistance des préférences
-- **📧 Newsletter** : Système d'abonnement à la newsletter avec consentement
+- **🍪 Bannière de cookies** : Consentement RGPD (cookies requis/optionnels), persistance des préférences
+- **📧 Newsletter** : Système d'abonnement avec consentement
 - **🔒 Protection des routes** : Routes protégées avec vérification d'authentification et de rôles
-- **⚡ Optimisations de build** : Code splitting automatique (React vendor, Framer Motion), minification ESBuild, optimisations de cache
+- **⚡ Optimisations de build** : Code splitting manuel, minification ESBuild, noms de fichiers hashés
 
 ## 🔐 Authentification et rôles
 
@@ -234,8 +248,6 @@ L'application utilise un système d'authentification basé sur des cookies avec 
 - **Inscription** (`register`) : Création de compte puis connexion automatique
 - **Déconnexion** (`logout`) : Suppression des tokens et nettoyage de l'état
 - **Vérification de l'utilisateur** (`me`) : Récupération des informations de l'utilisateur connecté
-- **Export de données** (`exportData`) : Export des données personnelles au format JSON
-- **Suppression de compte** (`deleteAccount`) : Suppression définitive du compte utilisateur
 - **Réinitialisation de mot de passe** : Demande et confirmation avec token
 
 Le contexte initialise automatiquement la vérification de l'utilisateur avec un délai intelligent (idle callback ou timeout) pour optimiser les performances.
@@ -250,89 +262,28 @@ Le système de rôles est géré via `src/utils/roles.js` avec une détection fl
 
 **Rôles disponibles :**
 - **Staff/Superuser** : Accès complet à toutes les fonctionnalités (détecté via `is_staff` ou `is_superuser`)
-- **Personnel** : Accès aux formations et aux formations utilisateurs (détecté via rôle "Personnel" ou permissions `api.view_userformation`, etc.)
-- **Commercial** : Accès aux fonctionnalités commerciales (détecté via `is_commercial` ou rôle "Commercial")
-- **Redacteur** : Accès à la rédaction d'articles (détecté via `is_redacteur` ou rôle "Redacteur")
+- **Personnel** : Accès aux formations et aux formations utilisateurs
+- **Commercial** : Accès aux fonctionnalités commerciales
+- **Redacteur** : Accès à la rédaction d'articles
 
 **Routes protégées :**
-- `ProtectedRoute` : Vérifie uniquement l'authentification (toutes les pages admin sauf formations)
-- `PersonnelRoute` : Vérifie le rôle Personnel (pages `/admin/formations` et `/admin/user-formations`)
-- `StaffRoute` : Vérifie les rôles Staff (disponible pour futures fonctionnalités)
-
-## 🌐 Configuration
-
-### API Backend
-
-L'application se connecte à une API backend Django. La configuration de l'URL de l'API se fait automatiquement selon l'environnement via `src/lib/api.js` :
-
-1. **Variables d'environnement explicites** (`VITE_API_URL`) : Priorité absolue si définie
-2. **Fallback par défaut** : `https://weebbackend.melissa-mangione.com/api` si aucune variable n'est définie
-
-**Endpoints principaux :**
-- `/api/auth/*` : Authentification (login, register, logout, me, etc.)
-- `/api/*` : Autres endpoints (articles, formations, messages, etc.)
-
-**Fonctionnalités API :**
-- Gestion automatique du CSRF avec récupération du token si manquant
-- Support des cookies avec `credentials: "include"`
-- Gestion des erreurs réseau et HTTP
-- Support FormData pour les uploads
-- Headers automatiques (Content-Type, X-CSRFToken)
-
-### Internationalisation
-
-Les traductions sont stockées dans `locales/` avec des fichiers JSON séparés par langue (fr/en) et par section :
-- `home.json`, `blog.json`, `contact.json`, `formations.json`
-- `header.json`, `footer.json`, `login.json`, `register.json`
-- `profile.json`, `feedback.json`, `cookies.json`
-- `forgot_password.json`, `reset_password.json`
-- `legal.json`, `privacy.json`, `about.json`
-
-Le `LanguageContext` gère la langue active et synchronise l'attribut `lang` du DOM. La langue par défaut est le français.
-
-### Thème
-
-Le thème est géré via `ThemeContext` et persiste dans `localStorage`. Les classes Tailwind s'adaptent automatiquement selon le thème sélectionné. Le thème par défaut est "dark". Le contexte synchronise l'attribut `data-theme` du DOM pour permettre des styles CSS personnalisés.
-
-### Cookies et RGPD
-
-La bannière de cookies (`CookieBanner`) gère le consentement RGPD avec :
-- Cookies requis (toujours activés) : Authentification, sécurité
-- Cookies optionnels : Analytics, préférences utilisateur
-- Persistance des préférences dans un cookie avec durée de 180 jours
-- Bouton de gestion accessible depuis n'importe quelle page
-
-## 🐳 Docker
-
-### Développement avec Docker
-
-Le fichier `docker-compose.yml` référence actuellement `Dockerfile.dev` (non présent). Deux options :
-
-Le fichier `docker-compose.yml` configure :
-- Volume pour le code source (hot-reload avec `--watch`)
-- Port 5173 exposé (host:container)
-- Variables d'environnement pour le file watching (`CHOKIDAR_USEPOLLING`, `WATCHPACK_POLLING`)
-- Commande : `npm run dev -- --host 0.0.0.0 --port 5173` pour exposer sur toutes les interfaces
-
-**Note** : Le `docker-compose.yml` référence `Dockerfile.dev` mais le fichier s'appelle `Dockerfile`. Vous devrez soit :
-- Renommer `Dockerfile` en `Dockerfile.dev`, ou
-- Modifier `docker-compose.yml` pour utiliser `Dockerfile`
-
-### Build Docker
-
-```bash
-# Construire l'image
-docker build -t weeb-website .
-
-# Lancer le conteneur
-docker run -p 5173:5173 weeb-website
-```
-
-Le `Dockerfile` utilise Node.js 20 (bookworm) et configure l'environnement pour un file watching fiable dans Docker.
+- `ProtectedRoute` : Vérifie uniquement l'authentification (admin + profil)
+- `PersonnelRoute` : Vérifie le rôle Personnel (pages formations)
+- `StaffRoute` : Helper prêt à l'usage (non utilisé dans les routes actuelles)
 
 ## 🧪 Tests
 
-### Tests Cypress
+### Vitest (unitaires / composants)
+
+```bash
+npm test
+```
+
+- Environnement `jsdom`
+- Configuration globale via `src/setupTests.js`
+- Tests présents dans `src/**` (pages, composants UI, admin, etc.)
+
+### Cypress (E2E)
 
 ```bash
 npm run cypress:open
@@ -349,27 +300,68 @@ npm run cypress:run
 - `cookies.cy.js` : Tests de la bannière de cookies
 - `admin.cy.js` : Tests généraux de l'administration
 - `admin-articles.cy.js` : Tests de gestion des articles
-- `admin-post.cy.js` : Tests de création/modification d'articles
-- `smoke.cy.js` : Tests de smoke (vérification basique des fonctionnalités principales)
+- `admin-post.cy.js` : Tests de création/modification d'articles et formations
+- `smoke.cy.js` : Tests de smoke (vérification basique)
 
 **Configuration Cypress :**
 - Base URL : `http://localhost:5173`
 - Viewport : 1280x720
 - Vidéos désactivées, screenshots activés sur échec
-- Support des tests de composants React
+- Configuration de tests de composants React prête (bundler Vite)
 
-Les fixtures de test sont dans `cypress/fixtures/` avec des données mockées pour tous les endpoints.
+## 📘 Storybook
+
+```bash
+npm run storybook
+```
+
+Build statique :
+
+```bash
+npm run build-storybook
+```
+
+- Configuration dans `.storybook/`
+- Mocks réseau centralisés dans `src/stories/storybook-mocks.js` et chargés par `.storybook/preview.jsx`
+- Les tests Storybook sont intégrés à `vitest` (via `@storybook/addon-vitest`)
+
+## 🐳 Docker
+
+### Développement avec Docker Compose
+
+Le fichier `docker-compose.yml` configure :
+- Volume pour le code source (hot-reload)
+- Port 5173 exposé (host:container)
+- Variables d'environnement pour le file watching (`CHOKIDAR_USEPOLLING`, `WATCHPACK_POLLING`)
+- Commande : `npm run dev -- --host 0.0.0.0 --port 5173`
+
+**Note importante** : `docker-compose.yml` référence `Dockerfile.dev` mais le fichier s'appelle `Dockerfile`. Deux options :
+- Renommer `Dockerfile` en `Dockerfile.dev`, ou
+- Modifier `docker-compose.yml` pour utiliser `Dockerfile`
+
+### Build Docker
+
+```bash
+# Construire l'image
+docker build -t weeb-website .
+
+# Lancer le conteneur
+docker run -p 5173:5173 weeb-website
+```
+
+Le `Dockerfile` utilise Node.js 20 (bookworm) et configure l'environnement pour un file watching fiable dans Docker.
 
 ## 🚀 Déploiement
 
 ### Vercel
 
-Le projet est configuré pour Vercel :
+Le projet est configuré pour Vercel via `vercel.json` :
 
 - Build command : `npm run build`
 - Output directory : `dist`
 - Rewrites SPA vers `/index.html`
-- Rewrites `/api/*` vers `http://localhost:8000/api/*` (à ajuster pour un backend distant)
+- Rewrites `/api/*` vers `https://weebbackend.melissa-mangione.com/api/*`
+- Headers CORS pour `/api/*`
 
 ### Build de production
 
@@ -392,12 +384,12 @@ L'application utilise trois contextes principaux :
 2. **ThemeContext** (`src/context/ThemeContext.jsx`) :
    - Gestion du thème dark/light
    - Persistance dans localStorage
-   - Synchronisation avec le DOM (`data-theme`)
+   - Synchronisation avec le DOM (`class` + `data-theme`)
 
 3. **LanguageContext** (`src/context/LanguageContext.jsx`) :
    - Gestion de la langue (FR/EN)
    - Persistance dans localStorage
-   - Synchronisation avec le DOM (`lang`)
+   - Synchronisation avec le DOM (`lang` + `data-lang`)
 
 ### Structure des composants
 
@@ -412,12 +404,12 @@ Le `vite.config.js` configure :
 - **Code splitting** : Séparation React vendor et Framer Motion
 - **Minification** : ESBuild pour JS, CSS minifié
 - **Cache** : Noms de fichiers avec hash pour cache optimal
-- **Target** : ES2015 pour compatibilité navigateurs modernes
+- **Target** : ES2020 pour compatibilité navigateurs modernes
 - **Chunk size warning** : Limite à 1000KB
 
 ### Gestion des erreurs
 
-- Gestion des erreurs réseau dans `api.js`
+- Gestion des erreurs réseau dans `src/lib/api.js`
 - Messages d'erreur structurés avec status et details
 - Logs de debug en mode développement
 - Gestion gracieuse des erreurs CSRF
@@ -443,7 +435,7 @@ Utilisez des messages de commit conventionnels :
 
 ### 🤖 CI/CD
 
-Le projet inclut deux workflows GitHub Actions dans `.github/workflows/` :
+Le projet inclut trois workflows GitHub Actions dans `.github/workflows/` :
 
 #### 1. Workflow CI (`ci.yml`)
 
@@ -458,11 +450,6 @@ Exécuté automatiquement sur chaque `push` et `pull_request` :
   - Attend que l'application soit disponible sur `http://localhost:5173`
   - Timeout de 120 secondes
 
-**Configuration :**
-- Utilise `cypress-io/github-action@v6`
-- Node.js version 22
-- Cache npm activé pour accélérer les builds
-
 #### 2. Workflow Auto Pull Request (`create-pr.yml`)
 
 Exécuté automatiquement sur chaque `push` vers une branche qui n'est pas `main` ou `master` :
@@ -472,21 +459,16 @@ Exécuté automatiquement sur chaque `push` vers une branche qui n'est pas `main
 - **Description automatique** : Génère la description de la PR à partir des messages de commit
 - **Détection de la branche de base** : Détecte automatiquement `main` ou `master` comme branche de base
 
-**Fonctionnalités :**
-- Collecte tous les messages de commit depuis la branche de base
-- Format la description avec les messages de commit
-- Gère les cas où aucun commit n'est trouvé
-- Utilise l'API GitHub pour créer/mettre à jour les PR
-
 **Permissions requises :**
-- `contents: write` : Pour lire le code
-- `pull-requests: write` : Pour créer et mettre à jour les PR
+- `contents: write`
+- `pull-requests: write`
 
-#### Template de Pull Request
+#### 3. Workflow Deploy Storybook (`deploy-storybook.yml`)
 
-Le projet inclut un template de PR dans `.github/PULL_REQUEST_TEMPLATE.md` pour standardiser les descriptions de pull request.
+Exécuté automatiquement sur chaque `push` vers `main` :
 
----
+- **Build Storybook** : `npm run build-storybook`
+- **Déploiement** : Vercel via `amondnet/vercel-action@v25`
 
 ## 🐛 Dépannage
 
@@ -495,7 +477,7 @@ Le projet inclut un template de PR dans `.github/PULL_REQUEST_TEMPLATE.md` pour 
 **L'application ne se connecte pas à l'API :**
 - Vérifiez que `VITE_API_URL` est correctement défini dans `.env`
 - Vérifiez que le backend est accessible et que les CORS sont configurés
-- En mode développement, l'URL par défaut est `http://localhost:8000/api`
+- En mode développement, l'URL par défaut est `https://weebbackend.melissa-mangione.com/api`
 
 **Les cookies ne fonctionnent pas :**
 - Vérifiez que vous êtes sur HTTPS en production (cookies Secure)
@@ -503,7 +485,7 @@ Le projet inclut un template de PR dans `.github/PULL_REQUEST_TEMPLATE.md` pour 
 - Assurez-vous que le domaine du cookie correspond au domaine de l'application
 
 **Le hot-reload ne fonctionne pas dans Docker :**
-- Vérifiez que les variables `CHOKIDAR_USEPOLLING` et `WATCHPACK_POLLING` sont définies
+- Vérifiez que `CHOKIDAR_USEPOLLING` et `WATCHPACK_POLLING` sont définis
 - Vérifiez que les volumes sont correctement montés dans `docker-compose.yml`
 
 **Les tests Cypress échouent :**
@@ -515,6 +497,8 @@ Le projet inclut un template de PR dans `.github/PULL_REQUEST_TEMPLATE.md` pour 
 - Vérifiez que toutes les dépendances sont installées (`npm install`)
 - Vérifiez les erreurs ESLint avec `npm run lint`
 - Assurez-vous d'utiliser Node.js v20 ou supérieur
+
+---
 
 ## 📄 Licence
 
