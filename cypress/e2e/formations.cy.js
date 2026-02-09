@@ -92,7 +92,7 @@ describe("formations", () => {
     cy.get("input[placeholder]").first().clear();
     cy.contains("button", /voir les détails|view details/i).first().click();
     cy.get("[role='dialog']").should("be.visible");
-    cy.contains("a", /contact/i).should("be.visible");
+    cy.get("[role='dialog']").find("a[href='/contact']").should("be.visible");
   });
 
   it("supports load more when results exceed initial slice", () => {
