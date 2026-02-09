@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
 import Autocomplete from "../ui/Autocomplete";
+import { getEnv } from "../../lib/env";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

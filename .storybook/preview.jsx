@@ -1,7 +1,11 @@
 import "../src/index.css";
+import { installStorybookMocks } from "../src/stories/storybook-mocks";
+
+installStorybookMocks();
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {
+  tags: ["autodocs"],
   parameters: {
     controls: {
       matchers: {

@@ -4,10 +4,11 @@ import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../../utils/roles";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import { getEnv } from "../../lib/env";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

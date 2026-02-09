@@ -7,6 +7,7 @@ import {
   hasAnyStaffRole,
   hasAnyRedactionRole,
 } from "../../utils/roles";
+import { getEnv } from "../../lib/env";
 
 /* ==== Icônes inline (SVG) sans dépendance ==== */
 function IconBase({ children, size = 18 }) {
@@ -116,7 +117,7 @@ const NAV_ALL = [
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
-  const raw = (import.meta.env.VITE_API_URL ?? "http://localhost:8000") + "";
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
   return base.endsWith("/api") ? base : `${base}/api`;
 })();

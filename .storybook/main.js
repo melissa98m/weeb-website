@@ -16,6 +16,9 @@ const config = {
     "@storybook/addon-docs",
     "@storybook/addon-onboarding"
   ],
-  "framework": "@storybook/react-vite"
+  "framework": "@storybook/react-vite",
+  "docs": {
+    "autodocs": true
+  }
 };
 export default config;

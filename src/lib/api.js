@@ -1,8 +1,9 @@
 
 import { deleteCookie, getCookie, setCookie } from "./cookies";
+import { appEnv } from "./env";
 
 /** Résout la base API de façon simple et lisible. */
-const EXPLICIT_API_URL = import.meta?.env?.VITE_API_URL?.replace(/\/$/, "");
+const EXPLICIT_API_URL = appEnv.VITE_API_URL?.replace(/\/$/, "");
 const FALLBACK_API_URL = "https://weebbackend.melissa-mangione.com/api";
 
 function resolveApiBase() {
@@ -13,7 +14,7 @@ function resolveApiBase() {
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
 
-const isDev = import.meta.env.DEV;
+const isDev = appEnv.DEV;
 
 
 if (typeof window !== "undefined" && isDev) {
@@ -93,7 +94,7 @@ async function fetchCsrfToken(url) {
   }
 
   const token = bodyToken || getCookie("csrftoken");
-  if (typeof window !== "undefined" && import.meta.env.DEV) {
+  if (typeof window !== "undefined" && appEnv.DEV) {
     console.debug("[CSRF] ok response", {
       url,
       status: r.status,
@@ -128,7 +129,7 @@ export async function ensureCsrf() {
       return await fetchCsrfToken(url);
     } catch (e) {
       lastError = e;
-      if (typeof window !== "undefined" && import.meta.env.DEV) {
+      if (typeof window !== "undefined" && appEnv.DEV) {
         console.debug("[CSRF] failed", { url, status: e?.status, message: e?.message });
       }
       if (e?.status !== 404) break;

@@ -9,8 +9,9 @@ import GenreChips from "../components/Blog/GenreChips";
 import Pagination from "../components/ui/Pagination";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
+import { getEnv } from "../lib/env";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 function makeExcerpt(text = "", maxWords = 40) {
   const words = String(text).trim().split(/\s+/);
