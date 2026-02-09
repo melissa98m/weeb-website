@@ -14,8 +14,8 @@ jobs:
         with:
           node-version: 18
 
-      # Job 2: Installer les dépendances (npm ci est plus rapide en CI)
-      - run: npm ci
+      # Job 2: Installer les dépendances
+      - run: npm install
 
       # Job 3: Construire la version statique de Storybook
       - run: npm run build-storybook
