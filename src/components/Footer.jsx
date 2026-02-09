@@ -293,7 +293,7 @@ export default function Footer() {
         </div>
         {footerLinks.map(({ title, links }) => (
           <div key={language === "fr" ? title.fr : title.en}>
-            <h3 className="font-semibold text-muted uppercase mb-2">
+            <h3 className={`font-semibold uppercase mb-2 ${theme === "dark" ? "text-slate-600" : "text-slate-300"}`}>
               {language === "fr" ? title.fr : title.en}
             </h3>
             <ul className="space-y-1">
