@@ -27,4 +27,6 @@ jobs:
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           # ... autres secrets stockés dans GitHub > Settings > Secrets
-          vercel-dir: storybook-static
+          working-directory: storybook-static
+          # Optionnel: arguments Vercel supplémentaires
+          # vercel-args: "--prod"
