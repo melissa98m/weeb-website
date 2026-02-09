@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 import RelatedCarousel from "../components/Blog/RelatedCarousel";
+import { safeChipStyle } from "../utils/colors";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 const INDEX_PAGE_SIZE = 200;
@@ -256,11 +257,7 @@ export default function BlogDetail() {
                     <span
                       key={g.id}
                       className="px-2 py-1 rounded-full border text-xs"
-                      style={{
-                        backgroundColor: "transparent",
-                        borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                        color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-                      }}
+                      style={safeChipStyle(g.color, theme)}
                     >
                       {g.name}
                     </span>
@@ -293,11 +290,7 @@ export default function BlogDetail() {
                   <span
                     key={g.id}
                     className="px-2 py-1 rounded-full border text-xs"
-                    style={{
-                      backgroundColor: "transparent",
-                      borderColor: g.color || (theme === "dark" ? "#333333" : "#e5e7eb"),
-                      color: g.color || (theme === "dark" ? "#ffffff" : "#111827"),
-                    }}
+                    style={safeChipStyle(g.color, theme)}
                   >
                     {g.name}
                   </span>

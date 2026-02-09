@@ -26,6 +26,7 @@ export default function Register() {
     telephone: "",
     password: "",
     confirmPassword: "",
+    rgpdConsent: false,
   });
 
   const [errors, setErrors] = useState({});
@@ -104,17 +105,30 @@ export default function Register() {
     } else if (form.confirmPassword !== form.password) {
       errs.confirmPassword = t.passwords_not_match;
     }
+    if (!form.rgpdConsent) {
+      errs.rgpdConsent =
+        t.rgpd_consent_error ||
+        (language === "fr"
+          ? "Vous devez accepter le traitement des données personnelles."
+          : "You must accept the personal data processing terms.");
+    }
     return errs;
   };
 
   const handleChange = (e) => {
-    const { id, value } = e.target;
+    const { id, value, type, checked } = e.target;
 
     if (id === "telephone") {
       if (value === "" || /^[+()\-\s0-9]+$/.test(value)) {
         setForm((prev) => ({ ...prev, telephone: value }));
         setErrors((prev) => ({ ...prev, telephone: null }));
       }
+      return;
+    }
+
+    if (type === "checkbox") {
+      setForm((prev) => ({ ...prev, [id]: checked }));
+      setErrors((prev) => ({ ...prev, [id]: null, form: null }));
       return;
     }
 
@@ -578,6 +592,50 @@ export default function Register() {
               role="alert"
             >
               {errors.confirmPassword}
+            </motion.p>
+          )}
+        </motion.div>
+
+        {/* GDPR consent */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.55 }}
+          className="space-y-2"
+        >
+          <label className="flex items-start gap-3 text-sm">
+            <input
+              id="rgpdConsent"
+              type="checkbox"
+              checked={form.rgpdConsent}
+              onChange={handleChange}
+              disabled={isLocked}
+              className={`mt-1 h-4 w-4 rounded border transition-colors focus:outline-none focus:ring-2 ${
+                theme === "dark"
+                  ? "border-[#333] bg-[#1c1c1c] text-primary focus:ring-primary"
+                  : "border-gray-300 bg-white text-secondary focus:ring-secondary"
+              } ${errors.rgpdConsent ? "border-red-500 focus:ring-red-400" : ""} ${
+                isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+              }`}
+              aria-invalid={!!errors.rgpdConsent}
+              aria-describedby={errors.rgpdConsent ? "rgpd-consent-error" : undefined}
+            />
+            <span>
+              {t.rgpd_consent ||
+                (language === "fr"
+                  ? "J'accepte le traitement de mes données personnelles conformément au RGPD."
+                  : "I accept the processing of my personal data in accordance with the GDPR.")}
+            </span>
+          </label>
+          {errors.rgpdConsent && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              id="rgpd-consent-error"
+              className="text-red-500 text-xs"
+              role="alert"
+            >
+              {errors.rgpdConsent}
             </motion.p>
           )}
         </motion.div>
