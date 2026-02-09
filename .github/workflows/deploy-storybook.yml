@@ -21,12 +21,35 @@ jobs:
       # Job 3: Construire la version statique de Storybook
       - run: npm run build-storybook
 
+      - name: Vérifier VERCEL_TOKEN
+        if: ${{ !secrets.VERCEL_TOKEN }}
+        run: |
+          echo "ERREUR: le secret GitHub 'VERCEL_TOKEN' est manquant."
+          echo "Ajoutez-le via Settings > Secrets and variables > Actions."
+          exit 1
+
+      - name: Vérifier VERCEL_PROJECT_ID
+        if: ${{ !secrets.VERCEL_PROJECT_ID }}
+        run: |
+          echo "ERREUR: le secret GitHub 'VERCEL_PROJECT_ID' est manquant."
+          echo "Ajoutez-le via Settings > Secrets and variables > Actions."
+          exit 1
+
+      - name: Vérifier VERCEL_ORG_ID
+        if: ${{ !secrets.VERCEL_ORG_ID }}
+        run: |
+          echo "ERREUR: le secret GitHub 'VERCEL_ORG_ID' est manquant."
+          echo "Ajoutez-le via Settings > Secrets and variables > Actions."
+          exit 1
+
       # Job 4: Déployer sur Vercel (le token est un secret GitHub)
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           # ... autres secrets stockés dans GitHub > Settings > Secrets
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           working-directory: storybook-static
           # Optionnel: arguments Vercel supplémentaires
           # vercel-args: "--prod"
