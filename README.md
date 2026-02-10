@@ -76,7 +76,7 @@ weeb-website/
 │   ├── workflows/          # CI/CD GitHub Actions
 │   │   ├── ci.yml
 │   │   ├── create-pr.yml
-│   │   └── deploy-storybook.yml
+│   │   └── chromatic.yml
 │   └── PULL_REQUEST_TEMPLATE.md
 ├── .storybook/             # Configuration Storybook
 ├── cypress/
@@ -324,6 +324,7 @@ npm run build-storybook
 - Configuration dans `.storybook/`
 - Mocks réseau centralisés dans `src/stories/storybook-mocks.js` et chargés par `.storybook/preview.jsx`
 - Les tests Storybook sont intégrés à `vitest` (via `@storybook/addon-vitest`)
+- Accès Storybook via Chromatic : [ouvrir le Storybook](https://www.chromatic.com/start?inviteToken=chpi_7ebbdf44267c454586cd6765a5d5d914&appId=698af9b0621aabc16621b40c)
 
 ## 🐳 Docker
 
@@ -463,12 +464,11 @@ Exécuté automatiquement sur chaque `push` vers une branche qui n'est pas `main
 - `contents: write`
 - `pull-requests: write`
 
-#### 3. Workflow Deploy Storybook (`deploy-storybook.yml`)
+#### 3. Workflow Chromatic (`chromatic.yml`)
 
-Exécuté automatiquement sur chaque `push` vers `main` :
+Exécuté automatiquement sur chaque `push` :
 
-- **Build Storybook** : `npm run build-storybook`
-- **Déploiement** : Vercel via `amondnet/vercel-action@v25`
+- **Build + déploiement Storybook** : via Chromatic (action `chromaui/action`)
 
 ## 🐛 Dépannage
 
