@@ -13,6 +13,7 @@ vi.mock("framer-motion", () => ({
     div: (props) => <div {...props} />,
   },
   AnimatePresence: ({ children }) => <>{children}</>,
+  useReducedMotion: () => false,
 }));
 
 vi.mock("../context/ThemeContext", () => ({
