@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 
+const defaultFetchOptions = async () => [];
+
 function Autocomplete({
   id,
   value,
@@ -8,7 +10,7 @@ function Autocomplete({
   placeholder,
   className = "",
   disabled = false,
-  fetchOptions = async () => [],
+  fetchOptions = defaultFetchOptions,
   getOptionLabel = (opt) => String(opt?.label ?? opt?.value ?? ""),
   getOptionValue = (opt) => opt?.value ?? opt?.id ?? null,
   formatDisplayValue = (opt) => getOptionLabel(opt),
@@ -66,8 +68,9 @@ function Autocomplete({
     }
 
     if (searchQuery.trim().length < minSearchLength) {
-      setOptions([]);
-      setIsOpen(false);
+      setOptions((prev) => (prev.length > 0 ? [] : prev));
+      setIsOpen((prev) => (prev ? false : prev));
+      setHighlightedIndex((prev) => (prev !== -1 ? -1 : prev));
       return;
     }
 
@@ -291,4 +294,3 @@ function Autocomplete({
 }
 
 export default React.memo(Autocomplete);
-
