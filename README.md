@@ -282,6 +282,19 @@ npm test
 - Environnement `jsdom`
 - Configuration globale via `src/setupTests.js`
 - Tests présents dans `src/**` (pages, composants UI, admin, etc.)
+ - Projets Vitest :
+   - `unit` : tests unitaires / composants
+   - `storybook` : tests de stories (Playwright headless)
+
+Lancer un projet précis :
+
+```bash
+# Uniquement les tests unitaires / composants
+npm test -- --run --project unit
+
+# Uniquement les tests Storybook
+npm test -- --run --project storybook
+```
 
 ### Cypress (E2E)
 
