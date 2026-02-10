@@ -10,6 +10,22 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      // Work around missing ESM entry in this install of framer-motion.
+      'framer-motion': path.join(dirname, 'node_modules/framer-motion/dist/cjs/index.js')
+    }
+  },
+  optimizeDeps: {
+    include: [
+      '@storybook/addon-a11y/preview',
+      '@storybook/react-vite',
+      'storybook/test',
+      'react-router-dom',
+      'prop-types',
+      'framer-motion'
+    ]
+  },
   test: {
     // Rend les API de Vitest (describe, it, expect) globales comme dans Jest
     globals: true,
