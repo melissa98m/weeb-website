@@ -28,7 +28,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Unit and Component Tests
-        run: npm test -- --run
+        run: npm test -- --run --project unit
 
       - name: Storybook Tests
         run: npm test -- --run --project storybook
