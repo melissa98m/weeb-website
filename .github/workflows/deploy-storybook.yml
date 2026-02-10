@@ -66,4 +66,4 @@ jobs:
           vercel-org-id: ${{ env.VERCEL_ORG_ID }}
           working-directory: storybook-static
           # Optionnel: arguments Vercel supplémentaires
-          # vercel-args: "--prod"
+          vercel-args: "--prebuilt"
