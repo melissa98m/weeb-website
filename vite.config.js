@@ -11,10 +11,7 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: {
-      // Work around missing ESM entry in this install of framer-motion.
-      'framer-motion': path.join(dirname, 'node_modules/framer-motion/dist/cjs/index.js')
-    }
+    alias: {}
   },
   optimizeDeps: {
     include: [
