@@ -8,7 +8,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { appEnv } from "./lib/env";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react";
 
 
 const sentryDsn = appEnv.VITE_SENTRY_DSN;
@@ -44,6 +44,7 @@ const appTree = (
       <LanguageProvider>
         <AuthProvider>
           <App />
+          <Analytics />
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
