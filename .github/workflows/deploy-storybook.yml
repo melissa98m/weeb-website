@@ -52,18 +52,12 @@ jobs:
           echo "Ajoutez-le via Settings > Secrets and variables > Actions."
           exit 1
 
-      # Job 4: Déployer sur Vercel (le token est un secret GitHub)
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
-        env:
-          VERCEL_TOKEN: ${{ env.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
         with:
-          vercel-token: ${{ env.VERCEL_TOKEN }}
-          # ... autres secrets stockés dans GitHub > Settings > Secrets
-          vercel-project-id: ${{ env.VERCEL_PROJECT_ID }}
-          vercel-org-id: ${{ env.VERCEL_ORG_ID }}
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: storybook-static
-          # Optionnel: arguments Vercel supplémentaires
-          vercel-args: "--prebuilt"
+          vercel-args: "--prod"
+        
