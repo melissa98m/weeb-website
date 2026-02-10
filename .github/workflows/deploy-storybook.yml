@@ -25,6 +25,12 @@ jobs:
       # Job 3: Construire la version statique de Storybook
       - run: npm run build-storybook
 
+      - name: Vérifier le dossier storybook-static
+        run: |
+          test -d storybook-static
+          test -f storybook-static/index.html
+          ls -la storybook-static
+
       - name: Vérifier VERCEL_TOKEN
         if: ${{ !env.VERCEL_TOKEN }}
         run: |
@@ -49,6 +55,10 @@ jobs:
       # Job 4: Déployer sur Vercel (le token est un secret GitHub)
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
+        env:
+          VERCEL_TOKEN: ${{ env.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ env.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ env.VERCEL_PROJECT_ID }}
         with:
           vercel-token: ${{ env.VERCEL_TOKEN }}
           # ... autres secrets stockés dans GitHub > Settings > Secrets
