@@ -28,7 +28,7 @@ export default function FeedbackModal({
     }
   }, [open]);
 
-  if (!open || !formation || !userId) return null;
+  if (!open || !formation) return null;
 
   const card =
     theme === "dark"
@@ -48,7 +48,6 @@ export default function FeedbackModal({
           "X-CSRFToken": csrf,
         },
         body: JSON.stringify({
-          user: userId,
           formation: formation.id,
           feedback_content: content.trim()
         })

@@ -23,6 +23,10 @@ vi.mock("../context/LanguageContext", () => ({
   useLanguage: vi.fn(),
 }));
 
+vi.mock("../lib/api", () => ({
+  ensureCsrf: vi.fn().mockResolvedValue("token"),
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
