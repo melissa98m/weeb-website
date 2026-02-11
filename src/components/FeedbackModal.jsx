@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import feedbackFr from "../../locales/fr/feedback.json";
 import feedbackEn from "../../locales/en/feedback.json";
 import { getEnv } from "../lib/env";
+import { ensureCsrf } from "../lib/api";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -38,10 +39,14 @@ export default function FeedbackModal({
     try {
       setSending(true);
       setErr(null);
+      const csrf = await ensureCsrf();
       const res = await fetch(`${API_BASE}/feedbacks/`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf,
+        },
         body: JSON.stringify({
           user: userId,
           formation: formation.id,

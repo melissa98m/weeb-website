@@ -7,6 +7,7 @@ import PageSizer from "../components/ui/PageSizer";
 import Pagination from "../components/ui/Pagination";
 import { STAFF_ROLES } from "../utils/roles";
 import { getEnv } from "../lib/env";
+import { ensureCsrf } from "../lib/api";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -279,9 +280,13 @@ export default function Feedback() {
   const markProcessed = async (row) => {
     if (!row?.id) return;
     try {
+      const csrf = await ensureCsrf();
       const res = await fetch(`${API_BASE}/feedbacks/${row.id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf,
+        },
         credentials: "include",
         body: JSON.stringify({ to_process: true }),
       });

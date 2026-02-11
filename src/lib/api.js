@@ -321,7 +321,7 @@ export const AuthApi = {
     return { blob, disposition };
   },
   deleteAccount() {
-    return authRequest("/me/delete/", { method: "DELETE", csrf: true });
+    return authRequest("/gdpr/", { method: "DELETE", csrf: true });
   },
   login(payload) {
     return authRequest("/login/", { method: "POST", body: payload, csrf: true }).then(
