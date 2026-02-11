@@ -5,6 +5,7 @@ import { useLanguage } from "../context/LanguageContext";
 import AdminAccessFooter from "../components/admin/AdminAccessFooter";
 import { STAFF_ROLES } from "../utils/roles";
 import { getEnv } from "../lib/env";
+import { ensureCsrf } from "../lib/api";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -203,9 +204,13 @@ export default function Messages() {
   const markProcessed = async (row) => {
     if (!row?.id) return;
     try {
+      const csrf = await ensureCsrf();
       const res = await fetch(`${API_BASE}/messages/${row.id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrf,
+        },
         credentials: "include",
         body: JSON.stringify({ is_processed: true }),
       });
