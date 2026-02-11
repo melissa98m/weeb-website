@@ -389,17 +389,32 @@ export default function ContactForm() {
               onChange={handleChange}
               className={`w-full bg-transparent border-b py-2 focus:outline-none ${
                 theme === "dark"
-                  ? "border-primary focus:border-primary"
-                  : "border-secondary focus:border-secondary"
+                  ? "border-primary focus:border-primary text-white bg-[#1c1c1c]"
+                  : "border-secondary focus:border-secondary text-gray-900 bg-white"
               } ${errors.subject ? errorBorder : ""}`}
               aria-invalid={!!errors.subject}
             >
-              <option value="">{t?.subject_placeholder || "Select a subject"}</option>
+              <option
+                value=""
+                className={theme === "dark" ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900"}
+              >
+                {t?.subject_placeholder || "Select a subject"}
+              </option>
               {loadingSubjects ? (
-                <option value="" disabled>{t?.loading || "Loading..."}</option>
+                <option
+                  value=""
+                  disabled
+                  className={theme === "dark" ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900"}
+                >
+                  {t?.loading || "Loading..."}
+                </option>
               ) : (
                 subjects.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option
+                    key={s.id}
+                    value={s.id}
+                    className={theme === "dark" ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900"}
+                  >
                     {s.name || s.title || `#${s.id}`}
                   </option>
                 ))
