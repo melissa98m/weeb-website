@@ -5,39 +5,11 @@ import { useLanguage } from "../context/LanguageContext";
 import AdminAccessFooter from "../components/admin/AdminAccessFooter";
 import PageSizer from "../components/ui/PageSizer";
 import Pagination from "../components/ui/Pagination";
-import { STAFF_ROLES } from "../utils/roles";
+import { STAFF_ROLES, hasAnyStaffRole } from "../utils/roles";
 import { getEnv } from "../lib/env";
 import { ensureCsrf } from "../lib/api";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
-
-/* ----- Helper rôles (Commercial ou Personnel) ----- */
-const hasAnyStaffRole = (u) => {
-  if (!u) return false;
-  const toLower = (s) => String(s || "").toLowerCase();
-
-  const collected = [];
-  if (Array.isArray(u.groups)) {
-    for (const g of u.groups) {
-      if (g && typeof g === "object" && g.name) collected.push(g.name);
-      else if (typeof g === "string") collected.push(g);
-    }
-  }
-  if (Array.isArray(u.group_names)) collected.push(...u.group_names);
-  if (Array.isArray(u.roles)) collected.push(...u.roles);
-  if (u.role) collected.push(u.role);
-  if (u.profile?.group?.name) collected.push(u.profile.group.name);
-
-  const set = new Set(collected.map(toLower));
-  const inCommercial = set.has("commercial");
-  const inPersonnel = set.has("personnel");
-
-  const flags = !!(u.is_commercial || u.is_personnel);
-  const staffFallback = !!u.is_staff;
-
-  return inCommercial || inPersonnel || flags || staffFallback;
-};
-/* ----------------------------------------------------------------------------- */
 
 export default function Feedback() {
   const { user } = useAuth();
