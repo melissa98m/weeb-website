@@ -16,6 +16,17 @@ export function AuthProvider({ children }) {
       setError(null);
       return me;
     } catch (e) {
+      if (e?.status === 401) {
+        try {
+          await AuthApi.refresh();
+          const me = await AuthApi.me();
+          setUser(me);
+          setError(null);
+          return me;
+        } catch {
+          // refresh failed, fallback to signed-out state below
+        }
+      }
       setUser(null);
       setError(e);
       return null;
