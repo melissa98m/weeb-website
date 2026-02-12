@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import ResetPassword from "./ResetPassword";
@@ -68,5 +68,26 @@ describe("ResetPassword", () => {
     });
 
     expect(await screen.findByText(resetEn.success_message)).toBeInTheDocument();
+  });
+
+  it("shows invalid token message when backend returns non_field_errors", async () => {
+    const user = userEvent.setup();
+    const err = new Error("bad link");
+    err.details = { non_field_errors: ["Invalid or expired reset link."] };
+    AuthApi.confirmPasswordReset.mockRejectedValue(err);
+
+    render(
+      <MemoryRouter initialEntries={["/reset?uid=abc&token=def"]}>
+        <ResetPassword />
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(resetEn.password_label), "Abcd1234!");
+    await user.type(screen.getByLabelText(resetEn.confirm_label), "Abcd1234!");
+    await user.click(screen.getByRole("button", { name: resetEn.submit }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Invalid or expired reset link.")).toBeInTheDocument()
+    );
   });
 });
