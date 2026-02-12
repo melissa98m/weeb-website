@@ -34,9 +34,8 @@ export default function Register() {
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const lockTimeoutRef = useRef(null);
+  const [lockUntilTs, setLockUntilTs] = useState(0);
+  const [remainingLockSeconds, setRemainingLockSeconds] = useState(0);
 
   const [pwdValidations, setPwdValidations] = useState({
     length: false,
@@ -52,14 +51,25 @@ export default function Register() {
     }
   }, []);
 
-  // Nettoyage du timeout de verrouillage
+  // Sync local lock timer from backend throttle/lock responses.
   useEffect(() => {
-    return () => {
-      if (lockTimeoutRef.current) {
-        clearTimeout(lockTimeoutRef.current);
+    if (!lockUntilTs) {
+      setRemainingLockSeconds(0);
+      return;
+    }
+    const updateRemaining = () => {
+      const remain = Math.max(0, Math.ceil((lockUntilTs - Date.now()) / 1000));
+      setRemainingLockSeconds(remain);
+      if (remain <= 0) {
+        setLockUntilTs(0);
       }
     };
-  }, []);
+    updateRemaining();
+    const timer = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(timer);
+  }, [lockUntilTs]);
+
+  const isLocked = remainingLockSeconds > 0;
 
   useEffect(() => {
     const { password } = form;
@@ -150,10 +160,10 @@ export default function Register() {
     
     // Vérifier si le compte est verrouillé
     if (isLocked) {
-      setErrors({ 
+      setErrors({
         form: language === "fr" 
-          ? "Trop de tentatives. Veuillez patienter quelques instants." 
-          : "Too many attempts. Please wait a moment." 
+          ? `Trop de tentatives. Réessayez dans ${remainingLockSeconds}s.`
+          : `Too many attempts. Retry in ${remainingLockSeconds}s.`
       });
       return;
     }
@@ -176,8 +186,7 @@ export default function Register() {
         phone: normalizePhone(form.telephone),
         password: form.password,
       });
-      // Réinitialiser le compteur en cas de succès
-      setAttemptCount(0);
+      setLockUntilTs(0);
       navigate(redirectTo, { replace: true });
     } catch (e2) {
       const d = e2?.details || {};
@@ -193,29 +202,16 @@ export default function Register() {
         map.telephone = Array.isArray(v) ? v.join(" ") : String(v);
       }
       
-      // Gestion du rate limiting côté client
-      const newAttemptCount = attemptCount + 1;
-      setAttemptCount(newAttemptCount);
-
-      // Verrouiller après 5 tentatives échouées
-      if (newAttemptCount >= 5) {
-        setIsLocked(true);
-        if (lockTimeoutRef.current) {
-          clearTimeout(lockTimeoutRef.current);
-        }
-        lockTimeoutRef.current = setTimeout(() => {
-          setIsLocked(false);
-          setAttemptCount(0);
-        }, 30000); // 30 secondes
-
-        map.form = language === "fr" 
-          ? "Trop de tentatives échouées. Veuillez patienter 30 secondes." 
-          : "Too many failed attempts. Please wait 30 seconds.";
-      } else {
+      if (e2?.status === 429) {
+        const retryRaw = Number(d?.retry_after);
+        const retryAfter = Number.isFinite(retryRaw) && retryRaw > 0 ? Math.ceil(retryRaw) : 30;
+        setLockUntilTs(Date.now() + retryAfter * 1000);
         map.form =
-          d.non_field_errors?.join(" ") ||
-          d.detail ||
-          (language === "fr" ? "Échec de l'inscription." : "Registration failed.");
+          language === "fr"
+            ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
+            : `Too many attempts. Retry in ${retryAfter}s.`;
+      } else {
+        map.form = d.non_field_errors?.join(" ") || d.detail || (language === "fr" ? "Échec de l'inscription." : "Registration failed.");
       }
       
       setErrors(map);
