@@ -73,11 +73,16 @@ export default function Register() {
 
   // Helpers téléphone
   const onlyDialable = (s) => (s || "").replace(/[^\d]/g, "");
+  const normalizePhone = (raw) => {
+    const source = (raw || "").trim();
+    if (!source) return "";
+    const hasLeadingPlus = source.startsWith("+");
+    const digits = onlyDialable(source);
+    return hasLeadingPlus ? `+${digits}` : digits;
+  };
   const phoneLooksOk = (raw) => {
-    if (!raw) return true;
-    if (!/^[+()\-\s0-9]+$/.test(raw)) return false;
-    const digits = onlyDialable(raw);
-    return digits.length >= 8 && digits.length <= 15;
+    const normalized = normalizePhone(raw);
+    return /^\+?\d{6,20}$/.test(normalized);
   };
 
   const validate = () => {
@@ -89,12 +94,16 @@ export default function Register() {
     const emailOk = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim());
     if (!emailOk) errs.email = t.email_error;
 
-    if (form.telephone && !phoneLooksOk(form.telephone)) {
+    if (!form.telephone.trim()) {
+      errs.telephone =
+        t.phone_required ||
+        (language === "fr" ? "Le téléphone est requis." : "Phone is required.");
+    } else if (!phoneLooksOk(form.telephone)) {
       errs.telephone =
         t.phone_error_invalid ||
         (language === "fr"
-          ? "Numéro invalide. Utilisez 8–15 chiffres (peuvent contenir + ( ) - espaces)."
-          : "Invalid phone. Use 8–15 digits (may include + ( ) - spaces).");
+          ? "Numéro invalide. Utilisez 6 à 20 chiffres (préfixe + autorisé)."
+          : "Invalid phone. Use 6 to 20 digits (optional leading +).");
     }
 
     if (Object.values(pwdValidations).some((ok) => !ok)) {
@@ -164,7 +173,7 @@ export default function Register() {
         email: form.email.trim(),
         first_name: form.prenom.trim(),
         last_name: form.nom.trim(),
-        phone: form.telephone || undefined,
+        phone: normalizePhone(form.telephone),
         password: form.password,
       });
       // Réinitialiser le compteur en cas de succès
