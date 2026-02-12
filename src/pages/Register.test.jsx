@@ -86,9 +86,7 @@ describe("Register", () => {
       first_name: "Jane",
       last_name: "Doe",
       phone: "+33123456789",
-      telephone: "+33123456789",
       password: "Abcd1234!",
-      password_confirm: "Abcd1234!",
     });
   });
 });
