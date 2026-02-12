@@ -65,7 +65,6 @@ describe("ResetPassword", () => {
       uid: "abc",
       token: "def",
       password: "Abcd1234!",
-      password_confirm: "Abcd1234!",
     });
 
     expect(await screen.findByText(resetEn.success_message)).toBeInTheDocument();
