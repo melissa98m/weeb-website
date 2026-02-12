@@ -66,8 +66,6 @@ describe("Login", () => {
     await user.click(screen.getByRole("button", { name: loginEn.login }));
 
     expect(login).toHaveBeenCalledWith({
-      email: "user@example.com",
-      username: "user@example.com",
       identifier: "user@example.com",
       password: "secret123!",
     });

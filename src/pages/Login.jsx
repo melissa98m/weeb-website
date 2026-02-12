@@ -89,8 +89,6 @@ export default function Login() {
       console.debug("[LOGIN] submit with id=", id);
 
       const me = await login({
-        email: id,
-        username: id,
         identifier: id,
         password: form.password,
       });
