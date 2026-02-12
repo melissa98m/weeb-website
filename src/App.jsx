@@ -8,6 +8,7 @@ import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
 import StaffRoute from "./routes/StaffRoute";
+import RedactionRoute from "./routes/RedactionRoute";
 import Formations from "./pages/Formations";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -114,21 +115,21 @@ function App() {
             <Route
               path="/admin/articles"
               element={
-                <ProtectedRoute>
+                <RedactionRoute>
                   <AdminLayout>
                     <ArticlesManager />
                   </AdminLayout>
-                </ProtectedRoute>
+                </RedactionRoute>
               }
             />
             <Route
               path="/admin/genres"
               element={
-                <ProtectedRoute>
+                <RedactionRoute>
                   <AdminLayout>
                     <GenresManager />
                   </AdminLayout>
-                </ProtectedRoute>
+                </RedactionRoute>
               }
             />
             <Route
