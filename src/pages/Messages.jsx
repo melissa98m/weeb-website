@@ -7,7 +7,11 @@ import { STAFF_ROLES, hasAnyStaffRole } from "../utils/roles";
 import { getEnv } from "../lib/env";
 import { ensureCsrf } from "../lib/api";
 
-const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
+const API_BASE = (() => {
+  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
+  const base = raw.replace(/\/$/, "");
+  return base.endsWith("/api") ? base : `${base}/api`;
+})();
 
 export default function Messages() {
   const { user } = useAuth();
