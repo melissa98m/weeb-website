@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import Login from "./Login";
@@ -69,5 +69,28 @@ describe("Login", () => {
       identifier: "user@example.com",
       password: "secret123!",
     });
+  });
+
+  it("shows backend retry_after message on 429", async () => {
+    const user = userEvent.setup();
+    const err = new Error("too many");
+    err.status = 429;
+    err.details = { detail: "too many login attempts", retry_after: 12 };
+    const login = vi.fn().mockRejectedValue(err);
+    useAuth.mockReturnValue({ login });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(/email or username/i), "user@example.com");
+    await user.type(screen.getByLabelText("Password"), "secret123!");
+    await user.click(screen.getByRole("button", { name: loginEn.login }));
+
+    await waitFor(() =>
+      expect(screen.getByText("Too many attempts. Retry in 12s.")).toBeInTheDocument()
+    );
   });
 });
