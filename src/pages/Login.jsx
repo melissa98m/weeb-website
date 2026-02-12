@@ -25,9 +25,8 @@ export default function Login() {
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const lockTimeoutRef = useRef(null);
+  const [lockUntilTs, setLockUntilTs] = useState(0);
+  const [remainingLockSeconds, setRemainingLockSeconds] = useState(0);
 
   // Focus sur le premier champ au montage
   useEffect(() => {
@@ -36,14 +35,25 @@ export default function Login() {
     }
   }, []);
 
-  // Nettoyage du timeout de verrouillage
+  // Sync local lock timer from backend retry_after.
   useEffect(() => {
-    return () => {
-      if (lockTimeoutRef.current) {
-        clearTimeout(lockTimeoutRef.current);
+    if (!lockUntilTs) {
+      setRemainingLockSeconds(0);
+      return;
+    }
+    const updateRemaining = () => {
+      const remain = Math.max(0, Math.ceil((lockUntilTs - Date.now()) / 1000));
+      setRemainingLockSeconds(remain);
+      if (remain <= 0) {
+        setLockUntilTs(0);
       }
     };
-  }, []);
+    updateRemaining();
+    const timer = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(timer);
+  }, [lockUntilTs]);
+
+  const isLocked = remainingLockSeconds > 0;
 
   const validate = () => {
     const errs = {};
@@ -67,10 +77,10 @@ export default function Login() {
     
     // Vérifier si le compte est verrouillé
     if (isLocked) {
-      setErrors({ 
+      setErrors({
         form: language === "fr" 
-          ? "Trop de tentatives. Veuillez patienter quelques instants." 
-          : "Too many attempts. Please wait a moment." 
+          ? `Trop de tentatives. Réessayez dans ${remainingLockSeconds}s.`
+          : `Too many attempts. Retry in ${remainingLockSeconds}s.`
       });
       return;
     }
@@ -94,43 +104,29 @@ export default function Login() {
       });
 
       if (me) {
-        // Réinitialiser le compteur en cas de succès
-        setAttemptCount(0);
+        setLockUntilTs(0);
         navigate(from, { replace: true });
       } else {
         throw new Error("no_me");
       }
     } catch (e) {
       console.error("[LOGIN] error:", e);
-      
-      // Gestion du rate limiting côté client
-      const newAttemptCount = attemptCount + 1;
-      setAttemptCount(newAttemptCount);
 
-      // Verrouiller après 5 tentatives échouées
-      if (newAttemptCount >= 5) {
-        setIsLocked(true);
-        if (lockTimeoutRef.current) {
-          clearTimeout(lockTimeoutRef.current);
-        }
-        lockTimeoutRef.current = setTimeout(() => {
-          setIsLocked(false);
-          setAttemptCount(0);
-        }, 30000); // 30 secondes
-
-        setErrors({ 
-          form: language === "fr" 
-            ? "Trop de tentatives échouées. Veuillez patienter 30 secondes." 
-            : "Too many failed attempts. Please wait 30 seconds." 
+      if (e?.status === 429) {
+        const retryRaw = Number(e?.details?.retry_after);
+        const retryAfter = Number.isFinite(retryRaw) && retryRaw > 0 ? Math.ceil(retryRaw) : 30;
+        setLockUntilTs(Date.now() + retryAfter * 1000);
+        setErrors({
+          form:
+            language === "fr"
+              ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
+              : `Too many attempts. Retry in ${retryAfter}s.`,
         });
       } else {
-        const apiMsg =
-          e?.details?.non_field_errors?.join(" ") ||
-          e?.details?.detail ||
-          (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
+        const apiMsg = e?.details?.non_field_errors?.join(" ") || e?.details?.detail || (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
         setErrors({ form: apiMsg });
       }
-      
+
       setShake(true);
       setTimeout(() => setShake(false), 500);
     } finally {
