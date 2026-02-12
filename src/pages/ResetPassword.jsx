@@ -97,10 +97,16 @@ export default function ResetPassword() {
       if (details.password) {
         map.password = Array.isArray(details.password) ? details.password.join(" ") : String(details.password);
       }
-      if (details.uid || details.token) {
+      if (details.uid || details.token || details.non_field_errors || details.detail) {
+        const nonField =
+          Array.isArray(details.non_field_errors) && details.non_field_errors.length
+            ? details.non_field_errors.join(" ")
+            : null;
         map.form =
           details.uid?.join?.(" ") ||
           details.token?.join?.(" ") ||
+          nonField ||
+          details.detail ||
           t.invalid_token ||
           "Reset link is invalid or expired.";
       }
