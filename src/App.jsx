@@ -7,6 +7,7 @@ import CookieBanner from "./components/CookieBanner";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
+import StaffRoute from "./routes/StaffRoute";
 import Formations from "./pages/Formations";
 
 const Home = lazy(() => import("./pages/Home"));
@@ -71,21 +72,21 @@ function App() {
             <Route
               path="/admin/feedbacks"
               element={
-                <ProtectedRoute>
+                <StaffRoute>
                   <AdminLayout>
                     <Feedbacks />
                   </AdminLayout>
-                </ProtectedRoute>
+                </StaffRoute>
               }
             />
             <Route
               path="/admin/messages"
               element={
-                <ProtectedRoute>
+                <StaffRoute>
                   <AdminLayout>
                     <Messages />
                   </AdminLayout>
-                </ProtectedRoute>
+                </StaffRoute>
               }
             />
 
