@@ -53,6 +53,7 @@ describe("Register", () => {
     expect(screen.getByText(registerEn.name_error)).toBeInTheDocument();
     expect(screen.getByText(registerEn.firstname_error)).toBeInTheDocument();
     expect(screen.getByText(registerEn.email_error)).toBeInTheDocument();
+    expect(screen.getByText(registerEn.phone_required)).toBeInTheDocument();
     expect(screen.getByText(registerEn.password_error)).toBeInTheDocument();
     expect(screen.getByText(registerEn.confirm_password_required)).toBeInTheDocument();
     expect(screen.getByText(registerEn.rgpd_consent_error)).toBeInTheDocument();
