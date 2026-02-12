@@ -90,4 +90,32 @@ describe("Register", () => {
       password: "Abcd1234!",
     });
   });
+
+  it("normalizes formatted phone before submit", async () => {
+    const user = userEvent.setup();
+    const register = vi.fn().mockResolvedValue({ id: 1 });
+    useAuth.mockReturnValue({ register });
+
+    render(
+      <MemoryRouter>
+        <Register />
+      </MemoryRouter>
+    );
+
+    await user.type(screen.getByLabelText(registerEn.username), "jdoe");
+    await user.type(screen.getByLabelText(registerEn.name), "Doe");
+    await user.type(screen.getByLabelText(registerEn.firstname), "Jane");
+    await user.type(screen.getByLabelText(registerEn.email), "jane@example.com");
+    await user.type(screen.getByLabelText(registerEn.phone), "+33 (0)6 12-34-56-78");
+    await user.type(screen.getByLabelText(registerEn.password), "Abcd1234!");
+    await user.type(screen.getByLabelText(registerEn.confirm_password), "Abcd1234!");
+    await user.click(screen.getByRole("checkbox", { name: registerEn.rgpd_consent }));
+    await user.click(screen.getByRole("button", { name: registerEn.register }));
+
+    expect(register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        phone: "+330612345678",
+      })
+    );
+  });
 });
