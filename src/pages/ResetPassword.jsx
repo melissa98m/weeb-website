@@ -88,7 +88,6 @@ export default function ResetPassword() {
         uid,
         token,
         password: form.password,
-        password_confirm: form.confirmPassword,
       });
       setServerMsg({ type: "success", text: t.success_message || "Password updated. You can now log in." });
       setTimeout(() => navigate("/login"), 1200);
@@ -97,11 +96,6 @@ export default function ResetPassword() {
       const map = {};
       if (details.password) {
         map.password = Array.isArray(details.password) ? details.password.join(" ") : String(details.password);
-      }
-      if (details.password_confirm) {
-        map.confirmPassword = Array.isArray(details.password_confirm)
-          ? details.password_confirm.join(" ")
-          : String(details.password_confirm);
       }
       if (details.uid || details.token) {
         map.form =
