@@ -309,7 +309,6 @@ export default function ArticleEditorModal({
         article_content: content,
         link_image: imageUrl.trim() || null,
       };
-      if (!isEditing && userId != null) payload.user = userId;
 
       let saved;
       if (isEditing) {
