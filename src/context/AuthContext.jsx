@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async ({ email, username, identifier, password }) => {
       const id = (email ?? username ?? identifier ?? "").trim();
-      await AuthApi.login({ email: id, username: id, identifier: id, password });
+      await AuthApi.login({ login: id, password });
       const me = await fetchMe(); // hydrate le context
       return me;                  
     },
@@ -80,7 +80,7 @@ export function AuthProvider({ children }) {
     async (payload) => {
       await AuthApi.register(payload);
       try {
-        await AuthApi.login({ email: payload.email, username: payload.email, identifier: payload.email, password: payload.password });
+        await AuthApi.login({ login: payload.email, password: payload.password });
       } catch {
        
       }

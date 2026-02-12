@@ -159,16 +159,13 @@ export default function Register() {
 
     try {
       setSubmitting(true);
-      // Envoie les 2 clés phone/telephone pour compat backend
       await registerUser({
         username: form.username.trim(),
         email: form.email.trim(),
         first_name: form.prenom.trim(),
         last_name: form.nom.trim(),
         phone: form.telephone || undefined,
-        telephone: form.telephone || undefined,
         password: form.password,
-        password_confirm: form.confirmPassword,
       });
       // Réinitialiser le compteur en cas de succès
       setAttemptCount(0);

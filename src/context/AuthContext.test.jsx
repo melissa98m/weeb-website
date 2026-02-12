@@ -102,9 +102,7 @@ describe("AuthContext", () => {
 
     await waitFor(() => expect(screen.getByTestId("user").textContent).toBe("B"));
     expect(AuthApi.login).toHaveBeenCalledWith({
-      email: "user@test.com",
-      username: "user@test.com",
-      identifier: "user@test.com",
+      login: "user@test.com",
       password: "pw",
     });
   });
@@ -124,7 +122,10 @@ describe("AuthContext", () => {
       email: "new@test.com",
       password: "pw",
     });
-    expect(AuthApi.login).toHaveBeenCalled();
+    expect(AuthApi.login).toHaveBeenCalledWith({
+      login: "new@test.com",
+      password: "pw",
+    });
   });
 
   it("clears user on logout even when api fails", async () => {

@@ -406,7 +406,7 @@ export default function ArticleEditorModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                maxLength={255}
+                maxLength={200}
               />
             </div>
 
