@@ -25,7 +25,8 @@
   "phone": "Phone",
   "phone_placeholder": "e.g. +1 212 555 0123",
   "phone_hint": "Valid examples: +1 212 555 0123 or (212) 555-0123",
-  "phone_error_invalid": "Invalid phone. Use 8–15 digits (may include + ( ) - spaces).",
+  "phone_required": "Phone is required.",
+  "phone_error_invalid": "Invalid phone. Use 6 to 20 digits (optional leading +).",
   "rgpd_consent": "I accept the processing of my personal data in accordance with the GDPR.",
   "rgpd_consent_error": "You must accept the personal data processing terms."
 }

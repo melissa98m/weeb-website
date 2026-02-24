@@ -25,7 +25,8 @@
   "phone": "Téléphone",
   "phone_placeholder": "Ex. +33 6 12 34 56 78",
   "phone_hint": "Exemples valides : +33 6 12 34 56 78 ou (06) 12-34-56-78",
-  "phone_error_invalid": "Numéro invalide. Utilisez 8–15 chiffres (peuvent contenir + ( ) - espaces).",
+  "phone_required": "Le téléphone est requis.",
+  "phone_error_invalid": "Numéro invalide. Utilisez 6 à 20 chiffres (préfixe + autorisé).",
   "rgpd_consent": "J'accepte le traitement de mes données personnelles conformément au RGPD.",
   "rgpd_consent_error": "Vous devez accepter le traitement des données personnelles."
 }

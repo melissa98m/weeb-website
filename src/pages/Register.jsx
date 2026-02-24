@@ -34,9 +34,8 @@ export default function Register() {
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [attemptCount, setAttemptCount] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
-  const lockTimeoutRef = useRef(null);
+  const [lockUntilTs, setLockUntilTs] = useState(0);
+  const [remainingLockSeconds, setRemainingLockSeconds] = useState(0);
 
   const [pwdValidations, setPwdValidations] = useState({
     length: false,
@@ -52,14 +51,25 @@ export default function Register() {
     }
   }, []);
 
-  // Nettoyage du timeout de verrouillage
+  // Sync local lock timer from backend throttle/lock responses.
   useEffect(() => {
-    return () => {
-      if (lockTimeoutRef.current) {
-        clearTimeout(lockTimeoutRef.current);
+    if (!lockUntilTs) {
+      setRemainingLockSeconds(0);
+      return;
+    }
+    const updateRemaining = () => {
+      const remain = Math.max(0, Math.ceil((lockUntilTs - Date.now()) / 1000));
+      setRemainingLockSeconds(remain);
+      if (remain <= 0) {
+        setLockUntilTs(0);
       }
     };
-  }, []);
+    updateRemaining();
+    const timer = window.setInterval(updateRemaining, 1000);
+    return () => window.clearInterval(timer);
+  }, [lockUntilTs]);
+
+  const isLocked = remainingLockSeconds > 0;
 
   useEffect(() => {
     const { password } = form;
@@ -73,11 +83,16 @@ export default function Register() {
 
   // Helpers téléphone
   const onlyDialable = (s) => (s || "").replace(/[^\d]/g, "");
+  const normalizePhone = (raw) => {
+    const source = (raw || "").trim();
+    if (!source) return "";
+    const hasLeadingPlus = source.startsWith("+");
+    const digits = onlyDialable(source);
+    return hasLeadingPlus ? `+${digits}` : digits;
+  };
   const phoneLooksOk = (raw) => {
-    if (!raw) return true;
-    if (!/^[+()\-\s0-9]+$/.test(raw)) return false;
-    const digits = onlyDialable(raw);
-    return digits.length >= 8 && digits.length <= 15;
+    const normalized = normalizePhone(raw);
+    return /^\+?\d{6,20}$/.test(normalized);
   };
 
   const validate = () => {
@@ -89,12 +104,16 @@ export default function Register() {
     const emailOk = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(form.email.trim());
     if (!emailOk) errs.email = t.email_error;
 
-    if (form.telephone && !phoneLooksOk(form.telephone)) {
+    if (!form.telephone.trim()) {
+      errs.telephone =
+        t.phone_required ||
+        (language === "fr" ? "Le téléphone est requis." : "Phone is required.");
+    } else if (!phoneLooksOk(form.telephone)) {
       errs.telephone =
         t.phone_error_invalid ||
         (language === "fr"
-          ? "Numéro invalide. Utilisez 8–15 chiffres (peuvent contenir + ( ) - espaces)."
-          : "Invalid phone. Use 8–15 digits (may include + ( ) - spaces).");
+          ? "Numéro invalide. Utilisez 6 à 20 chiffres (préfixe + autorisé)."
+          : "Invalid phone. Use 6 to 20 digits (optional leading +).");
     }
 
     if (Object.values(pwdValidations).some((ok) => !ok)) {
@@ -141,10 +160,10 @@ export default function Register() {
     
     // Vérifier si le compte est verrouillé
     if (isLocked) {
-      setErrors({ 
+      setErrors({
         form: language === "fr" 
-          ? "Trop de tentatives. Veuillez patienter quelques instants." 
-          : "Too many attempts. Please wait a moment." 
+          ? `Trop de tentatives. Réessayez dans ${remainingLockSeconds}s.`
+          : `Too many attempts. Retry in ${remainingLockSeconds}s.`
       });
       return;
     }
@@ -159,19 +178,15 @@ export default function Register() {
 
     try {
       setSubmitting(true);
-      // Envoie les 2 clés phone/telephone pour compat backend
       await registerUser({
         username: form.username.trim(),
         email: form.email.trim(),
         first_name: form.prenom.trim(),
         last_name: form.nom.trim(),
-        phone: form.telephone || undefined,
-        telephone: form.telephone || undefined,
+        phone: normalizePhone(form.telephone),
         password: form.password,
-        password_confirm: form.confirmPassword,
       });
-      // Réinitialiser le compteur en cas de succès
-      setAttemptCount(0);
+      setLockUntilTs(0);
       navigate(redirectTo, { replace: true });
     } catch (e2) {
       const d = e2?.details || {};
@@ -187,29 +202,16 @@ export default function Register() {
         map.telephone = Array.isArray(v) ? v.join(" ") : String(v);
       }
       
-      // Gestion du rate limiting côté client
-      const newAttemptCount = attemptCount + 1;
-      setAttemptCount(newAttemptCount);
-
-      // Verrouiller après 5 tentatives échouées
-      if (newAttemptCount >= 5) {
-        setIsLocked(true);
-        if (lockTimeoutRef.current) {
-          clearTimeout(lockTimeoutRef.current);
-        }
-        lockTimeoutRef.current = setTimeout(() => {
-          setIsLocked(false);
-          setAttemptCount(0);
-        }, 30000); // 30 secondes
-
-        map.form = language === "fr" 
-          ? "Trop de tentatives échouées. Veuillez patienter 30 secondes." 
-          : "Too many failed attempts. Please wait 30 seconds.";
-      } else {
+      if (e2?.status === 429) {
+        const retryRaw = Number(d?.retry_after);
+        const retryAfter = Number.isFinite(retryRaw) && retryRaw > 0 ? Math.ceil(retryRaw) : 30;
+        setLockUntilTs(Date.now() + retryAfter * 1000);
         map.form =
-          d.non_field_errors?.join(" ") ||
-          d.detail ||
-          (language === "fr" ? "Échec de l'inscription." : "Registration failed.");
+          language === "fr"
+            ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
+            : `Too many attempts. Retry in ${retryAfter}s.`;
+      } else {
+        map.form = d.non_field_errors?.join(" ") || d.detail || (language === "fr" ? "Échec de l'inscription." : "Registration failed.");
       }
       
       setErrors(map);

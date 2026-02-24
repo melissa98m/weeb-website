@@ -50,7 +50,6 @@ export default function Footer() {
   const { language } = useLanguage();
   const t = language === "fr" ? footerFr : footerEn;
   const [newsletterConsent, setNewsletterConsent] = useState(false);
-  const [newsletterConsentAt, setNewsletterConsentAt] = useState("");
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterStatus, setNewsletterStatus] = useState("idle");
   const footerLinks = [
@@ -204,16 +203,12 @@ export default function Footer() {
               if (!newsletterConsent || newsletterStatus === "loading") return;
               try {
                 setNewsletterStatus("loading");
-                const consentAt = newsletterConsentAt || new Date().toISOString();
                 await NewsletterApi.subscribe({
                   email: newsletterEmail.trim(),
-                  consent: true,
-                  consented_at: consentAt,
                 });
                 setNewsletterStatus("success");
                 setNewsletterEmail("");
                 setNewsletterConsent(false);
-                setNewsletterConsentAt("");
               } catch (_) {
                 setNewsletterStatus("error");
               }
@@ -236,7 +231,6 @@ export default function Footer() {
               value={newsletterEmail}
               onChange={(event) => setNewsletterEmail(event.target.value)}
             />
-            <input type="hidden" name="consent_at" value={newsletterConsentAt} />
             <button
               type="submit"
               disabled={!newsletterConsent || newsletterStatus === "loading"}
@@ -271,7 +265,6 @@ export default function Footer() {
                 onChange={(event) => {
                   const checked = event.target.checked;
                   setNewsletterConsent(checked);
-                  setNewsletterConsentAt(checked ? new Date().toISOString() : "");
                 }}
               />
               <span>{t.newsletter_consent}</span>

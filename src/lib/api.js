@@ -339,6 +339,9 @@ export const AuthApi = {
       clearAuthTokens();
     });
   },
+  refresh() {
+    return authRequest("/refresh/", { method: "POST", csrf: true });
+  },
   requestPasswordReset(payload) {
     return authRequest("/forgot-password/", { method: "POST", body: payload, csrf: true });
   },
