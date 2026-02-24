@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -18,6 +18,26 @@ export default function ForgotPassword() {
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverMsg, setServerMsg] = useState(null);
+  const shakeTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerShake = () => {
+    setShake(true);
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+    }
+    shakeTimeoutRef.current = setTimeout(() => {
+      setShake(false);
+      shakeTimeoutRef.current = null;
+    }, 500);
+  };
 
   const validate = () => {
     const errs = {};
@@ -42,8 +62,7 @@ export default function ForgotPassword() {
     const validation = validate();
     if (Object.keys(validation).length) {
       setErrors(validation);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
       return;
     }
 
@@ -68,8 +87,7 @@ export default function ForgotPassword() {
           text: t.error_message || "Unable to send reset email. Please try again later.",
         });
       }
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
     } finally {
       setSubmitting(false);
     }

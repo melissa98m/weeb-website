@@ -8,6 +8,7 @@ import { AuthApi, ensureCsrf } from "../lib/api";
 vi.mock("../lib/api", () => ({
   AuthApi: {
     me: vi.fn(),
+    refresh: vi.fn(),
     login: vi.fn(),
     register: vi.fn(),
     logout: vi.fn(),
@@ -53,6 +54,7 @@ describe("AuthContext", () => {
     vi.clearAllMocks();
     ensureCsrf.mockResolvedValue("token");
     AuthApi.me.mockResolvedValue(null);
+    AuthApi.refresh.mockResolvedValue({});
     AuthApi.login.mockResolvedValue({});
     AuthApi.register.mockResolvedValue({});
     AuthApi.logout.mockResolvedValue({});
@@ -102,9 +104,7 @@ describe("AuthContext", () => {
 
     await waitFor(() => expect(screen.getByTestId("user").textContent).toBe("B"));
     expect(AuthApi.login).toHaveBeenCalledWith({
-      email: "user@test.com",
-      username: "user@test.com",
-      identifier: "user@test.com",
+      login: "user@test.com",
       password: "pw",
     });
   });
@@ -124,7 +124,10 @@ describe("AuthContext", () => {
       email: "new@test.com",
       password: "pw",
     });
-    expect(AuthApi.login).toHaveBeenCalled();
+    expect(AuthApi.login).toHaveBeenCalledWith({
+      login: "new@test.com",
+      password: "pw",
+    });
   });
 
   it("clears user on logout even when api fails", async () => {
@@ -147,5 +150,19 @@ describe("AuthContext", () => {
 
     await waitFor(() => expect(screen.getByTestId("loading").textContent).toBe("false"));
     expect(screen.getByTestId("error")).toBeInTheDocument();
+  });
+
+  it("refreshes session when /me returns 401", async () => {
+    const unauthorized = new Error("unauthorized");
+    unauthorized.status = 401;
+    AuthApi.me
+      .mockRejectedValueOnce(unauthorized)
+      .mockResolvedValueOnce({ id: 5, name: "E" });
+    AuthApi.refresh.mockResolvedValueOnce({});
+
+    renderAuth();
+
+    await waitFor(() => expect(AuthApi.refresh).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByTestId("user").textContent).toBe("E"));
   });
 });

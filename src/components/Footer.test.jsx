@@ -66,8 +66,7 @@ describe("Footer", () => {
 
     const payload = NewsletterApi.subscribe.mock.calls[0][0];
     expect(payload.email).toBe("test@example.com");
-    expect(payload.consent).toBe(true);
-    expect(typeof payload.consented_at).toBe("string");
+    expect(payload).toEqual({ email: "test@example.com" });
 
     expect(await screen.findByText(footerEn.newsletter_success)).toBeInTheDocument();
   });

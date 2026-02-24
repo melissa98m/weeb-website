@@ -309,7 +309,6 @@ export default function ArticleEditorModal({
         article_content: content,
         link_image: imageUrl.trim() || null,
       };
-      if (!isEditing && userId != null) payload.user = userId;
 
       let saved;
       if (isEditing) {
@@ -406,7 +405,7 @@ export default function ArticleEditorModal({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                maxLength={255}
+                maxLength={200}
               />
             </div>
 

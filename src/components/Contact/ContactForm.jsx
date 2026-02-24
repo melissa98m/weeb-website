@@ -126,7 +126,9 @@ export default function ContactForm() {
     if (!form.message_content.trim()) e.message_content = t?.message_error || "Message is required.";
     else if (form.message_content.trim().length > 5000) e.message_content = t?.message_max || "Max 5000 characters.";
 
-    if (form.subject && !/^\d+$/.test(String(form.subject))) {
+    if (!form.subject) {
+      e.subject = t?.subject_error || "Invalid subject.";
+    } else if (!/^\d+$/.test(String(form.subject))) {
       e.subject = t?.subject_error || "Invalid subject.";
     }
 
@@ -187,8 +189,6 @@ export default function ContactForm() {
 
     // Normaliser les données pour l’API (subject null si vide)
     const payload = {
-      ...form,
-      consent: undefined,
       subject: form.subject ? Number(form.subject) : null,
       telephone: form.telephone.trim(),
       first_name: form.first_name.trim(),

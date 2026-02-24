@@ -68,6 +68,7 @@ describe("ContactForm", () => {
     expect(await screen.findByText(contactEn.lastname_error)).toBeInTheDocument();
     expect(screen.getByText(contactEn.firstname_error)).toBeInTheDocument();
     expect(screen.getByText(contactEn.email_error)).toBeInTheDocument();
+    expect(screen.getByText(contactEn.subject_error)).toBeInTheDocument();
     expect(screen.getByText(contactEn.message_error)).toBeInTheDocument();
     expect(screen.getByText(contactEn.consent_error)).toBeInTheDocument();
   });
