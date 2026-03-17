@@ -4,7 +4,13 @@ import { useTheme } from "../../context/ThemeContext";
 import contactEn from "../../../locales/en/contact.json";
 import contactFr from "../../../locales/fr/contact.json";
 import { useLanguage } from "../../context/LanguageContext";
-import { API_BASE } from "../../lib/api";
+import {
+  MessagesApi,
+  SubjectsApi,
+  getApiErrorMessage,
+  getApiSupportHint,
+  mapApiFieldErrors,
+} from "../../lib/api";
 
 /* ====================== ANTI-SPAM (front only) ====================== */
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 min
@@ -70,6 +76,7 @@ export default function ContactForm() {
   const [shake, setShake] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [serverMsg, setServerMsg] = useState(null);
+  const [serverHint, setServerHint] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
 
@@ -92,18 +99,24 @@ export default function ContactForm() {
     (async () => {
       try {
         setLoadingSubjects(true);
-        const r = await fetch(`${API_BASE}/subjects/`);
-        if (!r.ok) throw new Error("Failed to load subjects");
-        const data = await r.json();
-        if (active) setSubjects(Array.isArray(data) ? data : data.results || []);
+        const data = await SubjectsApi.list();
+        if (active) {
+          setSubjects(Array.isArray(data) ? data : data?.results || []);
+        }
       } catch (e) {
-        setServerMsg({ type: "error", text: t?.subjects_load_error || "Unable to load subjects." });
+        if (active) {
+          setServerMsg({
+            type: "error",
+            text: getApiErrorMessage(e, t?.subjects_load_error || "Unable to load subjects."),
+          });
+          setServerHint(getApiSupportHint(e, language));
+        }
       } finally {
-        setLoadingSubjects(false);
+        if (active) setLoadingSubjects(false);
       }
     })();
     return () => { active = false; };
-  }, []);
+  }, [language, t]);
 
   // Validation front
   const validate = () => {
@@ -144,11 +157,13 @@ export default function ContactForm() {
     setForm((prev) => ({ ...prev, [id]: type === "checkbox" ? checked : value }));
     setErrors((prev) => ({ ...prev, [id]: null }));
     setServerMsg(null);
+    setServerHint(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setServerMsg(null);
+    setServerHint(null);
 
     // Anti-spam 1: rate-limit navigateur
     const gate = canSubmitNow();
@@ -199,54 +214,46 @@ export default function ContactForm() {
 
     try {
       setSubmitting(true);
-      const r = await fetch(`${API_BASE}/messages/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      await MessagesApi.create(payload);
+      recordSubmit();
+      setCooldownSec(Math.ceil(cooldownRemainingMs() / 1000));
+
+      setForm({
+        first_name: "",
+        last_name: "",
+        telephone: "",
+        email: "",
+        subject: "",
+        message_content: "",
+        consent: false,
+        _website: "",
+        _started_at: Date.now(),
       });
-
-      if (r.ok) {
-        // Enregistrement client de la soumission pour le rate-limit
-        recordSubmit();
-        setCooldownSec(Math.ceil(cooldownRemainingMs() / 1000));
-
-        setForm({
-          first_name: "",
-          last_name: "",
-          telephone: "",
-          email: "",
-          subject: "",
-          message_content: "",
-          consent: false,
-          _website: "",
-          _started_at: Date.now(),
-        });
-        setErrors({});
-        setServerMsg({ type: "success", text: t?.sent_ok || "Message sent. Thank you!" });
-        return;
-      }
-
-      if (r.status === 400) {
-        const data = await r.json();
-        const fieldErrors = {};
-        Object.entries(data).forEach(([key, val]) => {
-          if (Array.isArray(val) && val.length) fieldErrors[key] = val.join(" ");
-          else if (typeof val === "string") fieldErrors[key] = val;
-        });
-        setErrors(fieldErrors);
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
-        if (data.non_field_errors && data.non_field_errors.length) {
-          setServerMsg({ type: "error", text: data.non_field_errors.join(" ") });
-        } else {
-          setServerMsg({ type: "error", text: t?.sent_error || "Please correct the highlighted fields." });
-        }
-        return;
-      }
-
-      setServerMsg({ type: "error", text: t?.server_error || "Server error. Please try again later." });
+      setErrors({});
+      setServerMsg({ type: "success", text: t?.sent_ok || "Message sent. Thank you!" });
     } catch (err) {
-      setServerMsg({ type: "error", text: t?.network_error || "Network error. Check your connection." });
+      const fieldErrors = mapApiFieldErrors(err, {
+        first_name: "first_name",
+        last_name: "last_name",
+        telephone: "telephone",
+        email: "email",
+        subject: "subject",
+        message_content: "message_content",
+      });
+      if (Object.keys(fieldErrors).length) {
+        setErrors(fieldErrors);
+      }
+
+      const hasFieldErrors = Object.keys(fieldErrors).length > 0;
+      setServerMsg({
+        type: "error",
+        text: hasFieldErrors
+          ? getApiErrorMessage(err, t?.sent_error || "Please correct the highlighted fields.")
+          : getApiErrorMessage(err, t?.network_error || "Network error. Check your connection."),
+      });
+      setServerHint(getApiSupportHint(err, language));
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
     } finally {
       setSubmitting(false);
     }
@@ -283,6 +290,9 @@ export default function ContactForm() {
             }`}
           >
             {serverMsg.text}
+            {serverHint && serverMsg.type === "error" ? (
+              <p className="mt-2 text-xs opacity-80">{serverHint}</p>
+            ) : null}
           </div>
         )}
 
