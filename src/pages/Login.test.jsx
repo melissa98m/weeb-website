@@ -20,6 +20,7 @@ vi.mock("framer-motion", () => ({
 }));
 
 vi.mock("@react-oauth/google", () => ({
+  GoogleOAuthProvider: ({ children }) => <>{children}</>,
   GoogleLogin: ({ onSuccess }) => (
     <button type="button" onClick={() => onSuccess?.({ credential: "google-id-token" })}>
       Continue with Google

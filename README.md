@@ -169,10 +169,14 @@ Créez ou mettez à jour un fichier `.env` à la racine du projet :
 ```env
 VITE_API_URL=http://localhost:8000/api
 VITE_SENTRY_DSN=__votre_dsn_sentry__
+VITE_GOOGLE_CLIENT_ID=__votre_google_client_id__
+VITE_OAUTH_GITHUB_URL=http://localhost:8000/api/auth/oauth/github/
 ```
 
 - `VITE_API_URL` : URL du backend Django. **Si non défini**, l'app utilise par défaut `https://weebbackend.melissa-mangione.com/api`.
 - `VITE_SENTRY_DSN` : DSN Sentry. **Si défini en production**, active le reporting d'erreurs et les traces/replays.
+- `VITE_GOOGLE_CLIENT_ID` : Client ID Google OAuth. **Si défini**, le bouton Google apparaît sur `/login` et envoie un `id_token` au backend.
+- `VITE_OAUTH_GITHUB_URL` : URL de démarrage OAuth GitHub. **Si définie**, un bouton GitHub apparaît sur `/login`.
 
 ## 🛠 Scripts disponibles
 
@@ -245,6 +249,8 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 L'application utilise un système d'authentification basé sur des cookies avec protection CSRF. `AuthContext` centralise :
 
 - **Connexion** (`login`) : Accepte email/username/identifier + password, pose les cookies, puis charge `/me`
+- **Connexion OAuth Google** : Optionnelle via Google Identity, puis appel backend `POST /auth/oauth/google/` avec `id_token`
+- **Connexion OAuth GitHub** : Optionnelle via URL provider configurée dans les variables d'environnement
 - **Inscription** (`register`) : Création de compte puis connexion automatique
 - **Déconnexion** (`logout`) : Suppression des tokens et nettoyage de l'état
 - **Vérification de l'utilisateur** (`me`) : Récupération des informations de l'utilisateur connecté

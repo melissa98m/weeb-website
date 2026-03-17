@@ -4,7 +4,6 @@ import * as Sentry from "@sentry/react";
 import "./index.css";
 import App from "./App.jsx";
 import { BrowserRouter } from "react-router-dom";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
@@ -15,7 +14,6 @@ import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 
 const sentryDsn = appEnv.VITE_SENTRY_DSN;
 const sentryEnabled = appEnv.PROD && Boolean(sentryDsn);
-const googleClientId = appEnv.VITE_GOOGLE_CLIENT_ID?.trim();
 
 if (sentryEnabled) {
   const integrations = [];
@@ -54,14 +52,8 @@ const appTree = (
   </BrowserRouter>
 );
 
-const appTreeWithProviders = googleClientId ? (
-  <GoogleOAuthProvider clientId={googleClientId}>{appTree}</GoogleOAuthProvider>
-) : (
-  appTree
-);
-
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <AppErrorBoundary>{appTreeWithProviders}</AppErrorBoundary>
+    <AppErrorBoundary>{appTree}</AppErrorBoundary>
   </StrictMode>
 );

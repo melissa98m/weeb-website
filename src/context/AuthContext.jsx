@@ -101,6 +101,15 @@ export function AuthProvider({ children }) {
     [fetchMe]
   );
 
+  const loginWithGoogle = useCallback(
+    async ({ idToken }) => {
+      await AuthApi.oauthGoogle({ id_token: idToken });
+      const me = await fetchMe();
+      return me;
+    },
+    [fetchMe]
+  );
+
   const logout = useCallback(async () => {
     try {
       await AuthApi.logout();
@@ -115,11 +124,12 @@ export function AuthProvider({ children }) {
       loading,
       error,
       login,
+      loginWithGoogle,
       register,
       logout,
       reload: fetchMe,
     }),
-    [user, loading, error, login, register, logout, fetchMe]
+    [user, loading, error, login, loginWithGoogle, register, logout, fetchMe]
   );
 
   return (
