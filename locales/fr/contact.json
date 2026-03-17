@@ -7,6 +7,7 @@
     "phone": "Téléphone",
     "email": "Email",
     "message": "Message",
+    "subject": "Sujet",
     "subject_placeholder": "Sélectionnez un sujet",
     "loading": "Chargement...",
     "contact_cta": "Contact",

@@ -393,6 +393,9 @@ export default function ContactForm() {
 
           {/* Subject */}
           <div className="relative md:col-span-2">
+            <label htmlFor="subject" className="sr-only">
+              {t?.subject || "Subject"}
+            </label>
             <select
               id="subject"
               value={form.subject}
@@ -403,6 +406,7 @@ export default function ContactForm() {
                   : "border-secondary focus:border-secondary text-gray-900 bg-white"
               } ${errors.subject ? errorBorder : ""}`}
               aria-invalid={!!errors.subject}
+              aria-describedby={errors.subject ? "subject-error" : undefined}
             >
               <option
                 value=""
@@ -430,7 +434,11 @@ export default function ContactForm() {
                 ))
               )}
             </select>
-            {errors.subject && <p className="text-red-500 text-xs mt-1">{errors.subject}</p>}
+            {errors.subject && (
+              <p id="subject-error" className="text-red-500 text-xs mt-1">
+                {errors.subject}
+              </p>
+            )}
           </div>
         </div>
 

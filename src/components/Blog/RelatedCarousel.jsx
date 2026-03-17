@@ -66,7 +66,7 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
         </div>
       )}
       <div className="p-3">
-        <h4 className="text-sm font-semibold line-clamp-2">{item.title}</h4>
+        <h3 className="text-sm font-semibold line-clamp-2">{item.title}</h3>
         <div className={`text-xs mt-2 ${theme === "dark" ? "text-white/70" : "text-gray-600"}`}>
           {authorLabel} • {formatDate(dateIso, language)}
         </div>
@@ -163,9 +163,9 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
       <style>{HIDE_SCROLLBAR_CSS}</style>
 
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold">
           {language === "fr" ? "Articles du même genre" : "More in this genre"}
-        </h3>
+        </h2>
         <div className="flex gap-2">
           <button
             type="button"

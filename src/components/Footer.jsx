@@ -191,7 +191,7 @@ export default function Footer() {
             >
               Newsletter
             </p>
-            <h3 className="text-lg font-semibold">{t.newsletter_title}</h3>
+            <h2 className="text-lg font-semibold">{t.newsletter_title}</h2>
             <p className={theme === "dark" ? "text-slate-600" : "text-slate-300"}>
               {t.newsletter_subtitle}
             </p>
