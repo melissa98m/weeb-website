@@ -36,6 +36,7 @@ export default function Formations() {
     }
 
     const ctr = new AbortController();
+    let active = true;
     (async () => {
       try {
         setLoading(true);
@@ -46,15 +47,25 @@ export default function Formations() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         const list = Array.isArray(data) ? data : data.results || [];
-        setItems(list);
+        if (active) {
+          setItems(list);
+        }
       } catch (e) {
+        if (e?.name === "AbortError" || ctr.signal.aborted) return;
         console.error("Failed to load formations", e);
-        setItems([]); // pas de mock -> strict
+        if (active) {
+          setItems([]); // pas de mock -> strict
+        }
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     })();
-    return () => ctr.abort();
+    return () => {
+      active = false;
+      ctr.abort();
+    };
   }, []);
 
   const openSummary = useCallback((f) => { setSelected(f); setOpen(true); }, []);
