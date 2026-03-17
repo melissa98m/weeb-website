@@ -7,6 +7,7 @@ import registerEn from "../../locales/en/register.json";
 import registerFr from "../../locales/fr/register.json";
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthContext";
+import { getApiErrorMessage, getApiLockoutMessage, getApiRetryAfter, mapApiFieldErrors } from "../lib/api";
 
 export default function Register() {
   const { theme } = useTheme();
@@ -189,29 +190,25 @@ export default function Register() {
       setLockUntilTs(0);
       navigate(redirectTo, { replace: true });
     } catch (e2) {
-      const d = e2?.details || {};
-      const map = {};
-      if (d.username) map.username = Array.isArray(d.username) ? d.username.join(" ") : String(d.username);
-      if (d.email) map.email = Array.isArray(d.email) ? d.email.join(" ") : String(d.email);
-      if (d.first_name) map.prenom = Array.isArray(d.first_name) ? d.first_name.join(" ") : String(d.first_name);
-      if (d.last_name) map.nom = Array.isArray(d.last_name) ? d.last_name.join(" ") : String(d.last_name);
-      if (d.password) map.password = Array.isArray(d.password) ? d.password.join(" ") : String(d.password);
-      if (d.password_confirm) map.confirmPassword = Array.isArray(d.password_confirm) ? d.password_confirm.join(" ") : String(d.password_confirm);
-      if (d.phone || d.telephone) {
-        const v = d.phone || d.telephone;
-        map.telephone = Array.isArray(v) ? v.join(" ") : String(v);
-      }
+      const map = mapApiFieldErrors(e2, {
+        username: "username",
+        email: "email",
+        prenom: "first_name",
+        nom: "last_name",
+        password: "password",
+        confirmPassword: "password_confirm",
+        telephone: ["phone", "telephone"],
+      });
       
       if (e2?.status === 429) {
-        const retryRaw = Number(d?.retry_after);
-        const retryAfter = Number.isFinite(retryRaw) && retryRaw > 0 ? Math.ceil(retryRaw) : 30;
+        const retryAfter = getApiRetryAfter(e2) ?? 30;
         setLockUntilTs(Date.now() + retryAfter * 1000);
-        map.form =
-          language === "fr"
-            ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
-            : `Too many attempts. Retry in ${retryAfter}s.`;
+        map.form = getApiLockoutMessage(e2, language, retryAfter);
       } else {
-        map.form = d.non_field_errors?.join(" ") || d.detail || (language === "fr" ? "Échec de l'inscription." : "Registration failed.");
+        map.form = getApiErrorMessage(
+          e2,
+          language === "fr" ? "Échec de l'inscription." : "Registration failed."
+        );
       }
       
       setErrors(map);
