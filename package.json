@@ -16,6 +16,7 @@
     "chromatic": "npx chromatic --project-token=chpt_bd375f6a4af10d9"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.4",
     "@sentry/react": "^10.12.0",
     "@vercel/analytics": "^1.6.1",
     "framer-motion": "^12.12.1",
