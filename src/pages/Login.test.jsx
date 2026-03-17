@@ -8,6 +8,7 @@ import loginEn from "../../locales/en/login.json";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
+import { getEnabledOAuthProviders } from "../lib/api";
 
 vi.mock("framer-motion", () => ({
   motion: {
@@ -16,6 +17,14 @@ vi.mock("framer-motion", () => ({
     p: (props) => <p {...props} />,
   },
   AnimatePresence: ({ children }) => <>{children}</>,
+}));
+
+vi.mock("@react-oauth/google", () => ({
+  GoogleLogin: ({ onSuccess }) => (
+    <button type="button" onClick={() => onSuccess?.({ credential: "google-id-token" })}>
+      Continue with Google
+    </button>
+  ),
 }));
 
 vi.mock("../context/ThemeContext", () => ({
@@ -30,10 +39,28 @@ vi.mock("../context/AuthContext", () => ({
   useAuth: vi.fn(),
 }));
 
+vi.mock("../lib/api", () => ({
+  getEnabledOAuthProviders: vi.fn(),
+  getApiErrorMessage: vi.fn((error, fallback) => error?.details?.detail || fallback),
+  getApiLockoutMessage: vi.fn((error, language, fallbackSeconds = 30) =>
+    language === "fr"
+      ? `Trop de tentatives. Réessayez dans ${error?.details?.retry_after ?? fallbackSeconds}s.`
+      : `Too many attempts. Retry in ${error?.details?.retry_after ?? fallbackSeconds}s.`
+  ),
+  getApiRetryAfter: vi.fn((error) => error?.details?.retry_after ?? null),
+}));
+
+vi.mock("../lib/env", () => ({
+  appEnv: {
+    VITE_GOOGLE_CLIENT_ID: "google-client-id",
+  },
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
-  useAuth.mockReturnValue({ login: vi.fn() });
+  useAuth.mockReturnValue({ login: vi.fn(), loginWithGoogle: vi.fn() });
+  getEnabledOAuthProviders.mockReturnValue([]);
 });
 
 describe("Login", () => {
@@ -53,7 +80,7 @@ describe("Login", () => {
   it("calls login with identifier and password", async () => {
     const user = userEvent.setup();
     const login = vi.fn().mockResolvedValue({ id: 1 });
-    useAuth.mockReturnValue({ login });
+    useAuth.mockReturnValue({ login, loginWithGoogle: vi.fn() });
 
     render(
       <MemoryRouter>
@@ -77,7 +104,7 @@ describe("Login", () => {
     err.status = 429;
     err.details = { detail: "too many login attempts", retry_after: 12 };
     const login = vi.fn().mockRejectedValue(err);
-    useAuth.mockReturnValue({ login });
+    useAuth.mockReturnValue({ login, loginWithGoogle: vi.fn() });
 
     render(
       <MemoryRouter>
@@ -92,5 +119,39 @@ describe("Login", () => {
     await waitFor(() =>
       expect(screen.getByText("Too many attempts. Retry in 12s.")).toBeInTheDocument()
     );
+  });
+
+  it("calls loginWithGoogle when Google auth succeeds", async () => {
+    const user = userEvent.setup();
+    const loginWithGoogle = vi.fn().mockResolvedValue({ id: 2 });
+    useAuth.mockReturnValue({ login: vi.fn(), loginWithGoogle });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Continue with Google" }));
+    expect(loginWithGoogle).toHaveBeenCalledWith({ idToken: "google-id-token" });
+  });
+
+  it("redirects to provider URL when non-google oauth button is clicked", async () => {
+    const user = userEvent.setup();
+    getEnabledOAuthProviders.mockReturnValue([
+      { id: "github", label: "GitHub", url: "https://auth.example.com/github" },
+    ]);
+    const assignSpy = vi.fn();
+    vi.stubGlobal("location", { ...window.location, assign: assignSpy });
+
+    render(
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole("button", { name: "Continue with GitHub" }));
+    expect(assignSpy).toHaveBeenCalledWith("https://auth.example.com/github");
+    vi.unstubAllGlobals();
   });
 });
