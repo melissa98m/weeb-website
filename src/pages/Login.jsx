@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { GoogleLogin } from "@react-oauth/google";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
@@ -19,6 +19,7 @@ export default function Login() {
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
   const identifierRef = useRef(null);
+  const shakeTimeoutRef = useRef(null);
   const oauthProviders = getEnabledOAuthProviders().filter((provider) => provider.id !== "google");
   const hasGoogleOAuth = Boolean(appEnv.VITE_GOOGLE_CLIENT_ID?.trim());
   const hasAnyOAuth = hasGoogleOAuth || oauthProviders.length > 0;
@@ -40,6 +41,14 @@ export default function Login() {
     if (identifierRef.current) {
       identifierRef.current.focus();
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Sync local lock timer from backend retry_after.
@@ -84,6 +93,17 @@ export default function Login() {
     window.location.assign(url);
   };
 
+  const triggerShake = () => {
+    setShake(true);
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+    }
+    shakeTimeoutRef.current = setTimeout(() => {
+      shakeTimeoutRef.current = null;
+      setShake(false);
+    }, 500);
+  };
+
   const handleGoogleSuccess = async (credentialResponse) => {
     const oauthErrorMessage =
       language === "fr"
@@ -94,8 +114,7 @@ export default function Login() {
       const idToken = credentialResponse?.credential;
       if (!idToken) {
         setErrors({ form: oauthErrorMessage });
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+        triggerShake();
         return;
       }
 
@@ -106,14 +125,12 @@ export default function Login() {
         navigate(from, { replace: true });
       } else {
         setErrors({ form: oauthErrorMessage });
-        setShake(true);
-        setTimeout(() => setShake(false), 500);
+        triggerShake();
       }
     } catch (e) {
       const apiMsg = getApiErrorMessage(e, oauthErrorMessage);
       setErrors({ form: apiMsg });
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
     } finally {
       setSubmitting(false);
     }
@@ -144,8 +161,7 @@ export default function Login() {
     const validation = validate();
     if (Object.keys(validation).length) {
       setErrors(validation);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
       return;
     }
 
@@ -182,8 +198,7 @@ export default function Login() {
         setErrors({ form: apiMsg });
       }
 
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
     } finally {
       setSubmitting(false);
     }
@@ -392,24 +407,27 @@ export default function Login() {
               </div>
               <div className="grid grid-cols-1 gap-2">
                 {hasGoogleOAuth && (
-                  <div
-                    className={`overflow-hidden rounded-md border shadow-sm transition-all ${
-                      theme === "dark"
-                        ? "border-gray-700 bg-[#1f1f1f] hover:border-gray-600"
-                        : "border-gray-300 bg-white hover:border-gray-400"
-                    } focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2`}
-                  >
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={handleGoogleError}
-                      text="continue_with"
-                      shape="rectangular"
-                      size="large"
-                      width="100%"
-                      theme={theme === "dark" ? "filled_black" : "outline"}
-                      logo_alignment="left"
-                    />
-                  </div>
+                  <GoogleOAuthProvider clientId={appEnv.VITE_GOOGLE_CLIENT_ID.trim()}>
+                    <div
+                      className={`overflow-hidden rounded-md border shadow-sm transition-all ${
+                        theme === "dark"
+                          ? "border-gray-700 bg-[#1f1f1f] hover:border-gray-600"
+                          : "border-gray-300 bg-white hover:border-gray-400"
+                      } focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2`}
+                    >
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        text="continue_with"
+                        shape="rectangular"
+                        size="large"
+                        width="100%"
+                        theme={theme === "dark" ? "filled_black" : "outline"}
+                        logo_alignment="left"
+                        use_fedcm_for_button
+                      />
+                    </div>
+                  </GoogleOAuthProvider>
                 )}
                 {oauthProviders.map((provider) => (
                   <button
