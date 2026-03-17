@@ -12,6 +12,8 @@ vi.mock("../../lib/api", () => ({
     exportData: vi.fn(),
     deleteAccount: vi.fn(),
   },
+  getApiErrorMessage: vi.fn((error, fallback) => error?.details?.detail || fallback),
+  getApiSupportHint: vi.fn(() => null),
 }));
 
 vi.mock("react-router-dom", async (importOriginal) => {
