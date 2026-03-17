@@ -1,6 +1,6 @@
 {
   "title": "Politique de confidentialite",
-  "updated": "Derniere mise a jour: 2025-01-01",
+  "updated": "Derniere mise a jour: 2026-02-16",
   "intro": "Nous attachons une grande importance a la protection des donnees personnelles.",
   "sections": [
     {
@@ -55,6 +55,17 @@
       "items": [
         "Nous utilisons des cookies necessaires au fonctionnement du site.",
         "Les cookies optionnels ne sont deposees qu'avec votre consentement."
+      ]
+    },
+    {
+      "title": "Information utilisateur",
+      "items": [
+        "Lorsque vous laissez un feedback sur la plateforme, nous pouvons analyser automatiquement le contenu de votre message afin d'en deduire un indicateur de satisfaction (positif, negatif ou neutre) et un score de confiance.",
+        "Cette analyse a pour seul objectif d'ameliorer la qualite du service et des formations, en nous aidant a identifier plus rapidement les retours a traiter en priorite.",
+        "Le texte de votre feedback n'est pas utilise pour etablir un profil global vous concernant et aucune decision ayant un effet juridique n'est prise uniquement sur la base de ce traitement.",
+        "Les resultats (classe et confiance) sont conserves avec votre feedback et supprimes si votre compte est supprime.",
+        "Selon la configuration, une traduction peut etre utilisee avant l'analyse; dans ce cas, le texte transite uniquement pour permettre ce traitement.",
+        "Vous pouvez exercer vos droits (acces, export, suppression) via les fonctionnalites prevues dans votre espace."
       ]
     }
   ]
