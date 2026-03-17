@@ -1,6 +1,6 @@
 {
   "title": "Privacy Policy",
-  "updated": "Last updated: 2026-01-20",
+  "updated": "Last updated: 2026-02-16",
   "intro": "We take data protection seriously. This policy explains how we collect and use personal data.",
   "sections": [
     {
@@ -55,6 +55,17 @@
       "items": [
         "We use necessary cookies for site operation.",
         "Optional cookies are only set with your consent."
+      ]
+    },
+    {
+      "title": "User information",
+      "items": [
+        "When you leave feedback on the platform, we may automatically analyze the content of your message to derive a satisfaction indicator (positive, negative, or neutral) and a confidence score.",
+        "This analysis is used solely to improve the quality of the service and training courses by helping us identify feedback that should be handled first.",
+        "Your feedback text is not used to build a broader profile about you, and no decision producing legal or similarly significant effects is made solely on the basis of this processing.",
+        "The results (class and confidence) are stored with your feedback and are deleted if your account is deleted.",
+        "Depending on the configuration, a translation step may be used before the analysis; in that case, the text is transmitted only for the purpose of enabling this processing.",
+        "You can exercise your rights (access, export, deletion) through the features available in your account."
       ]
     }
   ]
