@@ -34,9 +34,9 @@ function FormationCardBase({ f, theme, onView }) {
 
       <div className="p-4">
         {/* Titre */}
-        <h3 className="text-base md:text-lg font-semibold tracking-tight mb-1 line-clamp-2">
+        <h2 className="text-base md:text-lg font-semibold tracking-tight mb-1 line-clamp-2">
           {title}
-        </h3>
+        </h2>
 
         {/* Description */}
         {excerpt ? (

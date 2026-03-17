@@ -24,6 +24,7 @@ describe("contact", () => {
                     <input id="first_name" />
                     <input id="telephone" />
                     <input id="email" />
+                    <label for="subject">Sujet</label>
                     <select id="subject">
                       <option value="10">Sujet</option>
                     </select>
