@@ -27,7 +27,7 @@ describe("formations", () => {
                   <input placeholder="Rechercher une formation…" />
                   <section>
                     <article>
-                      <h3>${first?.name || "Formation React"}</h3>
+                      <h2>${first?.name || "Formation React"}</h2>
                       <button type="button">Voir les détails</button>
                     </article>
                   </section>
@@ -50,10 +50,10 @@ describe("formations", () => {
               if (loadMore) {
                 loadMore.addEventListener("click", () => {
                   if (!root.querySelector("[data-testid='formation-performance']")) {
-                    const h3 = doc.createElement("h3");
-                    h3.dataset.testid = "formation-performance";
-                    h3.textContent = "Formation Performance";
-                    root.querySelector("section")?.appendChild(h3);
+                    const h2 = doc.createElement("h2");
+                    h2.dataset.testid = "formation-performance";
+                    h2.textContent = "Formation Performance";
+                    root.querySelector("section")?.appendChild(h2);
                   }
                 });
               }
@@ -86,7 +86,7 @@ describe("formations", () => {
     });
 
     cy.get("body").should("be.visible");
-    cy.contains("h3", "Formation React").should("be.visible");
+    cy.contains("h2", "Formation React").should("be.visible");
     cy.get("input[placeholder]").first().type("React");
 
     cy.get("input[placeholder]").first().clear();
@@ -101,8 +101,8 @@ describe("formations", () => {
       ensureFormationsDom(data);
     });
 
-    cy.contains("h3", "Formation React").should("be.visible");
+    cy.contains("h2", "Formation React").should("be.visible");
     cy.contains("button", /charger plus|load more/i).click();
-    cy.contains("h3", "Formation Performance").should("be.visible");
+    cy.contains("h2", "Formation Performance").should("be.visible");
   });
 });
