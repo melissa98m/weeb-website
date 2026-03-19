@@ -4,14 +4,9 @@ import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../../utils/roles";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
-import { getEnv } from "../../lib/env";
-
-// Normalise toujours vers .../api
-const API_BASE = (() => {
-  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
-  const base = raw.replace(/\/$/, "");
-  return base.endsWith("/api") ? base : `${base}/api`;
-})();
+import ExportCSVButton from "../../components/admin/ExportCSVButton";
+import AnalyticsCharts from "../../components/admin/AnalyticsCharts";
+import { API_BASE } from "../../lib/api";
 
 /* ==== Icônes (SVG inline, zéro dépendance) ==== */
 function IconLink({ size = 18 }) {
@@ -33,6 +28,16 @@ function IconCap({ size = 18 }) {
     </svg>
   );
 }
+function IconMail({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+}
+
 function IconMessage({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -73,24 +78,91 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
   );
 }
 
-function TestComponent({ className = "" }) {
-  const handleCrash = () => {
-    const user = undefined;
-    // This will throw
-    // eslint-disable-next-line no-console
-    console.log(user.name);
-  };
+
+function ExportSection({ card, ghostBtn, theme, canStaff, canPersonnel }) {
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+
+  const inputClass = `rounded-lg border px-2 py-1 text-sm ${
+    theme === "dark"
+      ? "bg-[#1c1c1c] text-white border-[#333] placeholder:text-white/40"
+      : "bg-white text-gray-900 border-gray-200"
+  }`;
 
   return (
-    <button onClick={handleCrash} className={className}>
-      Crash Test
-    </button>
+    <div className="space-y-3">
+      {/* Filtres de date */}
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-sm">
+          Du&nbsp;:
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className={inputClass}
+            aria-label="Date de début"
+          />
+        </label>
+        <label className="flex items-center gap-2 text-sm">
+          Au&nbsp;:
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className={inputClass}
+            aria-label="Date de fin"
+          />
+        </label>
+      </div>
+
+      {/* Boutons d'export */}
+      <div className="flex flex-wrap gap-2">
+        {canPersonnel && (
+          <ExportCSVButton
+            type="inscrits"
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            className={ghostBtn}
+          />
+        )}
+        {canStaff && (
+          <>
+            <ExportCSVButton
+              type="feedbacks"
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              className={ghostBtn}
+            />
+            <ExportCSVButton
+              type="messages"
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              className={ghostBtn}
+            />
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
 export default function AdminHome() {
   const { user } = useAuth();
   const { theme } = useTheme();
+
+  // SEO : les pages admin ne doivent jamais être indexées
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Administration | Weeb";
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement("meta");
+      metaRobots.name = "robots";
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.content = "noindex, nofollow";
+    return () => { document.title = prev; };
+  }, []);
 
   // Visibilités par rôle
   const canStaff = hasAnyStaffRole(user);       // ex: Commercial / Personnel
@@ -194,7 +266,7 @@ export default function AdminHome() {
               <div className="min-w-0">
                 <div className="font-semibold flex items-center gap-2">
                   Feedbacks
-                  {fbPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"}>{fbPending}</MiniBadge>}
+                  {fbPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${fbPending} feedback${fbPending !== 1 ? "s" : ""} à traiter`}>{fbPending}</MiniBadge>}
                 </div>
                 <div className="text-sm opacity-80">Suivre la satisfaction et traiter les retours.</div>
               </div>
@@ -208,9 +280,20 @@ export default function AdminHome() {
               <div className="min-w-0">
                 <div className="font-semibold flex items-center gap-2">
                   Messages
-                  {msgPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"}>{msgPending}</MiniBadge>}
+                  {msgPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${msgPending} message${msgPending !== 1 ? "s" : ""} à traiter`}>{msgPending}</MiniBadge>}
                 </div>
                 <div className="text-sm opacity-80">Traiter les demandes entrantes.</div>
+              </div>
+            </Link>
+          )}
+
+          {/* Newsletter (Admin) */}
+          {(user?.is_staff || user?.is_superuser) && (
+            <Link to="/admin/newsletter" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
+              <div className="mt-0.5"><IconMail /></div>
+              <div className="min-w-0">
+                <div className="font-semibold">Newsletter</div>
+                <div className="text-sm opacity-80">Composer et envoyer des campagnes aux abonnés.</div>
               </div>
             </Link>
           )}
@@ -221,9 +304,24 @@ export default function AdminHome() {
           <button onClick={loadCounts} className={`rounded-lg border px-3 py-1.5 text-sm ${ghostBtn}`}>
             Recharger les compteurs
           </button>
-          <TestComponent className={`rounded-lg border px-3 py-1.5 text-sm ${ghostBtn}`} />
         </div>
       </section>
+
+      {/* Dashboard analytique (admins uniquement) */}
+      {(user?.is_staff || user?.is_superuser) && (
+        <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
+          <h2 className="text-base font-semibold">Analytiques</h2>
+          <AnalyticsCharts theme={theme} />
+        </section>
+      )}
+
+      {/* Exports CSV (admins uniquement) */}
+      {(canStaff || canPersonnel || canRedact) && (
+        <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
+          <h2 className="text-base font-semibold mb-3">Exports CSV</h2>
+          <ExportSection card={card} ghostBtn={ghostBtn} theme={theme} canStaff={canStaff} canPersonnel={canPersonnel} />
+        </section>
+      )}
 
       {/* Footer accès/roles */}
       <div className="mt-4">
