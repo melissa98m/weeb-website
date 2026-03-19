@@ -31,11 +31,12 @@ export default function FormationModal({ open, onClose, formation, theme, t }) {
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="formation-modal-title"
         className={`fixed z-[101] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl rounded-xl border shadow-lg ${card}`}
       >
         <div className="p-5">
           <div className="flex items-start justify-between gap-3 mb-3">
-            <h3 className="text-xl md:text-2xl font-semibold">{title}</h3>
+            <h2 id="formation-modal-title" className="text-xl md:text-2xl font-semibold">{title}</h2>
             <Button
               type="button"
               onClick={onClose}

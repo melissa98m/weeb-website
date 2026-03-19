@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { useLanguage } from "../context/LanguageContext";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { getApiErrorMessage, getApiLockoutMessage, getApiRetryAfter, getEnabledOAuthProviders } from "../lib/api";
+import { appEnv } from "../lib/env";
 import Button from "../components/Button";
 import loginEn from "../../locales/en/login.json";
 import loginFr from "../../locales/fr/login.json";
@@ -11,11 +14,16 @@ import loginFr from "../../locales/fr/login.json";
 export default function Login() {
   const { theme } = useTheme();
   const { language } = useLanguage();
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/";
   const identifierRef = useRef(null);
+  const shakeTimeoutRef = useRef(null);
+  const oauthProviders = getEnabledOAuthProviders().filter((provider) => provider.id !== "google");
+  const hasGoogleOAuth = Boolean(appEnv.VITE_GOOGLE_CLIENT_ID?.trim());
+  const hasAnyOAuth = hasGoogleOAuth || oauthProviders.length > 0;
+  const oauthGoogle = (idToken) => loginWithGoogle({ idToken });
 
   const L = language === "fr" ? loginFr : loginEn;
 
@@ -33,6 +41,14 @@ export default function Login() {
     if (identifierRef.current) {
       identifierRef.current.focus();
     }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+    };
   }, []);
 
   // Sync local lock timer from backend retry_after.
@@ -72,6 +88,63 @@ export default function Login() {
     setErrors((prev) => ({ ...prev, [id]: null, form: null }));
   };
 
+  const handleOAuthLogin = (url) => {
+    if (typeof window === "undefined") return;
+    window.location.assign(url);
+  };
+
+  const triggerShake = () => {
+    setShake(true);
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+    }
+    shakeTimeoutRef.current = setTimeout(() => {
+      shakeTimeoutRef.current = null;
+      setShake(false);
+    }, 500);
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const oauthErrorMessage =
+      language === "fr"
+        ? "Connexion Google impossible pour le moment."
+        : "Google sign-in is currently unavailable.";
+
+    try {
+      const idToken = credentialResponse?.credential;
+      if (!idToken) {
+        setErrors({ form: oauthErrorMessage });
+        triggerShake();
+        return;
+      }
+
+      setSubmitting(true);
+      const me = await oauthGoogle(idToken);
+      if (me) {
+        setLockUntilTs(0);
+        navigate(from, { replace: true });
+      } else {
+        setErrors({ form: oauthErrorMessage });
+        triggerShake();
+      }
+    } catch (e) {
+      const apiMsg = getApiErrorMessage(e, oauthErrorMessage);
+      setErrors({ form: apiMsg });
+      triggerShake();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setErrors({
+      form:
+        language === "fr"
+          ? "Connexion Google annulée ou indisponible."
+          : "Google sign-in was cancelled or unavailable.",
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -88,8 +161,7 @@ export default function Login() {
     const validation = validate();
     if (Object.keys(validation).length) {
       setErrors(validation);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
       return;
     }
 
@@ -113,22 +185,20 @@ export default function Login() {
       console.error("[LOGIN] error:", e);
 
       if (e?.status === 429) {
-        const retryRaw = Number(e?.details?.retry_after);
-        const retryAfter = Number.isFinite(retryRaw) && retryRaw > 0 ? Math.ceil(retryRaw) : 30;
+        const retryAfter = getApiRetryAfter(e) ?? 30;
         setLockUntilTs(Date.now() + retryAfter * 1000);
         setErrors({
-          form:
-            language === "fr"
-              ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
-              : `Too many attempts. Retry in ${retryAfter}s.`,
+          form: getApiLockoutMessage(e, language, retryAfter),
         });
       } else {
-        const apiMsg = e?.details?.non_field_errors?.join(" ") || e?.details?.detail || (language === "fr" ? "Identifiants invalides." : "Invalid credentials.");
+        const apiMsg = getApiErrorMessage(
+          e,
+          language === "fr" ? "Identifiants invalides." : "Invalid credentials."
+        );
         setErrors({ form: apiMsg });
       }
 
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
     } finally {
       setSubmitting(false);
     }
@@ -315,6 +385,69 @@ export default function Login() {
               )}
             </Button>
           </motion.div>
+
+          {hasAnyOAuth && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.45 }}
+              className="space-y-3"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-700" />
+                </div>
+                <p
+                  className={`relative mx-auto w-fit px-2 text-xs ${
+                    theme === "dark" ? "bg-[#181818] text-muted" : "bg-white text-gray-500"
+                  }`}
+                >
+                  {L.or_continue_with || "Or continue with"}
+                </p>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                {hasGoogleOAuth && (
+                  <GoogleOAuthProvider clientId={appEnv.VITE_GOOGLE_CLIENT_ID.trim()}>
+                    <div
+                      className={`overflow-hidden rounded-md border shadow-sm transition-all ${
+                        theme === "dark"
+                          ? "border-gray-700 bg-[#1f1f1f] hover:border-gray-600"
+                          : "border-gray-300 bg-white hover:border-gray-400"
+                      } focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2`}
+                    >
+                      <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={handleGoogleError}
+                        text="continue_with"
+                        shape="rectangular"
+                        size="large"
+                        width="100%"
+                        theme={theme === "dark" ? "filled_black" : "outline"}
+                        logo_alignment="left"
+                        use_fedcm_for_button
+                      />
+                    </div>
+                  </GoogleOAuthProvider>
+                )}
+                {oauthProviders.map((provider) => (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    onClick={() => handleOAuthLogin(provider.url)}
+                    className={`w-full rounded-md border px-4 py-3 text-sm font-medium transition-colors ${
+                      theme === "dark"
+                        ? "border-gray-700 bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]"
+                        : "border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
+                    }`}
+                  >
+                    {provider.id === "github"
+                      ? L.oauth_github || "Continue with GitHub"
+                      : `${L.login || "Login"} ${provider.label}`}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0 }}

@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CookieBanner from "./components/CookieBanner";
+import OfflineBanner from "./components/OfflineBanner";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
@@ -31,7 +32,9 @@ const FormationsManager = lazy(() => import("./pages/admin/FormationsManager"));
 const ArticlesManager = lazy(() => import("./pages/admin/ArticlesManager"));
 const GenresManager = lazy(() => import("./pages/admin/GenresManager"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
+const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
 
 function App() {
   const { theme } = useTheme();
@@ -60,6 +63,7 @@ function App() {
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/formations" element={<Formations />} />
             <Route path="/formation/:id" element={<FormationModal />} />
+            <Route path="/search" element={<SearchResults />} />
 
             {/* Auth-required (non admin layout) */}
             <Route
@@ -133,6 +137,16 @@ function App() {
               }
             />
             <Route
+              path="/admin/newsletter"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout>
+                    <NewsletterManager />
+                  </AdminLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
                 <ProtectedRoute>
@@ -147,6 +161,7 @@ function App() {
       </main>
       <Footer />
       <CookieBanner />
+      <OfflineBanner />
     </div>
   );
 }

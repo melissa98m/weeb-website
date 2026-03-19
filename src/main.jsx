@@ -7,14 +7,35 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { appEnv } from "./lib/env";
 import { Analytics } from "@vercel/analytics/react";
+import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 
 
 const sentryDsn = appEnv.VITE_SENTRY_DSN;
 const sentryEnabled = appEnv.PROD && Boolean(sentryDsn);
 
-if (sentryEnabled) {
+// RGPD : Sentry n'est initialisé qu'après vérification du consentement optional
+// Le cookie cookie_consent est lu de manière synchrone avant tout rendu
+function hasCookieConsent() {
+  try {
+    const raw = document.cookie
+      .split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith("cookie_consent="));
+    if (!raw) return false;
+    const val = decodeURIComponent(raw.split("=").slice(1).join("="));
+    if (val === "accepted") return true;
+    if (val === "rejected") return false;
+    const parsed = JSON.parse(val);
+    return parsed?.optional === true;
+  } catch {
+    return false;
+  }
+}
+
+if (sentryEnabled && hasCookieConsent()) {
   const integrations = [];
 
   if (typeof Sentry.browserTracingIntegration === "function") {
@@ -23,18 +44,13 @@ if (sentryEnabled) {
     integrations.push(Sentry.browserTracing());
   }
 
-  if (typeof Sentry.replayIntegration === "function") {
-    integrations.push(Sentry.replayIntegration());
-  } else if (typeof Sentry.replay === "function") {
-    integrations.push(Sentry.replay());
-  }
-
   Sentry.init({
     dsn: sentryDsn,
     integrations,
     traces_sample_rate: 1.0,
-    replays_session_sample_rate: 0.1,
-    replays_on_error_sample_rate: 1.0,
+    // Session replay désactivé — risque PII (RGPD)
+    replays_session_sample_rate: 0,
+    replays_on_error_sample_rate: 0,
   });
 }
 
@@ -43,8 +59,11 @@ const appTree = (
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <App />
-          <Analytics />
+          <NotificationProvider>
+            <App />
+            {/* RGPD : Vercel Analytics uniquement si consentement optional accordé */}
+            {hasCookieConsent() && <Analytics />}
+          </NotificationProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
@@ -53,12 +72,6 @@ const appTree = (
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    {sentryEnabled ? (
-      <Sentry.ErrorBoundary fallback={<div>Une erreur est survenue.</div>}>
-        {appTree}
-      </Sentry.ErrorBoundary>
-    ) : (
-      appTree
-    )}
+    <AppErrorBoundary>{appTree}</AppErrorBoundary>
   </StrictMode>
 );

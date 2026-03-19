@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
 import GenrePicker from "./GenrePicker"; // <- votre composant
+import RichTextEditor from "./RichTextEditor";
 
 /* --- Helpers d’URL --- */
 const ARTICLE_ENDPOINTS = (apiBase) => [`${apiBase}/articles/`];
@@ -411,11 +412,10 @@ export default function ArticleEditorModal({
 
             <div>
               <label className="block text-sm mb-1">Contenu</label>
-              <textarea
-                className={`w-full rounded-lg border px-3 py-2 ${inputCls}`}
-                rows={8}
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
+                theme={theme}
               />
             </div>
 

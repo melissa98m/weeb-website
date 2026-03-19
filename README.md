@@ -106,7 +106,8 @@ weeb-website/
 │   ├── layouts/             # Layouts réutilisables
 │   ├── lib/                 # Client API + cookies + env
 │   ├── pages/
-│   │   ├── admin/           # Pages admin
+│   │   ├── admin/           # Pages admin (AdminHome, ArticlesManager, FormationsManager,
+│   │   │                    # GenresManager, NewsletterManager, PersonnelFormationAdmin)
 │   │   ├── About.jsx
 │   │   ├── Blog.jsx
 │   │   ├── BlogDetail.jsx
@@ -120,7 +121,9 @@ weeb-website/
 │   │   ├── Messages.jsx
 │   │   ├── Privacy.jsx
 │   │   ├── Profile.jsx
-│   │   └── Register.jsx
+│   │   ├── Register.jsx
+│   │   ├── ResetPassword.jsx
+│   │   └── SearchResults.jsx
 │   ├── routes/             # Routes protégées
 │   │   ├── PersonnelRoute.jsx
 │   │   └── StaffRoute.jsx
@@ -169,10 +172,14 @@ Créez ou mettez à jour un fichier `.env` à la racine du projet :
 ```env
 VITE_API_URL=http://localhost:8000/api
 VITE_SENTRY_DSN=__votre_dsn_sentry__
+VITE_GOOGLE_CLIENT_ID=__votre_google_client_id__
+VITE_OAUTH_GITHUB_URL=http://localhost:8000/api/auth/oauth/github/
 ```
 
 - `VITE_API_URL` : URL du backend Django. **Si non défini**, l'app utilise par défaut `https://weebbackend.melissa-mangione.com/api`.
 - `VITE_SENTRY_DSN` : DSN Sentry. **Si défini en production**, active le reporting d'erreurs et les traces/replays.
+- `VITE_GOOGLE_CLIENT_ID` : Client ID Google OAuth. **Si défini**, le bouton Google apparaît sur `/login` et envoie un `id_token` au backend.
+- `VITE_OAUTH_GITHUB_URL` : URL de démarrage OAuth GitHub. **Si définie**, un bouton GitHub apparaît sur `/login`.
 
 ## 🛠 Scripts disponibles
 
@@ -196,9 +203,10 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 - **📖 À propos** (`/about-us`) : Page de présentation de l'entreprise
 - **📨 Contact** (`/contact`) : Formulaire de contact avec validation et envoi de messages
 - **📝 Blog** (`/blog`) : Liste des articles de blog avec pagination et filtres par genre
-- **📄 Détail article** (`/blog/:id`) : Page de détail d'un article avec contenu complet
+- **📄 Détail article** (`/blog/:id`) : Page de détail d'un article (rendu HTML Tiptap + tracking lecture)
 - **📚 Formations** (`/formations`) : Catalogue des formations disponibles avec modal de détail
 - **🪟 Détail formation** (`/formation/:id`) : Route dédiée au modal de formation
+- **🔍 Résultats de recherche** (`/search?q=`) : Recherche globale articles + formations
 - **🔐 Connexion** (`/login`) : Page de connexion avec validation et animations
 - **📝 Inscription** (`/register`) : Page d'inscription avec validation
 - **🔑 Mot de passe oublié** (`/forgot-password`) : Demande de réinitialisation de mot de passe
@@ -218,13 +226,14 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 
 ### 🛡️ Panneau d'administration
 
-- **🏠 Tableau de bord** (`/admin`)
-- **📝 Articles** (`/admin/articles`)
+- **🏠 Tableau de bord** (`/admin`) : Analytics (recharts — BarChart inscriptions/mois, PieChart satisfaction) + exports CSV
+- **📝 Articles** (`/admin/articles`) : CRUD complet avec éditeur Tiptap (rich text)
 - **📚 Formations** (`/admin/formations`) *(Personnel requis)*
 - **👥 Formations utilisateurs** (`/admin/user-formations`) *(Personnel requis)*
 - **🏷️ Genres** (`/admin/genres`)
 - **💬 Messages** (`/admin/messages`)
 - **⭐ Feedbacks** (`/admin/feedbacks`)
+- **📧 Newsletter** (`/admin/newsletter`) : Gestion des campagnes newsletter *(Admin requis)*
 
 ### 🎨 Fonctionnalités transversales
 
@@ -237,6 +246,10 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 - **📧 Newsletter** : Système d'abonnement avec consentement
 - **🔒 Protection des routes** : Routes protégées avec vérification d'authentification et de rôles
 - **⚡ Optimisations de build** : Code splitting manuel, minification ESBuild, noms de fichiers hashés
+- **🔍 Recherche globale** : Barre de recherche `SearchBar` (raccourci Ctrl+K sur desktop), résultats articles + formations en temps réel
+- **📊 Tableau de bord personnel** : Section "Mon tableau de bord" dans `/profile` avec stats de lecture et timeline des formations (`DashboardStats`)
+- **📤 Exports CSV** : Export des inscrits, feedbacks et messages depuis l'admin (`ExportCSVButton`)
+- **📈 Analytics admin** : Graphiques recharts (BarChart + PieChart) dans `AdminHome` via `AnalyticsCharts`
 
 ## 🔐 Authentification et rôles
 
@@ -245,6 +258,8 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 L'application utilise un système d'authentification basé sur des cookies avec protection CSRF. `AuthContext` centralise :
 
 - **Connexion** (`login`) : Accepte email/username/identifier + password, pose les cookies, puis charge `/me`
+- **Connexion OAuth Google** : Optionnelle via Google Identity, puis appel backend `POST /auth/oauth/google/` avec `id_token`
+- **Connexion OAuth GitHub** : Optionnelle via URL provider configurée dans les variables d'environnement
 - **Inscription** (`register`) : Création de compte puis connexion automatique
 - **Déconnexion** (`logout`) : Suppression des tokens et nettoyage de l'état
 - **Vérification de l'utilisateur** (`me`) : Récupération des informations de l'utilisateur connecté
@@ -348,10 +363,6 @@ Le fichier `docker-compose.yml` configure :
 - Port 5173 exposé (host:container)
 - Variables d'environnement pour le file watching (`CHOKIDAR_USEPOLLING`, `WATCHPACK_POLLING`)
 - Commande : `npm run dev -- --host 0.0.0.0 --port 5173`
-
-**Note importante** : `docker-compose.yml` référence `Dockerfile.dev` mais le fichier s'appelle `Dockerfile`. Deux options :
-- Renommer `Dockerfile` en `Dockerfile.dev`, ou
-- Modifier `docker-compose.yml` pour utiliser `Dockerfile`
 
 ### Build Docker
 

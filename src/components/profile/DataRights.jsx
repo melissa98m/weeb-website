@@ -1,12 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthApi } from "../../lib/api";
+import { AuthApi, getApiErrorMessage, getApiSupportHint } from "../../lib/api";
 
 function getFilenameFromDisposition(disposition, fallback) {
   if (!disposition) return fallback;
   const match = /filename\*?=(?:UTF-8'')?\"?([^\";]+)\"?/i.exec(disposition);
   if (!match || !match[1]) return fallback;
   return decodeURIComponent(match[1]);
+}
+
+function getUiLanguage() {
+  if (typeof window === "undefined") return "en";
+  return window.navigator.language?.toLowerCase().startsWith("fr") ? "fr" : "en";
 }
 
 export default function DataRights({ theme, t, onSignedOut }) {
@@ -18,14 +23,17 @@ export default function DataRights({ theme, t, onSignedOut }) {
 
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState(null);
+  const [dataErrorHint, setDataErrorHint] = useState(null);
   const [dataPayload, setDataPayload] = useState(null);
   const [dataTouched, setDataTouched] = useState(false);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [downloadError, setDownloadError] = useState(null);
+  const [downloadErrorHint, setDownloadErrorHint] = useState(null);
   const [confirmChecked, setConfirmChecked] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState(null);
+  const [deleteErrorHint, setDeleteErrorHint] = useState(null);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   const handleViewData = async () => {
@@ -33,10 +41,12 @@ export default function DataRights({ theme, t, onSignedOut }) {
       setDataTouched(true);
       setDataLoading(true);
       setDataError(null);
+      setDataErrorHint(null);
       const payload = await AuthApi.data();
       setDataPayload(payload ?? null);
     } catch (e) {
-      setDataError(e);
+      setDataError(getApiErrorMessage(e, t.gdpr_data_error));
+      setDataErrorHint(getApiSupportHint(e, getUiLanguage()));
       setDataPayload(null);
     } finally {
       setDataLoading(false);
@@ -47,6 +57,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
     try {
       setDownloadLoading(true);
       setDownloadError(null);
+      setDownloadErrorHint(null);
       const { blob, disposition } = await AuthApi.exportData();
       const filename = getFilenameFromDisposition(disposition, "weeb-data.json");
       const url = URL.createObjectURL(blob);
@@ -56,7 +67,8 @@ export default function DataRights({ theme, t, onSignedOut }) {
       link.click();
       URL.revokeObjectURL(url);
     } catch (e) {
-      setDownloadError(e);
+      setDownloadError(getApiErrorMessage(e, t.gdpr_download_error));
+      setDownloadErrorHint(getApiSupportHint(e, getUiLanguage()));
     } finally {
       setDownloadLoading(false);
     }
@@ -71,12 +83,14 @@ export default function DataRights({ theme, t, onSignedOut }) {
     try {
       setDeleteLoading(true);
       setDeleteError(null);
+      setDeleteErrorHint(null);
       await AuthApi.deleteAccount();
       setDeleteSuccess(true);
       await onSignedOut?.();
       navigate("/");
     } catch (e) {
-      setDeleteError(e);
+      setDeleteError(getApiErrorMessage(e, t.gdpr_delete_error));
+      setDeleteErrorHint(getApiSupportHint(e, getUiLanguage()));
       setDeleteSuccess(false);
     } finally {
       setDeleteLoading(false);
@@ -117,9 +131,12 @@ export default function DataRights({ theme, t, onSignedOut }) {
         </div>
 
         {(dataError || downloadError) && (
-          <p className="mt-3 text-xs text-red-500">
-            {dataError ? t.gdpr_data_error : t.gdpr_download_error}
-          </p>
+          <div className="mt-3 text-xs text-red-500">
+            <p>{dataError || downloadError}</p>
+            {dataErrorHint || downloadErrorHint ? (
+              <p className="mt-1 opacity-80">{dataErrorHint || downloadErrorHint}</p>
+            ) : null}
+          </div>
         )}
 
         {dataPayload && (
@@ -188,7 +205,12 @@ export default function DataRights({ theme, t, onSignedOut }) {
           </button>
         </div>
 
-        {deleteError && <p className="mt-3 text-xs text-red-500">{t.gdpr_delete_error}</p>}
+        {deleteError && (
+          <div className="mt-3 text-xs text-red-500">
+            <p>{deleteError}</p>
+            {deleteErrorHint ? <p className="mt-1 opacity-80">{deleteErrorHint}</p> : null}
+          </div>
+        )}
         {deleteSuccess && (
           <p className="mt-3 text-xs text-green-500">{t.gdpr_delete_success}</p>
         )}

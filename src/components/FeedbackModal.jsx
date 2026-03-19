@@ -72,10 +72,11 @@ export default function FeedbackModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="feedback-modal-title"
         className={`fixed z-[101] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-lg rounded-xl border shadow ${card}`}
       >
         <div className="p-5">
-          <h3 className="text-lg font-semibold mb-1">{t.title}</h3>
+          <h2 id="feedback-modal-title" className="text-lg font-semibold mb-1">{t.title}</h2>
           <p className="text-sm opacity-70 mb-4">{formation.name}</p>
 
           <textarea

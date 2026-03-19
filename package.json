@@ -16,13 +16,19 @@
     "chromatic": "npx chromatic --project-token=chpt_bd375f6a4af10d9"
   },
   "dependencies": {
+    "@react-oauth/google": "^0.13.4",
     "@sentry/react": "^10.12.0",
+    "@tiptap/extension-image": "^3.20.4",
+    "@tiptap/extension-link": "^3.20.4",
+    "@tiptap/react": "^3.20.4",
+    "@tiptap/starter-kit": "^3.20.4",
     "@vercel/analytics": "^1.6.1",
     "framer-motion": "^12.12.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.6.0"
+    "react-router-dom": "^7.6.0",
+    "recharts": "^3.8.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.1",
@@ -55,6 +61,7 @@
     "storybook": "^10.2.7",
     "tailwindcss": "^4.1.7",
     "vite": "^6.3.5",
+    "vite-plugin-pwa": "^1.2.0",
     "vitest": "^4.0.18"
   }
 }
