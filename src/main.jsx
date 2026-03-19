@@ -7,6 +7,7 @@ import { BrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext.jsx";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { appEnv } from "./lib/env";
 import { Analytics } from "@vercel/analytics/react";
 import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
@@ -58,9 +59,11 @@ const appTree = (
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <App />
-          {/* RGPD : Vercel Analytics uniquement si consentement optional accordé */}
-          {hasCookieConsent() && <Analytics />}
+          <NotificationProvider>
+            <App />
+            {/* RGPD : Vercel Analytics uniquement si consentement optional accordé */}
+            {hasCookieConsent() && <Analytics />}
+          </NotificationProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

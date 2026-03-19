@@ -8,6 +8,7 @@ import headerFr from "../../locales/fr/header.json";
 import { useAuth } from "../context/AuthContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../utils/roles";
 import SearchBar from "./SearchBar";
+import NotificationBell from "./NotificationBell";
 
 
 function IconMenu({ size = 24 }) {
@@ -139,6 +140,8 @@ export default function Header() {
 
           {user ? (
             <>
+              <NotificationBell theme={theme} />
+
               <Link
                 to="/profile"
                 title={t("profile", "Profile")}

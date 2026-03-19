@@ -13,8 +13,10 @@ import { getEnv } from "../lib/env";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
-function makeExcerpt(text = "", maxWords = 40) {
-  const words = String(text).trim().split(/\s+/);
+function makeExcerpt(html = "", maxWords = 40) {
+  // Strip HTML tags before building the excerpt
+  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const words = text.split(/\s+/);
   const cut = words.slice(0, maxWords).join(" ");
   return words.length > maxWords ? `${cut}…` : cut;
 }
