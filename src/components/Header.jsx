@@ -7,6 +7,7 @@ import headerEn from "../../locales/en/header.json";
 import headerFr from "../../locales/fr/header.json";
 import { useAuth } from "../context/AuthContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../utils/roles";
+import SearchBar from "./SearchBar";
 
 
 function IconMenu({ size = 24 }) {
@@ -109,6 +110,11 @@ export default function Header() {
               );
             })}
           </nav>
+        </div>
+
+        {/* Desktop search */}
+        <div className="hidden md:block">
+          <SearchBar />
         </div>
 
         {/* Desktop actions */}
