@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /search/
+Disallow: /reset-password/
+Disallow: /forgot-password/
+Disallow: /register/
+
+Sitemap: https://weebbackend.melissa-mangione.com/sitemap.xml
