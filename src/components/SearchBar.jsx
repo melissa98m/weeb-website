@@ -76,14 +76,14 @@ export default function SearchBar() {
         aria-label="Ouvrir la recherche"
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm transition
           ${theme === "dark"
-            ? "border-[#444] text-white/60 hover:text-white hover:border-[#666] bg-[#2a2a2a]"
+            ? "border-[#444] text-white/70 hover:text-white hover:border-[#666] bg-[#2a2a2a]"
             : "border-gray-300 text-gray-500 hover:text-gray-700 hover:border-gray-400 bg-white"
           }`}
       >
         <IconSearch size={14} />
         <span className="hidden lg:inline">Rechercher…</span>
         <kbd className={`hidden lg:inline text-xs px-1 rounded border font-mono
-          ${theme === "dark" ? "border-[#555] text-white/30" : "border-gray-300 text-gray-400"}`}>
+          ${theme === "dark" ? "border-[#555] text-white/50" : "border-gray-300 text-gray-400"}`}>
           ⌘K
         </kbd>
       </button>

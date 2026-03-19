@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CookieBanner from "./components/CookieBanner";
+import OfflineBanner from "./components/OfflineBanner";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
@@ -160,6 +161,7 @@ function App() {
       </main>
       <Footer />
       <CookieBanner />
+      <OfflineBanner />
     </div>
   );
 }
