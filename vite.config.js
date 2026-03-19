@@ -29,6 +29,9 @@ export default defineConfig({
         ],
       },
       workbox: {
+        // Exclure les assets Storybook du précache (trop lourds + inutiles en prod)
+        globIgnores: ['sb-manager/**', 'sb-preview/**', '**/@storybook/**'],
+        maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4 MiB fallback
         // Articles : StaleWhileRevalidate (cache + refresh en arrière-plan)
         runtimeCaching: [
           {
