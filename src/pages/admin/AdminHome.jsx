@@ -5,7 +5,6 @@ import { useTheme } from "../../context/ThemeContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../../utils/roles";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import ExportCSVButton from "../../components/admin/ExportCSVButton";
-import AnalyticsCharts from "../../components/admin/AnalyticsCharts";
 import { API_BASE } from "../../lib/api";
 
 /* ==== Icônes (SVG inline, zéro dépendance) ==== */
@@ -79,7 +78,7 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
 }
 
 
-function ExportSection({ card, ghostBtn, theme, canStaff, canPersonnel }) {
+function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel }) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -173,6 +172,18 @@ export default function AdminHome() {
     theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const ghostBtn =
     theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+
+  // Résumé analytiques
+  const [analytics, setAnalytics] = useState(null);
+  useEffect(() => {
+    if (!canStaff) return;
+    let alive = true;
+    fetch(`${API_BASE}/admin/analytics/`, { credentials: "include", headers: { Accept: "application/json" } })
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (alive) setAnalytics(d); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [canStaff]);
 
   // Compteurs “à traiter”
   const [fbPending, setFbPending] = useState(null);
@@ -288,7 +299,7 @@ export default function AdminHome() {
           )}
 
           {/* Newsletter (Admin) */}
-          {(user?.is_staff || user?.is_superuser) && (
+          {canStaff && (
             <Link to="/admin/newsletter" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconMail /></div>
               <div className="min-w-0">
@@ -307,11 +318,77 @@ export default function AdminHome() {
         </div>
       </section>
 
-      {/* Dashboard analytique (admins uniquement) */}
-      {(user?.is_staff || user?.is_superuser) && (
+      {/* Résumé analytiques */}
+      {canStaff && (
         <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
-          <h2 className="text-base font-semibold">Analytiques</h2>
-          <AnalyticsCharts theme={theme} />
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold">Analytiques</h2>
+            <Link
+              to="/admin/analytics"
+              className="text-xs opacity-60 hover:opacity-100 transition underline underline-offset-2"
+            >
+              Voir tout →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Utilisateurs", value: analytics?.total_utilisateurs },
+              { label: "Inscrits", value: analytics?.total_inscrits },
+              { label: "Feedbacks", value: analytics?.total_feedbacks },
+              {
+                label: "Messages non traités",
+                value: analytics?.messages_non_traites,
+                accent: analytics?.messages_non_traites > 0,
+              },
+            ].map(({ label, value, accent }) => (
+              <div
+                key={label}
+                className={`rounded-xl border p-3 flex flex-col gap-0.5 ${
+                  theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <span className={`text-2xl font-bold ${accent ? "text-amber-500" : ""}`}>
+                  {value ?? <span className="opacity-30 text-base">—</span>}
+                </span>
+                <span className="text-xs opacity-60">{label}</span>
+              </div>
+            ))}
+          </div>
+          {analytics?.taux_satisfaction != null && (
+            <div className="mt-3 flex items-center gap-2 text-sm">
+              <span className="opacity-60">Satisfaction :</span>
+              <span
+                className="font-semibold"
+                style={{
+                  color:
+                    analytics.taux_satisfaction >= 70
+                      ? "#22c55e"
+                      : analytics.taux_satisfaction >= 40
+                      ? "#f59e0b"
+                      : "#ef4444",
+                }}
+              >
+                {analytics.taux_satisfaction} %
+              </span>
+              <div
+                className="flex-1 rounded-full h-1.5"
+                style={{ background: theme === "dark" ? "#333" : "#e5e7eb" }}
+              >
+                <div
+                  className="h-1.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${analytics.taux_satisfaction}%`,
+                    background:
+                      analytics.taux_satisfaction >= 70
+                        ? "#22c55e"
+                        : analytics.taux_satisfaction >= 40
+                        ? "#f59e0b"
+                        : "#ef4444",
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </section>
       )}
 

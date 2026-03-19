@@ -115,6 +115,16 @@ function IconMail() {
   );
 }
 
+function IconChart() {
+  return (
+    <IconBase>
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </IconBase>
+  );
+}
+
 const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
@@ -123,6 +133,7 @@ const NAV_ALL = [
   { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
   { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
   { key: "newsletter", label: "Newsletter", to: "/admin/newsletter", icon: IconMail },
+  { key: "analytics", label: "Analytiques", to: "/admin/analytics", icon: IconChart },
 ];
 
 
@@ -173,7 +184,8 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         case "msg":
           return canStaff || isAdmin;
         case "newsletter":
-          return isAdmin;
+        case "analytics":
+          return canStaff || isAdmin;
         default:
           return false;
       }

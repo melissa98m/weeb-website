@@ -33,6 +33,7 @@ const ArticlesManager = lazy(() => import("./pages/admin/ArticlesManager"));
 const GenresManager = lazy(() => import("./pages/admin/GenresManager"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
+const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 
@@ -144,6 +145,16 @@ function App() {
                     <NewsletterManager />
                   </AdminLayout>
                 </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <AnalyticsPage />
+                  </AdminLayout>
+                </StaffRoute>
               }
             />
             <Route
