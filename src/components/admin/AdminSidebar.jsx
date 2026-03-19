@@ -7,7 +7,7 @@ import {
   hasAnyStaffRole,
   hasAnyRedactionRole,
 } from "../../utils/roles";
-import { getEnv } from "../../lib/env";
+import { API_BASE } from "../../lib/api";
 
 /* ==== Icônes inline (SVG) sans dépendance ==== */
 function IconBase({ children, size = 18 }) {
@@ -106,6 +106,15 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
 }
 
 /* ===== Items de navigation (toutes les entrées potentielles) ===== */
+function IconMail() {
+  return (
+    <IconBase>
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </IconBase>
+  );
+}
+
 const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
@@ -113,14 +122,9 @@ const NAV_ALL = [
   { key: "genres", label: "Genres", to: "/admin/genres", icon: IconTag },
   { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
   { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
+  { key: "newsletter", label: "Newsletter", to: "/admin/newsletter", icon: IconMail },
 ];
 
-// Normalise toujours vers .../api
-const API_BASE = (() => {
-  const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
-  const base = raw.replace(/\/$/, "");
-  return base.endsWith("/api") ? base : `${base}/api`;
-})();
 
 export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const { user } = useAuth();
@@ -129,6 +133,14 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const [fbPending, setFbPending] = useState(null);
   const [msgPending, setMsgPending] = useState(null);
   const ctrlRef = useRef(null);
+
+  // Fermeture du menu mobile au clavier (Escape)
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, onClose]);
 
   const panel =
     theme === "dark"
@@ -160,6 +172,8 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         case "fb":
         case "msg":
           return canStaff || isAdmin;
+        case "newsletter":
+          return isAdmin;
         default:
           return false;
       }
