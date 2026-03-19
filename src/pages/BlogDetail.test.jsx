@@ -7,6 +7,7 @@ import BlogDetail from "./BlogDetail";
 import blogEn from "../../locales/en/blog.json";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 vi.mock("framer-motion", () => ({
   motion: {
@@ -27,6 +28,10 @@ vi.mock("../context/LanguageContext", () => ({
   useLanguage: vi.fn(),
 }));
 
+vi.mock("../context/AuthContext", () => ({
+  useAuth: vi.fn(),
+}));
+
 vi.mock("../components/Blog/RelatedCarousel", () => ({
   default: () => <div>RelatedCarousel</div>,
 }));
@@ -36,6 +41,7 @@ let writeTextMock;
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
+  useAuth.mockReturnValue({ user: null, isAuthenticated: false });
   vi.stubGlobal("fetch", vi.fn());
   vi.stubGlobal("scrollTo", vi.fn());
   writeTextMock = vi.fn().mockResolvedValue();
