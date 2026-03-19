@@ -6,6 +6,7 @@ import ProfileInfo from "../components/profile/ProfileInfo";
 import TrainingsList from "../components/profile/TrainingsList";
 import FeedbackModal from "../components/FeedbackModal";
 import DataRights from "../components/profile/DataRights";
+import DashboardStats from "../components/profile/DashboardStats";
 
 import profileFr from "../../locales/fr/profile.json";
 import profileEn from "../../locales/en/profile.json";
@@ -18,6 +19,20 @@ export default function Profile() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = useMemo(() => (language === "fr" ? profileFr : profileEn), [language]);
+
+  // SEO : profil utilisateur — données personnelles, jamais indexées
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Mon profil | Weeb";
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement("meta");
+      metaRobots.name = "robots";
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.content = "noindex, nofollow";
+    return () => { document.title = prev; };
+  }, []);
 
   // tant que l’auth charge, on peut afficher un skeleton basique
   if (authLoading) {
@@ -183,6 +198,38 @@ export default function Profile() {
     };
   }, [API_BASE, authLoading, userId]);
 
+  // ---------- Dashboard stats ----------
+  const [dashData, setDashData] = useState(null);
+  const [dashLoading, setDashLoading] = useState(true);
+  const [dashError, setDashError] = useState(null);
+
+  useEffect(() => {
+    if (authLoading || !userId) return;
+    let alive = true;
+    const ctr = new AbortController();
+
+    (async () => {
+      try {
+        setDashLoading(true);
+        setDashError(null);
+        const res = await fetch(`${API_BASE}/dashboard/`, {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+          signal: ctr.signal,
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (alive) setDashData(data);
+      } catch (e) {
+        if (alive) setDashError(e.message);
+      } finally {
+        if (alive) setDashLoading(false);
+      }
+    })();
+
+    return () => { alive = false; ctr.abort(); };
+  }, [API_BASE, authLoading, userId]);
+
   // ---------- Modale feedback ----------
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
@@ -217,6 +264,13 @@ export default function Profile() {
           theme={theme}
           onRefresh={reload}
           onSignout={logout}
+        />
+
+        <DashboardStats
+          data={dashData}
+          loading={dashLoading}
+          error={dashError}
+          theme={theme}
         />
 
         <TrainingsList

@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
+import { getCookie } from "../lib/cookies";
 import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
@@ -64,6 +66,7 @@ export default function BlogDetail() {
   const currId = Number(id);
   const { theme } = useTheme();
   const { language } = useLanguage();
+  const { user } = useAuth();
   const txt = language === "fr" ? blogFr : blogEn;
 
   const [loadingPost, setLoadingPost] = useState(true);
@@ -78,6 +81,19 @@ export default function BlogDetail() {
     window.scrollTo({ top: 0, behavior: "auto" });
     setCoverBroken(false);
   }, [id]);
+
+  // Tracking de lecture (fire-and-forget, uniquement si connecté)
+  useEffect(() => {
+    if (!user || !currId) return;
+    const csrfToken = getCookie("csrftoken");
+    fetch(`${API_BASE}/articles/${currId}/view/`, {
+      method: "POST",
+      credentials: "include",
+      headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+    }).catch(() => {
+      // silencieux — ne pas bloquer la lecture en cas d'erreur réseau
+    });
+  }, [currId, user]);
 
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
@@ -299,31 +315,43 @@ export default function BlogDetail() {
               </div>
             )}
 
-            {/* Contenu */}
-            <div
-              ref={containerRef}
-              className={`prose max-w-none leading-relaxed ${
-                theme === "dark" ? "prose-invert prose-headings:text-white" : ""
-              }`}
-            >
-              <AnimatePresence>
-                {(post?.article_content ?? "")
-                  .split(/\n{2,}|\r?\n\r?\n/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((p, i) => (
-                    <motion.p
-                      key={i}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.25, delay: i * 0.05 }}
-                      className={`${i === 0 ? "mt-0" : "mt-4"}`}
-                    >
-                      {p}
-                    </motion.p>
-                  ))}
-              </AnimatePresence>
-            </div>
+            {/* Contenu — HTML (Tiptap) ou texte brut (rétro-compatibilité) */}
+            {(() => {
+              const raw = post?.article_content ?? "";
+              const isHtml = /^\s*</.test(raw);
+              return (
+                <div
+                  ref={containerRef}
+                  className={`prose max-w-none leading-relaxed ${
+                    theme === "dark" ? "prose-invert prose-headings:text-white" : ""
+                  }`}
+                >
+                  {isHtml ? (
+                    // Contenu HTML sanitisé côté serveur (bleach)
+                    <div dangerouslySetInnerHTML={{ __html: raw }} />
+                  ) : (
+                    // Texte brut (anciens articles)
+                    <AnimatePresence>
+                      {raw
+                        .split(/\n{2,}|\r?\n\r?\n/)
+                        .map((s) => s.trim())
+                        .filter(Boolean)
+                        .map((p, i) => (
+                          <motion.p
+                            key={i}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.25, delay: i * 0.05 }}
+                            className={`${i === 0 ? "mt-0" : "mt-4"}`}
+                          >
+                            {p}
+                          </motion.p>
+                        ))}
+                    </AnimatePresence>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </article>
 
