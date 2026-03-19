@@ -17,7 +17,7 @@ describe("admin articles", () => {
                   <button type="button">+ Nouvel article</button>
                   <div data-testid="article-modal" style="display:none">
                     <label>Titre</label><input />
-                    <label>Contenu</label><textarea></textarea>
+                    <label>Contenu</label><div class="ProseMirror" contenteditable="true"></div>
                     <div data-testid="selected-genres">
                       <span style="display:none">
                         Tech
@@ -129,7 +129,7 @@ describe("admin articles", () => {
     cy.get("[data-testid='article-modal']").should("be.visible");
 
     cy.get("[data-testid='article-modal']").find("input").first().type("Nouveau");
-    cy.get("[data-testid='article-modal']").contains("label", "Contenu").parent().find("textarea").type("Contenu");
+    cy.get("[data-testid='article-modal']").find(".ProseMirror[contenteditable='true']").click().type("Contenu");
 
     cy.get("[data-testid='article-modal']").contains("button", "Tech").scrollIntoView().click({ force: true });
     cy.get("[data-testid='article-modal']").contains("span", "Tech").should("be.visible");

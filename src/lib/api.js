@@ -12,6 +12,12 @@ function resolveApiBase() {
 
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
+
+/** Base WebSocket (ws:// ou wss://) dérivée de API_BASE. */
+export const WS_BASE = API_BASE
+  .replace(/^https/, "wss")
+  .replace(/^http/, "ws")
+  .replace(/\/api$/, "");
 const OAUTH_GITHUB_URL = appEnv.VITE_OAUTH_GITHUB_URL?.trim();
 
 const isDev = appEnv.DEV;
