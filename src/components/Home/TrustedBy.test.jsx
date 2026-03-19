@@ -1,10 +1,29 @@
-import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TrustedBy from "./TrustedBy";
 import homeEn from "../../../locales/en/home.json";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
+
+// React.lazy + Suspense does not flush promises in Vitest/jsdom.
+// Replace lazy with a useState/useEffect version so icons render asynchronously
+// without relying on the Suspense boundary — findByText() can then wait for them.
+vi.mock("react", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    lazy: (importFn) => {
+      function LazyWrapper(props) {
+        const [Comp, setComp] = actual.useState(null);
+        actual.useEffect(() => {
+          importFn().then((mod) => setComp(() => mod.default));
+        }, []);
+        return Comp ? actual.createElement(Comp, props) : null;
+      }
+      return LazyWrapper;
+    },
+  };
+});
 
 vi.mock("../Icon/Artvenue", () => ({ default: () => <div>Artvenue</div> }));
 vi.mock("../Icon/Shells", () => ({ default: () => <div>Shells</div> }));
@@ -33,6 +52,7 @@ describe("TrustedBy", () => {
 
     expect(screen.getByRole("heading", { name: homeEn.trust })).toBeInTheDocument();
 
+    // Icons are lazy-loaded via useEffect in the test mock — findBy* waits for them
     expect(await screen.findByText("Artvenue")).toBeInTheDocument();
     expect(await screen.findByText("Shells")).toBeInTheDocument();
     expect(await screen.findByText("Smartfinder")).toBeInTheDocument();
