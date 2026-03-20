@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
 import Pagination from "../ui/Pagination";
@@ -46,7 +46,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
     ctrlRef.current?.abort();
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -150,7 +150,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
         try {
           const j = await r.json();
           if (j?.detail) msg += ` - ${j.detail}`;
-        } catch {}
+        } catch { /* noop */ }
         throw new Error(msg);
       }
       onDeleted?.(formation.id);

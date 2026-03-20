@@ -4,7 +4,7 @@ import { AuthApi, getApiErrorMessage, getApiSupportHint } from "../../lib/api";
 
 function getFilenameFromDisposition(disposition, fallback) {
   if (!disposition) return fallback;
-  const match = /filename\*?=(?:UTF-8'')?\"?([^\";]+)\"?/i.exec(disposition);
+  const match = /filename\*?=(?:UTF-8'')?["]?([^";]+)["]?/i.exec(disposition);
   if (!match || !match[1]) return fallback;
   return decodeURIComponent(match[1]);
 }

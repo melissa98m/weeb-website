@@ -55,13 +55,17 @@ export default function SearchBar() {
     }
   };
 
+  // Focus automatique quand la barre s'ouvre
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
   // Raccourci clavier Ctrl+K / Cmd+K pour ouvrir
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         setOpen(true);
-        setTimeout(() => inputRef.current?.focus(), 50);
       }
     };
     window.addEventListener("keydown", handler);
@@ -71,7 +75,7 @@ export default function SearchBar() {
   if (!open) {
     return (
       <button
-        onClick={() => { setOpen(true); setTimeout(() => inputRef.current?.focus(), 50); }}
+        onClick={() => setOpen(true)}
         title="Rechercher (Ctrl+K)"
         aria-label="Ouvrir la recherche"
         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm transition

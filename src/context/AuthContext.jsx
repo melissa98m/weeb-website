@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
       try {
         await AuthApi.login({ login: payload.email, password: payload.password });
       } catch {
-       
+        // auto-login after register — ignore login failure, user will log in manually
       }
       const me = await fetchMe();
       return me;

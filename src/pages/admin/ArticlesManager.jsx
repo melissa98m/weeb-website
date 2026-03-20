@@ -19,10 +19,6 @@ export default function ArticlesManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
 
-  const canRedact = hasAnyRedactionRole(user);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
-
   const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
     ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
@@ -64,7 +60,7 @@ export default function ArticlesManager() {
     ref.current?.abort();
     const ctrl = new AbortController();
     ref.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -159,15 +155,19 @@ export default function ArticlesManager() {
 
   useEffect(() => {
     loadGenres();
-    return () => { try { genresCtrlRef.current?.abort(); } catch {} };
+    return () => { try { genresCtrlRef.current?.abort(); } catch { /* noop */ } };
   }, [loadGenres]);
 
   useEffect(() => { setPage(1); }, [pageSize, debouncedQ, selectedGenreId]);
 
   useEffect(() => {
     load(page);
-    return () => { try { listCtrlRef.current?.abort(); } catch {} };
+    return () => { try { listCtrlRef.current?.abort(); } catch { /* noop */ } };
   }, [page, load]);
+
+  const canRedact = hasAnyRedactionRole(user);
+  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
 
   const openCreate = () => { setCurrent(null); setOpen(true); };
   const openEdit = (a) => { setCurrent(a.raw); setOpen(true); };

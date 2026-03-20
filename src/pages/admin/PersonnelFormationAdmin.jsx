@@ -126,7 +126,7 @@ export default function PersonnelFormationAdmin() {
     const ctrl = new AbortController();
     ref.current = ctrl;
     const t = setTimeout(() => {
-      try { ctrl.abort(); } catch {}
+      try { ctrl.abort(); } catch { /* noop */ }
     }, ms);
 
     const isAbortError = (e) => {
@@ -371,7 +371,7 @@ export default function PersonnelFormationAdmin() {
             ) {
               errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
             }
-          } catch (parseError) {
+          } catch (_parseError) {
             // Si on ne peut pas parser le JSON, utiliser le message par défaut
             if (res.status === 400 || res.status === 409) {
               errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";

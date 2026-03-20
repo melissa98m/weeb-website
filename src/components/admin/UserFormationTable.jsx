@@ -4,7 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 function UserFormationTable({
   loading,
   error,
-  links,
+  links: _links,
   filteredLinks,
   onRemove,
   busy,

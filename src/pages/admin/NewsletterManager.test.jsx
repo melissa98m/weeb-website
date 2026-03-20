@@ -12,9 +12,17 @@ vi.mock("../../context/ThemeContext", () => ({
 
 function setup() {
   const user = userEvent.setup();
-  global.fetch = vi.fn().mockResolvedValue({
-    ok: true,
-    json: () => Promise.resolve({ total_abonnes: 42 }),
+  global.fetch = vi.fn().mockImplementation((url) => {
+    if (url.includes("/subscribers/")) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ results: [], count: 0, num_pages: 1, page: 1 }),
+      });
+    }
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ total_abonnes: 42 }),
+    });
   });
   render(<NewsletterManager />);
   return user;
@@ -32,7 +40,7 @@ describe("NewsletterManager", () => {
 
   it("charge et affiche le nombre d'abonnés", async () => {
     setup();
-    await waitFor(() => expect(screen.getByText("42")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/42 abonné/i)).toBeInTheDocument());
   });
 
   it("a un label associé au champ sujet", () => {
@@ -50,8 +58,8 @@ describe("NewsletterManager", () => {
   });
 
   it("désactive le bouton 'Envoyer' si le sujet est vide", async () => {
-    const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    setup();
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     const btn = screen.getByRole("button", { name: /envoyer la campagne/i });
     expect(btn).toBeDisabled();
@@ -59,7 +67,7 @@ describe("NewsletterManager", () => {
 
   it("désactive le bouton 'Envoyer' si corps texte vide", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Mon sujet");
     const btn = screen.getByRole("button", { name: /envoyer la campagne/i });
@@ -68,7 +76,7 @@ describe("NewsletterManager", () => {
 
   it("active le bouton 'Envoyer' si sujet et corps remplis", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps de l'email");
@@ -78,7 +86,7 @@ describe("NewsletterManager", () => {
 
   it("ouvre la modale de confirmation au clic sur 'Envoyer'", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
@@ -90,7 +98,7 @@ describe("NewsletterManager", () => {
 
   it("ferme la modale au clic sur 'Annuler'", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
@@ -102,7 +110,7 @@ describe("NewsletterManager", () => {
 
   it("ferme la modale avec la touche Escape", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
@@ -114,7 +122,7 @@ describe("NewsletterManager", () => {
 
   it("envoie la campagne après confirmation et affiche le résultat", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     // Le stats fetch est déjà résolu ; on configure le send fetch
     global.fetch = vi.fn()
@@ -132,12 +140,14 @@ describe("NewsletterManager", () => {
     await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
     await user.click(screen.getByRole("button", { name: /^envoyer$/i }));
 
-    await waitFor(() => expect(screen.getByText(/42 email/i)).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(/42 abonné/i)
+    );
   });
 
   it("affiche une erreur si l'envoi échoue", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     global.fetch = vi.fn().mockResolvedValue({
       ok: false,
@@ -154,7 +164,7 @@ describe("NewsletterManager", () => {
 
   it("affiche l'aperçu HTML quand togglé", async () => {
     const user = setup();
-    await waitFor(() => screen.getByText("42"));
+    await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/html/i), "<p>Hello</p>");
     await user.click(screen.getByRole("button", { name: /aperçu html/i }));

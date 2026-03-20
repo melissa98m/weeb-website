@@ -34,27 +34,6 @@ export default function Profile() {
     return () => { document.title = prev; };
   }, []);
 
-  // tant que l’auth charge, on peut afficher un skeleton basique
-  if (authLoading) {
-    return (
-      <main className="min-h-[60vh] px-6 py-16 flex justify-center">
-        <div className={`w-full max-w-2xl rounded-xl border shadow p-6 ${theme==="dark"?"bg-[#1c1c1c] border-[#333]":"bg-white border-gray-200"}`}>
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 w-1/3 bg-gray-300/30 rounded" />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
-            </div>
-          </div>
-        </div>
-      </main>
-    );
-  }
-
-  if (!user) return null;
-
   const userId = user?.id ?? user?.pk ?? user?.user_id ?? null;
 
   // ---------- Formations ----------
@@ -233,6 +212,27 @@ export default function Profile() {
   // ---------- Modale feedback ----------
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
+
+  // tant que l'auth charge, on peut afficher un skeleton basique
+  if (authLoading) {
+    return (
+      <main className="min-h-[60vh] px-6 py-16 flex justify-center">
+        <div className={`w-full max-w-2xl rounded-xl border shadow p-6 ${theme==="dark"?"bg-[#1c1c1c] border-[#333]":"bg-white border-gray-200"}`}>
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 w-1/3 bg-gray-300/30 rounded" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="h-4 bg-gray-300/30 rounded" />
+              <div className="h-4 bg-gray-300/30 rounded" />
+              <div className="h-4 bg-gray-300/30 rounded" />
+              <div className="h-4 bg-gray-300/30 rounded" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
 
   const openFeedback = (formation) => {
     if (fbMap[formation.id]) return; // si déjà envoyé, on bloque

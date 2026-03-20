@@ -74,7 +74,7 @@ export default function BlogDetail() {
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [coverBroken, setCoverBroken] = useState(false);
+  const [_coverBroken, setCoverBroken] = useState(false);
   const [ids, setIds] = useState([]);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function BlogDetail() {
         const data = await r.json();
         if (!alive) return;
         setPost(data);
-      } catch (e) {
+      } catch (_e) {
         if (!alive) return;
         setError("Unable to load the article.");
         setPost(null);
@@ -143,7 +143,7 @@ export default function BlogDetail() {
         if (!alive) return;
         const uniq = Array.from(new Set(all)).sort((a, b) => Number(a) - Number(b));
         setIds(uniq);
-      } catch (e) {
+      } catch (_e) {
         if (!alive) return;
         setError("Unable to load the article index.");
         setIds([]);
@@ -157,7 +157,7 @@ export default function BlogDetail() {
   const loading = loadingPost || loadingIndex;
 
   const title = useMemo(() => post?.title ?? "", [post]);
-  const paragraphs = useMemo(() => {
+  const _paragraphs = useMemo(() => {
     const raw = post?.article_content ?? "";
     const parts = raw.split(/\n{2,}|\r?\n\r?\n/).map(s => s.trim()).filter(Boolean);
     return parts.length ? parts : raw ? [raw] : [];
@@ -289,7 +289,7 @@ export default function BlogDetail() {
                       await navigator.clipboard.writeText(window.location.href);
                       setCopied(true);
                       setTimeout(() => setCopied(false), 1200);
-                    } catch {}
+                    } catch { /* noop */ }
                   }}
                   className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
                     theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"

@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import { useTheme } from "../../context/ThemeContext";
 import homeEn from "../../../locales/en/home.json";
 import homeFr from "../../../locales/fr/home.json";
 import { useLanguage } from "../../context/LanguageContext";
@@ -17,7 +16,6 @@ function IconPlaceholder() {
 }
 
 export default function TrustedBy() {
-  const { theme } = useTheme();
   const { language } = useLanguage();
 
   return (

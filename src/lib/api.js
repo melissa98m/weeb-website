@@ -1,4 +1,4 @@
-import { deleteCookie, getCookie } from "./cookies";
+import { deleteCookie, getCookie, setCookie } from "./cookies";
 import { appEnv } from "./env";
 
 /** Résout la base API de façon simple et lisible. */
@@ -287,7 +287,7 @@ async function fetchCsrfToken(url) {
       data?.csrf ||
       data?.token ||
       null;
-  } catch (_) {}
+  } catch (_) { /* noop */ }
 
   if (bodyToken) {
     setCookie("csrftoken", bodyToken);
