@@ -4,7 +4,7 @@ describe("newsletter admin", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("h1") || doc.querySelector("h2")) {
+          if (doc.querySelector("#campaign-subject")) {
             resolve();
             return;
           }

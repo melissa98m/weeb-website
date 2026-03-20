@@ -4,7 +4,7 @@ describe("admin articles", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("button")) {
+          if (doc.querySelector("[data-testid='article-modal']")) {
             resolve();
             return;
           }
@@ -129,7 +129,10 @@ describe("admin articles", () => {
     cy.get("[data-testid='article-modal']").should("be.visible");
 
     cy.get("[data-testid='article-modal']").find("input").first().type("Nouveau");
-    cy.get("[data-testid='article-modal']").find(".ProseMirror[contenteditable='true']").click().type("Contenu");
+    cy.get("[data-testid='article-modal']").find(".ProseMirror[contenteditable='true']").then(($el) => {
+      $el[0].innerHTML = "<p>Contenu</p>";
+      $el[0].dispatchEvent(new InputEvent("input", { bubbles: true }));
+    });
 
     cy.get("[data-testid='article-modal']").contains("button", "Tech").scrollIntoView().click({ force: true });
     cy.get("[data-testid='article-modal']").contains("span", "Tech").should("be.visible");
