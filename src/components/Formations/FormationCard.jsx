@@ -47,6 +47,30 @@ function FormationCardBase({ f, theme, onView }) {
           <p className={`text-sm italic ${meta}`}>—</p>
         )}
 
+        {/* Barre de progression (si l'utilisateur est inscrit et que des modules existent) */}
+        {typeof f.progress_percent === "number" && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className={meta}>Progression</span>
+              <span className={`font-medium ${f.progress_percent === 100 ? "text-green-500" : meta}`}>
+                {f.progress_percent}%
+              </span>
+            </div>
+            <div className={`h-1.5 rounded-full overflow-hidden ${theme === "dark" ? "bg-white/10" : "bg-gray-100"}`}>
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  f.progress_percent === 100 ? "bg-green-500" : "bg-indigo-500"
+                }`}
+                style={{ width: `${f.progress_percent}%` }}
+                role="progressbar"
+                aria-valuenow={f.progress_percent}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="mt-4 flex items-center justify-end">
           <Button

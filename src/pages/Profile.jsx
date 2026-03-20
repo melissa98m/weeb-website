@@ -209,6 +209,26 @@ export default function Profile() {
     return () => { alive = false; ctr.abort(); };
   }, [API_BASE, authLoading, userId]);
 
+  // ---------- Historique connexions ----------
+  const [loginHistory, setLoginHistory] = useState([]);
+  const [loginHistoryLoading, setLoginHistoryLoading] = useState(false);
+  const [showLoginHistory, setShowLoginHistory] = useState(false);
+
+  useEffect(() => {
+    if (!showLoginHistory || authLoading || !userId) return;
+    let alive = true;
+    setLoginHistoryLoading(true);
+    (async () => {
+      try {
+        const r = await fetch(`${API_BASE}/auth/login-history/`, { credentials: "include" });
+        if (!alive) return;
+        if (r.ok) setLoginHistory(await r.json());
+      } catch { /* noop */ }
+      finally { if (alive) setLoginHistoryLoading(false); }
+    })();
+    return () => { alive = false; };
+  }, [showLoginHistory, authLoading, userId]);
+
   // ---------- Modale feedback ----------
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
@@ -282,6 +302,64 @@ export default function Profile() {
           t={t}
           onGiveFeedback={openFeedback}
         />
+
+        {/* Historique des connexions */}
+        <section className="w-full max-w-2xl mt-10">
+          <button
+            type="button"
+            onClick={() => setShowLoginHistory((v) => !v)}
+            className={`flex items-center gap-2 text-sm font-medium mb-3 underline-offset-2 hover:underline ${
+              theme === "dark" ? "text-white/70" : "text-gray-600"
+            }`}
+            aria-expanded={showLoginHistory}
+          >
+            {showLoginHistory ? "▾" : "▸"} Historique des connexions
+          </button>
+
+          {showLoginHistory && (
+            <div className={`rounded-xl border shadow overflow-hidden ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200"}`}>
+              {loginHistoryLoading && (
+                <div className="p-4 text-sm opacity-60">Chargement…</div>
+              )}
+              {!loginHistoryLoading && loginHistory.length === 0 && (
+                <div className="p-4 text-sm opacity-60">Aucun événement enregistré.</div>
+              )}
+              {!loginHistoryLoading && loginHistory.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className={`text-left text-xs uppercase tracking-wide ${theme === "dark" ? "bg-white/5 text-white/50" : "bg-gray-50 text-gray-500"}`}>
+                        <th className="px-4 py-2">Date</th>
+                        <th className="px-4 py-2">Statut</th>
+                        <th className="px-4 py-2">IP</th>
+                        <th className="px-4 py-2">Navigateur</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-current/5">
+                      {loginHistory.map((ev) => (
+                        <tr key={ev.id} className={`${!ev.success ? theme === "dark" ? "bg-red-500/5" : "bg-red-50" : ""}`}>
+                          <td className="px-4 py-2 whitespace-nowrap opacity-70">
+                            {new Date(ev.created_at).toLocaleString(language === "fr" ? "fr-FR" : "en-US")}
+                          </td>
+                          <td className="px-4 py-2">
+                            {ev.success
+                              ? <span className="text-green-500 font-medium">✓ Succès</span>
+                              : <span className="text-red-400 font-medium">✗ Échec</span>
+                            }
+                          </td>
+                          <td className="px-4 py-2 opacity-70">{ev.ip_address || "—"}</td>
+                          <td className="px-4 py-2 opacity-60 truncate max-w-[200px]">
+                            {ev.user_agent ? ev.user_agent.split(" ").slice(0, 3).join(" ") : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
 
         <DataRights theme={theme} t={t} onSignedOut={logout} />
       </div>
