@@ -14,7 +14,7 @@ vi.mock("../../context/LanguageContext", () => ({
 
 vi.mock("framer-motion", () => ({
   motion: {
-    img: ({ initial, whileInView, viewport, transition, ...rest }) => <img {...rest} />,
+    img: ({ initial: _i, whileInView: _wiv, viewport: _vp, transition: _tr, ...rest }) => <img {...rest} />,
   },
 }));
 

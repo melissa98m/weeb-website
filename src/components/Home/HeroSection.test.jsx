@@ -14,7 +14,7 @@ vi.mock("../../context/LanguageContext", () => ({
 
 vi.mock("framer-motion", () => ({
   motion: {
-    img: ({ drag, dragConstraints, dragDirectionLock, dragTransition, dragElastic, whileTap, ...rest }) =>
+    img: ({ drag: _drag, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, whileTap: _wt, ...rest }) =>
       <img {...rest} />,
   },
 }));
