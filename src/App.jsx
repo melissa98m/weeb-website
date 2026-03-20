@@ -37,6 +37,7 @@ const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
 const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
 const AdminChatPanel = lazy(() => import("./pages/admin/AdminChatPanel"));
+const CommercialDashboard = lazy(() => import("./pages/admin/CommercialDashboard"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 
@@ -157,6 +158,16 @@ function App() {
                 <StaffRoute>
                   <AdminLayout>
                     <AnalyticsPage />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
+              path="/admin/commercial"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <CommercialDashboard />
                   </AdminLayout>
                 </StaffRoute>
               }
