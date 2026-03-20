@@ -11,6 +11,8 @@ import PersonnelRoute from "./routes/PersonnelRoute";
 import StaffRoute from "./routes/StaffRoute";
 import RedactionRoute from "./routes/RedactionRoute";
 import Formations from "./pages/Formations";
+import { ChatProvider } from "./context/ChatContext";
+import ChatWidget from "./components/chat/ChatWidget";
 
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -34,6 +36,7 @@ const GenresManager = lazy(() => import("./pages/admin/GenresManager"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
 const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
 const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
+const AdminChatPanel = lazy(() => import("./pages/admin/AdminChatPanel"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 
@@ -41,6 +44,7 @@ function App() {
   const { theme } = useTheme();
 
   return (
+    <ChatProvider>
     <div className="text-white font-sans overflow-x-hidden relative">
       <Header />
       <main
@@ -158,6 +162,16 @@ function App() {
               }
             />
             <Route
+              path="/admin/chat"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <AdminChatPanel />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
                 <ProtectedRoute>
@@ -173,7 +187,9 @@ function App() {
       <Footer />
       <CookieBanner />
       <OfflineBanner />
+      <ChatWidget />
     </div>
+    </ChatProvider>
   );
 }
 
