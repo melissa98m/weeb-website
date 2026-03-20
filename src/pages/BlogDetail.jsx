@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
@@ -76,6 +76,15 @@ export default function BlogDetail() {
   const [copied, setCopied] = useState(false);
   const [_coverBroken, setCoverBroken] = useState(false);
   const [ids, setIds] = useState([]);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsError, setCommentsError] = useState(null);
+  const [commentText, setCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState(null);
+  const [replyTo, setReplyTo] = useState(null); // { id, username }
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
@@ -95,6 +104,69 @@ export default function BlogDetail() {
     });
   }, [currId, user]);
 
+  const fetchComments = useCallback(async () => {
+    if (!currId) return;
+    setCommentsLoading(true);
+    setCommentsError(null);
+    try {
+      const r = await fetch(`${API_BASE}/articles/${currId}/comments/`, { credentials: "omit" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      setComments(Array.isArray(data) ? data : data.results ?? []);
+    } catch {
+      setCommentsError(true);
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, [currId]);
+
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
+
+  const submitComment = useCallback(async (e) => {
+    e.preventDefault();
+    const text = commentText.trim();
+    if (!text) return;
+    setCommentSubmitting(true);
+    setCommentError(null);
+    const csrfToken = getCookie("csrftoken");
+    try {
+      const r = await fetch(`${API_BASE}/articles/${currId}/comments/`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+        body: JSON.stringify({
+          content: text,
+          ...(replyTo ? { parent: replyTo.id } : {}),
+        }),
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      setCommentText("");
+      setReplyTo(null);
+      await fetchComments();
+    } catch {
+      setCommentError(true);
+    } finally {
+      setCommentSubmitting(false);
+    }
+  }, [commentText, currId, replyTo, fetchComments]);
+
+  const deleteComment = useCallback(async (commentId) => {
+    const csrfToken = getCookie("csrftoken");
+    try {
+      await fetch(`${API_BASE}/comments/${commentId}/`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+      });
+      await fetchComments();
+    } catch { /* noop */ }
+  }, [fetchComments]);
+
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
@@ -111,6 +183,8 @@ export default function BlogDetail() {
         const data = await r.json();
         if (!alive) return;
         setPost(data);
+        setIsLiked(data.is_liked ?? false);
+        setLikesCount(data.likes_count ?? 0);
       } catch (_e) {
         if (!alive) return;
         setError("Unable to load the article.");
@@ -281,21 +355,70 @@ export default function BlogDetail() {
                   ))}
                 </div>
 
-                {/* Copier le lien */}
+                {/* Like */}
+                {user && (
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      const method = isLiked ? "DELETE" : "POST";
+                      const csrfToken = getCookie("csrftoken");
+                      try {
+                        const r = await fetch(`${API_BASE}/articles/${currId}/like/`, {
+                          method,
+                          credentials: "include",
+                          headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+                        });
+                        if (r.ok) {
+                          const data = await r.json();
+                          setIsLiked(data.is_liked);
+                          setLikesCount(data.likes_count);
+                        }
+                      } catch { /* noop */ }
+                    }}
+                    className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 flex items-center gap-1.5 transition-colors ${
+                      isLiked
+                        ? "bg-rose-500 text-white"
+                        : theme === "dark"
+                        ? "bg-[#2a2a2a] text-white/70 border border-[#444]"
+                        : "bg-white text-gray-600 border border-gray-200"
+                    }`}
+                    aria-label={isLiked ? txt.unlike : txt.like}
+                    aria-pressed={isLiked}
+                  >
+                    <span aria-hidden="true">{isLiked ? "♥" : "♡"}</span>
+                    <span>{likesCount}</span>
+                  </Button>
+                )}
+                {!user && likesCount > 0 && (
+                  <span className={`text-sm flex items-center gap-1 ${theme === "dark" ? "text-white/50" : "text-gray-400"}`}>
+                    <span aria-hidden="true">♥</span> {likesCount}
+                  </span>
+                )}
+
+                {/* Partager / Copier le lien */}
                 <Button
                   type="button"
                   onClick={async () => {
-                    try {
-                      await navigator.clipboard.writeText(window.location.href);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 1200);
-                    } catch { /* noop */ }
+                    if (typeof navigator.share === "function") {
+                      try {
+                        await navigator.share({ title, url: window.location.href });
+                      } catch { /* annulé par l'utilisateur — noop */ }
+                    } else {
+                      try {
+                        await navigator.clipboard.writeText(window.location.href);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 1200);
+                      } catch { /* noop */ }
+                    }
                   }}
                   className={`px-3 py-1.5 rounded-md shadow text-sm hover:brightness-110 ${
                     theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
                   }`}
+                  aria-label={typeof navigator.share === "function" ? txt.share : txt.copy_link}
                 >
-                  {copied ? txt.copied : txt.copy_link}
+                  {typeof navigator.share === "function"
+                    ? txt.share
+                    : copied ? txt.copied : txt.copy_link}
                 </Button>
               </div>
             </div>
@@ -389,6 +512,152 @@ export default function BlogDetail() {
             <span />
           )}
         </div>
+
+        {/* Section commentaires */}
+        <section
+          aria-labelledby=”comments-heading”
+          className={`rounded-xl border shadow p-6 md:p-8 ${card}`}
+        >
+          <h2 id=”comments-heading” className=”text-xl font-semibold mb-6”>
+            {txt.comments_title}
+            {comments.length > 0 && (
+              <span className={`ml-2 text-base font-normal ${meta}`}>({comments.length})</span>
+            )}
+          </h2>
+
+          {/* Formulaire */}
+          {user ? (
+            <form onSubmit={submitComment} className=”mb-8”>
+              {replyTo && (
+                <div className={`text-sm mb-2 flex items-center gap-2 ${meta}`}>
+                  <span>{txt.comment_reply} @{replyTo.username}</span>
+                  <button
+                    type=”button”
+                    onClick={() => setReplyTo(null)}
+                    className=”underline text-xs”
+                  >
+                    {txt.comment_cancel}
+                  </button>
+                </div>
+              )}
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
+                rows={3}
+                maxLength={2000}
+                aria-label={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
+                className={`w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                  theme === “dark”
+                    ? “bg-[#252525] border-[#444] text-white placeholder-white/40”
+                    : “bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400”
+                }`}
+              />
+              {commentError && (
+                <p role=”alert” className=”text-red-500 text-sm mt-1”>{txt.comment_submit_error}</p>
+              )}
+              <div className=”flex justify-end mt-2”>
+                <button
+                  type=”submit”
+                  disabled={commentSubmitting || !commentText.trim()}
+                  className={`px-4 py-2 rounded-md text-sm font-medium shadow hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    theme === “dark” ? “bg-secondary text-white” : “bg-primary text-dark”
+                  }`}
+                >
+                  {commentSubmitting ? “…” : txt.comment_submit}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <p className={`text-sm mb-6 ${meta}`}>{txt.comment_login_required}</p>
+          )}
+
+          {/* Liste des commentaires */}
+          {commentsLoading && (
+            <div className=”space-y-4 animate-pulse”>
+              {[1, 2].map((i) => (
+                <div key={i} className={`h-16 rounded-lg ${theme === “dark” ? “bg-white/5” : “bg-gray-100”}`} />
+              ))}
+            </div>
+          )}
+          {commentsError && !commentsLoading && (
+            <p className=”text-red-500 text-sm”>{txt.comment_error}</p>
+          )}
+          {!commentsLoading && !commentsError && comments.length === 0 && (
+            <p className={`text-sm ${meta}`}>{txt.comment_empty}</p>
+          )}
+          {!commentsLoading && !commentsError && comments.length > 0 && (
+            <ul className=”space-y-6”>
+              {comments.map((c) => (
+                <li key={c.id}>
+                  {/* Commentaire racine */}
+                  <div className={`rounded-lg p-4 ${theme === “dark” ? “bg-white/5” : “bg-gray-50”}`}>
+                    <div className=”flex items-start justify-between gap-2 mb-2”>
+                      <span className=”font-medium text-sm”>
+                        {c.author?.username || c.author?.first_name || “—“}
+                      </span>
+                      <span className={`text-xs ${meta}`}>
+                        {new Date(c.created_at).toLocaleDateString(language === “fr” ? “fr-FR” : “en-US”)}
+                      </span>
+                    </div>
+                    <p className=”text-sm leading-relaxed”>{c.content}</p>
+                    <div className={`flex gap-3 mt-2 text-xs ${meta}`}>
+                      {user && (
+                        <button
+                          type=”button”
+                          onClick={() => setReplyTo({ id: c.id, username: c.author?.username || “?” })}
+                          className=”hover:underline”
+                        >
+                          {txt.comment_reply}
+                        </button>
+                      )}
+                      {user && (user.id === c.author?.id || user.is_staff) && (
+                        <button
+                          type=”button”
+                          onClick={() => deleteComment(c.id)}
+                          className=”hover:underline text-red-400”
+                        >
+                          {txt.comment_delete}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Réponses (niveau 1) */}
+                  {c.replies?.length > 0 && (
+                    <ul className=”ml-6 mt-3 space-y-3”>
+                      {c.replies.map((r) => (
+                        <li
+                          key={r.id}
+                          className={`rounded-lg p-3 ${theme === “dark” ? “bg-white/3 border border-white/10” : “bg-white border border-gray-100”}`}
+                        >
+                          <div className=”flex items-start justify-between gap-2 mb-1”>
+                            <span className=”font-medium text-sm”>
+                              {r.author?.username || r.author?.first_name || “—“}
+                            </span>
+                            <span className={`text-xs ${meta}`}>
+                              {new Date(r.created_at).toLocaleDateString(language === “fr” ? “fr-FR” : “en-US”)}
+                            </span>
+                          </div>
+                          <p className=”text-sm leading-relaxed”>{r.content}</p>
+                          {user && (user.id === r.author?.id || user.is_staff) && (
+                            <button
+                              type=”button”
+                              onClick={() => deleteComment(r.id)}
+                              className={`mt-1 text-xs hover:underline text-red-400`}
+                            >
+                              {txt.comment_delete}
+                            </button>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* Carrousel “même genre” (composant séparé) */}
         <RelatedCarousel

@@ -20,11 +20,26 @@
     "back": "Back to blog",
     "read_time": "Read",
     "min": "min",
+    "like": "Like",
+    "unlike": "Unlike",
+    "likes": "likes",
+    "share": "Share",
     "copy_link": "Copy link",
     "copied": "Copied!",
     "not_found_title": "Post not found",
     "not_found_desc": "This post doesn’t exist or was removed.",
-    "all_genres": "All genres"
+    "all_genres": "All genres",
+    "comments_title": "Comments",
+    "comment_placeholder": "Write your comment...",
+    "comment_reply_placeholder": "Reply to this comment...",
+    "comment_submit": "Post",
+    "comment_reply": "Reply",
+    "comment_cancel": "Cancel",
+    "comment_delete": "Delete",
+    "comment_login_required": "Log in to leave a comment.",
+    "comment_empty": "No comments yet. Be the first!",
+    "comment_error": "Unable to load comments.",
+    "comment_submit_error": "Error posting comment. Please try again."
 
   }
   

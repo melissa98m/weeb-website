@@ -12,11 +12,31 @@ export default function TrainingItem({
       ? "bg-[#1c1c1c] border-[#333]"
       : "bg-white border-gray-200";
 
+  const progress = formation.progress_percent ?? null;
+
   return (
     <div className={`rounded-lg border p-4 ${card}`}>
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="text-base font-medium">{formation.name || "—"}</div>
+          {progress !== null && (
+            <div className="mt-2">
+              <div className="flex justify-between text-xs mb-1 opacity-70">
+                <span>Progression</span>
+                <span className={progress === 100 ? "text-green-500 font-medium" : ""}>{progress}%</span>
+              </div>
+              <div className={`h-1.5 rounded-full overflow-hidden ${theme === "dark" ? "bg-white/10" : "bg-gray-100"}`}>
+                <div
+                  className={`h-full rounded-full transition-all duration-500 ${progress === 100 ? "bg-green-500" : "bg-indigo-500"}`}
+                  style={{ width: `${progress}%` }}
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {!existingFeedback ? (

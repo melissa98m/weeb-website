@@ -95,6 +95,53 @@ export default function ArticleEditorModal({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
+  /* ---------- Révisions ---------- */
+  const [showRevisions, setShowRevisions] = useState(false);
+  const [revisions, setRevisions] = useState([]);
+  const [revisionsLoading, setRevisionsLoading] = useState(false);
+
+  const fetchRevisions = useCallback(async () => {
+    if (!artId) return;
+    setRevisionsLoading(true);
+    try {
+      const r = await fetch(`${apiBase}/articles/${artId}/revisions/`, { credentials: "include" });
+      if (r.ok) {
+        const data = await r.json();
+        setRevisions(Array.isArray(data) ? data : (data.results ?? []));
+      }
+    } catch { /* noop */ }
+    finally { setRevisionsLoading(false); }
+  }, [artId, apiBase]);
+
+  const restoreRevision = useCallback(async (revisionId) => {
+    if (!window.confirm("Restaurer cette révision ? Le contenu actuel sera remplacé.")) return;
+    const csrf = await ensureCsrf();
+    try {
+      const r = await fetch(`${apiBase}/articles/${artId}/revisions/${revisionId}/restore/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-CSRFToken": csrf },
+      });
+      if (r.ok) {
+        const data = await r.json();
+        // Recharge la révision fraîche depuis l'API
+        const articleR = await fetch(`${apiBase}/articles/${artId}/`, { credentials: "include" });
+        if (articleR.ok) {
+          const updated = await articleR.json();
+          setTitle(updated.title ?? "");
+          setContent(updated.article_content ?? "");
+        }
+        setShowRevisions(false);
+        setRevisions([]);
+        alert(data.detail ?? "Révision restaurée.");
+      }
+    } catch { /* noop */ }
+  }, [artId, apiBase]);
+
+  useEffect(() => {
+    if (showRevisions && artId) fetchRevisions();
+  }, [showRevisions, artId, fetchRevisions]);
+
   /* ---------- Abort controller commun ---------- */
   const ctrlRef = useRef(null);
   const startTask = useCallback((ms = 20000) => {
@@ -380,16 +427,71 @@ export default function ArticleEditorModal({
             <div className="font-semibold">
               {isEditing ? `Éditer l’article #${artId}` : "Nouvel article"}
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`rounded-lg border px-2 py-1 ${ghostBtn}`}
-              disabled={saving}
-              aria-label="Fermer"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-2">
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={() => setShowRevisions((v) => !v)}
+                  className={`rounded-lg border px-3 py-1 text-sm ${ghostBtn}`}
+                  aria-expanded={showRevisions}
+                >
+                  {showRevisions ? "← Éditeur" : "Historique"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className={`rounded-lg border px-2 py-1 ${ghostBtn}`}
+                disabled={saving}
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
           </header>
+
+          {/* Panneau révisions */}
+          {showRevisions && (
+            <div className="p-4 border-b">
+              <h3 className="text-sm font-semibold mb-3">Historique des révisions</h3>
+              {revisionsLoading && <p className="text-sm opacity-60">Chargement…</p>}
+              {!revisionsLoading && revisions.length === 0 && (
+                <p className="text-sm opacity-60">Aucune révision.</p>
+              )}
+              {!revisionsLoading && revisions.length > 0 && (
+                <ul className="space-y-2 max-h-72 overflow-y-auto">
+                  {revisions.map((rev) => (
+                    <li
+                      key={rev.id}
+                      className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
+                        theme === "dark" ? "border-[#333]" : "border-gray-200"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <span className="font-medium">v{rev.revision_number}</span>
+                        <span className="mx-2 opacity-40">·</span>
+                        <span className="truncate opacity-70">{rev.title}</span>
+                        <span className="mx-2 opacity-40">·</span>
+                        <span className="opacity-50 text-xs">
+                          {new Date(rev.created_at).toLocaleString("fr-FR")}
+                        </span>
+                        {rev.author?.username && (
+                          <span className="ml-2 opacity-50 text-xs">par {rev.author.username}</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => restoreRevision(rev.id)}
+                        className={`shrink-0 rounded-md border px-2 py-1 text-xs ${ghostBtn}`}
+                      >
+                        Restaurer
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {/* Formulaire (unique) */}
           <form onSubmit={save} className="p-4 space-y-4">

@@ -176,13 +176,11 @@ export default function BlogCard({
             {labels.viewSummary}
           </Button>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className={theme === "dark" ? "text-white/40" : "text-gray-400"}
-          >
-            ★
-          </motion.div>
+          {(post.likes_count ?? 0) > 0 && (
+            <span className={`text-sm flex items-center gap-1 ${theme === "dark" ? "text-white/40" : "text-gray-400"}`}>
+              <span aria-hidden="true">♥</span> {post.likes_count}
+            </span>
+          )}
         </div>
       </div>
     </motion.article>
