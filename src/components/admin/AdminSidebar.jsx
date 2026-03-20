@@ -125,6 +125,14 @@ function IconChart() {
   );
 }
 
+function IconChat() {
+  return (
+    <IconBase>
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </IconBase>
+  );
+}
+
 const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
@@ -134,6 +142,7 @@ const NAV_ALL = [
   { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
   { key: "newsletter", label: "Newsletter", to: "/admin/newsletter", icon: IconMail },
   { key: "analytics", label: "Analytiques", to: "/admin/analytics", icon: IconChart },
+  { key: "chat", label: "Chat support", to: "/admin/chat", icon: IconChat },
 ];
 
 
@@ -185,6 +194,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
           return canStaff || isAdmin;
         case "newsletter":
         case "analytics":
+        case "chat":
           return canStaff || isAdmin;
         default:
           return false;
