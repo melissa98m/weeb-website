@@ -3,7 +3,7 @@ import { useAuth } from "./AuthContext";
 import { API_BASE, WS_BASE } from "../lib/api";
 import { getCookie } from "../lib/cookies";
 
-const NotificationContext = createContext(null);
+export const NotificationContext = createContext(null);
 
 export function NotificationProvider({ children }) {
   const { user } = useAuth();
