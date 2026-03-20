@@ -155,8 +155,9 @@ describe("CookieBanner", () => {
     setupNoConsent();
     render(<CookieBanner />);
 
-    // Cocher la case optionnelle
-    const checkbox = screen.getByRole("checkbox", { name: "" }); // checkbox analytics (non disabled)
+    // Cocher la case optionnelle (la seule qui ne soit pas disabled)
+    const checkboxes = screen.getAllByRole("checkbox");
+    const checkbox = checkboxes.find((cb) => !cb.disabled);
     await user.click(checkbox);
 
     await user.click(screen.getByRole("button", { name: /enregistrer/i }));

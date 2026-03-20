@@ -35,7 +35,7 @@ export default function GenrePicker({
     ctrlRef.current?.abort();
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -69,7 +69,7 @@ export default function GenrePicker({
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; try { ctrlRef.current?.abort(); } catch {} };
+    return () => { alive = false; try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, [apiBase, startTask]);
 
   const selectedIds = useMemo(() => new Set(value.map(v => v.id)), [value]);

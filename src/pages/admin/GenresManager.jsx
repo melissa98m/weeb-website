@@ -15,10 +15,6 @@ export default function GenresManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
 
-  const canRedact = hasAnyRedactionRole(user);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
-
   const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
     ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
@@ -55,7 +51,7 @@ export default function GenresManager() {
     ctrlRef.current?.abort();
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -106,7 +102,7 @@ export default function GenresManager() {
 
   useEffect(() => {
     load();
-    return () => { try { ctrlRef.current?.abort(); } catch {} };
+    return () => { try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, [load]);
 
   const filtered = useMemo(() => {
@@ -200,6 +196,10 @@ export default function GenresManager() {
       task.done();
     }
   }, [startTask]);
+
+  const canRedact = hasAnyRedactionRole(user);
+  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
 
   return (
     <main className="px-4 md:px-6 py-4 md:py-6">

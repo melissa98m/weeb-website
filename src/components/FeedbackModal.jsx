@@ -9,7 +9,7 @@ const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 export default function FeedbackModal({
   open,
   onClose,
-  userId,
+  userId: _userId,
   formation,
   theme,
   language,
@@ -56,7 +56,7 @@ export default function FeedbackModal({
       const created = await res.json();
       onSuccess?.(created);
       onClose();
-    } catch (e) {
+    } catch (_e) {
       setErr(t.error);
     } finally {
       setSending(false);

@@ -8,15 +8,13 @@ vi.mock("../../lib/api", () => ({ API_BASE: "http://localhost:8000/api" }));
 vi.mock("../../lib/cookies", () => ({ getCookie: vi.fn(() => "csrf-token") }));
 
 describe("ExportCSVButton", () => {
-  let clickSpy;
-
   beforeEach(() => {
     // Intercepter le clic sur les <a> créés dynamiquement
     const origCreate = document.createElement.bind(document);
     vi.spyOn(document, "createElement").mockImplementation((tag) => {
       const el = origCreate(tag);
       if (tag === "a") {
-        clickSpy = vi.spyOn(el, "click").mockImplementation(() => {});
+        vi.spyOn(el, "click").mockImplementation(() => {});
       }
       return el;
     });

@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -76,7 +75,7 @@ export default function FormationsManager() {
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
     const t = setTimeout(() => {
-      try { ctrl.abort(); } catch {}
+      try { ctrl.abort(); } catch { /* noop */ }
     }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||

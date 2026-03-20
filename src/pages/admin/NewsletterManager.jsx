@@ -21,8 +21,8 @@ function Toast({ toast, onClose }) {
 
   return (
     <div
-      role="status"
-      aria-live="polite"
+      role={isSuccess ? "status" : "alert"}
+      aria-live={isSuccess ? "polite" : "assertive"}
       className={`fixed bottom-6 right-6 z-50 flex items-start gap-3 rounded-xl shadow-lg px-4 py-3 max-w-sm w-full text-sm transition-all ${colors}`}
     >
       <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">

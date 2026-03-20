@@ -41,11 +41,11 @@ async function formatApiError(r, fallbackLabel) {
         else if (data.detail) detail = data.detail;
         else detail = JSON.stringify(data);
       }
-    } catch {}
+    } catch { /* noop */ }
   } else {
     try {
       detail = (await r.text()).trim();
-    } catch {}
+    } catch { /* noop */ }
   }
   const base = `${r.status} ${r.statusText}`.trim();
   const msg = detail ? `${base} - ${detail}` : base;
@@ -56,7 +56,7 @@ export default function ArticleEditorModal({
   open = false,
   onClose = () => {},
   apiBase,
-  userId = null,
+  userId: _userId = null,
   article = null,             // null => création ; sinon objet article
   onSaved = () => {},
   onDeleted = () => {},
@@ -98,10 +98,10 @@ export default function ArticleEditorModal({
   /* ---------- Abort controller commun ---------- */
   const ctrlRef = useRef(null);
   const startTask = useCallback((ms = 20000) => {
-    try { ctrlRef.current?.abort(); } catch {}
+    try { ctrlRef.current?.abort(); } catch { /* noop */ }
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -114,7 +114,7 @@ export default function ArticleEditorModal({
   }, []);
 
   useEffect(() => {
-    return () => { try { ctrlRef.current?.abort(); } catch {} };
+    return () => { try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, []);
 
   /* ---------- (Ré)initialisation quand on ouvre/ferme ---------- */

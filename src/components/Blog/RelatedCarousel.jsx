@@ -147,11 +147,6 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
   if (loading || !genreIds.length) return null;
   if (err || items.length === 0) return null;
 
-  const barMask =
-    theme === "dark"
-      ? "from-[#1c1c1c] via-transparent to-[#1c1c1c]"
-      : "from-white via-transparent to-white";
-
   // CSS pour masquer les barres de défilement (Firefox, WebKit, Edge/IE)
   const HIDE_SCROLLBAR_CSS = `
     .related-scroll { -ms-overflow-style: none; scrollbar-width: none; }
