@@ -48,6 +48,14 @@ export default function ArticlesManager() {
   const [genres, setGenres] = useState([]); // [{id,name,color}]
   const [selectedGenreId, setSelectedGenreId] = useState(null);
 
+  // Onglet actif
+  const [activeTab, setActiveTab] = useState("articles"); // "articles" | "comments"
+
+  // Modération commentaires
+  const [allComments, setAllComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsFilter, setCommentsFilter] = useState("all"); // "all" | "true" | "false"
+
   // Modale
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(null);
@@ -165,6 +173,49 @@ export default function ArticlesManager() {
     return () => { try { listCtrlRef.current?.abort(); } catch { /* noop */ } };
   }, [page, load]);
 
+  const loadComments = useCallback(async () => {
+    setCommentsLoading(true);
+    try {
+      const params = new URLSearchParams({ page_size: "200" });
+      if (commentsFilter !== "all") params.set("is_approved", commentsFilter);
+      const data = await fetchJSON(`${API_BASE}/admin/comments/?${params.toString()}`, null);
+      setAllComments(Array.isArray(data) ? data : (data.results ?? []));
+    } catch { /* noop */ }
+    finally { setCommentsLoading(false); }
+  }, [fetchJSON, commentsFilter]);
+
+  useEffect(() => {
+    if (activeTab === "comments") loadComments();
+  }, [activeTab, loadComments]);
+
+  const moderateComment = useCallback(async (id, isApproved) => {
+    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? "";
+    try {
+      await fetch(`${API_BASE}/comments/${id}/`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+        body: JSON.stringify({ is_approved: isApproved }),
+      });
+      await loadComments();
+    } catch { /* noop */ }
+  }, [loadComments]);
+
+  const deleteComment = useCallback(async (id) => {
+    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? "";
+    try {
+      await fetch(`${API_BASE}/comments/${id}/`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+      });
+      await loadComments();
+    } catch { /* noop */ }
+  }, [loadComments]);
+
   const canRedact = hasAnyRedactionRole(user);
   if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
   if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
@@ -211,8 +262,26 @@ export default function ArticlesManager() {
         </div>
       </header>
 
+      {/* Onglets */}
+      <div className="flex gap-2 mt-4 border-b border-current/10">
+        {["articles", "comments"].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab
+                ? "border-indigo-500 text-indigo-500"
+                : "border-transparent opacity-60 hover:opacity-80"
+            }`}
+          >
+            {tab === "articles" ? "Articles" : "Commentaires"}
+          </button>
+        ))}
+      </div>
+
       {/* Filtres genres (chips comme blog) */}
-      {!open && (
+      {activeTab === "articles" && !open && (
         <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
           <div className="text-sm opacity-80 mb-2">Filtrer par genre</div>
           <GenreChips
@@ -224,8 +293,101 @@ export default function ArticlesManager() {
         </section>
       )}
 
+      {/* Panel modération commentaires */}
+      {activeTab === "comments" && (
+        <section className={`mt-3 rounded-2xl border p-4 ${card}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-sm font-medium">Filtrer :</span>
+            {[["all", "Tous"], ["true", "Approuvés"], ["false", "En attente"]].map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setCommentsFilter(val)}
+                className={`px-3 py-1 rounded-full text-xs border transition ${
+                  commentsFilter === val
+                    ? "bg-indigo-500 text-white border-indigo-500"
+                    : ghostBtn
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {commentsLoading && <div className="text-sm opacity-70 py-4">Chargement…</div>}
+          {!commentsLoading && allComments.length === 0 && (
+            <div className="text-sm opacity-70 py-4">Aucun commentaire.</div>
+          )}
+          {!commentsLoading && allComments.length > 0 && (
+            <ul className="space-y-3">
+              {allComments.map((c) => (
+                <li
+                  key={c.id}
+                  className={`rounded-xl border p-4 ${
+                    c.is_approved
+                      ? theme === "dark" ? "border-[#333]" : "border-gray-200"
+                      : "border-orange-400/40 bg-orange-50/5"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-medium text-sm">
+                          {c.author?.username || "—"}
+                        </span>
+                        <span className="text-xs opacity-60">
+                          sur article #{c.article}
+                        </span>
+                        {!c.is_approved && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-orange-400/20 text-orange-400">
+                            En attente
+                          </span>
+                        )}
+                        {c.parent && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-400/20 text-blue-400">
+                            Réponse
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm leading-relaxed">{c.content}</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {!c.is_approved && (
+                        <button
+                          type="button"
+                          onClick={() => moderateComment(c.id, true)}
+                          className="px-2 py-1 rounded-md text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                        >
+                          Approuver
+                        </button>
+                      )}
+                      {c.is_approved && (
+                        <button
+                          type="button"
+                          onClick={() => moderateComment(c.id, false)}
+                          className="px-2 py-1 rounded-md text-xs bg-orange-400/20 text-orange-400 hover:bg-orange-400/30"
+                        >
+                          Masquer
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => deleteComment(c.id)}
+                        className="px-2 py-1 rounded-md text-xs bg-red-400/20 text-red-400 hover:bg-red-400/30"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {/* Liste */}
-      <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
+      {activeTab === "articles" && <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
         {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
         {!loading && err && (
           <div className="p-4 text-sm text-red-600 dark:text-red-400">
@@ -285,12 +447,14 @@ export default function ArticlesManager() {
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      {/* Pagination */}
-      <div className="mt-2">
-        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
-      </div>
+      {/* Pagination (articles uniquement) */}
+      {activeTab === "articles" && (
+        <div className="mt-2">
+          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+        </div>
+      )}
 
       {/* Modale */}
       <ArticleEditorModal
