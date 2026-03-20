@@ -1,0 +1,34 @@
+{
+  "total_utilisateurs": 128,
+  "total_inscrits": 54,
+  "total_articles": 17,
+  "total_formations": 8,
+  "total_feedbacks": 73,
+  "total_abonnes": 312,
+  "messages_non_traites": 5,
+  "taux_satisfaction": 82,
+  "satisfaction_globale": {
+    "positif": 58,
+    "negatif": 6,
+    "neutre": 9,
+    "non_evalue": 0
+  },
+  "inscriptions_par_mois": [
+    { "mois": "2025-01", "count": 8 },
+    { "mois": "2025-02", "count": 12 },
+    { "mois": "2025-03", "count": 7 }
+  ],
+  "feedbacks_par_mois": [
+    { "mois": "2025-01", "count": 5 },
+    { "mois": "2025-02", "count": 14 },
+    { "mois": "2025-03", "count": 9 }
+  ],
+  "top_formations": [
+    { "id": 1, "name": "Formation React", "inscrits": 22 },
+    { "id": 2, "name": "Formation Node", "inscrits": 18 }
+  ],
+  "top_articles_lus": [
+    { "id": 1, "title": "Les hooks React en 2025", "vues": 340 },
+    { "id": 2, "title": "Débuter avec Django REST", "vues": 210 }
+  ]
+}
