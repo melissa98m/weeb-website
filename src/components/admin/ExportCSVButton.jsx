@@ -23,16 +23,17 @@ function IconDownload({ size = 16 }) {
 }
 
 /**
- * Bouton qui déclenche le téléchargement d'un export CSV depuis l'API.
+ * Bouton qui déclenche le téléchargement d'un export CSV ou PDF depuis l'API.
  *
  * @param {object} props
  * @param {"inscrits"|"feedbacks"|"messages"} props.type - Type d'export.
+ * @param {"csv"|"pdf"} [props.format="csv"] - Format de sortie.
  * @param {string} [props.dateFrom] - Filtre date de début (YYYY-MM-DD).
  * @param {string} [props.dateTo]   - Filtre date de fin (YYYY-MM-DD).
  * @param {string} [props.label]    - Libellé du bouton.
  * @param {string} [props.className]
  */
-export default function ExportCSVButton({ type, dateFrom, dateTo, label, className = "" }) {
+export default function ExportCSVButton({ type, format = "csv", dateFrom, dateTo, label, className = "" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -51,7 +52,8 @@ export default function ExportCSVButton({ type, dateFrom, dateTo, label, classNa
       if (dateFrom) params.set("from", dateFrom);
       if (dateTo) params.set("to", dateTo);
 
-      const url = `${API_BASE}/export/${type}/${params.toString() ? `?${params}` : ""}`;
+      const suffix = format === "pdf" ? "pdf/" : "";
+      const url = `${API_BASE}/export/${type}/${suffix}${params.toString() ? `?${params}` : ""}`;
       const csrfToken = getCookie("csrftoken");
 
       const res = await fetch(url, {
@@ -67,7 +69,8 @@ export default function ExportCSVButton({ type, dateFrom, dateTo, label, classNa
       const blob = await res.blob();
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const filename = `${type}_${new Date().toISOString().slice(0, 10)}.csv`;
+      const ext = format === "pdf" ? "pdf" : "csv";
+      const filename = `${type}_${new Date().toISOString().slice(0, 10)}.${ext}`;
       a.href = blobUrl;
       a.download = filename;
       document.body.appendChild(a);
@@ -81,7 +84,7 @@ export default function ExportCSVButton({ type, dateFrom, dateTo, label, classNa
     }
   };
 
-  const displayLabel = label ?? `Exporter ${LABELS[type] ?? type}`;
+  const displayLabel = label ?? `Exporter ${LABELS[type] ?? type} (${format.toUpperCase()})`;
 
   return (
     <div className="inline-flex flex-col gap-1">

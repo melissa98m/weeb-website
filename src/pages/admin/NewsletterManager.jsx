@@ -244,10 +244,97 @@ function SubscribersList({ theme }) {
   );
 }
 
+const STATUS_LABELS = {
+  draft:     { label: "Brouillon",  cls: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/70" },
+  scheduled: { label: "Planifiée",  cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300" },
+  sending:   { label: "En cours",   cls: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300" },
+  sent:      { label: "Envoyée",    cls: "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300" },
+  failed:    { label: "Échouée",    cls: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" },
+};
+
+function CampaignsBadge({ status }) {
+  const s = STATUS_LABELS[status] ?? STATUS_LABELS.draft;
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>;
+}
+
+function CampaignsList({ theme, onSelect, refresh }) {
+  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const [campaigns, setCampaigns] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/admin/newsletter/campaigns/`, { credentials: "include" });
+      if (!res.ok) return;
+      setCampaigns(await res.json());
+    } catch { /* silencieux */ }
+    finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { load(); }, [load, refresh]);
+
+  const deleteC = async (id) => {
+    const csrf = getCookie("csrftoken");
+    await fetch(`${API_BASE}/admin/newsletter/campaigns/${id}/`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: csrf ? { "X-CSRFToken": csrf } : {},
+    });
+    load();
+  };
+
+  if (loading) return null;
+  if (!campaigns.length) return null;
+
+  return (
+    <section className={`rounded-2xl border ${card}`} aria-labelledby="campaigns-list-heading">
+      <h2 id="campaigns-list-heading" className="text-base font-semibold px-5 pt-4 pb-3 border-b ${theme === 'dark' ? 'border-[#333]' : 'border-gray-100'}">
+        Campagnes
+      </h2>
+      <ul className="divide-y divide-inherit">
+        {campaigns.map((c) => (
+          <li key={c.id} className="px-5 py-3 flex flex-wrap items-start gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-sm truncate">{c.subject}</div>
+              <div className={`text-xs mt-0.5 ${muted}`}>
+                {c.scheduled_at
+                  ? `Planifiée : ${new Date(c.scheduled_at).toLocaleString("fr-FR")}`
+                  : c.sent_at
+                  ? `Envoyée : ${new Date(c.sent_at).toLocaleString("fr-FR")} — ${c.sent_count} envois`
+                  : `Créée : ${new Date(c.created_at).toLocaleString("fr-FR")}`}
+              </div>
+            </div>
+            <CampaignsBadge status={c.status} />
+            {(c.status === "draft" || c.status === "scheduled") && (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => onSelect(c)}
+                  className="text-xs px-2 py-1 rounded border hover:opacity-80 transition"
+                  aria-label={`Modifier la campagne ${c.subject}`}
+                >
+                  Modifier
+                </button>
+                <button
+                  onClick={() => deleteC(c.id)}
+                  className="text-xs px-2 py-1 rounded border border-red-300 text-red-600 hover:opacity-80 transition"
+                  aria-label={`Supprimer la campagne ${c.subject}`}
+                >
+                  Supprimer
+                </button>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export default function NewsletterManager() {
   const { theme } = useTheme();
 
-  // SEO : pages admin exclues de l'indexation
   useEffect(() => {
     const prev = document.title;
     document.title = "Newsletter | Administration Weeb";
@@ -266,15 +353,19 @@ export default function NewsletterManager() {
     ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+  const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
 
+  const [editingCampaignId, setEditingCampaignId] = useState(null);
   const [subject, setSubject] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
+  const [scheduledAt, setScheduledAt] = useState("");
   const [preview, setPreview] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
   const [stats, setStats] = useState(null);
+  const [campaignsRefresh, setCampaignsRefresh] = useState(0);
 
   const loadStats = useCallback(async () => {
     try {
@@ -286,35 +377,67 @@ export default function NewsletterManager() {
 
   useEffect(() => { loadStats(); }, [loadStats]);
 
+  const resetForm = () => {
+    setEditingCampaignId(null);
+    setSubject("");
+    setBodyText("");
+    setBodyHtml("");
+    setScheduledAt("");
+    setPreview(false);
+  };
+
+  const loadCampaign = (c) => {
+    setEditingCampaignId(c.id);
+    setSubject(c.subject);
+    setBodyText(c.body_text);
+    setBodyHtml(c.body_html || "");
+    setScheduledAt(c.scheduled_at ? c.scheduled_at.slice(0, 16) : "");
+  };
+
+  const saveDraft = async () => {
+    const csrf = getCookie("csrftoken");
+    const payload = {
+      subject: subject.trim(),
+      body_text: bodyText.trim(),
+      body_html: bodyHtml.trim() || "",
+      scheduled_at: scheduledAt || null,
+    };
+    const url = editingCampaignId
+      ? `${API_BASE}/admin/newsletter/campaigns/${editingCampaignId}/`
+      : `${API_BASE}/admin/newsletter/campaigns/`;
+    const method = editingCampaignId ? "PATCH" : "POST";
+    const res = await fetch(url, {
+      method,
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRFToken": csrf } : {}) },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`Erreur ${res.status}`);
+    return res.json();
+  };
+
   const handleSend = async () => {
     setConfirm(false);
     setSending(true);
     setToast(null);
-
     try {
+      const campaign = await saveDraft();
       const csrf = getCookie("csrftoken");
-      const res = await fetch(`${API_BASE}/admin/newsletter/send/`, {
+      const sendPayload = scheduledAt ? { scheduled_at: scheduledAt } : {};
+      const res = await fetch(`${API_BASE}/admin/newsletter/campaigns/${campaign.id}/send/`, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          ...(csrf ? { "X-CSRFToken": csrf } : {}),
-        },
-        body: JSON.stringify({
-          subject: subject.trim(),
-          body_text: bodyText.trim(),
-          body_html: bodyHtml.trim() || undefined,
-        }),
+        headers: { "Content-Type": "application/json", ...(csrf ? { "X-CSRFToken": csrf } : {}) },
+        body: JSON.stringify(sendPayload),
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
         throw new Error(err?.detail ?? `Erreur ${res.status}`);
       }
       const data = await res.json();
-      const detail = data.erreurs > 0
-        ? `${data.envoyes} email${data.envoyes !== 1 ? "s" : ""} envoyé${data.envoyes !== 1 ? "s" : ""}, ${data.erreurs} échec${data.erreurs !== 1 ? "s" : ""}.`
-        : `Campagne envoyée à ${data.envoyes} abonné${data.envoyes !== 1 ? "s" : ""} !`;
-      setToast({ type: "success", message: detail });
+      setToast({ type: "success", message: data.detail ?? "Campagne mise en file d'envoi." });
+      resetForm();
+      setCampaignsRefresh((n) => n + 1);
       loadStats();
     } catch (e) {
       setToast({ type: "error", message: e.message });
@@ -325,28 +448,41 @@ export default function NewsletterManager() {
 
   const canSend = subject.trim().length > 0 && bodyText.trim().length > 0;
 
+  // Date minimum pour planification : maintenant + 5 minutes
+  const minScheduledAt = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
+
   return (
     <main className="px-4 md:px-6 py-6 max-w-4xl space-y-6">
       <header>
         <h1 className="text-2xl font-bold">Newsletter</h1>
-        <p className={`text-sm mt-1 ${theme === "dark" ? "text-white/60" : "text-gray-500"}`}>
-          Gérer les abonnés et envoyer des campagnes.
+        <p className={`text-sm mt-1 ${muted}`}>
+          Gérer les abonnés, créer et planifier des campagnes.
         </p>
       </header>
 
       {/* Liste des abonnés */}
       <SubscribersList theme={theme} />
 
-      {/* Campagne */}
+      {/* Historique campagnes */}
+      <CampaignsList theme={theme} onSelect={loadCampaign} refresh={campaignsRefresh} />
+
+      {/* Formulaire campagne */}
       <section className={`rounded-2xl border p-5 ${card}`} aria-labelledby="campaign-heading">
-        <h2 id="campaign-heading" className="text-base font-semibold mb-4">
-          Nouvelle campagne
-          {stats && (
-            <span className={`ml-2 text-sm font-normal ${theme === "dark" ? "text-white/50" : "text-gray-400"}`}>
-              — {stats.total_abonnes} abonné{stats.total_abonnes !== 1 ? "s" : ""}
-            </span>
+        <div className="flex items-center justify-between mb-4">
+          <h2 id="campaign-heading" className="text-base font-semibold">
+            {editingCampaignId ? "Modifier la campagne" : "Nouvelle campagne"}
+            {stats && (
+              <span className={`ml-2 text-sm font-normal ${muted}`}>
+                — {stats.total_abonnes} abonné{stats.total_abonnes !== 1 ? "s" : ""}
+              </span>
+            )}
+          </h2>
+          {editingCampaignId && (
+            <button onClick={resetForm} className={`text-xs px-2 py-1 rounded border ${ghostBtn}`}>
+              Nouvelle campagne
+            </button>
           )}
-        </h2>
+        </div>
 
         <div className="space-y-4">
           <div>
@@ -370,7 +506,7 @@ export default function NewsletterManager() {
               onChange={(e) => setBodyText(e.target.value)}
               rows={5}
               className={`w-full rounded-lg border px-3 py-2 text-sm font-mono ${inputCls}`}
-              placeholder="Contenu de l'email en texte brut (pour les clients sans HTML)…"
+              placeholder="Contenu de l'email en texte brut…"
             />
           </div>
 
@@ -398,12 +534,34 @@ export default function NewsletterManager() {
           {preview && bodyHtml && (
             <div className={`rounded-lg border p-4 text-sm ${theme === "dark" ? "bg-white text-gray-900" : "bg-gray-50"}`}>
               <p className="text-xs text-gray-400 mb-2 uppercase tracking-wide">Aperçu HTML</p>
-              {/* Aperçu brut saisi par l'admin (page protégée, jamais exposée aux utilisateurs).
-                  Le contenu est envoyé par email — les clients email supportent un sous-ensemble HTML restreint.
-                  Note : ajouter DOMPurify si ce composant est utilisé hors contexte admin. */}
+              {/* Aperçu saisi par l'admin (page protégée, jamais exposée aux utilisateurs publics). */}
               <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
             </div>
           )}
+
+          {/* Planification */}
+          <div>
+            <label className="block text-sm mb-1" htmlFor="nl-scheduled">
+              Planifier l'envoi (optionnel)
+            </label>
+            <input
+              id="nl-scheduled"
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              min={minScheduledAt}
+              className={`rounded-lg border px-3 py-2 text-sm ${inputCls}`}
+            />
+            {scheduledAt && (
+              <button
+                type="button"
+                onClick={() => setScheduledAt("")}
+                className={`ml-2 text-xs px-2 py-1 rounded border ${ghostBtn}`}
+              >
+                Effacer
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end mt-5">
@@ -413,7 +571,11 @@ export default function NewsletterManager() {
             disabled={!canSend || sending || !stats?.total_abonnes}
             className="px-5 py-2 rounded-xl border bg-blue-600 text-white text-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {sending ? "Envoi en cours…" : "Envoyer la campagne"}
+            {sending
+              ? "En cours…"
+              : scheduledAt
+              ? "Planifier la campagne"
+              : "Envoyer maintenant"}
           </button>
         </div>
       </section>
