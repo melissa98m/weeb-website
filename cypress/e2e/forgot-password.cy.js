@@ -5,11 +5,11 @@ describe("forgot password", () => {
       statusCode: 401,
       body: { detail: "Unauthorized" },
     });
-    cy.intercept("POST", "**/api/auth/password-reset/", {
+    cy.intercept("POST", "**/api/auth/forgot-password/", {
       statusCode: 200,
       body: { ok: true },
     }).as("requestReset");
-    cy.intercept("POST", "**/api/auth/password-reset-confirm/", {
+    cy.intercept("POST", "**/api/auth/reset-password/", {
       statusCode: 200,
       body: { ok: true },
     }).as("confirmReset");

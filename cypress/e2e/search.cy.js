@@ -90,7 +90,7 @@ describe("search", () => {
     ensureSearchDom("react");
 
     cy.contains("h1", /résultats/i).should("be.visible");
-    cy.get("main ul li").should("have.length.at.least", 1);
+    cy.get("main section a").should("have.length.at.least", 1);
   });
 
   it("affiche les liens vers les articles trouvés", () => {

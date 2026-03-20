@@ -21,7 +21,7 @@ describe("notifications", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("header")) {
+          if (doc.querySelector("#notif-bell")) {
             resolve();
             return;
           }

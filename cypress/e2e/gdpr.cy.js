@@ -16,7 +16,7 @@ describe("gdpr", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("h2") || doc.querySelector("[data-testid='gdpr']")) {
+          if (doc.querySelector("#btn-view-data")) {
             resolve();
             return;
           }

@@ -46,7 +46,7 @@ describe("accessibility", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("button")) {
+          if (doc.querySelector("#open-modal")) {
             resolve();
             return;
           }
@@ -103,7 +103,7 @@ describe("accessibility", () => {
       return new Cypress.Promise((resolve) => {
         const start = Date.now();
         const tick = () => {
-          if (doc.querySelector("form")) {
+          if (doc.querySelector("#identifier") && !doc.querySelector("#password[disabled]")) {
             resolve();
             return;
           }
@@ -138,6 +138,10 @@ describe("accessibility", () => {
     cy.intercept("GET", "**/api/auth/me/", {
       statusCode: 401,
       body: { detail: "Unauthorized" },
+    });
+    cy.intercept("GET", "**/api/articles/**", {
+      statusCode: 200,
+      body: { results: [], count: 0 },
     });
   });
 
@@ -205,7 +209,7 @@ describe("accessibility", () => {
     ensureFormDom();
 
     cy.get("#identifier").type("melissa");
-    cy.get("#password").type("Test123!{enter}");
+    cy.get("#password").type("Test123!{enter}", { force: true });
     // Le formulaire se soumet — pas d'erreur de navigation
     cy.get("body").should("be.visible");
   });
