@@ -15,7 +15,10 @@ export default function AnalyticsPage() {
       document.head.appendChild(metaRobots);
     }
     metaRobots.content = "noindex, nofollow";
-    return () => { document.title = prev; };
+    return () => {
+      document.title = prev;
+      metaRobots.content = "index, follow";
+    };
   }, []);
 
   const card =
