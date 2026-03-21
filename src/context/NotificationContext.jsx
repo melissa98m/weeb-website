@@ -12,11 +12,30 @@ export function NotificationProvider({ children }) {
   const wsRef = useRef(null);
   const reconnectTimer = useRef(null);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (!user) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const ws = new WebSocket(`${WS_BASE}/ws/notifications/`);
+    // Fetch an ephemeral ticket via HTTP (cookies work normally with HTTP).
+    // HttpOnly cookies are not forwarded by browsers during WS handshakes on
+    // cross-port origins (e.g. localhost:5173 → localhost:8000, SameSite=Lax).
+    let ticket = "";
+    try {
+      const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-CSRFToken": getCookie("csrftoken") ?? "" },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        ticket = data.ticket ?? "";
+      }
+    } catch { /* silently fall back to cookie */ }
+
+    const wsUrl = ticket
+      ? `${WS_BASE}/ws/notifications/?ticket=${ticket}`
+      : `${WS_BASE}/ws/notifications/`;
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onmessage = (e) => {
@@ -47,6 +66,28 @@ export function NotificationProvider({ children }) {
     return () => {
       clearTimeout(reconnectTimer.current);
       wsRef.current?.close();
+    };
+  }, [connect]);
+
+  useEffect(() => {
+    const handlePageHide = (e) => {
+      if (e.persisted) {
+        // Page en train d'entrer dans le bfcache — fermer la WS pour l'autoriser
+        clearTimeout(reconnectTimer.current);
+        wsRef.current?.close();
+      }
+    };
+    const handlePageShow = (e) => {
+      if (e.persisted) {
+        // Page restaurée depuis le bfcache — reconnecter
+        connect();
+      }
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
     };
   }, [connect]);
 

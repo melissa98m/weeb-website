@@ -87,6 +87,28 @@ export function ChatProvider({ children }) {
   }, []); // stable — utilise userRef pour éviter les re-créations
 
   useEffect(() => {
+    const handlePageHide = (e) => {
+      if (e.persisted) {
+        // Page en train d'entrer dans le bfcache — fermer la WS pour l'autoriser
+        clearTimeout(reconnectRef.current);
+        wsRef.current?.close(1000, "bfcache");
+      }
+    };
+    const handlePageShow = (e) => {
+      if (e.persisted) {
+        // Page restaurée depuis le bfcache — reconnecter
+        connect();
+      }
+    };
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [connect]);
+
+  useEffect(() => {
     if (!user) {
       clearTimeout(reconnectRef.current);
       wsRef.current?.close(1000, "logout");
