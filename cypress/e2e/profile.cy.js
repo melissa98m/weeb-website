@@ -53,12 +53,16 @@ describe("profile", () => {
     cy.fixture("profile_formations").then((data) => {
       cy.intercept("GET", "**/api/formations/**", { statusCode: 200, body: data }).as("formations");
     });
+    cy.intercept("GET", "**/api/formations/*/progress/", {
+      statusCode: 200,
+      body: { progress_percent: 100, modules: [] },
+    }).as("progress");
     cy.fixture("profile_feedbacks").then((data) => {
       cy.intercept("GET", "**/api/feedbacks/**", { statusCode: 200, body: data }).as("feedbacks");
     });
     cy.intercept("POST", "**/api/feedbacks/", {
       statusCode: 200,
-      body: { id: 999, formation: 202, feedback_content: "Super" }
+      body: { id: 999, formation: 201, feedback_content: "Super" }
     }).as("sendFeedback");
   });
 
@@ -70,7 +74,7 @@ describe("profile", () => {
     cy.contains("h2", "Mes formations").should("be.visible");
 
     cy.contains("div", "Formation React").should("be.visible");
-    cy.contains("span", "Feedback").should("be.visible");
+    cy.contains("button", "Donner un feedback").should("be.visible");
 
     cy.contains("button", "Donner un feedback").click();
     cy.get("[role='dialog']").should("be.visible");

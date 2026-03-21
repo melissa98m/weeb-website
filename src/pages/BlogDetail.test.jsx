@@ -64,6 +64,10 @@ describe("BlogDetail page", () => {
     fetch
       .mockResolvedValueOnce({
         ok: true,
+        json: async () => ({ results: [], count: 0 }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
         json: async () => ({
           id: 1,
           title: "Post One",

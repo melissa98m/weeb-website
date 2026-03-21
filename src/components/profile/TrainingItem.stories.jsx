@@ -1,4 +1,5 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import TrainingItem from "./TrainingItem";
 
 const T_FR = {
@@ -17,6 +18,13 @@ const FEEDBACK = {
 const meta = {
   title: "Profile/TrainingItem",
   component: TrainingItem,
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
   argTypes: {
     theme: { control: "radio", options: ["light", "dark"] },
     existingFeedback: { control: "object" },

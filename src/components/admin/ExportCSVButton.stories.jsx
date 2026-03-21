@@ -7,14 +7,14 @@ const meta = {
   argTypes: {
     type: {
       control: "select",
-      options: ["inscrits", "feedbacks", "messages"],
+      options: ["registrations", "feedbacks", "messages"],
     },
     dateFrom: { control: "text" },
     dateTo: { control: "text" },
     label: { control: "text" },
   },
   args: {
-    type: "inscrits",
+    type: "registrations",
     dateFrom: "",
     dateTo: "",
     label: undefined,
@@ -24,8 +24,8 @@ const meta = {
 
 export default meta;
 
-export const Inscrits = {
-  args: { type: "inscrits" },
+export const Registrations = {
+  args: { type: "registrations" },
 };
 
 export const Feedbacks = {
@@ -37,7 +37,7 @@ export const Messages = {
 };
 
 export const CustomLabel = {
-  args: { type: "inscrits", label: "Télécharger les inscrits" },
+  args: { type: "registrations", label: "Télécharger les registrations" },
 };
 
 export const WithDateRange = {

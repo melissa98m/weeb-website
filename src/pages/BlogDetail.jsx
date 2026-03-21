@@ -515,10 +515,10 @@ export default function BlogDetail() {
 
         {/* Section commentaires */}
         <section
-          aria-labelledby=”comments-heading”
+          aria-labelledby="comments-heading"
           className={`rounded-xl border shadow p-6 md:p-8 ${card}`}
         >
-          <h2 id=”comments-heading” className=”text-xl font-semibold mb-6”>
+          <h2 id="comments-heading" className="text-xl font-semibold mb-6">
             {txt.comments_title}
             {comments.length > 0 && (
               <span className={`ml-2 text-base font-normal ${meta}`}>({comments.length})</span>
@@ -527,14 +527,14 @@ export default function BlogDetail() {
 
           {/* Formulaire */}
           {user ? (
-            <form onSubmit={submitComment} className=”mb-8”>
+            <form onSubmit={submitComment} className="mb-8">
               {replyTo && (
                 <div className={`text-sm mb-2 flex items-center gap-2 ${meta}`}>
                   <span>{txt.comment_reply} @{replyTo.username}</span>
                   <button
-                    type=”button”
+                    type="button"
                     onClick={() => setReplyTo(null)}
-                    className=”underline text-xs”
+                    className="underline text-xs"
                   >
                     {txt.comment_cancel}
                   </button>
@@ -548,23 +548,23 @@ export default function BlogDetail() {
                 maxLength={2000}
                 aria-label={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
                 className={`w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
-                  theme === “dark”
-                    ? “bg-[#252525] border-[#444] text-white placeholder-white/40”
-                    : “bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400”
+                  theme === "dark"
+                    ? "bg-[#252525] border-[#444] text-white placeholder-white/40"
+                    : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400"
                 }`}
               />
               {commentError && (
-                <p role=”alert” className=”text-red-500 text-sm mt-1”>{txt.comment_submit_error}</p>
+                <p role="alert" className="text-red-500 text-sm mt-1">{txt.comment_submit_error}</p>
               )}
-              <div className=”flex justify-end mt-2”>
+              <div className="flex justify-end mt-2">
                 <button
-                  type=”submit”
+                  type="submit"
                   disabled={commentSubmitting || !commentText.trim()}
                   className={`px-4 py-2 rounded-md text-sm font-medium shadow hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    theme === “dark” ? “bg-secondary text-white” : “bg-primary text-dark”
+                    theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
                   }`}
                 >
-                  {commentSubmitting ? “…” : txt.comment_submit}
+                  {commentSubmitting ? "…" : txt.comment_submit}
                 </button>
               </div>
             </form>
@@ -574,48 +574,48 @@ export default function BlogDetail() {
 
           {/* Liste des commentaires */}
           {commentsLoading && (
-            <div className=”space-y-4 animate-pulse”>
+            <div className="space-y-4 animate-pulse">
               {[1, 2].map((i) => (
-                <div key={i} className={`h-16 rounded-lg ${theme === “dark” ? “bg-white/5” : “bg-gray-100”}`} />
+                <div key={i} className={`h-16 rounded-lg ${theme === "dark" ? "bg-white/5" : "bg-gray-100"}`} />
               ))}
             </div>
           )}
           {commentsError && !commentsLoading && (
-            <p className=”text-red-500 text-sm”>{txt.comment_error}</p>
+            <p className="text-red-500 text-sm">{txt.comment_error}</p>
           )}
           {!commentsLoading && !commentsError && comments.length === 0 && (
             <p className={`text-sm ${meta}`}>{txt.comment_empty}</p>
           )}
           {!commentsLoading && !commentsError && comments.length > 0 && (
-            <ul className=”space-y-6”>
+            <ul className="space-y-6">
               {comments.map((c) => (
                 <li key={c.id}>
                   {/* Commentaire racine */}
-                  <div className={`rounded-lg p-4 ${theme === “dark” ? “bg-white/5” : “bg-gray-50”}`}>
-                    <div className=”flex items-start justify-between gap-2 mb-2”>
-                      <span className=”font-medium text-sm”>
-                        {c.author?.username || c.author?.first_name || “—“}
+                  <div className={`rounded-lg p-4 ${theme === "dark" ? "bg-white/5" : "bg-gray-50"}`}>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <span className="font-medium text-sm">
+                        {c.author?.username || c.author?.first_name || "—"}
                       </span>
                       <span className={`text-xs ${meta}`}>
-                        {new Date(c.created_at).toLocaleDateString(language === “fr” ? “fr-FR” : “en-US”)}
+                        {new Date(c.created_at).toLocaleDateString(language === "fr" ? "fr-FR" : "en-US")}
                       </span>
                     </div>
-                    <p className=”text-sm leading-relaxed”>{c.content}</p>
+                    <p className="text-sm leading-relaxed">{c.content}</p>
                     <div className={`flex gap-3 mt-2 text-xs ${meta}`}>
                       {user && (
                         <button
-                          type=”button”
-                          onClick={() => setReplyTo({ id: c.id, username: c.author?.username || “?” })}
-                          className=”hover:underline”
+                          type="button"
+                          onClick={() => setReplyTo({ id: c.id, username: c.author?.username || "?" })}
+                          className="hover:underline"
                         >
                           {txt.comment_reply}
                         </button>
                       )}
                       {user && (user.id === c.author?.id || user.is_staff) && (
                         <button
-                          type=”button”
+                          type="button"
                           onClick={() => deleteComment(c.id)}
-                          className=”hover:underline text-red-400”
+                          className="hover:underline text-red-400"
                         >
                           {txt.comment_delete}
                         </button>
@@ -625,24 +625,24 @@ export default function BlogDetail() {
 
                   {/* Réponses (niveau 1) */}
                   {c.replies?.length > 0 && (
-                    <ul className=”ml-6 mt-3 space-y-3”>
+                    <ul className="ml-6 mt-3 space-y-3">
                       {c.replies.map((r) => (
                         <li
                           key={r.id}
-                          className={`rounded-lg p-3 ${theme === “dark” ? “bg-white/3 border border-white/10” : “bg-white border border-gray-100”}`}
+                          className={`rounded-lg p-3 ${theme === "dark" ? "bg-white/3 border border-white/10" : "bg-white border border-gray-100"}`}
                         >
-                          <div className=”flex items-start justify-between gap-2 mb-1”>
-                            <span className=”font-medium text-sm”>
-                              {r.author?.username || r.author?.first_name || “—“}
+                          <div className="flex items-start justify-between gap-2 mb-1">
+                            <span className="font-medium text-sm">
+                              {r.author?.username || r.author?.first_name || "—"}
                             </span>
                             <span className={`text-xs ${meta}`}>
-                              {new Date(r.created_at).toLocaleDateString(language === “fr” ? “fr-FR” : “en-US”)}
+                              {new Date(r.created_at).toLocaleDateString(language === "fr" ? "fr-FR" : "en-US")}
                             </span>
                           </div>
-                          <p className=”text-sm leading-relaxed”>{r.content}</p>
+                          <p className="text-sm leading-relaxed">{r.content}</p>
                           {user && (user.id === r.author?.id || user.is_staff) && (
                             <button
-                              type=”button”
+                              type="button"
                               onClick={() => deleteComment(r.id)}
                               className={`mt-1 text-xs hover:underline text-red-400`}
                             >
@@ -659,7 +659,7 @@ export default function BlogDetail() {
           )}
         </section>
 
-        {/* Carrousel “même genre” (composant séparé) */}
+        {/* Carrousel "même genre" (composant séparé) */}
         <RelatedCarousel
           currentId={currId}
           currentGenres={chips}

@@ -3,9 +3,12 @@ import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
 import Pagination from "../ui/Pagination";
 import PageSizer from "../ui/PageSizer";
+import FormationContentEditor from "./FormationContentEditor";
 
 export default function FormationDetailsModal({ open, onClose, apiBase, formation, onDeleted }) {
   const { theme } = useTheme();
+
+  const [tab, setTab] = useState("inscrits"); // "inscrits" | "contenu"
 
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
@@ -131,7 +134,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
   }, [apiBase, open, formation?.id, pageSize, fetchJSON, fmtUser, startTask]);
 
   // Reload when open/formation changes or page changes
-  useEffect(() => { setPage(1); }, [formation?.id, open, pageSize]);
+  useEffect(() => { setPage(1); setTab("inscrits"); }, [formation?.id, open, pageSize]);
   useEffect(() => { load(page); }, [load, page]);
 
   const doDelete = useCallback(async () => {
@@ -198,8 +201,38 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
           </div>
         </div>
 
-        {/* Liste inscrits */}
-        <div className="mt-4 rounded-xl border overflow-hidden">
+        {/* Onglets */}
+        <div className={`mt-4 flex gap-1 border-b ${theme === "dark" ? "border-[#333]" : "border-gray-200"}`}>
+          {[
+            { key: "inscrits", label: "Inscrits" },
+            { key: "contenu", label: "Contenu" },
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTab(key)}
+              className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition ${
+                tab === key
+                  ? "border-indigo-500 text-indigo-500"
+                  : `border-transparent ${theme === "dark" ? "text-white/60 hover:text-white" : "text-gray-500 hover:text-gray-800"}`
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Onglet Contenu */}
+        {tab === "contenu" && (
+          <FormationContentEditor
+            apiBase={apiBase}
+            formationId={formation?.id}
+            theme={theme}
+          />
+        )}
+
+        {/* Onglet Inscrits */}
+        {tab === "inscrits" && <div className="mt-4 rounded-xl border overflow-hidden">
           <div className={`hidden md:block ${headRow}`}>
             <div className="grid grid-cols-2 gap-0">
               <div className="p-3 font-medium">Utilisateur</div>
@@ -246,13 +279,15 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
               </ul>
             )}
           </div>
-        </div>
+        </div>}
 
-        {/* Pagination interne */}
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <PageSizer pageSize={pageSize} onChange={setPageSize} />
-          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
-        </div>
+        {/* Pagination interne (onglet inscrits seulement) */}
+        {tab === "inscrits" && (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <PageSizer pageSize={pageSize} onChange={setPageSize} />
+            <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+          </div>
+        )}
       </div>
     </div>
   );

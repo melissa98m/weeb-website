@@ -28,8 +28,8 @@ describe("ExportCSVButton", () => {
     delete global.fetch;
   });
 
-  it("affiche le libellé par défaut pour le type 'inscrits'", () => {
-    render(<ExportCSVButton type="inscrits" />);
+  it("affiche le libellé par défaut pour le type 'registrations'", () => {
+    render(<ExportCSVButton type="registrations" />);
     expect(screen.getByRole("button")).toHaveTextContent("Exporter Inscrits");
   });
 
@@ -44,7 +44,7 @@ describe("ExportCSVButton", () => {
   });
 
   it("utilise un libellé personnalisé si fourni", () => {
-    render(<ExportCSVButton type="inscrits" label="Télécharger CSV" />);
+    render(<ExportCSVButton type="registrations" label="Télécharger CSV" />);
     expect(screen.getByRole("button")).toHaveTextContent("Télécharger CSV");
   });
 
@@ -52,7 +52,7 @@ describe("ExportCSVButton", () => {
     let resolve;
     global.fetch = vi.fn(() => new Promise((r) => { resolve = r; }));
     const user = userEvent.setup();
-    render(<ExportCSVButton type="inscrits" />);
+    render(<ExportCSVButton type="registrations" />);
 
     await user.click(screen.getByRole("button"));
     expect(screen.getByRole("button")).toBeDisabled();
@@ -82,7 +82,7 @@ describe("ExportCSVButton", () => {
       blob: () => Promise.resolve(new Blob([])),
     });
     const user = userEvent.setup();
-    render(<ExportCSVButton type="inscrits" dateFrom="2025-01-01" dateTo="2025-12-31" />);
+    render(<ExportCSVButton type="registrations" dateFrom="2025-01-01" dateTo="2025-12-31" />);
 
     await user.click(screen.getByRole("button"));
     await waitFor(() => expect(global.fetch).toHaveBeenCalled());
@@ -105,7 +105,7 @@ describe("ExportCSVButton", () => {
   it("affiche une erreur si le fetch échoue (réseau)", async () => {
     global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
     const user = userEvent.setup();
-    render(<ExportCSVButton type="inscrits" />);
+    render(<ExportCSVButton type="registrations" />);
 
     await user.click(screen.getByRole("button"));
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
@@ -120,7 +120,7 @@ describe("ExportCSVButton", () => {
         blob: () => Promise.resolve(new Blob([])),
       });
     const user = userEvent.setup();
-    render(<ExportCSVButton type="inscrits" />);
+    render(<ExportCSVButton type="registrations" />);
 
     await user.click(screen.getByRole("button"));
     await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
@@ -135,7 +135,7 @@ describe("ExportCSVButton", () => {
       blob: () => Promise.resolve(new Blob([])),
     });
     const user = userEvent.setup();
-    render(<ExportCSVButton type="inscrits" />);
+    render(<ExportCSVButton type="registrations" />);
 
     await user.click(screen.getByRole("button"));
     await waitFor(() => expect(screen.getByRole("button")).not.toBeDisabled());
