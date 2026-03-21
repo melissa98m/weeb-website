@@ -177,10 +177,14 @@ describe("admin post endpoints", () => {
     cy.fixture("admin_messages").then((data) => {
       cy.intercept("GET", "**/api/messages/**", { statusCode: 200, body: data }).as("messages");
     });
-    cy.intercept("PATCH", "**/api/messages/9/", { statusCode: 200, body: { id: 9, is_processed: true } }).as("patchMessage");
+    cy.intercept("PATCH", "**/api/messages/9/", {
+      statusCode: 200,
+      body: { id: 9, status: "resolu", is_processed: true },
+    }).as("patchMessage");
 
     cy.visit("/admin/messages");
-    ensureProcessDom();
-    cy.get("table").contains("button", "Marquer comme traité").first().click();
+    cy.get("table tbody tr").first().click();
+    cy.get("table").contains("button", "Résolu").first().click();
+    cy.wait("@patchMessage");
   });
 });

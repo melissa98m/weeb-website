@@ -1,8 +1,17 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import TrainingItem from "./TrainingItem";
+
+beforeEach(() => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false }));
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe("TrainingItem", () => {
   const t = {
@@ -14,16 +23,18 @@ describe("TrainingItem", () => {
   it("calls onGiveFeedback when no feedback exists", async () => {
     const user = userEvent.setup();
     const onGiveFeedback = vi.fn();
-    const formation = { id: 1, name: "React" };
+    const formation = { id: 1, name: "React", progress_percent: 100 };
 
     render(
-      <TrainingItem
-        formation={formation}
-        existingFeedback={null}
-        theme="light"
-        t={t}
-        onGiveFeedback={onGiveFeedback}
-      />
+      <MemoryRouter>
+        <TrainingItem
+          formation={formation}
+          existingFeedback={null}
+          theme="light"
+          t={t}
+          onGiveFeedback={onGiveFeedback}
+        />
+      </MemoryRouter>
     );
 
     await user.click(screen.getByRole("button", { name: "Give feedback" }));
@@ -32,13 +43,15 @@ describe("TrainingItem", () => {
 
   it("shows existing feedback", () => {
     render(
-      <TrainingItem
-        formation={{ id: 2, name: "Node" }}
-        existingFeedback={{ feedback_content: "Great" }}
-        theme="light"
-        t={t}
-        onGiveFeedback={vi.fn()}
-      />
+      <MemoryRouter>
+        <TrainingItem
+          formation={{ id: 2, name: "Node", progress_percent: 100 }}
+          existingFeedback={{ feedback_content: "Great" }}
+          theme="light"
+          t={t}
+          onGiveFeedback={vi.fn()}
+        />
+      </MemoryRouter>
     );
 
     expect(screen.getByText(/Already sent/)).toBeInTheDocument();

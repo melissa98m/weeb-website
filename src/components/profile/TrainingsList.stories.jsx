@@ -1,4 +1,5 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import TrainingsList from "./TrainingsList";
 
 const T_FR = {
@@ -23,6 +24,13 @@ const FB_MAP = {
 const meta = {
   title: "Profile/TrainingsList",
   component: TrainingsList,
+  decorators: [
+    (Story) => (
+      <MemoryRouter>
+        <Story />
+      </MemoryRouter>
+    ),
+  ],
   argTypes: {
     theme: { control: "radio", options: ["light", "dark"] },
     loading: { control: "boolean" },

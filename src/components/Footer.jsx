@@ -158,14 +158,14 @@ export default function Footer() {
             en: footerEn.legal_notice,
             fr: footerFr.legal_notice,
           },
-          href: "/mentions-legales",
+          href: "/legal-notices",
         },
         {
           label: {
             en: footerEn.privacy_policy,
             fr: footerFr.privacy_policy,
           },
-          href: "/politique-confidentialite",
+          href: "/privacy-policy",
         },
       ],
     },
@@ -248,7 +248,7 @@ export default function Footer() {
           <div className={`text-xs ${theme === "dark" ? "text-slate-600" : "text-slate-300"}`}>
             <p id="newsletter-privacy">
               {t.newsletter_privacy}{" "}
-              <a href="/politique-confidentialite" className="underline">
+              <a href="/privacy-policy" className="underline">
                 {t.privacy_policy}
               </a>
             </p>

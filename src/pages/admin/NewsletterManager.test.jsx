@@ -61,7 +61,7 @@ describe("NewsletterManager", () => {
     setup();
     await waitFor(() => screen.getByText(/42 abonné/i));
 
-    const btn = screen.getByRole("button", { name: /envoyer la campagne/i });
+    const btn = screen.getByRole("button", { name: /envoyer maintenant/i });
     expect(btn).toBeDisabled();
   });
 
@@ -70,7 +70,7 @@ describe("NewsletterManager", () => {
     await waitFor(() => screen.getByText(/42 abonné/i));
 
     await user.type(screen.getByLabelText(/sujet/i), "Mon sujet");
-    const btn = screen.getByRole("button", { name: /envoyer la campagne/i });
+    const btn = screen.getByRole("button", { name: /envoyer maintenant/i });
     expect(btn).toBeDisabled();
   });
 
@@ -80,7 +80,7 @@ describe("NewsletterManager", () => {
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps de l'email");
-    const btn = screen.getByRole("button", { name: /envoyer la campagne/i });
+    const btn = screen.getByRole("button", { name: /envoyer maintenant/i });
     expect(btn).not.toBeDisabled();
   });
 
@@ -90,7 +90,7 @@ describe("NewsletterManager", () => {
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
-    await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
+    await user.click(screen.getByRole("button", { name: /envoyer maintenant/i }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText(/confirmer l'envoi/i)).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe("NewsletterManager", () => {
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
-    await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
+    await user.click(screen.getByRole("button", { name: /envoyer maintenant/i }));
     await user.click(screen.getByRole("button", { name: /annuler/i }));
 
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -114,7 +114,7 @@ describe("NewsletterManager", () => {
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
-    await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
+    await user.click(screen.getByRole("button", { name: /envoyer maintenant/i }));
     await user.keyboard("{Escape}");
 
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -137,11 +137,11 @@ describe("NewsletterManager", () => {
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
-    await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
+    await user.click(screen.getByRole("button", { name: /envoyer maintenant/i }));
     await user.click(screen.getByRole("button", { name: /^envoyer$/i }));
 
     await waitFor(() =>
-      expect(screen.getByRole("status")).toHaveTextContent(/42 abonné/i)
+      expect(screen.getByRole("status")).toHaveTextContent(/campagne/i)
     );
   });
 
@@ -149,14 +149,13 @@ describe("NewsletterManager", () => {
     const user = setup();
     await waitFor(() => screen.getByText(/42 abonné/i));
 
-    global.fetch = vi.fn().mockResolvedValue({
-      ok: false,
-      json: () => Promise.resolve({ detail: "Serveur indisponible" }),
-    });
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: () => Promise.resolve({ id: 99 }) })
+      .mockResolvedValue({ ok: false, json: () => Promise.resolve({ detail: "Serveur indisponible" }) });
 
     await user.type(screen.getByLabelText(/sujet/i), "Test sujet");
     await user.type(screen.getByLabelText(/corps texte brut/i), "Corps");
-    await user.click(screen.getByRole("button", { name: /envoyer la campagne/i }));
+    await user.click(screen.getByRole("button", { name: /envoyer maintenant/i }));
     await user.click(screen.getByRole("button", { name: /^envoyer$/i }));
 
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/serveur indisponible/i));

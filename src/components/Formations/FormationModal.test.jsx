@@ -4,6 +4,10 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import FormationModal from "./FormationModal";
 
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: vi.fn(() => ({ user: null })),
+}));
+
 const t = { close: "Close", contact_us: "Contact us" };
 const formation = { name: "React Basics", description: "Learn the basics" };
 
