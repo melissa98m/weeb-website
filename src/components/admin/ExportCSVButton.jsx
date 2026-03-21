@@ -26,7 +26,7 @@ function IconDownload({ size = 16 }) {
  * Bouton qui déclenche le téléchargement d'un export CSV ou PDF depuis l'API.
  *
  * @param {object} props
- * @param {"inscrits"|"feedbacks"|"messages"} props.type - Type d'export.
+ * @param {"registrations"|"feedbacks"|"messages"} props.type - Type d'export.
  * @param {"csv"|"pdf"} [props.format="csv"] - Format de sortie.
  * @param {string} [props.dateFrom] - Filtre date de début (YYYY-MM-DD).
  * @param {string} [props.dateTo]   - Filtre date de fin (YYYY-MM-DD).
@@ -38,7 +38,7 @@ export default function ExportCSVButton({ type, format = "csv", dateFrom, dateTo
   const [error, setError] = useState(null);
 
   const LABELS = {
-    inscrits: "Inscrits",
+    registrations: "Inscrits",
     feedbacks: "Feedbacks",
     messages: "Messages",
   };
