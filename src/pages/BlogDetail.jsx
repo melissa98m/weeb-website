@@ -145,15 +145,26 @@ export default function BlogDetail() {
         }),
       });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const newComment = await r.json();
       setCommentText("");
       setReplyTo(null);
-      await fetchComments();
+      if (replyTo) {
+        setComments((prev) =>
+          prev.map((c) =>
+            c.id === replyTo.id
+              ? { ...c, replies: [...(c.replies ?? []), newComment] }
+              : c
+          )
+        );
+      } else {
+        setComments((prev) => [...prev, newComment]);
+      }
     } catch {
       setCommentError(true);
     } finally {
       setCommentSubmitting(false);
     }
-  }, [commentText, currId, replyTo, fetchComments]);
+  }, [commentText, currId, replyTo]);
 
   const deleteComment = useCallback(async (commentId) => {
     const csrfToken = getCookie("csrftoken");
@@ -163,9 +174,13 @@ export default function BlogDetail() {
         credentials: "include",
         headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
       });
-      await fetchComments();
+      setComments((prev) =>
+        prev
+          .filter((c) => c.id !== commentId)
+          .map((c) => ({ ...c, replies: (c.replies ?? []).filter((r) => r.id !== commentId) }))
+      );
     } catch { /* noop */ }
-  }, [fetchComments]);
+  }, []);
 
   const containerRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
@@ -238,6 +253,28 @@ export default function BlogDetail() {
   }, [post]);
   const readingMin = useMemo(() => estimateReadingMinutes(post?.article_content ?? ""), [post]);
 
+  const coverUrl = useMemo(() => {
+    return (
+      resolveImageUrl(post?.link_image || post?.cover || post?.image || post?.image_url) ||
+      `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`
+    );
+  }, [post, currId]);
+
+  // Inject a <link rel="preload"> as soon as the cover URL is known so the
+  // browser can start fetching it without waiting for the <img> to render.
+  useEffect(() => {
+    if (!coverUrl) return;
+    const link = document.createElement("link");
+    link.rel = "preload";
+    link.as = "image";
+    link.href = coverUrl;
+    link.setAttribute("fetchpriority", "high");
+    document.head.appendChild(link);
+    return () => {
+      if (document.head.contains(link)) document.head.removeChild(link);
+    };
+  }, [coverUrl]);
+
   // voisins
   const index = useMemo(() => ids.findIndex(v => Number(v) === currId), [ids, currId]);
   const prevId = index > 0 ? ids[index - 1] : null;
@@ -248,27 +285,31 @@ export default function BlogDetail() {
 
   if (loading) {
     return (
-      <main className="px-6 py-16 max-w-4xl mx-auto">
-        <Skeleton theme={theme} />
+      <main className="px-0 md:px-6 py-12 md:py-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <Skeleton theme={theme} />
+        </div>
       </main>
     );
   }
 
   if (error || !post) {
     return (
-      <main className="px-6 py-16 max-w-3xl mx-auto">
-        <div className={`rounded-xl border p-8 text-center ${card}`}>
-          <h1 className="text-2xl font-semibold mb-2">{txt.not_found_title}</h1>
-          <p className={meta}>{txt.not_found_desc}</p>
-          <div className="mt-6">
-            <Button
-              to="/blog"
-              className={`px-4 py-2 rounded-md shadow hover:brightness-110 ${
-                theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
-              }`}
-            >
-              {txt.back}
-            </Button>
+      <main className="px-0 md:px-6 py-12 md:py-16">
+        <div className="max-w-3xl mx-auto px-6">
+          <div className={`rounded-xl border p-8 text-center ${card}`}>
+            <h1 className="text-2xl font-semibold mb-2">{txt.not_found_title}</h1>
+            <p className={meta}>{txt.not_found_desc}</p>
+            <div className="mt-6">
+              <Button
+                to="/blog"
+                className={`px-4 py-2 rounded-md shadow hover:brightness-110 ${
+                  theme === "dark" ? "bg-secondary text-white" : "bg-primary text-dark"
+                }`}
+              >
+                {txt.back}
+              </Button>
+            </div>
           </div>
         </div>
       </main>
@@ -281,11 +322,6 @@ export default function BlogDetail() {
     "—";
   const dateIso = post.created_at || post.updated_at || post.date;
   const chips = Array.isArray(post.genres) ? post.genres : [];
-
-  const placeholderCover = `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`;
-  const coverUrl =
-    resolveImageUrl(post?.link_image || post?.cover || post?.image || post?.image_url) ||
-    placeholderCover;
 
   return (
     <main className="px-0 md:px-6 py-12 md:py-16">
@@ -316,11 +352,15 @@ export default function BlogDetail() {
             <img
               src={coverUrl}
               alt={title}
+              width={1200}
+              height={528}
               className="h-64 md:h-[22rem] w-full object-cover"
-              loading="lazy"
+              loading="eager"
+              fetchpriority="high"
               onError={(e) => {
-                if (e.currentTarget.src !== placeholderCover) {
-                  e.currentTarget.src = placeholderCover;
+                const fallback = `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`;
+                if (e.currentTarget.src !== fallback) {
+                  e.currentTarget.src = fallback;
                 }
               }}
             />
@@ -328,8 +368,8 @@ export default function BlogDetail() {
 
           <div className="p-6 md:p-8">
             <motion.h1
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.25 }}
               className="text-2xl md:text-3xl font-bold mb-2"
             >
@@ -462,8 +502,8 @@ export default function BlogDetail() {
                         .map((p, i) => (
                           <motion.p
                             key={i}
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
                             transition={{ duration: 0.25, delay: i * 0.05 }}
                             className={`${i === 0 ? "mt-0" : "mt-4"}`}
                           >

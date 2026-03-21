@@ -3,6 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { API_BASE, ensureCsrf } from "../../lib/api";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import { QCMEditor } from "../../components/admin/FormationContentEditor";
+import RichTextEditor from "../../components/admin/RichTextEditor";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -282,7 +283,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
             {addingCours ? (
               <div className={`rounded-lg border p-2.5 space-y-2 mt-1 ${theme === "dark" ? "border-[#444] bg-[#111]" : "border-gray-200 bg-gray-50"}`}>
                 <input className={inputBase} placeholder="Titre du cours *" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
-                <textarea className={`${inputBase} min-h-[52px] resize-y`} placeholder="Contenu (optionnel)" value={newContent} onChange={(e) => setNewContent(e.target.value)} />
+                <RichTextEditor value={newContent} onChange={setNewContent} theme={theme} uploadEndpoint={`${apiBase}/upload/image/`} />
                 <input className={inputBase} placeholder="URL vidéo (optionnel)" value={newVideo} onChange={(e) => setNewVideo(e.target.value)} />
                 <ErrMsg msg={addErr} />
                 <div className="flex gap-2 justify-end">
@@ -458,7 +459,7 @@ function CoursRow({ apiBase, cours: initialCours, theme, onUpdated, onDeleted })
     return (
       <div className={`rounded-xl border p-3 space-y-2 ${block}`}>
         <input className={inputBase} placeholder="Titre *" value={title} onChange={(e) => setTitle(e.target.value)} autoFocus />
-        <textarea className={`${inputBase} min-h-[60px] resize-y`} placeholder="Contenu (optionnel)" value={content} onChange={(e) => setContent(e.target.value)} />
+        <RichTextEditor value={content} onChange={setContent} theme={theme} uploadEndpoint={`${apiBase}/upload/image/`} />
         <input className={inputBase} placeholder="URL vidéo (optionnel)" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
         <ErrMsg msg={err} />
         <div className="flex gap-2 justify-end">
@@ -538,7 +539,7 @@ function CoursTab({ apiBase, cours, theme, onCoursCreated, onCoursUpdated, onCou
       {adding && (
         <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"}`}>
           <input autoFocus className={inputBase} placeholder="Titre du cours *" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") createCours(); if (e.key === "Escape") setAdding(false); }} />
-          <textarea className={`${inputBase} min-h-[56px] resize-y`} placeholder="Contenu (optionnel)" value={newContent} onChange={(e) => setNewContent(e.target.value)} />
+          <RichTextEditor value={newContent} onChange={setNewContent} theme={theme} uploadEndpoint={`${apiBase}/upload/image/`} />
           <input className={inputBase} placeholder="URL vidéo (optionnel)" value={newVideo} onChange={(e) => setNewVideo(e.target.value)} />
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
