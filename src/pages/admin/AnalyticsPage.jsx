@@ -1,6 +1,8 @@
-import React, { useEffect } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
-import AnalyticsCharts from "../../components/admin/AnalyticsCharts";
+
+// recharts ~348KB — chargé uniquement quand la page admin est visitée
+const AnalyticsCharts = lazy(() => import("../../components/admin/AnalyticsCharts"));
 
 export default function AnalyticsPage() {
   const { theme } = useTheme();
@@ -36,7 +38,15 @@ export default function AnalyticsPage() {
       </header>
 
       <section className={`rounded-2xl border p-4 ${card}`}>
-        <AnalyticsCharts theme={theme} />
+        <Suspense fallback={
+          <div className="animate-pulse space-y-4 py-6">
+            {[80, 60, 90, 50].map((w, i) => (
+              <div key={i} className="h-4 rounded bg-gray-300/20" style={{ width: `${w}%` }} />
+            ))}
+          </div>
+        }>
+          <AnalyticsCharts theme={theme} />
+        </Suspense>
       </section>
     </main>
   );

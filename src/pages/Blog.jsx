@@ -10,6 +10,7 @@ import Pagination from "../components/ui/Pagination";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 import { getEnv } from "../lib/env";
+import { setCanonical, setOgMeta, SITE_URL } from "../lib/seo";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -61,6 +62,35 @@ export default function Blog() {
   // Modal
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+
+  // SEO
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr ? "Blog | Weeb — Actualités et tutoriels web" : "Blog | Weeb — Web News & Tutorials";
+    const desc = isFr
+      ? "Retrouvez nos articles sur le développement web, les tendances tech et nos tutoriels pratiques."
+      : "Find our articles on web development, tech trends and practical tutorials.";
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const cleanCanonical = setCanonical("/blog");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/blog`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+    };
+  }, [language]);
 
   // Fetch toutes les pages (DRF)
   useEffect(() => {

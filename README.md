@@ -117,6 +117,7 @@ weeb-website/
 │   │   └── AdminLayout.jsx
 │   ├── lib/
 │   │   ├── api.js                        # Client HTTP + CSRF
+│   │   ├── seo.js                        # Helpers SEO (canonical, og:meta, JSON-LD)
 │   │   └── env.js
 │   ├── pages/
 │   │   ├── admin/
@@ -277,6 +278,9 @@ VITE_OAUTH_GITHUB_URL=http://localhost:8000/api/auth/oauth/github/
 - **📊 Tableau de bord personnel** : Section "Mon tableau de bord" dans `/profile` avec stats de lecture et timeline des formations (`DashboardStats`)
 - **📤 Exports CSV** : Export des inscrits, feedbacks et messages depuis l'admin (`ExportCSVButton`)
 - **📈 Analytics admin** : Graphiques recharts (BarChart + PieChart) dans `AdminHome` via `AnalyticsCharts`
+- **🔎 SEO** : Chaque page publique définit canonical, Open Graph complet (og:title/description/image/url/type) et Twitter Cards. `BlogDetail` injecte un JSON-LD `Article` + `BreadcrumbList`. `Home` injecte un JSON-LD `WebSite` avec `SearchAction`. Les pages privées/admin ont `noindex, nofollow`. Helper centralisé : `src/lib/seo.js`.
+- **♿ Accessibilité** : Animations conditionnées à `prefers-reduced-motion` (via `useReducedMotion` Framer Motion), `<label>` visible sur tous les champs de formulaire, `role="status" aria-live="polite"` sur le fallback Suspense.
+- **🍪 Analytics conditionnels** : Vercel Analytics et Sentry initialisés uniquement après acceptation des cookies (`localStorage["cookie-consent"]`), conformément au RGPD.
 
 ## 🔐 Authentification et rôles
 

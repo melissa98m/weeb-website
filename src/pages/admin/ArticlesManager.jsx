@@ -19,6 +19,17 @@ export default function ArticlesManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Articles — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
     ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"

@@ -39,6 +39,17 @@ export default function ResetPassword() {
   });
 
   useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Réinitialiser le mot de passe | Weeb" : "Reset Password | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
+
+  useEffect(() => {
     const { password } = form;
     setPwdValidations({
       length: password.length >= 8,

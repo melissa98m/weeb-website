@@ -92,7 +92,7 @@ export default function SearchResults() {
     let alive = true;
     const ctrl = new AbortController();
 
-    (async () => {
+    const timer = setTimeout(async () => {
       try {
         setLoading(true);
         setError(null);
@@ -108,9 +108,9 @@ export default function SearchResults() {
       } finally {
         if (alive) setLoading(false);
       }
-    })();
+    }, 300);
 
-    return () => { alive = false; ctrl.abort(); };
+    return () => { alive = false; ctrl.abort(); clearTimeout(timer); };
   }, [q]);
 
   const totalResults = (results?.articles?.length ?? 0) + (results?.formations?.length ?? 0);

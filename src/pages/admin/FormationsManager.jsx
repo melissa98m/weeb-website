@@ -25,6 +25,17 @@ export default function FormationsManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Formations — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");

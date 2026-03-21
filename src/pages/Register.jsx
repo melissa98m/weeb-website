@@ -45,6 +45,18 @@ export default function Register() {
     special: false,
   });
 
+  // SEO
+  useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Créer un compte | Weeb" : "Sign Up | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
+
   // Focus sur le premier champ au montage
   useEffect(() => {
     if (usernameRef.current) {

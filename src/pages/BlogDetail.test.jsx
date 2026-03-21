@@ -18,6 +18,7 @@ vi.mock("framer-motion", () => ({
   AnimatePresence: ({ children }) => <>{children}</>,
   useScroll: () => ({ scrollYProgress: 0 }),
   useSpring: (v) => v,
+  useReducedMotion: () => false,
 }));
 
 vi.mock("../context/ThemeContext", () => ({
