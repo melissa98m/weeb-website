@@ -36,174 +36,91 @@ export default function Profile() {
 
   const userId = user?.id ?? user?.pk ?? user?.user_id ?? null;
 
-  // ---------- Formations ----------
+  // ---------- Formations + Feedbacks + Dashboard (parallèle) ----------
   const [formations, setFormations] = useState([]);
   const [fLoading, setFLoading] = useState(true);
   const [fError, setFError] = useState(null);
 
-  useEffect(() => {
-    // n’essaie PAS de fetch tant que l’auth n’est pas prête ou pas d’id
-    if (authLoading || !userId) return;
-
-    let alive = true;
-
-    const fetchAllPages = async (url, signal) => {
-      const all = [];
-      let next = url;
-      while (next) {
-        const res = await fetch(next, {
-          credentials: "include",
-          headers: { Accept: "application/json" },
-          signal,
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          all.push(...data);
-          break; // non paginé
-        } else {
-          const results = Array.isArray(data.results) ? data.results : [];
-          all.push(...results);
-          next = data.next || null;
-        }
-      }
-      return all;
-    };
-
-    const withRetry = async (fn, retries = 1) => {
-      try {
-        return await fn();
-      } catch (e) {
-        if (retries <= 0) throw e;
-        // petit backoff
-        await new Promise((r) => setTimeout(r, 250));
-        return withRetry(fn, retries - 1);
-      }
-    };
-
-    const ctr = new AbortController();
-    (async () => {
-      try {
-        setFLoading(true);
-        setFError(null);
-
-        const baseUrl = `${API_BASE}/formations/?user=${encodeURIComponent(
-          userId
-        )}&_=${Date.now()}`; // cache-buster
-
-        const list = await withRetry(
-          () => fetchAllPages(baseUrl, ctr.signal),
-          1 // 1 retry
-        );
-
-        if (!alive) return;
-        setFormations(list);
-      } catch (e) {
-        if (!alive) return;
-        setFError(e);
-        setFormations([]);
-      } finally {
-        if (alive) setFLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-      ctr.abort();
-    };
-  }, [API_BASE, authLoading, userId]); // attend authLoading=false + userId
-
-  // ---------- Feedbacks existants ----------
   const [fbMap, setFbMap] = useState({});
   const [fbLoading, setFbLoading] = useState(true);
 
-  useEffect(() => {
-    if (authLoading || !userId) return;
-
-    let alive = true;
-    const ctr = new AbortController();
-
-    const fetchAllPages = async (url, signal) => {
-      const all = [];
-      let next = url;
-      while (next) {
-        const res = await fetch(next, {
-          credentials: "include",
-          headers: { Accept: "application/json" },
-          signal,
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          all.push(...data);
-          break;
-        } else {
-          const results = Array.isArray(data.results) ? data.results : [];
-          all.push(...results);
-          next = data.next || null;
-        }
-      }
-      return all;
-    };
-
-    (async () => {
-      try {
-        setFbLoading(true);
-        const baseUrl = `${API_BASE}/feedbacks/?user=${encodeURIComponent(
-          userId
-        )}&_=${Date.now()}`;
-
-        const list = await fetchAllPages(baseUrl, ctr.signal);
-
-        if (!alive) return;
-        const map = {};
-        for (const item of list) {
-          const fid =
-            typeof item.formation === "object" ? item.formation?.id : item.formation;
-          if (fid != null) map[fid] = item;
-        }
-        setFbMap(map);
-      } catch {
-        if (!alive) return;
-        setFbMap({});
-      } finally {
-        if (alive) setFbLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-      ctr.abort();
-    };
-  }, [API_BASE, authLoading, userId]);
-
-  // ---------- Dashboard stats ----------
   const [dashData, setDashData] = useState(null);
   const [dashLoading, setDashLoading] = useState(true);
   const [dashError, setDashError] = useState(null);
 
   useEffect(() => {
     if (authLoading || !userId) return;
+
     let alive = true;
     const ctr = new AbortController();
 
-    (async () => {
-      try {
-        setDashLoading(true);
-        setDashError(null);
-        const res = await fetch(`${API_BASE}/dashboard/`, {
+    const fetchAllPages = async (url) => {
+      const all = [];
+      let next = url;
+      while (next) {
+        const res = await fetch(next, {
           credentials: "include",
           headers: { Accept: "application/json" },
           signal: ctr.signal,
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (alive) setDashData(data);
-      } catch (e) {
-        if (alive) setDashError(e.message);
-      } finally {
-        if (alive) setDashLoading(false);
+        if (Array.isArray(data)) { all.push(...data); break; }
+        all.push(...(Array.isArray(data.results) ? data.results : []));
+        next = data.next || null;
       }
+      return all;
+    };
+
+    setFLoading(true); setFbLoading(true); setDashLoading(true);
+    setFError(null); setDashError(null);
+
+    const ts = Date.now();
+
+    (async () => {
+      const [formationsRes, feedbacksRes, dashRes] = await Promise.allSettled([
+        fetchAllPages(`${API_BASE}/formations/?user=${encodeURIComponent(userId)}&_=${ts}`),
+        fetchAllPages(`${API_BASE}/feedbacks/?user=${encodeURIComponent(userId)}&_=${ts}`),
+        fetch(`${API_BASE}/dashboard/`, {
+          credentials: "include",
+          headers: { Accept: "application/json" },
+          signal: ctr.signal,
+        }).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      ]);
+
+      if (!alive) return;
+
+      // Formations
+      if (formationsRes.status === "fulfilled") {
+        setFormations(formationsRes.value);
+        setFError(null);
+      } else {
+        setFormations([]);
+        setFError(formationsRes.reason);
+      }
+      setFLoading(false);
+
+      // Feedbacks → map { formation_id: feedback }
+      if (feedbacksRes.status === "fulfilled") {
+        const map = {};
+        for (const item of feedbacksRes.value) {
+          const fid = typeof item.formation === "object" ? item.formation?.id : item.formation;
+          if (fid != null) map[fid] = item;
+        }
+        setFbMap(map);
+      } else {
+        setFbMap({});
+      }
+      setFbLoading(false);
+
+      // Dashboard
+      if (dashRes.status === "fulfilled") {
+        setDashData(dashRes.value);
+        setDashError(null);
+      } else {
+        setDashError(dashRes.reason?.message || "Erreur");
+      }
+      setDashLoading(false);
     })();
 
     return () => { alive = false; ctr.abort(); };

@@ -93,6 +93,8 @@ beforeEach(() => {
   FakeWebSocket.instances = [];
   ctxValue = null;
   global.WebSocket = FakeWebSocket;
+  // Mock fetch so the async ws-ticket call resolves immediately (non-ok → no ticket, falls back to cookie)
+  global.fetch = vi.fn().mockResolvedValue({ ok: false });
   vi.useFakeTimers({ shouldAdvanceTime: true });
 });
 
@@ -106,8 +108,9 @@ afterEach(() => {
 
 describe("NotificationContext", () => {
 
-  it("ouvre une connexion WebSocket quand l'utilisateur est connecté", () => {
+  it("ouvre une connexion WebSocket quand l'utilisateur est connecté", async () => {
     renderWithUser();
+    await act(async () => {});
     expect(FakeWebSocket.instances).toHaveLength(1);
     expect(FakeWebSocket.instances[0].url).toContain("/ws/notifications/");
   });
@@ -122,8 +125,9 @@ describe("NotificationContext", () => {
     expect(FakeWebSocket.instances).toHaveLength(0);
   });
 
-  it("initialise les notifications depuis le frame 'init'", () => {
+  it("initialise les notifications depuis le frame 'init'", async () => {
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -140,8 +144,9 @@ describe("NotificationContext", () => {
     expect(screen.getByTestId("count").textContent).toBe("1"); // seulement la non lue
   });
 
-  it("ajoute une notification depuis le frame 'notification'", () => {
+  it("ajoute une notification depuis le frame 'notification'", async () => {
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -155,8 +160,9 @@ describe("NotificationContext", () => {
     expect(screen.getByTestId("count").textContent).toBe("1");
   });
 
-  it("ignore les frames malformées (JSON invalide)", () => {
+  it("ignore les frames malformées (JSON invalide)", async () => {
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -168,8 +174,9 @@ describe("NotificationContext", () => {
     expect(screen.getByTestId("length").textContent).toBe("0");
   });
 
-  it("markRead envoie un ACK via WebSocket et met à jour l'état", () => {
+  it("markRead envoie un ACK via WebSocket et met à jour l'état", async () => {
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -193,6 +200,7 @@ describe("NotificationContext", () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: true });
 
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -230,6 +238,7 @@ describe("NotificationContext", () => {
 
   it("remet les notifications à zéro quand l'utilisateur se déconnecte", async () => {
     const { rerender } = renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
@@ -257,14 +266,15 @@ describe("NotificationContext", () => {
 
   it("tente une reconnexion automatique après fermeture du WebSocket", async () => {
     renderWithUser();
+    await act(async () => {});
     const ws = FakeWebSocket.instances[0];
 
     act(() => {
       ws.close();
     });
 
-    // Avancer le timer de reconnexion (5000ms)
-    act(() => {
+    // Avancer le timer de reconnexion (5000ms) et attendre le connect async
+    await act(async () => {
       vi.advanceTimersByTime(5100);
     });
 
