@@ -486,16 +486,16 @@ function CoursContent({ cours, moduleId, theme, onCompleted, onGoNext, hasNext, 
         )
       )}
 
-      {/* Contenu texte */}
+      {/* Contenu texte — HTML sanitisé par bleach côté serveur */}
       {cours.content ? (
         <div
-          className={`leading-relaxed text-sm md:text-base ${
-            theme === "dark" ? "text-white/80" : "text-gray-700"
-          }`}
-          style={{ whiteSpace: "pre-wrap" }}
-        >
-          {cours.content}
-        </div>
+          className={`prose prose-sm max-w-none leading-relaxed
+            [&_img]:max-w-full [&_img]:rounded [&_img]:my-2
+            [&_a]:text-blue-500 [&_a]:underline
+${theme === "dark" ? "prose-invert" : "text-gray-700"}
+          `}
+          dangerouslySetInnerHTML={{ __html: cours.content }}
+        />
       ) : !cours.video_url && (
         <p className={`text-sm ${muted} italic py-4`}>Contenu à venir.</p>
       )}

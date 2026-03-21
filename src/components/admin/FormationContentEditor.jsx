@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ensureCsrf } from "../../lib/api";
+import RichTextEditor from "./RichTextEditor";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -312,11 +313,11 @@ function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
     return (
       <div className={`rounded-lg border p-2.5 space-y-2 ${theme === "dark" ? "border-[#444] bg-[#1a1a1a]" : "border-gray-200 bg-white"}`}>
         <input className={input} placeholder="Titre du cours *" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <textarea
-          className={`${input} min-h-[60px] resize-y`}
-          placeholder="Contenu (optionnel)"
+        <RichTextEditor
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={setContent}
+          theme={theme}
+          uploadEndpoint={`${apiBase}/upload/image/`}
         />
         <input className={input} placeholder="URL vidéo (optionnel)" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
         <ErrMsg msg={err} />
@@ -519,11 +520,11 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
                 onChange={(e) => setNewCoursTitle(e.target.value)}
                 autoFocus
               />
-              <textarea
-                className={`${input} min-h-[56px] resize-y`}
-                placeholder="Contenu (optionnel)"
+              <RichTextEditor
                 value={newCoursContent}
-                onChange={(e) => setNewCoursContent(e.target.value)}
+                onChange={setNewCoursContent}
+                theme={theme}
+                uploadEndpoint={`${apiBase}/upload/image/`}
               />
               <input
                 className={input}

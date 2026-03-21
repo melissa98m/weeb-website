@@ -1,8 +1,56 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
+import { Extension } from "@tiptap/core";
+import { Color } from "@tiptap/extension-color";
+import { TextStyle } from "@tiptap/extension-text-style";
+import TextAlign from "@tiptap/extension-text-align";
+import { ensureCsrf } from "../../lib/api";
+
+/* ---- Extension font-size (pas dans la version gratuite de Tiptap) ---- */
+const FontSize = Extension.create({
+  name: "fontSize",
+  addOptions() { return { types: ["textStyle"] }; },
+  addGlobalAttributes() {
+    return [{
+      types: this.options.types,
+      attributes: {
+        fontSize: {
+          default: null,
+          parseHTML: (el) => el.style.fontSize || null,
+          renderHTML: (attrs) => attrs.fontSize ? { style: `font-size: ${attrs.fontSize}` } : {},
+        },
+      },
+    }];
+  },
+  addCommands() {
+    return {
+      setFontSize: (size) => ({ chain }) => chain().setMark("textStyle", { fontSize: size }).run(),
+      unsetFontSize: () => ({ chain }) => chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run(),
+    };
+  },
+});
+
+const FONT_SIZES = [
+  { label: "Petit",    value: "0.75rem" },
+  { label: "Normal",   value: null },
+  { label: "Grand",    value: "1.25rem" },
+  { label: "Très grand", value: "1.5rem" },
+  { label: "Titre",    value: "2rem" },
+];
+
+const PRESET_COLORS = [
+  { label: "Rouge",    value: "#ef4444" },
+  { label: "Orange",  value: "#f97316" },
+  { label: "Jaune",   value: "#eab308" },
+  { label: "Vert",    value: "#22c55e" },
+  { label: "Bleu",    value: "#3b82f6" },
+  { label: "Violet",  value: "#a855f7" },
+  { label: "Rose",    value: "#ec4899" },
+  { label: "Gris",    value: "#6b7280" },
+];
 
 /* ---- Icônes toolbar (SVG inline) ---- */
 function Icon({ children, title, active, onClick, disabled }) {
@@ -42,7 +90,101 @@ function Divider() {
   return <span className="w-px h-5 bg-current opacity-20 mx-1" aria-hidden="true" />;
 }
 
-function Toolbar({ editor, theme }) {
+function FontSizePicker({ editor, theme }) {
+  const current = editor.getAttributes("textStyle").fontSize ?? null;
+
+  const border = theme === "dark" ? "border-[#444] bg-[#1a1a1a] text-white" : "border-gray-300 bg-white text-gray-900";
+
+  return (
+    <select
+      value={current ?? ""}
+      onChange={(e) => {
+        const val = e.target.value || null;
+        if (val) editor.chain().focus().setFontSize(val).run();
+        else editor.chain().focus().unsetFontSize().run();
+      }}
+      title="Taille de police"
+      aria-label="Taille de police"
+      className={`h-7 text-xs rounded border px-1 outline-none cursor-pointer transition
+        focus:ring-2 focus:ring-blue-500 ${border}`}
+    >
+      {FONT_SIZES.map(({ label, value }) => (
+        <option key={label} value={value ?? ""}>{label}</option>
+      ))}
+    </select>
+  );
+}
+
+function ColorPicker({ editor, theme }) {
+  const [open, setOpen] = useState(false);
+  const currentColor = editor.getAttributes("textStyle").color ?? null;
+
+  const apply = (color) => {
+    editor.chain().focus().setColor(color).run();
+    setOpen(false);
+  };
+
+  const remove = () => {
+    editor.chain().focus().unsetColor().run();
+    setOpen(false);
+  };
+
+  const border = theme === "dark" ? "border-[#444]" : "border-gray-200";
+  const bg = theme === "dark" ? "bg-[#1c1c1c]" : "bg-white";
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        title="Couleur du texte"
+        onClick={() => setOpen((v) => !v)}
+        className={`p-1.5 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-1
+          hover:bg-gray-200 dark:hover:bg-[#333]`}
+        aria-label="Couleur du texte"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M9 7H6l-3 9h2l1-3h4l1 3h2L9 7z" />
+          <path d="M7.5 11.5l1-3 1 3h-2z" fill="currentColor" stroke="none" />
+          <line x1="4" y1="20" x2="20" y2="20" strokeWidth="3"
+            stroke={currentColor ?? "currentColor"} />
+        </svg>
+      </button>
+
+      {open && (
+        <div className={`absolute z-20 top-full left-0 mt-1 p-2 rounded-lg border shadow-lg ${border} ${bg}`}>
+          <div className="grid grid-cols-4 gap-1.5 mb-2">
+            {PRESET_COLORS.map(({ label, value }) => (
+              <button
+                key={value}
+                type="button"
+                title={label}
+                onClick={() => apply(value)}
+                className={`w-6 h-6 rounded-full border-2 transition hover:scale-110
+                  ${currentColor === value ? "border-white ring-2 ring-blue-500" : "border-transparent"}`}
+                style={{ backgroundColor: value }}
+                aria-label={label}
+              />
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={remove}
+            className={`w-full text-xs py-0.5 rounded border text-center transition
+              ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`}
+          >
+            Supprimer la couleur
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Toolbar({ editor, theme, uploadEndpoint }) {
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   if (!editor) return null;
 
   const handleLink = () => {
@@ -56,9 +198,43 @@ function Toolbar({ editor, theme }) {
     }
   };
 
-  const handleImage = () => {
+  const handleImageUrl = () => {
     const url = window.prompt("URL de l'image :");
     if (url) editor.chain().focus().setImage({ src: url }).run();
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset pour permettre de re-sélectionner le même fichier
+    e.target.value = "";
+
+    setIsUploading(true);
+    try {
+      const csrfToken = await ensureCsrf();
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const resp = await fetch(uploadEndpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-CSRFToken": csrfToken },
+        body: formData,
+      });
+
+      if (!resp.ok) {
+        const data = await resp.json().catch(() => ({}));
+        throw new Error(data?.detail || `Erreur ${resp.status}`);
+      }
+
+      const { url } = await resp.json();
+      editor.chain().focus().setImage({ src: url }).run();
+    } catch (err) {
+      console.error("[ImageUpload]", err);
+      alert(`Échec de l'upload : ${err.message}`);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -128,6 +304,39 @@ function Toolbar({ editor, theme }) {
 
       <Divider />
 
+      {/* Alignement */}
+      <Icon
+        title="Aligner à gauche"
+        active={editor.isActive({ textAlign: "left" })}
+        onClick={() => editor.chain().focus().setTextAlign("left").run()}
+      >
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="15" y2="12" />
+        <line x1="3" y1="18" x2="18" y2="18" />
+      </Icon>
+
+      <Icon
+        title="Centrer"
+        active={editor.isActive({ textAlign: "center" })}
+        onClick={() => editor.chain().focus().setTextAlign("center").run()}
+      >
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="6" y1="12" x2="18" y2="12" />
+        <line x1="4" y1="18" x2="20" y2="18" />
+      </Icon>
+
+      <Icon
+        title="Aligner à droite"
+        active={editor.isActive({ textAlign: "right" })}
+        onClick={() => editor.chain().focus().setTextAlign("right").run()}
+      >
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="9" y1="12" x2="21" y2="12" />
+        <line x1="6" y1="18" x2="21" y2="18" />
+      </Icon>
+
+      <Divider />
+
       {/* Listes */}
       <Icon
         title="Liste à puces"
@@ -167,6 +376,14 @@ function Toolbar({ editor, theme }) {
 
       <Divider />
 
+      {/* Taille de police */}
+      <FontSizePicker editor={editor} theme={theme} />
+
+      {/* Couleur du texte */}
+      <ColorPicker editor={editor} theme={theme} />
+
+      <Divider />
+
       {/* Lien */}
       <Icon
         title="Lien"
@@ -177,12 +394,35 @@ function Toolbar({ editor, theme }) {
         <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
       </Icon>
 
-      {/* Image */}
-      <Icon title="Image" onClick={handleImage}>
+      {/* Image par URL */}
+      <Icon title="Image par URL" onClick={handleImageUrl}>
         <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
         <circle cx="8.5" cy="8.5" r="1.5" />
         <polyline points="21 15 16 10 5 21" />
       </Icon>
+
+      {/* Upload image depuis l'ordinateur — affiché uniquement si uploadEndpoint fourni */}
+      {uploadEndpoint && (
+        <>
+          <Icon
+            title={isUploading ? "Upload en cours…" : "Insérer une image depuis l'ordinateur"}
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </Icon>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleImageUpload}
+            aria-hidden="true"
+          />
+        </>
+      )}
 
       <Divider />
 
@@ -212,17 +452,23 @@ function Toolbar({ editor, theme }) {
  * Éditeur rich text Tiptap.
  *
  * @param {object}   props
- * @param {string}   props.value      - Contenu HTML initial.
- * @param {Function} props.onChange   - Appelé avec le HTML à chaque changement.
- * @param {string}   [props.theme]    - "dark" | "light".
+ * @param {string}   props.value            - Contenu HTML initial.
+ * @param {Function} props.onChange         - Appelé avec le HTML à chaque changement.
+ * @param {string}   [props.theme]          - "dark" | "light".
  * @param {string}   [props.className]
+ * @param {string}   [props.uploadEndpoint] - URL de l'endpoint d'upload image.
+ *                                            Si absent, seule l'insertion par URL est disponible.
  */
-export default function RichTextEditor({ value, onChange, theme = "light", className = "" }) {
+export default function RichTextEditor({ value, onChange, theme = "light", className = "", uploadEndpoint = null }) {
   const editor = useEditor({
     extensions: [
       StarterKit,
       Image.configure({ inline: false, allowBase64: false }),
       Link.configure({ openOnClick: false, autolink: true }),
+      TextStyle,
+      FontSize,
+      Color,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: value ?? "",
     onUpdate({ editor }) {
@@ -246,7 +492,7 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
 
   return (
     <div className={`rounded-lg border overflow-hidden ${border} ${bg} ${className}`}>
-      <Toolbar editor={editor} theme={theme} />
+      <Toolbar editor={editor} theme={theme} uploadEndpoint={uploadEndpoint} />
 
       {/* Zone d'édition */}
       <EditorContent
