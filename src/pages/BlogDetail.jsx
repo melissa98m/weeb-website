@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion, AnimatePresence, useScroll, useSpring } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useSpring, useReducedMotion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
@@ -11,9 +11,10 @@ import blogFr from "../../locales/fr/blog.json";
 import RelatedCarousel from "../components/Blog/RelatedCarousel";
 import { safeChipStyle } from "../utils/colors";
 import { getEnv } from "../lib/env";
+import { setCanonical, setOgMeta, setJsonLd, SITE_URL } from "../lib/seo";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
-const INDEX_PAGE_SIZE = 200;
+
 
 // ---- Utils
 function formatDate(iso, lang) {
@@ -31,11 +32,7 @@ function estimateReadingMinutes(text = "") {
   const words = String(text).trim().split(/\s+/).filter(Boolean).length || 0;
   return Math.max(1, Math.ceil(words / 200));
 }
-function asList(data) {
-  if (Array.isArray(data)) return data;
-  if (data && Array.isArray(data.results)) return data.results;
-  return [];
-}
+
 const API_HOST = (API_BASE || "").replace(/\/api\/?$/, "");
 function resolveImageUrl(src) {
   if (!src) return null;
@@ -68,14 +65,15 @@ export default function BlogDetail() {
   const { language } = useLanguage();
   const { user } = useAuth();
   const txt = language === "fr" ? blogFr : blogEn;
+  const reduceMotion = useReducedMotion();
 
   const [loadingPost, setLoadingPost] = useState(true);
-  const [loadingIndex, setLoadingIndex] = useState(true);
   const [post, setPost] = useState(null);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [_coverBroken, setCoverBroken] = useState(false);
-  const [ids, setIds] = useState([]);
+  const [prevId, setPrevId] = useState(null);
+  const [nextId, setNextId] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [comments, setComments] = useState([]);
@@ -211,39 +209,91 @@ export default function BlogDetail() {
     return () => { alive = false; };
   }, [currId]);
 
-  // Index des IDs (asc)
+  // SEO dynamique : titre, description, robots, canonical, og:*, JSON-LD Article + Breadcrumb
   useEffect(() => {
+    if (!post) return;
+    const prev = document.title;
+    document.title = `${post.title} | Weeb`;
+
+    const excerpt = String(post.content || post.excerpt || post.article_content || "")
+      .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 155);
+
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc && excerpt) metaDesc.setAttribute("content", excerpt);
+
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const articlePath = `/blog/${post.id}`;
+    const articleUrl = `${SITE_URL}${articlePath}`;
+    const imgUrl = resolveImageUrl(post.cover_image_url || post.link_image || post.cover || post.image);
+
+    const cleanCanonical = setCanonical(articlePath);
+    const cleanOgUrl = setOgMeta("og:url", articleUrl);
+    const cleanOgTitle = setOgMeta("og:title", document.title);
+    const cleanOgDesc = excerpt ? setOgMeta("og:description", excerpt) : () => {};
+    const cleanOgImg = imgUrl ? setOgMeta("og:image", imgUrl) : () => {};
+    const cleanOgType = setOgMeta("og:type", "article");
+
+    const authorName =
+      (post.author && typeof post.author === "object"
+        ? post.author.username || post.author.email
+        : typeof post.author === "string" ? post.author : null) || "Weeb";
+
+    const cleanArticle = setJsonLd("jsonld-article", {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: excerpt,
+      datePublished: post.created_at || post.date || undefined,
+      dateModified: post.updated_at || post.created_at || undefined,
+      author: { "@type": "Person", name: authorName },
+      publisher: { "@type": "Organization", name: "Weeb", url: SITE_URL },
+      url: articleUrl,
+      ...(imgUrl ? { image: imgUrl } : {}),
+    });
+
+    const cleanBreadcrumb = setJsonLd("jsonld-breadcrumb", {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Accueil", item: SITE_URL },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_URL}/blog` },
+        { "@type": "ListItem", position: 3, name: post.title, item: articleUrl },
+      ],
+    });
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+      cleanOgImg();
+      cleanOgType();
+      cleanArticle();
+      cleanBreadcrumb();
+    };
+  }, [post]);
+
+  // Prev/next IDs via endpoint dédié (1 requête au lieu de N pages)
+  useEffect(() => {
+    if (!currId) return;
     let alive = true;
     (async () => {
       try {
-        setLoadingIndex(true);
-        setError(null);
-        let all = [];
-        let url = `${API_BASE}/articles/?ordering=id&page_size=${INDEX_PAGE_SIZE}&page=1`;
-        while (url) {
-          const r = await fetch(url, { credentials: "omit" });
-          if (!r.ok) throw new Error(`HTTP ${r.status}`);
-          const data = await r.json();
-          const list = asList(data);
-          all.push(...list.map(a => a.id).filter(v => v != null));
-          url = data.next || null;
-          if (!data.next && !Array.isArray(data.results)) break;
-        }
+        const r = await fetch(`${API_BASE}/articles/${currId}/neighbors/`, { credentials: "omit" });
+        if (!r.ok) return;
+        const data = await r.json();
         if (!alive) return;
-        const uniq = Array.from(new Set(all)).sort((a, b) => Number(a) - Number(b));
-        setIds(uniq);
-      } catch (_e) {
-        if (!alive) return;
-        setError("Unable to load the article index.");
-        setIds([]);
-      } finally {
-        if (alive) setLoadingIndex(false);
-      }
+        setPrevId(data.prev_id ?? null);
+        setNextId(data.next_id ?? null);
+      } catch { /* noop — navigation prev/next non critique */ }
     })();
     return () => { alive = false; };
-  }, []);
+  }, [currId]);
 
-  const loading = loadingPost || loadingIndex;
+  const loading = loadingPost;
 
   const title = useMemo(() => post?.title ?? "", [post]);
   const _paragraphs = useMemo(() => {
@@ -276,9 +326,7 @@ export default function BlogDetail() {
   }, [coverUrl]);
 
   // voisins
-  const index = useMemo(() => ids.findIndex(v => Number(v) === currId), [ids, currId]);
-  const prevId = index > 0 ? ids[index - 1] : null;
-  const nextId = index !== -1 && index < ids.length - 1 ? ids[index + 1] : null;
+  // prevId et nextId viennent du state (initialisé par le useEffect neighbors)
 
   const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
   const meta = theme === "dark" ? "text-white/70" : "text-gray-600";
@@ -325,11 +373,13 @@ export default function BlogDetail() {
 
   return (
     <main className="px-0 md:px-6 py-12 md:py-16">
-      {/* Barre de progression */}
-      <motion.div
-        style={{ scaleX }}
-        className="fixed left-0 top-0 right-0 h-1 origin-left bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-500 z-40"
-      />
+      {/* Barre de progression — masquée si prefers-reduced-motion */}
+      {!reduceMotion && (
+        <motion.div
+          style={{ scaleX }}
+          className="fixed left-0 top-0 right-0 h-1 origin-left bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-500 z-40"
+        />
+      )}
 
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Retour */}
@@ -368,8 +418,8 @@ export default function BlogDetail() {
 
           <div className="p-6 md:p-8">
             <motion.h1
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={reduceMotion ? false : { opacity: 0 }}
+              animate={reduceMotion ? false : { opacity: 1 }}
               transition={{ duration: 0.25 }}
               className="text-2xl md:text-3xl font-bold mb-2"
             >
@@ -580,13 +630,19 @@ export default function BlogDetail() {
                   </button>
                 </div>
               )}
+              <label
+                htmlFor="comment-textarea"
+                className="sr-only"
+              >
+                {replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
+              </label>
               <textarea
+                id="comment-textarea"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
                 rows={3}
                 maxLength={2000}
-                aria-label={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
                 className={`w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
                   theme === "dark"
                     ? "bg-[#252525] border-[#444] text-white placeholder-white/40"

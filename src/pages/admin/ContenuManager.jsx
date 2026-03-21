@@ -574,6 +574,17 @@ export default function ContenuManager() {
   const { theme } = useTheme();
   const apiBase = API_BASE;
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Contenu — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const [tab, setTab] = useState("modules"); // "modules" | "cours"
   const [modules, setModules] = useState([]);
   const [cours, setCours] = useState([]);

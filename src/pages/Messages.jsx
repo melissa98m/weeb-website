@@ -37,6 +37,17 @@ export default function Messages() {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Messages — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const t = useMemo(
     () =>
       language === "fr"

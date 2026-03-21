@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import SearchResults from "./SearchResults";
 
@@ -74,12 +74,18 @@ describe("SearchResults", () => {
   });
 
   it("affiche les skeletons pendant le chargement", async () => {
+    vi.useFakeTimers();
     let resolve;
     global.fetch = vi.fn(() => new Promise((r) => { resolve = r; }));
     renderWithQuery("Django");
-    // Le fetch est en cours → skeletons visibles
+    // Déclencher le debounce de 300ms pour que setLoading(true) soit appelé
+    await act(async () => { vi.advanceTimersByTime(300); });
+    // Le fetch est en attente → skeletons visibles
     expect(document.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);
-    resolve({ ok: true, json: () => Promise.resolve({ articles: [], formations: [] }) });
+    vi.useRealTimers();
+    await act(async () => {
+      resolve({ ok: true, json: () => Promise.resolve({ articles: [], formations: [] }) });
+    });
   });
 
   it("affiche les articles trouvés", async () => {

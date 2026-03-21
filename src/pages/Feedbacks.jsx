@@ -20,6 +20,17 @@ export default function Feedback() {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Feedbacks — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const t = useMemo(
     () =>
       language === "fr"

@@ -21,6 +21,17 @@ export default function ForgotPassword() {
   const shakeTimeoutRef = useRef(null);
 
   useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Mot de passe oublié | Weeb" : "Forgot Password | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
+
+  useEffect(() => {
     return () => {
       if (shakeTimeoutRef.current) {
         clearTimeout(shakeTimeoutRef.current);

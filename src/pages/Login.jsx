@@ -36,6 +36,18 @@ export default function Login() {
   const [lockUntilTs, setLockUntilTs] = useState(0);
   const [remainingLockSeconds, setRemainingLockSeconds] = useState(0);
 
+  // SEO
+  useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Connexion | Weeb" : "Login | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
+
   // Focus sur le premier champ au montage
   useEffect(() => {
     if (identifierRef.current) {

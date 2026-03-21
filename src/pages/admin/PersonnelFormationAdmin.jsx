@@ -30,6 +30,17 @@ export default function PersonnelFormationAdmin() {
   const { user } = useAuth();
   const { theme } = useTheme();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Gestion formations — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   // boot (users + formations)
   const [bootLoading, setBootLoading] = useState(true);
   const [bootError, setBootError] = useState("");

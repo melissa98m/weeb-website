@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { setCanonical, setOgMeta, SITE_URL } from "../lib/seo";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
@@ -67,6 +68,35 @@ export default function Formations() {
       ctr.abort();
     };
   }, []);
+
+  // ── SEO ──────────────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr ? "Formations | Weeb — Apprendre le développement web" : "Trainings | Weeb — Learn Web Development";
+    const desc = isFr
+      ? "Découvrez nos formations en développement web. Progressez à votre rythme avec des modules interactifs et des exercices pratiques."
+      : "Discover our web development trainings. Progress at your own pace with interactive modules and practical exercises.";
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const cleanCanonical = setCanonical("/formations");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/formations`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+    };
+  }, [language]);
 
   const openSummary = useCallback((f) => { setSelected(f); setOpen(true); }, []);
   const closeSummary = useCallback(() => { setOpen(false); setSelected(null); }, []);
