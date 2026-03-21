@@ -1,6 +1,6 @@
 import "./App.css";
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CookieBanner from "./components/CookieBanner";
@@ -45,13 +45,18 @@ const FormationParcours = lazy(() => import("./pages/FormationParcours"));
 
 function App() {
   const { theme } = useTheme();
+  const location = useLocation();
+
+  // La page d'apprentissage est une interface plein-écran autonome :
+  // elle gère son propre header, pas besoin du header/footer global.
+  const isLearnPage = /^\/formation\/[^/]+\/learn/.test(location.pathname);
 
   return (
     <ChatProvider>
     <div className="text-white font-sans overflow-x-hidden relative">
-      <Header />
+      {!isLearnPage && <Header />}
       <main
-        className={`pt-[24px] md:pt-[58px] min-h-screen ${
+        className={`${isLearnPage ? "" : "pt-[24px] md:pt-[58px]"} min-h-screen ${
           theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
         }`}
       >
@@ -217,7 +222,7 @@ function App() {
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isLearnPage && <Footer />}
       <CookieBanner />
       <OfflineBanner />
       <ChatWidget />
