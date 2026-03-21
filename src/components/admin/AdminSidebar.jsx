@@ -144,9 +144,19 @@ function IconChat() {
   );
 }
 
+function IconBook() {
+  return (
+    <IconBase>
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+    </IconBase>
+  );
+}
+
 const NAV_ALL = [
   { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
   { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
+  { key: "content", label: "Contenu", to: "/admin/content", icon: IconBook },
   { key: "articles", label: "Articles", to: "/admin/articles", icon: IconPen },
   { key: "genres", label: "Genres", to: "/admin/genres", icon: IconTag },
   { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
@@ -197,6 +207,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
       switch (key) {
         case "affect":
         case "forms":
+        case "content":
           return canPersonnel || isAdmin;
         case "articles":
         case "genres":

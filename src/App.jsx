@@ -38,8 +38,10 @@ const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
 const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
 const AdminChatPanel = lazy(() => import("./pages/admin/AdminChatPanel"));
 const CommercialDashboard = lazy(() => import("./pages/admin/CommercialDashboard"));
+const ContenuManager = lazy(() => import("./pages/admin/ContenuManager"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
+const FormationParcours = lazy(() => import("./pages/FormationParcours"));
 
 function App() {
   const { theme } = useTheme();
@@ -58,8 +60,8 @@ function App() {
             {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/about-us" element={<About />} />
-            <Route path="/mentions-legales" element={<Legal />} />
-            <Route path="/politique-confidentialite" element={<Privacy />} />
+            <Route path="/legal-notices" element={<Legal />} />
+            <Route path="/privacy-policy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -70,6 +72,16 @@ function App() {
             <Route path="/formations" element={<Formations />} />
             <Route path="/formation/:id" element={<FormationModal />} />
             <Route path="/search" element={<SearchResults />} />
+
+            {/* Formation parcours — utilisateur inscrit */}
+            <Route
+              path="/formation/:id/learn"
+              element={
+                <ProtectedRoute>
+                  <FormationParcours />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Auth-required (non admin layout) */}
             <Route
@@ -170,6 +182,16 @@ function App() {
                     <CommercialDashboard />
                   </AdminLayout>
                 </StaffRoute>
+              }
+            />
+            <Route
+              path="/admin/content"
+              element={
+                <PersonnelRoute>
+                  <AdminLayout>
+                    <ContenuManager />
+                  </AdminLayout>
+                </PersonnelRoute>
               }
             />
             <Route

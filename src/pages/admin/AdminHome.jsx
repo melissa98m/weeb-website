@@ -115,29 +115,68 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
       </div>
 
       {/* Boutons d'export */}
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-2">
         {canPersonnel && (
-          <ExportCSVButton
-            type="inscrits"
-            dateFrom={dateFrom}
-            dateTo={dateTo}
-            className={ghostBtn}
-          />
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium w-20 shrink-0 opacity-60">Inscrits</span>
+            <ExportCSVButton
+              type="registrations"
+              format="csv"
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              label="CSV"
+              className={ghostBtn}
+            />
+            <ExportCSVButton
+              type="registrations"
+              format="pdf"
+              dateFrom={dateFrom}
+              dateTo={dateTo}
+              label="PDF"
+              className={ghostBtn}
+            />
+          </div>
         )}
         {canStaff && (
           <>
-            <ExportCSVButton
-              type="feedbacks"
-              dateFrom={dateFrom}
-              dateTo={dateTo}
-              className={ghostBtn}
-            />
-            <ExportCSVButton
-              type="messages"
-              dateFrom={dateFrom}
-              dateTo={dateTo}
-              className={ghostBtn}
-            />
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs font-medium w-20 shrink-0 opacity-60">Feedbacks</span>
+              <ExportCSVButton
+                type="feedbacks"
+                format="csv"
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                label="CSV"
+                className={ghostBtn}
+              />
+              <ExportCSVButton
+                type="feedbacks"
+                format="pdf"
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                label="PDF"
+                className={ghostBtn}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs font-medium w-20 shrink-0 opacity-60">Messages</span>
+              <ExportCSVButton
+                type="messages"
+                format="csv"
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                label="CSV"
+                className={ghostBtn}
+              />
+              <ExportCSVButton
+                type="messages"
+                format="pdf"
+                dateFrom={dateFrom}
+                dateTo={dateTo}
+                label="PDF"
+                className={ghostBtn}
+              />
+            </div>
           </>
         )}
       </div>
@@ -395,7 +434,7 @@ export default function AdminHome() {
       {/* Exports CSV (admins uniquement) */}
       {(canStaff || canPersonnel || canRedact) && (
         <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
-          <h2 className="text-base font-semibold mb-3">Exports CSV</h2>
+          <h2 className="text-base font-semibold mb-3">Exports CSV / PDF</h2>
           <ExportSection card={card} ghostBtn={ghostBtn} theme={theme} canStaff={canStaff} canPersonnel={canPersonnel} />
         </section>
       )}

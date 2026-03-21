@@ -29,8 +29,6 @@ export default function CommercialDashboard() {
   const meta = theme === "dark" ? "text-white/60" : "text-gray-500";
 
   const isAllowed = hasAnyRole(user, ["Commercial"]);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!isAllowed) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Commerciaux et Administrateurs.</div>;
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -47,10 +45,14 @@ export default function CommercialDashboard() {
   }, []);
 
   useEffect(() => {
+    if (!user || !isAllowed) return;
     fetchData();
     document.title = "Dashboard Commercial";
     return () => { document.title = "Admin"; };
-  }, [fetchData]);
+  }, [fetchData, user, isAllowed]);
+
+  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!isAllowed) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Commerciaux et Administrateurs.</div>;
 
   if (loading) return <div className="p-6 text-sm opacity-70">Chargement…</div>;
   if (error) return (
