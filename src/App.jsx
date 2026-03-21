@@ -10,7 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
 import StaffRoute from "./routes/StaffRoute";
 import RedactionRoute from "./routes/RedactionRoute";
-import Formations from "./pages/Formations";
+const Formations = lazy(() => import("./pages/Formations"));
 import { ChatProvider } from "./context/ChatContext";
 import ChatWidget from "./components/chat/ChatWidget";
 
@@ -42,6 +42,7 @@ const ContenuManager = lazy(() => import("./pages/admin/ContenuManager"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
 const SearchResults = lazy(() => import("./pages/SearchResults"));
 const FormationParcours = lazy(() => import("./pages/FormationParcours"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
   const { theme } = useTheme();
@@ -60,7 +61,7 @@ function App() {
           theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
         }`}
       >
-        <Suspense fallback={<div className="p-6">Chargement...</div>}>
+        <Suspense fallback={<div role="status" aria-live="polite" className="p-6">Chargement...</div>}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
@@ -219,6 +220,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
