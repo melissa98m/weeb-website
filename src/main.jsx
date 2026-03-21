@@ -40,8 +40,6 @@ if (sentryEnabled && hasCookieConsent()) {
 
   if (typeof Sentry.browserTracingIntegration === "function") {
     integrations.push(Sentry.browserTracingIntegration());
-  } else if (typeof Sentry.browserTracing === "function") {
-    integrations.push(Sentry.browserTracing());
   }
 
   Sentry.init({
