@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { hasAnyRedactionRole } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
 import { getEnv } from "../../lib/env";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 const API_BASE = (() => {
   const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
@@ -14,10 +17,12 @@ const API_BASE = (() => {
 export default function GenresManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Genres — Admin | Weeb";
+    document.title = t.page_title_genres;
     const metaRobots = document.querySelector('meta[name="robots"]');
     if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
     return () => {
@@ -186,7 +191,7 @@ export default function GenresManager() {
   }, [formName, formColor, current, startTask]);
 
   const handleDelete = useCallback(async (genre) => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer le genre "${genre.name}" ?`)) return;
+    if (!confirm(t.genres_confirm_delete.replace("{name}", genre.name))) return;
 
     const task = startTask(15000);
     try {
@@ -209,46 +214,46 @@ export default function GenresManager() {
   }, [startTask]);
 
   const canRedact = hasAnyRedactionRole(user);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
+  if (!canRedact) return <div className="p-6 text-red-600">{t.genres_access_denied}</div>;
 
   return (
     <main className="px-4 md:px-6 py-4 md:py-6">
       {/* Header */}
       <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold leading-tight">Gérer les genres</h1>
-          <p className="text-xs mt-1 opacity-80">Créer, modifier et supprimer les genres d'articles.</p>
+          <h1 className="text-xl md:text-2xl font-bold leading-tight">{t.genres_title}</h1>
+          <p className="text-xs mt-1 opacity-80">{t.genres_subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <input
             className={`w-64 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder="Rechercher un genre"
+            placeholder={t.genres_search}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <button type="button" onClick={openCreate} className={`rounded-xl border px-3 py-2 ${cta}`}>
-            + Nouveau genre
+            {t.genres_new}
           </button>
         </div>
       </header>
 
       {/* Liste */}
       <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
+        {loading && <div className="p-4 text-sm opacity-80">{t.common_loading}</div>}
         {!loading && err && (
           <div className="p-4 text-sm text-red-600 dark:text-red-400">
-            Erreur : {err}
+            {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={load}>
-                Recharger
+                {t.common_reload}
               </button>
             </div>
           </div>
         )}
         {!loading && !err && filtered.length === 0 && (
           <div className="p-4 text-sm opacity-80">
-            {q ? "Aucun genre ne correspond à votre recherche." : "Aucun genre."}
+            {q ? t.genres_empty_search : t.genres_empty}
           </div>
         )}
 
@@ -271,7 +276,7 @@ export default function GenresManager() {
                     {genre.name?.[0]?.toUpperCase() || "?"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold truncate">{genre.name || "Sans nom"}</div>
+                    <div className="font-semibold truncate">{genre.name || t.genres_unnamed}</div>
                     {genre.color && (
                       <div className="text-xs opacity-70 truncate">{genre.color}</div>
                     )}
@@ -283,14 +288,14 @@ export default function GenresManager() {
                     onClick={() => openEdit(genre)}
                     className={`flex-1 rounded-lg border px-3 py-2 text-sm ${ghostBtn}`}
                   >
-                    Modifier
+                    {t.genres_btn_edit}
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDelete(genre)}
                     className={`rounded-lg border px-3 py-2 text-sm ${dangerBtn}`}
                   >
-                    Supprimer
+                    {t.genres_btn_delete}
                   </button>
                 </div>
               </div>
@@ -313,16 +318,16 @@ export default function GenresManager() {
         >
           <div className={`rounded-2xl border p-6 max-w-md w-full ${card}`}>
             <h2 className="text-xl font-bold mb-4">
-              {current ? "Modifier le genre" : "Nouveau genre"}
+              {current ? t.genres_modal_edit_title : t.genres_modal_create_title}
             </h2>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Nom</label>
+                <label className="block text-sm font-medium mb-2">{t.genres_field_name}</label>
                 <input
                   type="text"
                   className={`w-full rounded-lg border px-3 py-2 ${inputCls}`}
-                  placeholder="Nom du genre"
+                  placeholder={t.genres_placeholder_name}
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
                   autoFocus
@@ -330,7 +335,7 @@ export default function GenresManager() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Couleur</label>
+                <label className="block text-sm font-medium mb-2">{t.genres_field_color}</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
@@ -359,7 +364,7 @@ export default function GenresManager() {
                 className={`flex-1 rounded-lg border px-3 py-2 ${ghostBtn}`}
                 disabled={saving}
               >
-                Annuler
+                {t.common_cancel}
               </button>
               <button
                 type="button"
@@ -367,7 +372,7 @@ export default function GenresManager() {
                 className={`flex-1 rounded-lg border px-3 py-2 ${cta}`}
                 disabled={saving || !formName.trim()}
               >
-                {saving ? "Enregistrement…" : current ? "Modifier" : "Créer"}
+                {saving ? t.genres_saving : current ? t.genres_btn_edit : t.genres_btn_create}
               </button>
             </div>
           </div>

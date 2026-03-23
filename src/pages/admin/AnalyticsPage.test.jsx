@@ -8,6 +8,9 @@ vi.mock("../../lib/api", () => ({ API_BASE: "http://localhost:8000/api" }));
 vi.mock("../../context/ThemeContext", () => ({
   useTheme: () => ({ theme: "dark" }),
 }));
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
 
 // Mock recharts pour éviter les erreurs ResizeObserver dans jsdom
 vi.mock("recharts", () => ({

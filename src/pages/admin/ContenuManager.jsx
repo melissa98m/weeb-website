@@ -1,9 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { API_BASE, ensureCsrf } from "../../lib/api";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import { QCMEditor } from "../../components/admin/FormationContentEditor";
 import RichTextEditor from "../../components/admin/RichTextEditor";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 // ── helpers ───────────────────────────────────────────────────────────────────
 
@@ -114,7 +117,7 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
   );
 }
 
-function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUpdated, onDeleted }) {
+function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const block = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
   const inputCls = theme === "dark"
@@ -150,7 +153,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
   };
 
   const deleteModule = async () => {
-    if (!window.confirm(`Supprimer le module "${module.title}" et tout son contenu ?`)) return;
+    if (!window.confirm(t.content_confirm_delete_module.replace("{title}", module.title))) return;
     setBusy(true);
     try {
       await apiFetch(`${apiBase}/modules/${module.id}/`, { method: "DELETE" });
@@ -273,8 +276,8 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
                 <span className={`text-xs w-5 h-5 rounded-full border flex items-center justify-center shrink-0 ${muted} border-current`}>{i + 1}</span>
                 <span className="text-sm flex-1 truncate">{c.title}</span>
                 {c.video_url && <span className={`text-xs ${muted}`} title="Vidéo">▶</span>}
-                <button type="button" onClick={() => detachCours(c.id)} disabled={busy} className={btnSm("danger")} title="Détacher">
-                  Détacher
+                <button type="button" onClick={() => detachCours(c.id)} disabled={busy} className={btnSm("danger")} title={t.content_btn_detach}>
+                  {t.content_btn_detach}
                 </button>
               </div>
             ))}
@@ -282,20 +285,20 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
             {/* Créer un cours */}
             {addingCours ? (
               <div className={`rounded-lg border p-2.5 space-y-2 mt-1 ${theme === "dark" ? "border-[#444] bg-[#111]" : "border-gray-200 bg-gray-50"}`}>
-                <input className={inputBase} placeholder="Titre du cours *" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
+                <input className={inputBase} placeholder={t.content_field_title} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} autoFocus />
                 <RichTextEditor value={newContent} onChange={setNewContent} theme={theme} uploadEndpoint={`${apiBase}/upload/image/`} />
                 <input className={inputBase} placeholder="URL vidéo (optionnel)" value={newVideo} onChange={(e) => setNewVideo(e.target.value)} />
                 <ErrMsg msg={addErr} />
                 <div className="flex gap-2 justify-end">
-                  <button type="button" onClick={() => { setAddingCours(false); setAddErr(""); }} disabled={busy} className={btnSm("ghost")}>Annuler</button>
+                  <button type="button" onClick={() => { setAddingCours(false); setAddErr(""); }} disabled={busy} className={btnSm("ghost")}>{t.common_cancel}</button>
                   <button type="button" onClick={createCours} disabled={busy} className="flex items-center gap-1 text-xs px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-                    {busy ? <Spinner /> : null}Créer et rattacher
+                    {busy ? <Spinner /> : null}{t.content_btn_create_attach}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="flex gap-3 mt-1 pt-1">
-                <button type="button" onClick={() => setAddingCours(true)} className={`text-xs ${muted} hover:underline`}>+ créer un cours</button>
+                <button type="button" onClick={() => setAddingCours(true)} className={`text-xs ${muted} hover:underline`}>{t.content_btn_add_course}</button>
                 <button type="button" onClick={() => setShowAttach(true)} className={`text-xs ${muted} hover:underline`}>+ rattacher un cours existant</button>
               </div>
             )}
@@ -315,7 +318,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
                 />
               ) : (
                 <button type="button" onClick={() => setShowQCM(true)} className={`text-xs ${muted} hover:underline`}>
-                  {module.has_qcm ? "✎ Modifier le QCM" : "+ ajouter un QCM"}
+                  {module.has_qcm ? t.content_btn_edit_qcm : t.content_btn_add_qcm}
                 </button>
               )}
             </div>
@@ -326,7 +329,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, onUp
   );
 }
 
-function ModulesTab({ apiBase, modules, allCours, theme, onModuleCreated, onModuleUpdated, onModuleDeleted }) {
+function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onModuleUpdated, onModuleDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const inputCls = theme === "dark" ? "bg-[#111] border-[#444] text-white" : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${inputCls}`;
@@ -382,9 +385,9 @@ function ModulesTab({ apiBase, modules, allCours, theme, onModuleCreated, onModu
           />
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => { setAdding(false); setNewTitle(""); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>Annuler</button>
+            <button type="button" onClick={() => { setAdding(false); setNewTitle(""); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>{t.common_cancel}</button>
             <button type="button" onClick={createModule} disabled={busy} className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-              {busy ? <Spinner /> : null}Créer
+              {busy ? <Spinner /> : null}{t.common_create}
             </button>
           </div>
         </div>
@@ -401,6 +404,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, onModuleCreated, onModu
           module={m}
           allCours={allCours}
           theme={theme}
+          t={t}
           onUpdated={onModuleUpdated}
           onDeleted={onModuleDeleted}
         />
@@ -411,7 +415,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, onModuleCreated, onModu
 
 // ── Onglet Cours ──────────────────────────────────────────────────────────────
 
-function CoursRow({ apiBase, cours: initialCours, theme, onUpdated, onDeleted }) {
+function CoursRow({ apiBase, cours: initialCours, theme, t, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const inputCls = theme === "dark" ? "bg-[#111] border-[#444] text-white" : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${inputCls}`;
@@ -439,7 +443,7 @@ function CoursRow({ apiBase, cours: initialCours, theme, onUpdated, onDeleted })
   };
 
   const remove = async () => {
-    if (!window.confirm(`Supprimer le cours "${cours.title}" ?`)) return;
+    if (!window.confirm(t.content_confirm_delete_course.replace("{title}", cours.title))) return;
     setBusy(true);
     try {
       await apiFetch(`${apiBase}/courses/${cours.id}/`, { method: "DELETE" });
@@ -463,9 +467,9 @@ function CoursRow({ apiBase, cours: initialCours, theme, onUpdated, onDeleted })
         <input className={inputBase} placeholder="URL vidéo (optionnel)" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} />
         <ErrMsg msg={err} />
         <div className="flex gap-2 justify-end">
-          <button type="button" onClick={() => { setEditing(false); setErr(""); setTitle(cours.title); setContent(cours.content || ""); setVideoUrl(cours.video_url || ""); }} disabled={busy} className={btnSm("ghost")}>Annuler</button>
+          <button type="button" onClick={() => { setEditing(false); setErr(""); setTitle(cours.title); setContent(cours.content || ""); setVideoUrl(cours.video_url || ""); }} disabled={busy} className={btnSm("ghost")}>{t.common_cancel}</button>
           <button type="button" onClick={save} disabled={busy} className="flex items-center gap-1 text-xs px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-            {busy ? <Spinner /> : null}Sauvegarder
+            {busy ? <Spinner /> : null}{t.common_save}
           </button>
         </div>
       </div>
@@ -493,7 +497,7 @@ function CoursRow({ apiBase, cours: initialCours, theme, onUpdated, onDeleted })
   );
 }
 
-function CoursTab({ apiBase, cours, theme, onCoursCreated, onCoursUpdated, onCoursDeleted }) {
+function CoursTab({ apiBase, cours, theme, t, onCoursCreated, onCoursUpdated, onCoursDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const inputCls = theme === "dark" ? "bg-[#111] border-[#444] text-white" : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${inputCls}`;
@@ -532,20 +536,20 @@ function CoursTab({ apiBase, cours, theme, onCoursCreated, onCoursUpdated, onCou
           onChange={(e) => setQ(e.target.value)}
         />
         <button type="button" onClick={() => setAdding(true)} className="shrink-0 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
-          + Cours
+          {t.content_btn_add_course_module}
         </button>
       </div>
 
       {adding && (
         <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"}`}>
-          <input autoFocus className={inputBase} placeholder="Titre du cours *" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") createCours(); if (e.key === "Escape") setAdding(false); }} />
+          <input autoFocus className={inputBase} placeholder={t.content_field_title} value={newTitle} onChange={(e) => setNewTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") createCours(); if (e.key === "Escape") setAdding(false); }} />
           <RichTextEditor value={newContent} onChange={setNewContent} theme={theme} uploadEndpoint={`${apiBase}/upload/image/`} />
           <input className={inputBase} placeholder="URL vidéo (optionnel)" value={newVideo} onChange={(e) => setNewVideo(e.target.value)} />
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => { setAdding(false); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>Annuler</button>
+            <button type="button" onClick={() => { setAdding(false); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>{t.common_cancel}</button>
             <button type="button" onClick={createCours} disabled={busy} className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
-              {busy ? <Spinner /> : null}Créer
+              {busy ? <Spinner /> : null}{t.common_create}
             </button>
           </div>
         </div>
@@ -560,6 +564,7 @@ function CoursTab({ apiBase, cours, theme, onCoursCreated, onCoursUpdated, onCou
           apiBase={apiBase}
           cours={c}
           theme={theme}
+          t={t}
           onUpdated={onCoursUpdated}
           onDeleted={onCoursDeleted}
         />
@@ -572,11 +577,13 @@ function CoursTab({ apiBase, cours, theme, onCoursCreated, onCoursUpdated, onCou
 
 export default function ContenuManager() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
   const apiBase = API_BASE;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Contenu — Admin | Weeb";
+    document.title = t.page_title_content;
     const metaRobots = document.querySelector('meta[name="robots"]');
     if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
     return () => {
@@ -640,7 +647,7 @@ export default function ContenuManager() {
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold">Contenu pédagogique</h1>
+          <h1 className="text-2xl font-bold">{t.content_title}</h1>
           <p className={`text-sm mt-1 ${muted}`}>Gérer les modules, les cours et les QCM.</p>
         </div>
 
@@ -648,15 +655,15 @@ export default function ContenuManager() {
         <div className={`rounded-2xl border ${card} overflow-hidden`}>
           {/* Onglets */}
           <div className={`px-4 flex gap-0 border-b ${theme === "dark" ? "border-[#2a2a2a]" : "border-gray-200"}`}>
-            {tabBtn("modules", `Modules (${modules.length})`)}
-            {tabBtn("cours", `Cours (${cours.length})`)}
+            {tabBtn("modules", `${t.content_tab_modules} (${modules.length})`)}
+            {tabBtn("cours", `${t.content_tab_courses} (${cours.length})`)}
           </div>
 
           {/* Corps */}
           <div className="p-4">
             {loading && (
               <div className={`flex items-center gap-2 text-sm ${muted} py-6 justify-center`}>
-                <Spinner /> Chargement…
+                <Spinner /> {t.common_loading}
               </div>
             )}
             {!loading && err && (
@@ -668,6 +675,7 @@ export default function ContenuManager() {
                 modules={modules}
                 allCours={cours}
                 theme={theme}
+                t={t}
                 onModuleCreated={(m) => setModules((prev) => [...prev, m])}
                 onModuleUpdated={(m) => setModules((prev) => prev.map((x) => (x.id === m.id ? { ...x, ...m } : x)))}
                 onModuleDeleted={(id) => setModules((prev) => prev.filter((x) => x.id !== id))}
@@ -678,6 +686,7 @@ export default function ContenuManager() {
                 apiBase={apiBase}
                 cours={cours}
                 theme={theme}
+                t={t}
                 onCoursCreated={(c) => setCours((prev) => [...prev, c])}
                 onCoursUpdated={(c) => setCours((prev) => prev.map((x) => (x.id === c.id ? { ...x, ...c } : x)))}
                 onCoursDeleted={(id) => setCours((prev) => prev.filter((x) => x.id !== id))}

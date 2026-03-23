@@ -21,6 +21,10 @@ vi.mock("../../utils/roles", () => ({
   hasAnyRedactionRole: vi.fn(),
 }));
 
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useAuth.mockReturnValue({ user: { id: 1 } });

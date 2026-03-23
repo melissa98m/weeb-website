@@ -2,12 +2,15 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from "react"
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import {
   hasPersonnelRole,
   hasAnyStaffRole,
   hasAnyRedactionRole,
 } from "../../utils/roles";
 import { API_BASE } from "../../lib/api";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 /* ==== Icônes inline (SVG) sans dépendance ==== */
 function IconBase({ children, size = 18 }) {
@@ -93,7 +96,7 @@ function IconTag() {
 }
 
 /* ==== Mini badge "à traiter" ==== */
-function MiniBadge({ children, theme = "light", title = "À traiter" }) {
+function MiniBadge({ children, theme = "light", title }) {
   const base =
     "px-1.5 py-0.5 rounded-full text-[10px] leading-none font-semibold border";
   const light = "bg-amber-200 text-amber-800 border-amber-200";
@@ -153,24 +156,28 @@ function IconBook() {
   );
 }
 
-const NAV_ALL = [
-  { key: "affect", label: "Affectations", to: "/admin/user-formations", icon: IconLink },
-  { key: "forms", label: "Formations", to: "/admin/formations", icon: IconCap },
-  { key: "content", label: "Contenu", to: "/admin/content", icon: IconBook },
-  { key: "articles", label: "Articles", to: "/admin/articles", icon: IconPen },
-  { key: "genres", label: "Genres", to: "/admin/genres", icon: IconTag },
-  { key: "fb", label: "Feedbacks", to: "/admin/feedbacks", icon: IconMessage },
-  { key: "msg", label: "Messages", to: "/admin/messages", icon: IconInbox },
-  { key: "commercial", label: "Commercial", to: "/admin/commercial", icon: IconBriefcase },
-  { key: "newsletter", label: "Newsletter", to: "/admin/newsletter", icon: IconMail },
-  { key: "analytics", label: "Analytiques", to: "/admin/analytics", icon: IconChart },
-  { key: "chat", label: "Chat support", to: "/admin/chat", icon: IconChat },
-];
+function buildNav(t) {
+  return [
+    { key: "affect", labelKey: "nav_affect", to: "/admin/user-formations", icon: IconLink },
+    { key: "forms", labelKey: "nav_formations", to: "/admin/formations", icon: IconCap },
+    { key: "content", labelKey: "nav_content", to: "/admin/content", icon: IconBook },
+    { key: "articles", labelKey: "nav_articles", to: "/admin/articles", icon: IconPen },
+    { key: "genres", labelKey: "nav_genres", to: "/admin/genres", icon: IconTag },
+    { key: "fb", labelKey: "nav_feedbacks", to: "/admin/feedbacks", icon: IconMessage },
+    { key: "msg", labelKey: "nav_messages", to: "/admin/messages", icon: IconInbox },
+    { key: "commercial", labelKey: "nav_commercial", to: "/admin/commercial", icon: IconBriefcase },
+    { key: "newsletter", labelKey: "nav_newsletter", to: "/admin/newsletter", icon: IconMail },
+    { key: "analytics", labelKey: "nav_analytics", to: "/admin/analytics", icon: IconChart },
+    { key: "chat", labelKey: "nav_chat", to: "/admin/chat", icon: IconChat },
+  ].map(item => ({ ...item, label: t[item.labelKey] }));
+}
 
 
 export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   const [fbPending, setFbPending] = useState(null);
   const [msgPending, setMsgPending] = useState(null);
@@ -201,6 +208,8 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const canRedaction = hasAnyRedactionRole(user);
   const isAdmin = !!(user?.is_staff || user?.is_superuser);
 
+  const NAV_ALL = useMemo(() => buildNav(t), [t]);
+
   // Filtrage des onglets visibles selon rôles
   const NAV = useMemo(() => {
     return NAV_ALL.filter(({ key }) => {
@@ -225,7 +234,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
           return false;
       }
     });
-  }, [canPersonnel, canStaff, canRedaction, isAdmin]);
+  }, [NAV_ALL, canPersonnel, canStaff, canRedaction, isAdmin]);
 
   const fetchCount = useCallback(async (url, signal) => {
     const r = await fetch(url, { credentials: "include", signal });
@@ -304,15 +313,15 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
           transition-transform md:transition-none
           ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         role="navigation"
-        aria-label="Menu d’administration"
+        aria-label={t.nav_admin_label}
       >
         {/* Entête mobile */}
         <div className="md:hidden flex items-center justify-between px-4 h-14 border-b">
-          <div className="font-semibold">Administration</div>
+          <div className="font-semibold">{t.nav_administration}</div>
           <button
             onClick={onClose}
             className="px-2 py-1 rounded-lg border"
-            aria-label="Fermer le menu"
+            aria-label={t.nav_close}
           >
             ✕
           </button>
@@ -321,7 +330,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         <div className="p-3 md:p-4">
           {NAV.length === 0 ? (
             <div className="text-sm opacity-70 px-2">
-              Aucun module disponible pour votre rôle.
+              {t.nav_no_module}
             </div>
           ) : (
             <ul className="space-y-1">
@@ -346,7 +355,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
 
                       {(isFb || isMsg) && pending !== null && (
                         <span className="ml-auto">
-                          <MiniBadge theme={theme === "dark" ? "dark" : "light"}>
+                          <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={t.nav_to_process}>
                             {pending}
                           </MiniBadge>
                         </span>

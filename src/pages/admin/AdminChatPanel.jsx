@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { API_BASE, WS_BASE } from "../../lib/api";
 import { getCookie } from "../../lib/cookies";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 function formatTime(iso) {
   if (!iso) return "";
@@ -17,6 +20,8 @@ function formatTimeShort(iso) {
 export default function AdminChatPanel() {
   const { theme } = useTheme();
   const { user } = useAuth();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
   const dark = theme === "dark";
 
   const panel = dark ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
@@ -38,7 +43,7 @@ export default function AdminChatPanel() {
   // SEO
   useEffect(() => {
     const prev = document.title;
-    document.title = "Chat support — Admin";
+    document.title = t.page_title_chat;
     let meta = document.querySelector('meta[name="robots"]');
     if (!meta) { meta = document.createElement("meta"); meta.name = "robots"; document.head.appendChild(meta); }
     meta.content = "noindex, nofollow";
@@ -142,8 +147,8 @@ export default function AdminChatPanel() {
   return (
     <main className="px-4 md:px-6 py-6">
       <header className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Chat support</h1>
-        <p className={dark ? "text-white/70" : "text-gray-600"}>Conversations avec les utilisateurs.</p>
+        <h1 className="text-2xl md:text-3xl font-bold">{t.chat_title}</h1>
+        <p className={dark ? "text-white/70" : "text-gray-600"}>{t.chat_subtitle}</p>
       </header>
 
       <div className={`rounded-2xl border overflow-hidden flex ${panel}`} style={{ height: "70vh" }}>
@@ -151,11 +156,11 @@ export default function AdminChatPanel() {
         {/* Sidebar — liste des rooms */}
         <aside className={`w-72 border-r flex-shrink-0 flex flex-col ${sidebar}`}>
           <div className="px-4 py-3 border-b text-sm font-semibold opacity-60 uppercase tracking-wide">
-            Conversations ({rooms.length})
+            {t.chat_conversations} ({rooms.length})
           </div>
           <div className="flex-1 overflow-y-auto">
             {rooms.length === 0 && (
-              <p className="text-sm opacity-40 text-center mt-8 px-4">Aucune conversation pour l'instant.</p>
+              <p className="text-sm opacity-40 text-center mt-8 px-4">{t.chat_no_conversations}</p>
             )}
             {rooms.map((room) => (
               <button
@@ -192,7 +197,7 @@ export default function AdminChatPanel() {
         <div className="flex-1 flex flex-col min-w-0">
           {!activeRoom ? (
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-sm opacity-40">Sélectionnez une conversation.</p>
+              <p className="text-sm opacity-40">{t.chat_select}</p>
             </div>
           ) : (
             <>
@@ -235,7 +240,7 @@ export default function AdminChatPanel() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKey}
-                  placeholder="Répondre…"
+                  placeholder={t.chat_placeholder}
                   rows={1}
                   maxLength={2000}
                   className={`flex-1 resize-none rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${inputBg}`}
@@ -246,7 +251,7 @@ export default function AdminChatPanel() {
                   disabled={!input.trim() || !connected}
                   className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition"
                 >
-                  Envoyer
+                  {t.chat_send}
                 </button>
               </div>
             </>

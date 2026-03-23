@@ -7,12 +7,15 @@ import React, {
 import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import FormationDetailsModal from "../../components/admin/FormationDetailsModal";
 import CreateFormationModal from "../../components/admin/CreateFormationModal";
 import { getEnv } from "../../lib/env";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
@@ -24,10 +27,12 @@ const API_BASE = (() => {
 export default function FormationsManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Formations — Admin | Weeb";
+    document.title = t.page_title_formations;
     const metaRobots = document.querySelector('meta[name="robots"]');
     if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
     return () => {
@@ -181,9 +186,9 @@ export default function FormationsManager() {
   }, [load]);
 
   // guards
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
   if (!hasPersonnelRole(user))
-    return <div className="p-6 text-red-600">Accès refusé. Cette page est réservée au personnel.</div>;
+    return <div className="p-6 text-red-600">{t.common_access_denied}</div>;
 
   return (
     <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
@@ -191,10 +196,10 @@ export default function FormationsManager() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold leading-tight truncate">
-            Gérer les formations
+            {t.formations_title}
           </h1>
           <p className="mt-1 text-xs text-gray-500 dark:text-white/60">
-            Liste, recherche, création et ouverture des détails avec les inscrits.
+            {t.formations_subtitle}
           </p>
         </div>
 
@@ -205,12 +210,12 @@ export default function FormationsManager() {
             className={`rounded-xl border px-4 py-2 ${ctaBtn}`}
             onClick={() => setShowCreate(true)}
           >
-            + Nouvelle formation
+            {t.formations_new}
           </button>
 
           <input
             className={`w-60 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder="Rechercher une formation"
+            placeholder={t.formations_search}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -220,19 +225,19 @@ export default function FormationsManager() {
 
       {/* Content */}
       <section className={`rounded-2xl border mt-3 p-4 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
+        {loading && <div className="p-4 text-sm opacity-80">{t.common_loading}</div>}
         {!loading && err && (
           <div className="p-4 text-sm text-red-600 dark:text-red-400">
-            Erreur : {err}
+            {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={() => load(page)}>
-                Recharger
+                {t.common_reload}
               </button>
             </div>
           </div>
         )}
         {!loading && !err && items.length === 0 && (
-          <div className="p-4 text-sm opacity-80">Aucune formation.</div>
+          <div className="p-4 text-sm opacity-80">{t.formations_no_results}</div>
         )}
 
         {!loading && !err && items.length > 0 && (

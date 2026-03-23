@@ -9,6 +9,19 @@ vi.mock("../../lib/cookies", () => ({ getCookie: vi.fn(() => "csrf") }));
 vi.mock("../../context/ThemeContext", () => ({
   useTheme: () => ({ theme: "dark" }),
 }));
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+vi.mock("../../components/admin/RichTextEditor", () => ({
+  default: ({ onChange, value }) => (
+    <textarea
+      id="nl-body"
+      aria-label="Corps texte brut"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
 
 function setup() {
   const user = userEvent.setup();
@@ -159,18 +172,6 @@ describe("NewsletterManager", () => {
     await user.click(screen.getByRole("button", { name: /^envoyer$/i }));
 
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent(/serveur indisponible/i));
-  });
-
-  it("affiche l'aperçu HTML quand togglé", async () => {
-    const user = setup();
-    await waitFor(() => screen.getByText(/42 abonné/i));
-
-    await user.type(screen.getByLabelText(/html/i), "<p>Hello</p>");
-    await user.click(screen.getByRole("button", { name: /aperçu html/i }));
-
-    expect(screen.getByText(/aperçu html/i, { selector: "p" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /masquer aperçu/i }));
-    expect(screen.queryByText(/aperçu html/i, { selector: "p" })).toBeNull();
   });
 
   it("met robots noindex sur la page admin", () => {

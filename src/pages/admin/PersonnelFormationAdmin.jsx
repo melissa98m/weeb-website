@@ -10,7 +10,10 @@ import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 import Pill from "../../components/ui/Pill";
 import FiltersBar from "../../components/admin/FiltersBar";
 import AddUserFormationForm from "../../components/admin/AddUserFormation";
@@ -29,10 +32,12 @@ const API_BASE = (() => {
 export default function PersonnelFormationAdmin() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Gestion formations — Admin | Weeb";
+    document.title = t.page_title_personnel;
     const metaRobots = document.querySelector('meta[name="robots"]');
     if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
     return () => {
@@ -380,12 +385,12 @@ export default function PersonnelFormationAdmin() {
               errorLower.includes("unique") ||
               errorLower.includes("duplicate")
             ) {
-              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+              errorMessage = t.personnel_already_registered;
             }
           } catch (_parseError) {
             // Si on ne peut pas parser le JSON, utiliser le message par défaut
             if (res.status === 400 || res.status === 409) {
-              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+              errorMessage = t.personnel_already_registered;
             }
           }
           throw new Error(errorMessage);
@@ -432,11 +437,11 @@ export default function PersonnelFormationAdmin() {
   );
 
   // guards
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
   if (!hasPersonnelRole(user))
     return (
       <div className="p-6 text-red-600">
-        Accès refusé. Cette page est réservée au personnel.
+        {t.common_access_denied}
       </div>
     );
 
@@ -445,22 +450,22 @@ export default function PersonnelFormationAdmin() {
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start md:items-center sm:justify-between">
         <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold leading-tight">
-            Gestion des inscriptions aux formations
+            {t.personnel_title}
           </h1>
           <div className="mt-0.5 text-xs text-gray-500 dark:text-white/60 sm:hidden">
-            Accès réservé au personnel
+            {t.personnel_access_reserved}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
           <Pill color="primary" variant="soft" size="md">
-            {usersTotal} utilisateurs
+            {usersTotal} {t.personnel_users}
           </Pill>
           <Pill color="info" variant="soft" size="md">
-            {formationsTotal} formations
+            {formationsTotal} {t.personnel_formations}
           </Pill>
           <Pill color="success" variant="soft" size="md">
-            {linksTotal} liens
+            {linksTotal} {t.personnel_links}
           </Pill>
         </div>
       </header>
@@ -477,7 +482,7 @@ export default function PersonnelFormationAdmin() {
               onClick={loadBootstrap}
               disabled={bootLoading}
             >
-              Recharger utilisateurs/formations
+              {t.personnel_reload_users}
             </button>
           </div>
         </div>
@@ -495,7 +500,7 @@ export default function PersonnelFormationAdmin() {
               onClick={() => loadLinks(page)}
               disabled={linksLoading}
             >
-              Recharger les liens
+              {t.personnel_reload_links}
             </button>
           </div>
         </div>

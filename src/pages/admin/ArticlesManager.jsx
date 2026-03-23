@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { hasAnyRedactionRole } from "../../utils/roles";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 import { safeChipStyle } from "../../utils/colors";
 import PageSizer from "../../components/ui/PageSizer";
 import Pagination from "../../components/ui/Pagination";
@@ -18,10 +21,12 @@ const API_BASE = (() => {
 export default function ArticlesManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Articles — Admin | Weeb";
+    document.title = t.page_title_articles;
     const metaRobots = document.querySelector('meta[name="robots"]');
     if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
     return () => {
@@ -118,8 +123,8 @@ export default function ArticlesManager() {
   }, [fetchJSON, startTask]);
 
   const genresForChips = useMemo(
-    () => [{ id: null, name: "Tous", color: null }, ...genres],
-    [genres]
+    () => [{ id: null, name: t.articles_filter_all, color: null }, ...genres],
+    [genres, t]
   );
 
   const load = useCallback(async (p = 1) => {
@@ -228,8 +233,8 @@ export default function ArticlesManager() {
   }, [loadComments]);
 
   const canRedact = hasAnyRedactionRole(user);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
+  if (!canRedact) return <div className="p-6 text-red-600">{t.common_access_denied_redaction}</div>;
 
   const openCreate = () => { setCurrent(null); setOpen(true); };
   const openEdit = (a) => { setCurrent(a.raw); setOpen(true); };
@@ -256,19 +261,19 @@ export default function ArticlesManager() {
       {/* Header */}
       <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold leading-tight">Gérer les articles</h1>
-          <p className="text-xs mt-1 opacity-80">Recherche, filtre par genre, création/édition.</p>
+          <h1 className="text-xl md:text-2xl font-bold leading-tight">{t.articles_title}</h1>
+          <p className="text-xs mt-1 opacity-80">{t.articles_subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <input
             className={`w-64 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder="Rechercher un article"
+            placeholder={t.articles_search}
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
           <PageSizer pageSize={pageSize} onChange={setPageSize} />
           <button type="button" onClick={openCreate} className={`rounded-xl border px-3 py-2 ${cta}`}>
-            + Nouvel article
+            {t.articles_new}
           </button>
         </div>
       </header>
@@ -286,7 +291,7 @@ export default function ArticlesManager() {
                 : "border-transparent opacity-60 hover:opacity-80"
             }`}
           >
-            {tab === "articles" ? "Articles" : "Commentaires"}
+            {tab === "articles" ? t.articles_tab_articles : t.articles_tab_comments}
           </button>
         ))}
       </div>
@@ -294,7 +299,7 @@ export default function ArticlesManager() {
       {/* Filtres genres (chips comme blog) */}
       {activeTab === "articles" && !open && (
         <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-          <div className="text-sm opacity-80 mb-2">Filtrer par genre</div>
+          <div className="text-sm opacity-80 mb-2">{t.articles_filter_genre}</div>
           <GenreChips
             genres={genresForChips}
             selectedId={selectedGenreId}
@@ -308,8 +313,8 @@ export default function ArticlesManager() {
       {activeTab === "comments" && (
         <section className={`mt-3 rounded-2xl border p-4 ${card}`}>
           <div className="flex items-center gap-3 mb-4">
-            <span className="text-sm font-medium">Filtrer :</span>
-            {[["all", "Tous"], ["true", "Approuvés"], ["false", "En attente"]].map(([val, label]) => (
+            <span className="text-sm font-medium">{t.articles_filter_label}</span>
+            {[["all", t.articles_filter_all], ["true", t.articles_filter_approved], ["false", t.articles_filter_pending]].map(([val, label]) => (
               <button
                 key={val}
                 type="button"
@@ -325,9 +330,9 @@ export default function ArticlesManager() {
             ))}
           </div>
 
-          {commentsLoading && <div className="text-sm opacity-70 py-4">Chargement…</div>}
+          {commentsLoading && <div className="text-sm opacity-70 py-4">{t.common_loading}</div>}
           {!commentsLoading && allComments.length === 0 && (
-            <div className="text-sm opacity-70 py-4">Aucun commentaire.</div>
+            <div className="text-sm opacity-70 py-4">{t.articles_no_comments}</div>
           )}
           {!commentsLoading && allComments.length > 0 && (
             <ul className="space-y-3">
@@ -351,12 +356,12 @@ export default function ArticlesManager() {
                         </span>
                         {!c.is_approved && (
                           <span className="px-2 py-0.5 rounded-full text-xs bg-orange-400/20 text-orange-400">
-                            En attente
+                            {t.articles_comment_pending}
                           </span>
                         )}
                         {c.parent && (
                           <span className="px-2 py-0.5 rounded-full text-xs bg-blue-400/20 text-blue-400">
-                            Réponse
+                            {t.articles_comment_reply}
                           </span>
                         )}
                       </div>
@@ -369,7 +374,7 @@ export default function ArticlesManager() {
                           onClick={() => moderateComment(c.id, true)}
                           className="px-2 py-1 rounded-md text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30"
                         >
-                          Approuver
+                          {t.articles_comment_approve}
                         </button>
                       )}
                       {c.is_approved && (
@@ -378,7 +383,7 @@ export default function ArticlesManager() {
                           onClick={() => moderateComment(c.id, false)}
                           className="px-2 py-1 rounded-md text-xs bg-orange-400/20 text-orange-400 hover:bg-orange-400/30"
                         >
-                          Masquer
+                          {t.articles_comment_hide}
                         </button>
                       )}
                       <button
@@ -386,7 +391,7 @@ export default function ArticlesManager() {
                         onClick={() => deleteComment(c.id)}
                         className="px-2 py-1 rounded-md text-xs bg-red-400/20 text-red-400 hover:bg-red-400/30"
                       >
-                        Supprimer
+                        {t.common_delete}
                       </button>
                     </div>
                   </div>
@@ -399,19 +404,19 @@ export default function ArticlesManager() {
 
       {/* Liste */}
       {activeTab === "articles" && <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
+        {loading && <div className="p-4 text-sm opacity-80">{t.common_loading}</div>}
         {!loading && err && (
           <div className="p-4 text-sm text-red-600 dark:text-red-400">
-            Erreur : {err}
+            {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={() => load(page)}>
-                Recharger
+                {t.common_reload}
               </button>
             </div>
           </div>
         )}
         {!loading && !err && items.length === 0 && (
-          <div className="p-4 text-sm opacity-80">Aucun article.</div>
+          <div className="p-4 text-sm opacity-80">{t.articles_no_articles}</div>
         )}
 
         {!loading && !err && items.length > 0 && (
