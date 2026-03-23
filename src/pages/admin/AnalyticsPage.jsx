@@ -1,15 +1,20 @@
 import React, { lazy, Suspense, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 // recharts ~348KB — chargé uniquement quand la page admin est visitée
 const AnalyticsCharts = lazy(() => import("../../components/admin/AnalyticsCharts"));
 
 export default function AnalyticsPage() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Analytiques — Admin";
+    document.title = t.page_title_analytics;
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement("meta");
@@ -31,9 +36,9 @@ export default function AnalyticsPage() {
   return (
     <main className="px-4 md:px-6 py-6">
       <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">Analytiques</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{t.analytics_title}</h1>
         <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
-          Statistiques globales de la plateforme.
+          {t.analytics_subtitle}
         </p>
       </header>
 

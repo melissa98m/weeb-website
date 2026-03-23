@@ -1,9 +1,26 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { getCookie } from "../../lib/cookies";
 import { API_BASE } from "../../lib/api";
+import RichTextEditor from "../../components/admin/RichTextEditor";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
-function Toast({ toast, onClose }) {
+function htmlToText(html) {
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .trim();
+}
+
+function Toast({ toast, onClose, t }) {
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +48,7 @@ function Toast({ toast, onClose }) {
       <p className="flex-1">{toast.message}</p>
       <button
         onClick={onClose}
-        aria-label="Fermer la notification"
+        aria-label={t.newsletter_toast_close}
         className="ml-2 shrink-0 opacity-70 hover:opacity-100 transition-opacity text-lg leading-none"
       >
         ×
@@ -40,7 +57,7 @@ function Toast({ toast, onClose }) {
   );
 }
 
-function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme }) {
+function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme, t }) {
   React.useEffect(() => {
     if (!open) return;
     const handler = (e) => { if (e.key === "Escape") onCancel(); };
@@ -59,20 +76,19 @@ function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme }) {
         aria-labelledby="confirm-modal-title"
         className={`relative rounded-2xl border shadow p-6 max-w-sm w-full ${card}`}
       >
-        <h2 id="confirm-modal-title" className="text-lg font-semibold mb-2">Confirmer l'envoi</h2>
+        <h2 id="confirm-modal-title" className="text-lg font-semibold mb-2">{t.newsletter_confirm_title}</h2>
         <p className="text-sm opacity-80 mb-4">
-          Cette campagne sera envoyée à <strong>{recipientsCount}</strong> abonné{recipientsCount !== 1 ? "s" : ""}.
-          Cette action est irréversible.
+          {t.newsletter_confirm_body.replace('{count}', recipientsCount)}
         </p>
         <div className="flex justify-end gap-2">
           <button onClick={onCancel} className="px-4 py-2 rounded-lg border text-sm">
-            Annuler
+            {t.newsletter_confirm_cancel}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 rounded-lg border bg-blue-600 text-white text-sm hover:brightness-110"
           >
-            Envoyer
+            {t.newsletter_confirm_send}
           </button>
         </div>
       </div>
@@ -80,7 +96,7 @@ function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme }) {
   );
 }
 
-function SubscribersList({ theme }) {
+function SubscribersList({ theme, t }) {
   const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
   const inputCls = theme === "dark"
     ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/40"
@@ -132,7 +148,7 @@ function SubscribersList({ theme }) {
     <section className={`rounded-2xl border ${card}`} aria-labelledby="subscribers-heading">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border-b ${divider.replace('divide', 'border')}">
         <h2 id="subscribers-heading" className="text-base font-semibold">
-          Abonnés
+          {t.newsletter_subscribers}
           {data && (
             <span className={`ml-2 text-sm font-normal ${mutedCls}`}>
               ({data.count})
@@ -144,15 +160,15 @@ function SubscribersList({ theme }) {
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Rechercher un email…"
-            aria-label="Rechercher un abonné"
+            placeholder={t.newsletter_search_email}
+            aria-label={t.newsletter_search_aria}
             className={`rounded-lg border px-3 py-1.5 text-sm w-52 ${inputCls}`}
           />
           <button
             type="submit"
             className="px-3 py-1.5 rounded-lg border bg-blue-600 text-white text-sm hover:brightness-110 transition"
           >
-            Chercher
+            {t.newsletter_search_btn}
           </button>
         </form>
       </div>
@@ -160,7 +176,7 @@ function SubscribersList({ theme }) {
       {/* Table */}
       <div className="overflow-x-auto">
         {loading ? (
-          <div className="p-6 space-y-2" aria-busy="true" aria-label="Chargement des abonnés">
+          <div className="p-6 space-y-2" aria-busy="true" aria-label={t.newsletter_loading}>
             {[...Array(5)].map((_, i) => (
               <div key={i} className={`h-8 rounded animate-pulse ${theme === "dark" ? "bg-white/10" : "bg-gray-100"}`} />
             ))}
@@ -169,16 +185,16 @@ function SubscribersList({ theme }) {
           <p className="p-6 text-sm text-red-500" role="alert">{error}</p>
         ) : data?.results?.length === 0 ? (
           <p className={`p-6 text-sm ${mutedCls}`}>
-            {search ? "Aucun résultat pour cette recherche." : "Aucun abonné."}
+            {search ? t.newsletter_no_results : t.newsletter_no_subscribers}
           </p>
         ) : (
           <table className="w-full text-sm">
-            <caption className="sr-only">Liste des abonnés à la newsletter</caption>
+            <caption className="sr-only">{t.newsletter_subscribers_table_caption}</caption>
             <thead>
               <tr className={`text-left text-xs uppercase tracking-wide ${mutedCls} border-b ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
-                <th scope="col" className="px-4 py-2 font-medium">Email</th>
-                <th scope="col" className="px-4 py-2 font-medium">Inscrit le</th>
-                <th scope="col" className="px-4 py-2 font-medium">Dernier envoi</th>
+                <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_email}</th>
+                <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_subscribed}</th>
+                <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_last_sent}</th>
               </tr>
             </thead>
             <tbody className={`divide-y ${divider}`}>
@@ -201,7 +217,7 @@ function SubscribersList({ theme }) {
         <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t text-sm ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
           <div className="flex items-center gap-2">
             <label htmlFor="page-size-select" className={`text-xs ${mutedCls}`}>
-              Lignes par page
+              {t.newsletter_rows_per_page}
             </label>
             <select
               id="page-size-select"
@@ -217,24 +233,24 @@ function SubscribersList({ theme }) {
 
           <div className="flex items-center gap-3">
             <span className={mutedCls}>
-              Page {data.page} / {data.num_pages}
+              {t.newsletter_page_info.replace('{page}', data.page).replace('{total}', data.num_pages)}
             </span>
             <div className="flex gap-2">
               <button
                 onClick={() => setPage((p) => p - 1)}
                 disabled={data.page <= 1}
-                aria-label="Page précédente"
+                aria-label={t.newsletter_prev}
                 className={`px-3 py-1.5 rounded-lg border text-sm transition disabled:opacity-40 disabled:cursor-not-allowed ${theme === "dark" ? "border-[#333] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50"}`}
               >
-                ← Préc.
+                {t.newsletter_prev}
               </button>
               <button
                 onClick={() => setPage((p) => p + 1)}
                 disabled={data.page >= data.num_pages}
-                aria-label="Page suivante"
+                aria-label={t.newsletter_next}
                 className={`px-3 py-1.5 rounded-lg border text-sm transition disabled:opacity-40 disabled:cursor-not-allowed ${theme === "dark" ? "border-[#333] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50"}`}
               >
-                Suiv. →
+                {t.newsletter_next}
               </button>
             </div>
           </div>
@@ -244,20 +260,22 @@ function SubscribersList({ theme }) {
   );
 }
 
-const STATUS_LABELS = {
-  draft:     { label: "Brouillon",  cls: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/70" },
-  scheduled: { label: "Planifiée",  cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300" },
-  sending:   { label: "En cours",   cls: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300" },
-  sent:      { label: "Envoyée",    cls: "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300" },
-  failed:    { label: "Échouée",    cls: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" },
-};
+function getStatusLabels(t) {
+  return {
+    draft:     { label: t.newsletter_status_draft,     cls: "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/70" },
+    scheduled: { label: t.newsletter_status_scheduled, cls: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300" },
+    sending:   { label: t.newsletter_status_sending,   cls: "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300" },
+    sent:      { label: t.newsletter_status_sent,      cls: "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300" },
+    failed:    { label: t.newsletter_status_failed,    cls: "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300" },
+  };
+}
 
-function CampaignsBadge({ status }) {
-  const s = STATUS_LABELS[status] ?? STATUS_LABELS.draft;
+function CampaignsBadge({ status, t }) {
+  const s = getStatusLabels(t)[status] ?? getStatusLabels(t).draft;
   return <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>;
 }
 
-function CampaignsList({ theme, onSelect, refresh }) {
+function CampaignsList({ theme, onSelect, refresh, t }) {
   const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const [campaigns, setCampaigns] = useState([]);
@@ -291,7 +309,7 @@ function CampaignsList({ theme, onSelect, refresh }) {
   return (
     <section className={`rounded-2xl border ${card}`} aria-labelledby="campaigns-list-heading">
       <h2 id="campaigns-list-heading" className="text-base font-semibold px-5 pt-4 pb-3 border-b ${theme === 'dark' ? 'border-[#333]' : 'border-gray-100'}">
-        Campagnes
+        {t.newsletter_campaigns}
       </h2>
       <ul className="divide-y divide-inherit">
         {campaigns.map((c) => (
@@ -300,13 +318,13 @@ function CampaignsList({ theme, onSelect, refresh }) {
               <div className="font-medium text-sm truncate">{c.subject}</div>
               <div className={`text-xs mt-0.5 ${muted}`}>
                 {c.scheduled_at
-                  ? `Planifiée : ${new Date(c.scheduled_at).toLocaleString("fr-FR")}`
+                  ? `${t.newsletter_campaign_scheduled} ${new Date(c.scheduled_at).toLocaleString("fr-FR")}`
                   : c.sent_at
-                  ? `Envoyée : ${new Date(c.sent_at).toLocaleString("fr-FR")} — ${c.sent_count} envois`
-                  : `Créée : ${new Date(c.created_at).toLocaleString("fr-FR")}`}
+                  ? `${t.newsletter_campaign_sent} ${new Date(c.sent_at).toLocaleString("fr-FR")} — ${c.sent_count} envois`
+                  : `${t.newsletter_campaign_created} ${new Date(c.created_at).toLocaleString("fr-FR")}`}
               </div>
             </div>
-            <CampaignsBadge status={c.status} />
+            <CampaignsBadge status={c.status} t={t} />
             {(c.status === "draft" || c.status === "scheduled") && (
               <div className="flex gap-2">
                 <button
@@ -314,14 +332,14 @@ function CampaignsList({ theme, onSelect, refresh }) {
                   className="text-xs px-2 py-1 rounded border hover:opacity-80 transition"
                   aria-label={`Modifier la campagne ${c.subject}`}
                 >
-                  Modifier
+                  {t.newsletter_btn_edit}
                 </button>
                 <button
                   onClick={() => deleteC(c.id)}
                   className="text-xs px-2 py-1 rounded border border-red-300 text-red-600 hover:opacity-80 transition"
                   aria-label={`Supprimer la campagne ${c.subject}`}
                 >
-                  Supprimer
+                  {t.newsletter_btn_delete}
                 </button>
               </div>
             )}
@@ -334,10 +352,12 @@ function CampaignsList({ theme, onSelect, refresh }) {
 
 export default function NewsletterManager() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   useEffect(() => {
     const prev = document.title;
-    document.title = "Newsletter | Administration Weeb";
+    document.title = t.page_title_newsletter;
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement("meta");
@@ -346,7 +366,7 @@ export default function NewsletterManager() {
     }
     metaRobots.content = "noindex, nofollow";
     return () => { document.title = prev; };
-  }, []);
+  }, [t]);
 
   const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
   const inputCls = theme === "dark"
@@ -360,7 +380,6 @@ export default function NewsletterManager() {
   const [bodyText, setBodyText] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
-  const [preview, setPreview] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState(null);
@@ -383,7 +402,6 @@ export default function NewsletterManager() {
     setBodyText("");
     setBodyHtml("");
     setScheduledAt("");
-    setPreview(false);
   };
 
   const loadCampaign = (c) => {
@@ -435,7 +453,7 @@ export default function NewsletterManager() {
         throw new Error(err?.detail ?? `Erreur ${res.status}`);
       }
       const data = await res.json();
-      setToast({ type: "success", message: data.detail ?? "Campagne mise en file d'envoi." });
+      setToast({ type: "success", message: data.detail ?? t.newsletter_success });
       resetForm();
       setCampaignsRefresh((n) => n + 1);
       loadStats();
@@ -446,7 +464,7 @@ export default function NewsletterManager() {
     }
   };
 
-  const canSend = subject.trim().length > 0 && bodyText.trim().length > 0;
+  const canSend = subject.trim().length > 0 && bodyHtml.trim().length > 0;
 
   // Date minimum pour planification : maintenant + 5 minutes
   const minScheduledAt = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
@@ -454,39 +472,39 @@ export default function NewsletterManager() {
   return (
     <main className="px-4 md:px-6 py-6 max-w-4xl space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">Newsletter</h1>
+        <h1 className="text-2xl font-bold">{t.newsletter_title}</h1>
         <p className={`text-sm mt-1 ${muted}`}>
-          Gérer les abonnés, créer et planifier des campagnes.
+          {t.newsletter_subtitle}
         </p>
       </header>
 
       {/* Liste des abonnés */}
-      <SubscribersList theme={theme} />
+      <SubscribersList theme={theme} t={t} />
 
       {/* Historique campagnes */}
-      <CampaignsList theme={theme} onSelect={loadCampaign} refresh={campaignsRefresh} />
+      <CampaignsList theme={theme} onSelect={loadCampaign} refresh={campaignsRefresh} t={t} />
 
       {/* Formulaire campagne */}
       <section className={`rounded-2xl border p-5 ${card}`} aria-labelledby="campaign-heading">
         <div className="flex items-center justify-between mb-4">
           <h2 id="campaign-heading" className="text-base font-semibold">
-            {editingCampaignId ? "Modifier la campagne" : "Nouvelle campagne"}
+            {editingCampaignId ? t.newsletter_btn_edit_campaign : t.newsletter_btn_new}
             {stats && (
               <span className={`ml-2 text-sm font-normal ${muted}`}>
-                — {stats.total_abonnes} abonné{stats.total_abonnes !== 1 ? "s" : ""}
+                — {stats.total_abonnes} {stats.total_abonnes !== 1 ? t.newsletter_subscribers_count_plural : t.newsletter_subscribers_count}
               </span>
             )}
           </h2>
           {editingCampaignId && (
             <button onClick={resetForm} className={`text-xs px-2 py-1 rounded border ${ghostBtn}`}>
-              Nouvelle campagne
+              {t.newsletter_btn_new}
             </button>
           )}
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm mb-1" htmlFor="nl-subject">Sujet *</label>
+            <label className="block text-sm mb-1" htmlFor="nl-subject">{t.newsletter_field_subject}</label>
             <input
               id="nl-subject"
               type="text"
@@ -494,55 +512,26 @@ export default function NewsletterManager() {
               onChange={(e) => setSubject(e.target.value)}
               maxLength={200}
               className={`w-full rounded-lg border px-3 py-2 text-sm ${inputCls}`}
-              placeholder="Ex : Nouveautés de la semaine"
+              placeholder={t.newsletter_placeholder_subject}
             />
           </div>
 
           <div>
-            <label className="block text-sm mb-1" htmlFor="nl-text">Corps texte brut *</label>
-            <textarea
-              id="nl-text"
-              value={bodyText}
-              onChange={(e) => setBodyText(e.target.value)}
-              rows={5}
-              className={`w-full rounded-lg border px-3 py-2 text-sm font-mono ${inputCls}`}
-              placeholder="Contenu de l'email en texte brut…"
-            />
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="text-sm" htmlFor="nl-html">Corps HTML (optionnel)</label>
-              <button
-                type="button"
-                onClick={() => setPreview((v) => !v)}
-                className={`text-xs px-2 py-1 rounded border ${ghostBtn}`}
-              >
-                {preview ? "Masquer aperçu" : "Aperçu HTML"}
-              </button>
-            </div>
-            <textarea
-              id="nl-html"
+            <label className="block text-sm mb-1">{t.newsletter_field_body_text}</label>
+            <RichTextEditor
               value={bodyHtml}
-              onChange={(e) => setBodyHtml(e.target.value)}
-              rows={6}
-              className={`w-full rounded-lg border px-3 py-2 text-sm font-mono ${inputCls}`}
-              placeholder="<p>Contenu HTML de l'email…</p>"
+              onChange={(html) => {
+                setBodyHtml(html);
+                setBodyText(htmlToText(html));
+              }}
+              theme={theme}
             />
           </div>
-
-          {preview && bodyHtml && (
-            <div className={`rounded-lg border p-4 text-sm ${theme === "dark" ? "bg-white text-gray-900" : "bg-gray-50"}`}>
-              <p className="text-xs text-gray-400 mb-2 uppercase tracking-wide">Aperçu HTML</p>
-              {/* Aperçu saisi par l'admin (page protégée, jamais exposée aux utilisateurs publics). */}
-              <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-            </div>
-          )}
 
           {/* Planification */}
           <div>
             <label className="block text-sm mb-1" htmlFor="nl-scheduled">
-              Planifier l'envoi (optionnel)
+              {t.newsletter_field_scheduled}
             </label>
             <input
               id="nl-scheduled"
@@ -558,7 +547,7 @@ export default function NewsletterManager() {
                 onClick={() => setScheduledAt("")}
                 className={`ml-2 text-xs px-2 py-1 rounded border ${ghostBtn}`}
               >
-                Effacer
+                {t.newsletter_btn_clear}
               </button>
             )}
           </div>
@@ -572,10 +561,10 @@ export default function NewsletterManager() {
             className="px-5 py-2 rounded-xl border bg-blue-600 text-white text-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {sending
-              ? "En cours…"
+              ? t.newsletter_btn_sending
               : scheduledAt
-              ? "Planifier la campagne"
-              : "Envoyer maintenant"}
+              ? t.newsletter_btn_schedule
+              : t.newsletter_btn_send_now}
           </button>
         </div>
       </section>
@@ -586,9 +575,10 @@ export default function NewsletterManager() {
         onCancel={() => setConfirm(false)}
         recipientsCount={stats?.total_abonnes ?? 0}
         theme={theme}
+        t={t}
       />
 
-      <Toast toast={toast} onClose={() => setToast(null)} />
+      <Toast toast={toast} onClose={() => setToast(null)} t={t} />
     </main>
   );
 }

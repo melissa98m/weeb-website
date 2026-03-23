@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { hasAnyRole } from "../../utils/roles";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { getEnv } from "../../lib/env";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -21,6 +24,8 @@ function StatCard({ label, value, sub, theme, accent = false }) {
 export default function CommercialDashboard() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,57 +52,57 @@ export default function CommercialDashboard() {
   useEffect(() => {
     if (!user || !isAllowed) return;
     fetchData();
-    document.title = "Dashboard Commercial";
+    document.title = t.page_title_commercial;
     return () => { document.title = "Admin"; };
   }, [fetchData, user, isAllowed]);
 
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!isAllowed) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Commerciaux et Administrateurs.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
+  if (!isAllowed) return <div className="p-6 text-red-600">{t.commercial_access_denied}</div>;
 
-  if (loading) return <div className="p-6 text-sm opacity-70">Chargement…</div>;
+  if (loading) return <div className="p-6 text-sm opacity-70">{t.common_loading}</div>;
   if (error) return (
     <div className="p-6">
-      <p className="text-red-500 text-sm mb-3">Erreur : {error}</p>
-      <button onClick={fetchData} className="text-sm underline">Réessayer</button>
+      <p className="text-red-500 text-sm mb-3">{t.common_error.replace("{message}", error)}</p>
+      <button onClick={fetchData} className="text-sm underline">{t.commercial_retry}</button>
     </div>
   );
 
   const pipeline = data?.messages_pipeline ?? {};
   const pipelineData = [
-    { name: "Nouveau", value: pipeline.nouveau ?? 0, color: "#f59e0b" },
-    { name: "En cours", value: pipeline.en_cours ?? 0, color: "#6366f1" },
-    { name: "Résolu", value: pipeline.resolu ?? 0, color: "#22c55e" },
+    { name: t.commercial_pipeline_new, value: pipeline.nouveau ?? 0, color: "#f59e0b" },
+    { name: t.commercial_pipeline_in_progress, value: pipeline.en_cours ?? 0, color: "#6366f1" },
+    { name: t.commercial_pipeline_resolved, value: pipeline.resolu ?? 0, color: "#22c55e" },
   ];
 
   return (
     <main className="px-4 md:px-6 py-6 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold">Dashboard Commercial</h1>
-        <p className={`text-sm mt-1 ${meta}`}>Vue d'ensemble des formations, prospects et messages.</p>
+        <h1 className="text-2xl font-bold">{t.commercial_title}</h1>
+        <p className={`text-sm mt-1 ${meta}`}>{t.commercial_subtitle}</p>
       </header>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard
-          label="Total inscrits"
+          label={t.commercial_stat_registrations}
           value={data?.total_inscrits}
           theme={theme}
           accent
         />
         <StatCard
-          label="Messages reçus"
+          label={t.commercial_stat_messages}
           value={data?.total_messages}
           theme={theme}
         />
         <StatCard
-          label="Non assignés"
+          label={t.commercial_stat_unassigned}
           value={data?.messages_non_assignes}
-          sub="hors résolus"
+          sub={t.commercial_stat_unassigned_sub}
           theme={theme}
           accent={data?.messages_non_assignes > 0}
         />
         <StatCard
-          label="Formations sans inscrits"
+          label={t.commercial_stat_empty_trainings}
           value={data?.formations_sans_inscrits?.length ?? 0}
           theme={theme}
           accent={data?.formations_sans_inscrits?.length > 0}
@@ -107,7 +112,7 @@ export default function CommercialDashboard() {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Pipeline messages */}
         <section className={`rounded-xl border shadow p-5 ${card}`}>
-          <h2 className="text-base font-semibold mb-4">Pipeline messages de contact</h2>
+          <h2 className="text-base font-semibold mb-4">{t.commercial_pipeline_title}</h2>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={pipelineData} margin={{ top: 4, right: 8, left: -16, bottom: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 12 }} />
@@ -124,9 +129,9 @@ export default function CommercialDashboard() {
 
         {/* Top formations */}
         <section className={`rounded-xl border shadow p-5 ${card}`}>
-          <h2 className="text-base font-semibold mb-4">Top formations par inscrits</h2>
+          <h2 className="text-base font-semibold mb-4">{t.commercial_top_formations}</h2>
           {data?.top_formations?.length === 0 ? (
-            <p className={`text-sm ${meta}`}>Aucune donnée.</p>
+            <p className={`text-sm ${meta}`}>{t.commercial_no_data}</p>
           ) : (
             <ul className="space-y-2">
               {(data?.top_formations ?? []).map((f) => (
@@ -135,7 +140,7 @@ export default function CommercialDashboard() {
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                     theme === "dark" ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-50 text-indigo-600"
                   }`}>
-                    {f.inscrits} inscrits
+                    {f.inscrits} {t.commercial_registrations}
                   </span>
                 </li>
               ))}
@@ -148,7 +153,7 @@ export default function CommercialDashboard() {
       {data?.formations_sans_inscrits?.length > 0 && (
         <section className={`rounded-xl border shadow p-5 ${card}`}>
           <h2 className="text-base font-semibold mb-3">
-            Formations sans inscrits
+            {t.commercial_formations_empty}
             <span className={`ml-2 text-sm font-normal ${meta}`}>({data.formations_sans_inscrits.length})</span>
           </h2>
           <div className="flex flex-wrap gap-2">

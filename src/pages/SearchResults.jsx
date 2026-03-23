@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useLanguage } from "../context/LanguageContext";
 import { API_BASE } from "../lib/api";
+import searchEn from "../../locales/en/search.json";
+import searchFr from "../../locales/fr/search.json";
 
-function ArticleCard({ article, theme }) {
+function ArticleCard({ article, theme, t }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const card = theme === "dark"
     ? "bg-[#1c1c1c] border-[#333] text-white hover:bg-[#222]"
@@ -14,18 +17,18 @@ function ArticleCard({ article, theme }) {
       to={`/blog/${article.id}`}
       className={`block rounded-xl border p-4 transition ${card}`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-blue-500 mb-1">Article</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-blue-500 mb-1">{t.tag_article}</p>
       <h3 className="font-semibold leading-snug mb-1">{article.title}</h3>
       {article.author && (
         <p className={`text-sm ${muted}`}>
-          par {article.author.first_name || article.author.username}
+          {t.by_author.replace("{author}", article.author.first_name || article.author.username)}
         </p>
       )}
     </Link>
   );
 }
 
-function FormationCard({ formation, theme }) {
+function FormationCard({ formation, theme, t }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const card = theme === "dark"
     ? "bg-[#1c1c1c] border-[#333] text-white hover:bg-[#222]"
@@ -36,7 +39,7 @@ function FormationCard({ formation, theme }) {
       to="/formations"
       className={`block rounded-xl border p-4 transition ${card}`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-emerald-500 mb-1">Formation</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-emerald-500 mb-1">{t.tag_formation}</p>
       <h3 className="font-semibold leading-snug mb-1">{formation.name}</h3>
       {formation.description && (
         <p className={`text-sm line-clamp-2 ${muted}`}>{formation.description}</p>
@@ -58,6 +61,8 @@ function Skeleton({ theme }) {
 
 export default function SearchResults() {
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? searchFr : searchEn;
   const [searchParams] = useSearchParams();
   const q = useMemo(() => (searchParams.get("q") ?? "").trim(), [searchParams]);
 
@@ -68,7 +73,7 @@ export default function SearchResults() {
   // SEO : les pages de résultats de recherche ne doivent pas être indexées
   useEffect(() => {
     const prev = document.title;
-    document.title = q ? `Résultats pour "${q}" | Weeb` : "Recherche | Weeb";
+    document.title = q ? t.page_title_query.replace("{q}", q) : t.page_title_empty;
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement("meta");
@@ -119,21 +124,21 @@ export default function SearchResults() {
     <main className="min-h-[60vh] px-4 md:px-8 py-12 max-w-4xl mx-auto">
       <header className="mb-8">
         <h1 className="text-2xl font-bold mb-1">
-          {q ? `Résultats pour « ${q} »` : "Recherche"}
+          {q ? t.heading_query.replace("{q}", q) : t.heading_empty}
         </h1>
         {results && !loading && (
           <p className={`text-sm ${muted}`}>
-            {totalResults} résultat{totalResults !== 1 ? "s" : ""} trouvé{totalResults !== 1 ? "s" : ""}
+            {totalResults} {totalResults !== 1 ? t.results_count_many : t.results_count_one}
           </p>
         )}
         {q.length > 0 && q.length < 3 && (
-          <p className={`text-sm ${muted}`}>Saisir au moins 3 caractères.</p>
+          <p className={`text-sm ${muted}`}>{t.min_chars}</p>
         )}
       </header>
 
       {error && (
         <p className="text-sm text-red-500 mb-6" role="alert">
-          Erreur : {error}
+          {t.error.replace("{message}", error)}
         </p>
       )}
 
@@ -145,12 +150,8 @@ export default function SearchResults() {
 
       {results && !loading && totalResults === 0 && (
         <div className={`rounded-2xl border p-8 text-center ${card}`}>
-          <p className="text-lg font-medium mb-2">Aucun résultat</p>
-          <p className={`text-sm ${muted}`}>
-            Essaie avec d'autres mots-clés ou consulte directement le{" "}
-            <Link to="/blog" className="text-blue-500 underline">blog</Link> et les{" "}
-            <Link to="/formations" className="text-blue-500 underline">formations</Link>.
-          </p>
+          <p className="text-lg font-medium mb-2">{t.no_results_title}</p>
+          <p className={`text-sm ${muted}`}>{t.no_results_body}</p>
         </div>
       )}
 
@@ -160,11 +161,11 @@ export default function SearchResults() {
           {results.articles.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wide opacity-50 mb-3">
-                Articles ({results.articles.length})
+                {t.section_articles.replace("{count}", results.articles.length)}
               </h2>
               <div className="space-y-3">
                 {results.articles.map((a) => (
-                  <ArticleCard key={a.id} article={a} theme={theme} />
+                  <ArticleCard key={a.id} article={a} theme={theme} t={t} />
                 ))}
               </div>
             </section>
@@ -174,11 +175,11 @@ export default function SearchResults() {
           {results.formations.length > 0 && (
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wide opacity-50 mb-3">
-                Formations ({results.formations.length})
+                {t.section_formations.replace("{count}", results.formations.length)}
               </h2>
               <div className="space-y-3">
                 {results.formations.map((f) => (
-                  <FormationCard key={f.id} formation={f} theme={theme} />
+                  <FormationCard key={f.id} formation={f} theme={theme} t={t} />
                 ))}
               </div>
             </section>

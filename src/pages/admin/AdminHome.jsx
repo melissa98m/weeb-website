@@ -2,10 +2,13 @@ import React, { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { hasAnyStaffRole, hasAnyRedactionRole, hasPersonnelRole } from "../../utils/roles";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import ExportCSVButton from "../../components/admin/ExportCSVButton";
 import { API_BASE } from "../../lib/api";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 /* ==== Icônes (SVG inline, zéro dépendance) ==== */
 function IconLink({ size = 18 }) {
@@ -78,7 +81,7 @@ function MiniBadge({ children, theme = "light", title = "À traiter" }) {
 }
 
 
-function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel }) {
+function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel, t }) {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
@@ -93,23 +96,23 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
       {/* Filtres de date */}
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
-          Du&nbsp;:
+          {t.home_export_from}&nbsp;
           <input
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
             className={inputClass}
-            aria-label="Date de début"
+            aria-label={t.home_export_start_date}
           />
         </label>
         <label className="flex items-center gap-2 text-sm">
-          Au&nbsp;:
+          {t.home_export_to}&nbsp;
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
             className={inputClass}
-            aria-label="Date de fin"
+            aria-label={t.home_export_end_date}
           />
         </label>
       </div>
@@ -118,7 +121,7 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
       <div className="space-y-2">
         {canPersonnel && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-medium w-20 shrink-0 opacity-60">Inscrits</span>
+            <span className="text-xs font-medium w-20 shrink-0 opacity-60">{t.home_export_registrations}</span>
             <ExportCSVButton
               type="registrations"
               format="csv"
@@ -140,7 +143,7 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
         {canStaff && (
           <>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-xs font-medium w-20 shrink-0 opacity-60">Feedbacks</span>
+              <span className="text-xs font-medium w-20 shrink-0 opacity-60">{t.home_export_feedbacks}</span>
               <ExportCSVButton
                 type="feedbacks"
                 format="csv"
@@ -159,7 +162,7 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
               />
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className="text-xs font-medium w-20 shrink-0 opacity-60">Messages</span>
+              <span className="text-xs font-medium w-20 shrink-0 opacity-60">{t.home_export_messages}</span>
               <ExportCSVButton
                 type="messages"
                 format="csv"
@@ -187,11 +190,13 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel })
 export default function AdminHome() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
 
   // SEO : les pages admin ne doivent jamais être indexées
   useEffect(() => {
     const prev = document.title;
-    document.title = "Administration | Weeb";
+    document.title = t.page_title_admin;
     let metaRobots = document.querySelector('meta[name="robots"]');
     if (!metaRobots) {
       metaRobots = document.createElement("meta");
@@ -267,9 +272,9 @@ export default function AdminHome() {
     <main className="px-4 md:px-6 py-6">
       {/* Titre + bonjour */}
       <header className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Espace d’administration</h1>
+        <h1 className="text-2xl md:text-3xl font-bold">{t.home_title}</h1>
         <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
-          Bonjour{user?.username ? `, ${user.username}` : ""}. Choisissez une section.
+          {t.home_hello}{user?.username ? `, ${user.username}` : ""}. {t.home_subtitle}
         </p>
       </header>
 
@@ -281,8 +286,8 @@ export default function AdminHome() {
             <Link to="/admin/user-formations" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconLink /></div>
               <div className="min-w-0">
-                <div className="font-semibold">Affectations</div>
-                <div className="text-sm opacity-80">Gérer l’appartenance des utilisateurs aux formations.</div>
+                <div className="font-semibold">{t.nav_affect}</div>
+                <div className="text-sm opacity-80">{t.home_affect_desc}</div>
               </div>
             </Link>
           )}
@@ -292,8 +297,8 @@ export default function AdminHome() {
             <Link to="/admin/formations" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconCap /></div>
               <div className="min-w-0">
-                <div className="font-semibold">Formations</div>
-                <div className="text-sm opacity-80">Créer, lister, supprimer des formations.</div>
+                <div className="font-semibold">{t.nav_formations}</div>
+                <div className="text-sm opacity-80">{t.home_formations_desc}</div>
               </div>
             </Link>
           )}
@@ -303,8 +308,8 @@ export default function AdminHome() {
             <Link to="/admin/articles" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconPen /></div>
               <div className="min-w-0">
-                <div className="font-semibold">Articles</div>
-                <div className="text-sm opacity-80">Rédiger, éditer et taguer par genres.</div>
+                <div className="font-semibold">{t.nav_articles}</div>
+                <div className="text-sm opacity-80">{t.home_articles_desc}</div>
               </div>
             </Link>
           )}
@@ -315,10 +320,10 @@ export default function AdminHome() {
               <div className="mt-0.5"><IconMessage /></div>
               <div className="min-w-0">
                 <div className="font-semibold flex items-center gap-2">
-                  Feedbacks
-                  {fbPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${fbPending} feedback${fbPending !== 1 ? "s" : ""} à traiter`}>{fbPending}</MiniBadge>}
+                  {t.nav_feedbacks}
+                  {fbPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${fbPending} ${t.home_feedback_to_process}`}>{fbPending}</MiniBadge>}
                 </div>
-                <div className="text-sm opacity-80">Suivre la satisfaction et traiter les retours.</div>
+                <div className="text-sm opacity-80">{t.home_feedbacks_desc}</div>
               </div>
             </Link>
           )}
@@ -329,10 +334,10 @@ export default function AdminHome() {
               <div className="mt-0.5"><IconInbox /></div>
               <div className="min-w-0">
                 <div className="font-semibold flex items-center gap-2">
-                  Messages
-                  {msgPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${msgPending} message${msgPending !== 1 ? "s" : ""} à traiter`}>{msgPending}</MiniBadge>}
+                  {t.nav_messages}
+                  {msgPending !== null && <MiniBadge theme={theme === "dark" ? "dark" : "light"} title={`${msgPending} ${t.home_message_to_process}`}>{msgPending}</MiniBadge>}
                 </div>
-                <div className="text-sm opacity-80">Traiter les demandes entrantes.</div>
+                <div className="text-sm opacity-80">{t.home_messages_desc}</div>
               </div>
             </Link>
           )}
@@ -342,8 +347,8 @@ export default function AdminHome() {
             <Link to="/admin/newsletter" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconMail /></div>
               <div className="min-w-0">
-                <div className="font-semibold">Newsletter</div>
-                <div className="text-sm opacity-80">Composer et envoyer des campagnes aux abonnés.</div>
+                <div className="font-semibold">{t.nav_newsletter}</div>
+                <div className="text-sm opacity-80">{t.home_newsletter_desc}</div>
               </div>
             </Link>
           )}
@@ -352,7 +357,7 @@ export default function AdminHome() {
         {/* Actions utilitaires */}
         <div className="mt-4 flex flex-wrap gap-2">
           <button onClick={loadCounts} className={`rounded-lg border px-3 py-1.5 text-sm ${ghostBtn}`}>
-            Recharger les compteurs
+            {t.home_refresh_counts}
           </button>
         </div>
       </section>
@@ -361,21 +366,21 @@ export default function AdminHome() {
       {canStaff && (
         <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold">Analytiques</h2>
+            <h2 className="text-base font-semibold">{t.home_analytics}</h2>
             <Link
               to="/admin/analytics"
               className="text-xs opacity-60 hover:opacity-100 transition underline underline-offset-2"
             >
-              Voir tout →
+              {t.home_see_all}
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Utilisateurs", value: analytics?.total_utilisateurs },
-              { label: "Inscrits", value: analytics?.total_inscrits },
-              { label: "Feedbacks", value: analytics?.total_feedbacks },
+              { label: t.home_stat_users, value: analytics?.total_utilisateurs },
+              { label: t.home_stat_registrations, value: analytics?.total_inscrits },
+              { label: t.home_stat_feedbacks, value: analytics?.total_feedbacks },
               {
-                label: "Messages non traités",
+                label: t.home_stat_messages_pending,
                 value: analytics?.messages_non_traites,
                 accent: analytics?.messages_non_traites > 0,
               },
@@ -395,7 +400,7 @@ export default function AdminHome() {
           </div>
           {analytics?.taux_satisfaction != null && (
             <div className="mt-3 flex items-center gap-2 text-sm">
-              <span className="opacity-60">Satisfaction :</span>
+              <span className="opacity-60">{t.home_satisfaction}</span>
               <span
                 className="font-semibold"
                 style={{
@@ -434,8 +439,8 @@ export default function AdminHome() {
       {/* Exports CSV (admins uniquement) */}
       {(canStaff || canPersonnel || canRedact) && (
         <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
-          <h2 className="text-base font-semibold mb-3">Exports CSV / PDF</h2>
-          <ExportSection card={card} ghostBtn={ghostBtn} theme={theme} canStaff={canStaff} canPersonnel={canPersonnel} />
+          <h2 className="text-base font-semibold mb-3">{t.home_exports}</h2>
+          <ExportSection card={card} ghostBtn={ghostBtn} theme={theme} canStaff={canStaff} canPersonnel={canPersonnel} t={t} />
         </section>
       )}
 
