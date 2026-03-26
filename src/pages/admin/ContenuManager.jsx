@@ -408,7 +408,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
 
 // ── Onglet Cours ──────────────────────────────────────────────────────────────
 
-function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated, onDeleted }) {
+function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const block = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
 
@@ -550,7 +550,6 @@ export default function ContenuManager() {
   const [err, setErr] = useState("");
   const ctrlRef = useRef(null);
 
-  const bg = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
   const card = theme === "dark" ? "bg-[#1c1c1c] border-[#2a2a2a]" : "bg-white border-gray-200";
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
 

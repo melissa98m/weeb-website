@@ -12,7 +12,7 @@ import blogFr from "../../locales/fr/blog.json";
 import RelatedCarousel from "../components/Blog/RelatedCarousel";
 import { safeChipStyle } from "../utils/colors";
 import { getEnv } from "../lib/env";
-import { setCanonical, setOgMeta, setJsonLd, setHreflang, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setJsonLd, setHreflang, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -230,13 +230,18 @@ export default function BlogDetail() {
     const articleUrl = `${SITE_URL}${articlePath}`;
     const imgUrl = resolveImageUrl(post.cover_image_url || post.link_image || post.cover || post.image);
 
+    const ogImg = imgUrl || DEFAULT_OG_IMAGE;
+
     const cleanCanonical = setCanonical(articlePath);
     const cleanHreflang = setHreflang(articlePath);
     const cleanOgUrl = setOgMeta("og:url", articleUrl);
     const cleanOgTitle = setOgMeta("og:title", document.title);
     const cleanOgDesc = excerpt ? setOgMeta("og:description", excerpt) : () => {};
-    const cleanOgImg = imgUrl ? setOgMeta("og:image", imgUrl) : () => {};
+    const cleanOgImg = setOgMeta("og:image", ogImg);
     const cleanOgType = setOgMeta("og:type", "article");
+    const cleanTwTitle = setTwitterMeta("twitter:title", document.title);
+    const cleanTwDesc = excerpt ? setTwitterMeta("twitter:description", excerpt) : () => {};
+    const cleanTwImg = setTwitterMeta("twitter:image", ogImg);
 
     const authorName =
       (post.author && typeof post.author === "object"
@@ -275,6 +280,9 @@ export default function BlogDetail() {
       cleanOgDesc();
       cleanOgImg();
       cleanOgType();
+      cleanTwTitle();
+      cleanTwDesc();
+      cleanTwImg();
       cleanArticle();
       cleanBreadcrumb();
     };

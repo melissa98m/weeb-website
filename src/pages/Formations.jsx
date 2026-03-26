@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { setCanonical, setOgMeta, setHreflang, setJsonLd, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setHreflang, setJsonLd, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
@@ -89,6 +89,10 @@ export default function Formations() {
     const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/formations`);
     const cleanOgTitle = setOgMeta("og:title", title);
     const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanOgImg = setOgMeta("og:image", DEFAULT_OG_IMAGE);
+    const cleanTwTitle = setTwitterMeta("twitter:title", title);
+    const cleanTwDesc = setTwitterMeta("twitter:description", desc);
+    const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
     const cleanJsonLd = setJsonLd("jsonld-formations", {
       "@context": "https://schema.org",
       "@type": "ItemList",
@@ -111,6 +115,10 @@ export default function Formations() {
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
+      cleanOgImg();
+      cleanTwTitle();
+      cleanTwDesc();
+      cleanTwImg();
       cleanJsonLd();
     };
   }, [language, items]);

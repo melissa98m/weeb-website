@@ -14,6 +14,9 @@ export default function TrendsSection() {
         <img
           src="/home/Shapes.svg"
           alt="Visuel geometrique"
+          width={240}
+          height={240}
+          loading="lazy"
           className="w-60 h-60 animate-spin"
         />
       </div>
