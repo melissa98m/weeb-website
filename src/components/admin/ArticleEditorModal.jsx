@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
-import GenrePicker from "./GenrePicker"; // <- votre composant
+import GenrePicker from "./GenrePicker"; 
 import RichTextEditor from "./RichTextEditor";
 
 /* --- Helpers d’URL --- */

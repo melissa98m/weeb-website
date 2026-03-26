@@ -23,6 +23,7 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { API_BASE, ensureCsrf } from "../lib/api";
+import { parseAndHighlight } from "../lib/hljs";
 import formationsFr from "../../locales/fr/formations.json";
 import formationsEn from "../../locales/en/formations.json";
 
@@ -439,6 +440,9 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
     setDownloadErr("");
   }, [cours.id]);
 
+  // Coloration syntaxique : pré-traitée avant injection dans le DOM
+  const highlightedContent = useMemo(() => parseAndHighlight(cours.content), [cours.content]);
+
   const complete = async () => {
     setCompleting(true); setErr("");
     try {
@@ -575,21 +579,13 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
       )}
 
       {/* Contenu texte — HTML sanitisé par bleach côté serveur */}
-      {cours.content ? (
-        <div
-          className={`prose prose-sm max-w-none leading-relaxed
-            [&_img]:max-w-full [&_img]:rounded [&_img]:my-2
-            [&_a]:text-blue-500 [&_a]:underline
-            [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_pre]:max-w-full
-            [&_table]:w-full [&_table]:table-fixed
-            [&_code]:break-words [&_code]:whitespace-pre-wrap
-${theme === "dark" ? "prose-invert" : "text-gray-700"}
-          `}
-          dangerouslySetInnerHTML={{ __html: cours.content }}
-        />
-      ) : !cours.video_url && (
-        <p className={`text-sm ${muted} italic py-4`}>{t.content_coming}</p>
-      )}
+      <div className={`article-body max-w-none leading-relaxed ${theme === "dark" ? "" : "text-gray-700"}`}>
+        {highlightedContent ? (
+          <div dangerouslySetInnerHTML={{ __html: highlightedContent }} />
+        ) : !cours.video_url && (
+          <p className={`text-sm ${muted} italic py-4`}>{t.content_coming}</p>
+        )}
+      </div>
 
       {/* Zone action complétion */}
       <div className={`rounded-xl border p-4 ${card}`}>

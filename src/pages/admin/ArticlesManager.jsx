@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { hasAnyRedactionRole } from "../../utils/roles";
+import { hasAnyRedactionRole, REDACTION_ROLES } from "../../utils/roles";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 import { safeChipStyle } from "../../utils/colors";
@@ -482,6 +483,7 @@ export default function ArticlesManager() {
         onSaved={onSaved}
         onDeleted={onDeleted}
       />
+      <AdminAccessFooter allowedRoles={REDACTION_ROLES} />
     </main>
   );
 }

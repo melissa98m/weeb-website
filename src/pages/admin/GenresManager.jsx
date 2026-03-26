@@ -2,9 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { hasAnyRedactionRole } from "../../utils/roles";
+import { hasAnyRedactionRole, REDACTION_ROLES } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
 import { getEnv } from "../../lib/env";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import Pagination from "../../components/ui/Pagination";
+import PageSizer from "../../components/ui/PageSizer";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
@@ -126,6 +129,16 @@ export default function GenresManager() {
     return genres.filter(g => (g.name || "").toLowerCase().includes(debouncedQ));
   }, [genres, debouncedQ]);
 
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, pageSize]
+  );
+
+  useEffect(() => { setPage(1); }, [debouncedQ, pageSize]);
+
   const openCreate = () => {
     setCurrent(null);
     setFormName("");
@@ -232,6 +245,7 @@ export default function GenresManager() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
+            <PageSizer pageSize={pageSize} onChange={(n) => { setPageSize(n); setPage(1); }} />
           <button type="button" onClick={openCreate} className={`rounded-xl border px-3 py-2 ${cta}`}>
             {t.genres_new}
           </button>
@@ -259,7 +273,7 @@ export default function GenresManager() {
 
         {!loading && !err && filtered.length > 0 && (
           <div className="grid gap-3 p-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filtered.map((genre) => (
+            {paged.map((genre) => (
               <div
                 key={genre.id}
                 className={`rounded-xl border p-4 ${card} flex flex-col gap-3`}
@@ -303,6 +317,10 @@ export default function GenresManager() {
           </div>
         )}
       </section>
+
+      <div className="mt-4">
+        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+      </div>
 
       {/* Modale création/édition */}
       {open && (
@@ -378,6 +396,7 @@ export default function GenresManager() {
           </div>
         </div>
       )}
+      <AdminAccessFooter allowedRoles={REDACTION_ROLES} />
     </main>
   );
 }

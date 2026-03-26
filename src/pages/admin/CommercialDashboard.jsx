@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { hasAnyRole } from "../../utils/roles";
+import { hasAnyRole, STAFF_ROLES } from "../../utils/roles";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { getEnv } from "../../lib/env";
 import adminEn from "../../../locales/en/admin.json";
@@ -167,6 +168,7 @@ export default function CommercialDashboard() {
           </div>
         </section>
       )}
+      <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );
 }

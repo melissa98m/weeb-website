@@ -4,6 +4,10 @@ import { useLanguage } from "../../context/LanguageContext";
 import { getCookie } from "../../lib/cookies";
 import { API_BASE } from "../../lib/api";
 import RichTextEditor from "../../components/admin/RichTextEditor";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import Pagination from "../../components/ui/Pagination";
+import PageSizer from "../../components/ui/PageSizer";
+import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
@@ -214,46 +218,9 @@ function SubscribersList({ theme, t }) {
 
       {/* Pagination */}
       {data && (data.num_pages > 1 || data.count > 5) && (
-        <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t text-sm ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
-          <div className="flex items-center gap-2">
-            <label htmlFor="page-size-select" className={`text-xs ${mutedCls}`}>
-              {t.newsletter_rows_per_page}
-            </label>
-            <select
-              id="page-size-select"
-              value={pageSize}
-              onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className={`rounded-lg border px-2 py-1 text-sm ${inputCls}`}
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span className={mutedCls}>
-              {t.newsletter_page_info.replace('{page}', data.page).replace('{total}', data.num_pages)}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => p - 1)}
-                disabled={data.page <= 1}
-                aria-label={t.newsletter_prev}
-                className={`px-3 py-1.5 rounded-lg border text-sm transition disabled:opacity-40 disabled:cursor-not-allowed ${theme === "dark" ? "border-[#333] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50"}`}
-              >
-                {t.newsletter_prev}
-              </button>
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                disabled={data.page >= data.num_pages}
-                aria-label={t.newsletter_next}
-                className={`px-3 py-1.5 rounded-lg border text-sm transition disabled:opacity-40 disabled:cursor-not-allowed ${theme === "dark" ? "border-[#333] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50"}`}
-              >
-                {t.newsletter_next}
-              </button>
-            </div>
-          </div>
+        <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+          <PageSizer pageSize={pageSize} onChange={(n) => { setPageSize(n); setPage(1); }} />
+          <Pagination page={page} pageCount={data.num_pages} onPageChange={setPage} theme={theme} />
         </div>
       )}
     </section>
@@ -470,7 +437,7 @@ export default function NewsletterManager() {
   const minScheduledAt = new Date(Date.now() + 5 * 60 * 1000).toISOString().slice(0, 16);
 
   return (
-    <main className="px-4 md:px-6 py-6 max-w-4xl space-y-6">
+    <main className="px-4 md:px-6 py-6 space-y-6">
       <header>
         <h1 className="text-2xl font-bold">{t.newsletter_title}</h1>
         <p className={`text-sm mt-1 ${muted}`}>
@@ -579,6 +546,7 @@ export default function NewsletterManager() {
       />
 
       <Toast toast={toast} onClose={() => setToast(null)} t={t} />
+      <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );
 }

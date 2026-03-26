@@ -3,6 +3,8 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import AdminAccessFooter from "../components/admin/AdminAccessFooter";
+import Pagination from "../components/ui/Pagination";
+import PageSizer from "../components/ui/PageSizer";
 import { STAFF_ROLES, hasAnyStaffRole } from "../utils/roles";
 import { getEnv } from "../lib/env";
 import { ensureCsrf } from "../lib/api";
@@ -142,6 +144,8 @@ export default function Messages() {
   const [err, setErr] = useState(null);
   const [sort, setSort] = useState("priority");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [expandedId, setExpandedId] = useState(null);
   const [replyDraft, setReplyDraft] = useState({});
   const [saving, setSaving] = useState({});
@@ -260,9 +264,17 @@ export default function Messages() {
     return arr;
   }, [items, sort, filterStatus]);
 
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const paged = useMemo(
+    () => filtered.slice((page - 1) * pageSize, page * pageSize),
+    [filtered, page, pageSize]
+  );
+
+  useEffect(() => { setPage(1); }, [filterStatus, sort, pageSize]);
+
   if (!canSee) {
     return (
-      <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+      <main className="px-4 md:px-6 py-6">
         <div className={`rounded-xl border p-6 ${panel}`}>
           <h1 className="text-xl font-semibold mb-2">{t.title}</h1>
           <p className={muted}>{t.no_access}</p>
@@ -383,6 +395,8 @@ export default function Messages() {
             <option value="recent">{t.sort_recent}</option>
             <option value="to_process">{t.sort_to_process}</option>
           </select>
+
+          <PageSizer pageSize={pageSize} onChange={(n) => { setPageSize(n); setPage(1); }} />
         </div>
       </div>
 
@@ -394,7 +408,7 @@ export default function Messages() {
             : filtered.length === 0 ? renderState(t.empty)
             : (
               <ul className="divide-y" role="list">
-                {filtered.map((row) => {
+                {paged.map((row) => {
                   const isOpen = expandedId === row.id;
                   const draft = replyDraft[row.id] ?? row.reply_content;
                   const isDirty = replyDraft[row.id] !== undefined && replyDraft[row.id] !== row.reply_content;
@@ -473,7 +487,7 @@ export default function Messages() {
               ) : filtered.length === 0 ? (
                 <tr><td className={`px-4 py-2 ${muted}`} colSpan={6}>{t.empty}</td></tr>
               ) : (
-                filtered.flatMap((row) => {
+                paged.flatMap((row) => {
                   const isOpen = expandedId === row.id;
                   return [
                     <tr
@@ -511,6 +525,9 @@ export default function Messages() {
           </button>
         </div>
       )}
+      <div className="mt-4">
+        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+      </div>
       <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );

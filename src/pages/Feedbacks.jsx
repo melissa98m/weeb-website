@@ -288,7 +288,7 @@ export default function Feedback() {
 
   if (!canSee) {
     return (
-      <main className="px-6 py-16 max-w-5xl mx-auto">
+      <main className="px-4 md:px-6 py-6">
         <div className={`rounded-xl border p-6 ${card}`}>
           <h1 className="text-xl font-semibold mb-2">{t.title}</h1>
           <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
@@ -519,7 +519,7 @@ export default function Feedback() {
   );
 
   return (
-    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+    <main className="px-4 md:px-6 py-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
         <h1 className="text-xl sm:text-2xl font-semibold">{t.title}</h1>

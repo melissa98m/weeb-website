@@ -191,7 +191,7 @@ export default function FormationsManager() {
     return <div className="p-6 text-red-600">{t.common_access_denied}</div>;
 
   return (
-    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+    <main className="px-4 md:px-6 py-6">
       {/* Header */}
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
