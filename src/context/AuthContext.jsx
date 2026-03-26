@@ -40,7 +40,6 @@ export function AuthProvider({ children }) {
     didInitRef.current = true;
 
     const run = async () => {
-      // Prépare le CSRF puis tente /me
       try {
         await ensureCsrf();
       } finally {
@@ -48,31 +47,7 @@ export function AuthProvider({ children }) {
       }
     };
 
-    const isProtectedPath = (() => {
-      if (typeof window === "undefined") return false;
-      const path = window.location.pathname || "";
-      return path === "/profile" || path.startsWith("/admin");
-    })();
-
-    if (isProtectedPath || (typeof window !== "undefined" && window.Cypress)) {
-      run();
-      return;
-    }
-
-    let idleId;
-    let timeoutId;
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(() => run(), { timeout: 1500 });
-    } else {
-      timeoutId = setTimeout(() => run(), 1200);
-    }
-
-    return () => {
-      if (typeof window !== "undefined" && idleId) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    run();
   }, [fetchMe]);
 
   //  Accepte email/username/identifier + password, pose les cookies, puis charge /me
