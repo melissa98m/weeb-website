@@ -4,10 +4,11 @@
  * Couvre :
  * - Rendu de base et accessibilité
  * - Boutons de formatage (toolbar)
+ * - Bloc de code (toggleCodeBlock, inline code, sélecteur de langage)
  * - Alignement du texte
  * - Sélecteur de couleur (ColorPicker)
  * - Sélecteur de taille de police (FontSizePicker)
- * - Upload d'image (succès, erreur, taille, type)
+ * - Upload d'image (succès, erreur, réseau)
  * - Insertion d'image par URL
  * - Synchronisation du contenu (prop value)
  * - Thème dark / light
@@ -16,9 +17,15 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+// ── Mocks CSS (jsdom ignore les imports CSS) ───────────────────────────────────
+
+vi.mock("highlight.js/styles/github-dark-dimmed.css", () => ({}));
+
 // ── Mocks Tiptap (ProseMirror ne fonctionne pas en jsdom) ─────────────────────
 
-vi.mock("@tiptap/starter-kit", () => ({ default: {} }));
+vi.mock("@tiptap/starter-kit", () => ({
+  default: { configure: vi.fn(() => ({})) },
+}));
 vi.mock("@tiptap/extension-image", () => ({
   default: { configure: vi.fn(() => ({})) },
 }));
@@ -33,23 +40,36 @@ vi.mock("@tiptap/extension-text-style", () => ({ TextStyle: {} }));
 vi.mock("@tiptap/extension-text-align", () => ({
   default: { configure: vi.fn(() => ({})) },
 }));
+vi.mock("@tiptap/extension-code-block-lowlight", () => ({
+  CodeBlockLowlight: { configure: vi.fn(() => ({})) },
+}));
+vi.mock("lowlight", () => ({
+  createLowlight: vi.fn(() => ({
+    highlight: vi.fn(),
+    highlightAuto: vi.fn(),
+    listLanguages: vi.fn(() => []),
+  })),
+  common: {},
+}));
 vi.mock("../../lib/api", () => ({
   ensureCsrf: vi.fn(() => Promise.resolve("csrf-test-token")),
 }));
 
-// Chaîne d'appels fluents pour l'éditeur mock
+// ── Mock editor ────────────────────────────────────────────────────────────────
+
 function makeChain() {
   const chain = {};
   const methods = [
     "focus", "toggleBold", "toggleItalic", "toggleStrike",
     "toggleHeading", "toggleBulletList", "toggleOrderedList",
-    "toggleBlockquote", "setLink", "unsetLink", "setImage",
+    "toggleBlockquote", "toggleCode", "toggleCodeBlock",
+    "setLink", "unsetLink", "setImage",
     "setTextAlign", "setColor", "unsetColor", "setMark",
     "removeEmptyTextStyle", "setFontSize", "unsetFontSize",
-    "undo", "redo",
+    "updateAttributes", "undo", "redo",
   ];
   methods.forEach((m) => { chain[m] = vi.fn(() => chain); });
-  chain.run = vi.fn();
+  chain.run = vi.fn(() => true);
   return chain;
 }
 
@@ -64,7 +84,10 @@ function buildMockEditor(overrides = {}) {
     getAttributes: vi.fn(() => ({})),
     getHTML: vi.fn(() => "<p></p>"),
     commands: { setContent: vi.fn() },
-    can: vi.fn(() => ({ undo: vi.fn(() => true), redo: vi.fn(() => true) })),
+    can: vi.fn(() => ({
+      undo: vi.fn(() => true),
+      redo: vi.fn(() => true),
+    })),
     ...overrides,
   };
 }
@@ -77,8 +100,9 @@ vi.mock("@tiptap/react", () => ({
 }));
 
 import RichTextEditor from "./RichTextEditor";
+import { useEditor } from "@tiptap/react";
 
-// ── Setup ─────────────────────────────────────────────────────────────────────
+// ── Setup ──────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   mockEditor = buildMockEditor();
@@ -89,7 +113,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-// ── Rendu de base ─────────────────────────────────────────────────────────────
+// ── Rendu de base ──────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — rendu de base", () => {
   it("affiche la zone d'édition", () => {
@@ -114,9 +138,15 @@ describe("RichTextEditor — rendu de base", () => {
       render(<RichTextEditor value="" onChange={() => {}} />)
     ).not.toThrow();
   });
+
+  it("ne rend rien si l'éditeur n'est pas initialisé", () => {
+    useEditor.mockReturnValueOnce(null);
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    expect(screen.queryByRole("toolbar")).not.toBeInTheDocument();
+  });
 });
 
-// ── Boutons de formatage ──────────────────────────────────────────────────────
+// ── Boutons de formatage ───────────────────────────────────────────────────────
 
 describe("RichTextEditor — boutons de formatage", () => {
   it("le bouton Gras appelle toggleBold", async () => {
@@ -189,7 +219,133 @@ describe("RichTextEditor — boutons de formatage", () => {
   });
 });
 
-// ── Alignement ────────────────────────────────────────────────────────────────
+// ── Bloc de code ───────────────────────────────────────────────────────────────
+
+describe("RichTextEditor — bloc de code", () => {
+  it("le bouton 'Bloc de code' est présent dans la toolbar", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    expect(screen.getByTitle(/bloc de code/i)).toBeInTheDocument();
+  });
+
+  it("le bouton 'Code inline' est présent dans la toolbar", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    expect(screen.getByTitle(/code inline/i)).toBeInTheDocument();
+  });
+
+  it("cliquer sur 'Bloc de code' appelle toggleCodeBlock via la chaîne", async () => {
+    const user = userEvent.setup();
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    await user.click(screen.getByTitle(/bloc de code/i));
+    expect(mockChain.toggleCodeBlock).toHaveBeenCalled();
+    expect(mockChain.run).toHaveBeenCalled();
+  });
+
+  it("cliquer sur 'Code inline' appelle toggleCode via la chaîne", async () => {
+    const user = userEvent.setup();
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    await user.click(screen.getByTitle(/code inline/i));
+    expect(mockChain.toggleCode).toHaveBeenCalled();
+    expect(mockChain.run).toHaveBeenCalled();
+  });
+
+  it("le bouton 'Bloc de code' a aria-pressed=true quand isActive retourne true", () => {
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const btn = screen.getByTitle("Bloc de code");
+    expect(btn).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("le sélecteur de langage n'est PAS affiché hors d'un bloc de code", () => {
+    mockEditor.isActive = vi.fn(() => false);
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    expect(screen.queryByTitle(/langage du bloc de code/i)).not.toBeInTheDocument();
+  });
+
+  it("le sélecteur de langage APPARAÎT quand le curseur est dans un bloc de code", () => {
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    mockEditor.getAttributes = vi.fn(() => ({ language: "javascript" }));
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    expect(screen.getByTitle(/langage du bloc de code/i)).toBeInTheDocument();
+  });
+
+  it("le sélecteur de langage affiche le langage actif (python)", () => {
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    mockEditor.getAttributes = vi.fn(() => ({ language: "python" }));
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const select = screen.getByTitle(/langage du bloc de code/i);
+    expect(select.value).toBe("python");
+  });
+
+  it("le sélecteur de langage contient les langages courants", () => {
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    mockEditor.getAttributes = vi.fn(() => ({}));
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const select = screen.getByTitle(/langage du bloc de code/i);
+    const options = Array.from(select.querySelectorAll("option")).map((o) => o.value);
+    expect(options).toContain("javascript");
+    expect(options).toContain("python");
+    expect(options).toContain("bash");
+    expect(options).toContain("sql");
+    expect(options).toContain("typescript");
+  });
+
+  it("changer le langage appelle updateAttributes avec le bon langage", async () => {
+    const user = userEvent.setup();
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    mockEditor.getAttributes = vi.fn(() => ({ language: "" }));
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const select = screen.getByTitle(/langage du bloc de code/i);
+    await user.selectOptions(select, "python");
+    expect(mockChain.updateAttributes).toHaveBeenCalledWith("codeBlock", { language: "python" });
+    expect(mockChain.run).toHaveBeenCalled();
+  });
+
+  it("changer vers 'Texte brut' appelle updateAttributes avec language vide", async () => {
+    const user = userEvent.setup();
+    mockEditor.isActive = vi.fn((name) => name === "codeBlock");
+    mockEditor.getAttributes = vi.fn(() => ({ language: "javascript" }));
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const select = screen.getByTitle(/langage du bloc de code/i);
+    await user.selectOptions(select, "");
+    expect(mockChain.updateAttributes).toHaveBeenCalledWith("codeBlock", { language: "" });
+  });
+});
+
+// ── Comportement onMouseDown (focus préservé) ──────────────────────────────────
+
+describe("RichTextEditor — préservation du focus éditeur", () => {
+  it("mousedown sur le bouton Gras ne déclenche pas de blur sur l'éditeur (preventDefault)", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const btn = screen.getByTitle(/gras/i);
+    const event = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    btn.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it("mousedown sur le bouton Bloc de code appelle preventDefault", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const btn = screen.getByTitle(/bloc de code/i);
+    const event = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+    btn.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it("mousedown sur le bouton Bloc de code appelle toggleCodeBlock", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const btn = screen.getByTitle(/bloc de code/i);
+    fireEvent.mouseDown(btn);
+    expect(mockChain.toggleCodeBlock).toHaveBeenCalled();
+  });
+
+  it("mousedown sur le bouton Code inline appelle toggleCode", () => {
+    render(<RichTextEditor value="" onChange={vi.fn()} />);
+    const btn = screen.getByTitle(/code inline/i);
+    fireEvent.mouseDown(btn);
+    expect(mockChain.toggleCode).toHaveBeenCalled();
+  });
+});
+
+// ── Alignement ─────────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — alignement", () => {
   it("le bouton gauche appelle setTextAlign('left')", async () => {
@@ -214,7 +370,7 @@ describe("RichTextEditor — alignement", () => {
   });
 });
 
-// ── ColorPicker ───────────────────────────────────────────────────────────────
+// ── ColorPicker ────────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — ColorPicker", () => {
   it("le bouton couleur est présent dans la toolbar", () => {
@@ -266,7 +422,7 @@ describe("RichTextEditor — ColorPicker", () => {
   });
 });
 
-// ── FontSizePicker ────────────────────────────────────────────────────────────
+// ── FontSizePicker ─────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — FontSizePicker", () => {
   it("affiche le sélecteur de taille", () => {
@@ -300,7 +456,7 @@ describe("RichTextEditor — FontSizePicker", () => {
   });
 });
 
-// ── Upload image ──────────────────────────────────────────────────────────────
+// ── Upload image ───────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — upload image", () => {
   const uploadEndpoint = "http://localhost:8000/api/upload/image/";
@@ -450,7 +606,7 @@ describe("RichTextEditor — upload image", () => {
   });
 });
 
-// ── Insertion image par URL ───────────────────────────────────────────────────
+// ── Insertion image par URL ────────────────────────────────────────────────────
 
 describe("RichTextEditor — image par URL", () => {
   it("le bouton 'Image par URL' est présent", () => {
@@ -479,7 +635,7 @@ describe("RichTextEditor — image par URL", () => {
   });
 });
 
-// ── Thème ─────────────────────────────────────────────────────────────────────
+// ── Thème ──────────────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — thème", () => {
   it("thème dark : la toolbar a la classe border-[#333]", () => {
@@ -495,7 +651,7 @@ describe("RichTextEditor — thème", () => {
   });
 });
 
-// ── Synchronisation contenu ───────────────────────────────────────────────────
+// ── Synchronisation contenu ────────────────────────────────────────────────────
 
 describe("RichTextEditor — synchronisation value", () => {
   it("setContent appelé quand value change et diffère du HTML actuel", async () => {

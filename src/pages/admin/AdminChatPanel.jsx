@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { API_BASE, WS_BASE } from "../../lib/api";
 import { getCookie } from "../../lib/cookies";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
@@ -258,6 +260,7 @@ export default function AdminChatPanel() {
           )}
         </div>
       </div>
+      <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );
 }

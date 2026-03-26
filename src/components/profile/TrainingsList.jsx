@@ -16,7 +16,7 @@ export default function TrainingsList({
       : "bg-white text-gray-900 border-gray-200";
 
   return (
-    <section className="w-full max-w-2xl mt-10">
+    <section id="formations" className="w-full max-w-2xl mt-10">
       <h2 className="text-xl font-semibold mb-4">{t.trainings}</h2>
 
       {(loading) && (

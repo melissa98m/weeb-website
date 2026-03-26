@@ -286,7 +286,7 @@ export default function AdminHome() {
             <Link to="/admin/user-formations" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconLink /></div>
               <div className="min-w-0">
-                <div className="font-semibold">{t.nav_affect}</div>
+                <div className="font-semibold flex items-center gap-2">{t.nav_affect}</div>
                 <div className="text-sm opacity-80">{t.home_affect_desc}</div>
               </div>
             </Link>
@@ -297,7 +297,7 @@ export default function AdminHome() {
             <Link to="/admin/formations" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconCap /></div>
               <div className="min-w-0">
-                <div className="font-semibold">{t.nav_formations}</div>
+                <div className="font-semibold flex items-center gap-2">{t.nav_formations}</div>
                 <div className="text-sm opacity-80">{t.home_formations_desc}</div>
               </div>
             </Link>
@@ -308,7 +308,7 @@ export default function AdminHome() {
             <Link to="/admin/articles" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconPen /></div>
               <div className="min-w-0">
-                <div className="font-semibold">{t.nav_articles}</div>
+                <div className="font-semibold flex items-center gap-2">{t.nav_articles}</div>
                 <div className="text-sm opacity-80">{t.home_articles_desc}</div>
               </div>
             </Link>
@@ -347,7 +347,7 @@ export default function AdminHome() {
             <Link to="/admin/newsletter" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconMail /></div>
               <div className="min-w-0">
-                <div className="font-semibold">{t.nav_newsletter}</div>
+                <div className="font-semibold flex items-center gap-2">{t.nav_newsletter}</div>
                 <div className="text-sm opacity-80">{t.home_newsletter_desc}</div>
               </div>
             </Link>

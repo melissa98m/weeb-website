@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -7,7 +7,55 @@ import { Extension } from "@tiptap/core";
 import { Color } from "@tiptap/extension-color";
 import { TextStyle } from "@tiptap/extension-text-style";
 import TextAlign from "@tiptap/extension-text-align";
+import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import { createLowlight, common } from "lowlight";
 import { ensureCsrf } from "../../lib/api";
+
+/* ---- Langages supportés par prettier (chargement dynamique) ---- */
+const PRETTIER_PARSERS = {
+  javascript: "babel",
+  typescript: "typescript",
+  html: "html",
+  xml: "html",
+  css: "css",
+  json: "json",
+  yaml: "yaml",
+};
+
+async function formatWithPrettier(code, language) {
+  const parser = PRETTIER_PARSERS[language];
+  if (!parser || !code.trim()) return null;
+  try {
+    const prettier = await import("prettier/standalone");
+    let plugins = [];
+    if (parser === "babel" || parser === "json") {
+      const [babel, estree] = await Promise.all([
+        import("prettier/plugins/babel"),
+        import("prettier/plugins/estree"),
+      ]);
+      plugins = [babel, estree];
+    } else if (parser === "typescript") {
+      const [babel, estree, ts] = await Promise.all([
+        import("prettier/plugins/babel"),
+        import("prettier/plugins/estree"),
+        import("prettier/plugins/typescript"),
+      ]);
+      plugins = [babel, estree, ts];
+    } else if (parser === "html") {
+      plugins = [await import("prettier/plugins/html")];
+    } else if (parser === "css") {
+      plugins = [await import("prettier/plugins/postcss")];
+    } else if (parser === "yaml") {
+      plugins = [await import("prettier/plugins/yaml")];
+    }
+    const formatted = await prettier.format(code, { parser, plugins, tabWidth: 2, printWidth: 80 });
+    return formatted;
+  } catch {
+    return null;
+  }
+}
+
+const lowlight = createLowlight(common);
 
 /* ---- Extension font-size (pas dans la version gratuite de Tiptap) ---- */
 const FontSize = Extension.create({
@@ -41,6 +89,26 @@ const FONT_SIZES = [
   { label: "Titre",    value: "2rem" },
 ];
 
+const LANGUAGES = [
+  { label: "Texte brut", value: "" },
+  { label: "Bash / Shell", value: "bash" },
+  { label: "C", value: "c" },
+  { label: "C++", value: "cpp" },
+  { label: "CSS", value: "css" },
+  { label: "Go", value: "go" },
+  { label: "HTML", value: "html" },
+  { label: "Java", value: "java" },
+  { label: "JavaScript", value: "javascript" },
+  { label: "JSON", value: "json" },
+  { label: "PHP", value: "php" },
+  { label: "Python", value: "python" },
+  { label: "Rust", value: "rust" },
+  { label: "SQL", value: "sql" },
+  { label: "TypeScript", value: "typescript" },
+  { label: "XML / HTML", value: "xml" },
+  { label: "YAML", value: "yaml" },
+];
+
 const PRESET_COLORS = [
   { label: "Rouge",    value: "#ef4444" },
   { label: "Orange",  value: "#f97316" },
@@ -58,7 +126,7 @@ function Icon({ children, title, active, onClick, disabled }) {
     <button
       type="button"
       title={title}
-      onClick={onClick}
+      onMouseDown={(e) => { e.preventDefault(); onClick?.(); }}
       disabled={disabled}
       aria-pressed={active}
       className={`p-1.5 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-1
@@ -105,6 +173,7 @@ function FontSizePicker({ editor, theme }) {
       }}
       title="Taille de police"
       aria-label="Taille de police"
+      onMouseDown={(e) => e.preventDefault()}
       className={`h-7 text-xs rounded border px-1 outline-none cursor-pointer transition
         focus:ring-2 focus:ring-blue-500 ${border}`}
     >
@@ -178,6 +247,82 @@ function ColorPicker({ editor, theme }) {
         </div>
       )}
     </div>
+  );
+}
+
+function CodeLanguagePicker({ editor, theme }) {
+  const [isFormatting, setIsFormatting] = useState(false);
+
+  if (!editor.isActive("codeBlock")) return null;
+
+  const currentLang = editor.getAttributes("codeBlock").language || "";
+  const border = theme === "dark"
+    ? "border-[#444] bg-[#1a1a1a] text-white"
+    : "border-gray-300 bg-white text-gray-900";
+
+  const handleChange = async (e) => {
+    const newLang = e.target.value;
+
+    // Repérer le code block courant avant de modifier l'état
+    const { state } = editor;
+    const { $from } = state.selection;
+    let codeText = "";
+    let nodePos = -1;
+
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (node.type.name === "codeBlock") {
+        if (pos <= $from.pos && $from.pos <= pos + node.nodeSize) {
+          codeText = node.textContent;
+          nodePos = pos;
+          return false;
+        }
+      }
+    });
+
+    // 1. Changer le langage immédiatement (synchrone)
+    editor.chain().focus().updateAttributes("codeBlock", { language: newLang }).run();
+
+    // 2. Formater si le langage est supporté et le bloc non vide
+    if (!codeText.trim() || nodePos === -1 || !PRETTIER_PARSERS[newLang]) return;
+
+    setIsFormatting(true);
+    try {
+      const formatted = await formatWithPrettier(codeText, newLang);
+      if (!formatted) return;
+
+      // Retirer le saut de ligne final que prettier ajoute toujours
+      const content = formatted.endsWith("\n") ? formatted.slice(0, -1) : formatted;
+      if (content.trim() === codeText.trim()) return;
+
+      // Remplacer le contenu texte du code block dans l'état courant
+      const { state: newState } = editor;
+      const currentNode = newState.doc.nodeAt(nodePos);
+      if (!currentNode || currentNode.type.name !== "codeBlock") return;
+
+      const startPos = nodePos + 1;
+      const endPos = nodePos + currentNode.nodeSize - 1;
+      editor.view.dispatch(newState.tr.insertText(content, startPos, endPos));
+    } catch {
+      // Erreur silencieuse — on garde le code tel quel
+    } finally {
+      setIsFormatting(false);
+    }
+  };
+
+  return (
+    <select
+      value={currentLang}
+      onChange={handleChange}
+      disabled={isFormatting}
+      title={isFormatting ? "Formatage…" : "Langage du bloc de code"}
+      aria-label="Langage du bloc de code"
+      className={`h-7 text-xs rounded border px-1 outline-none cursor-pointer transition
+        focus:ring-2 focus:ring-blue-500 ${border} ${isFormatting ? "opacity-60 cursor-wait" : ""}`}
+    >
+      {LANGUAGES.map(({ label, value }) => (
+        <option key={value || "plain"} value={value}>{label}</option>
+      ))}
+    </select>
   );
 }
 
@@ -374,6 +519,30 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
         <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
       </Icon>
 
+      {/* Code inline */}
+      <Icon
+        title="Code inline (Ctrl+E)"
+        active={editor.isActive("code")}
+        onClick={() => editor.chain().focus().toggleCode().run()}
+      >
+        <polyline points="16 18 22 12 16 6" />
+        <polyline points="8 6 2 12 8 18" />
+      </Icon>
+
+      {/* Bloc de code */}
+      <Icon
+        title="Bloc de code"
+        active={editor.isActive("codeBlock")}
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+      >
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="m10 10-2 2 2 2" />
+        <path d="m14 14 2-2-2-2" />
+      </Icon>
+
+      {/* Sélecteur de langage — visible uniquement dans un bloc de code */}
+      <CodeLanguagePicker editor={editor} theme={theme} />
+
       <Divider />
 
       {/* Taille de police */}
@@ -462,13 +631,14 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
 export default function RichTextEditor({ value, onChange, theme = "light", className = "", uploadEndpoint = null }) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ codeBlock: false }),
       Image.configure({ inline: false, allowBase64: false }),
       Link.configure({ openOnClick: false, autolink: true }),
       TextStyle,
       FontSize,
       Color,
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      CodeBlockLowlight.configure({ lowlight, defaultLanguage: null, enableTabIndentation: true }),
     ],
     content: value ?? "",
     onUpdate({ editor }) {
@@ -488,8 +658,6 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
 
   const border = theme === "dark" ? "border-[#333]" : "border-gray-200";
   const bg = theme === "dark" ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900";
-  const proseClass = theme === "dark" ? "prose-invert" : "";
-
   return (
     <div className={`rounded-lg border overflow-hidden ${border} ${bg} ${className}`}>
       <Toolbar editor={editor} theme={theme} uploadEndpoint={uploadEndpoint} />
@@ -497,22 +665,7 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
       {/* Zone d'édition */}
       <EditorContent
         editor={editor}
-        className={`
-          min-h-[200px] max-h-[500px] overflow-y-auto
-          px-4 py-3 focus-within:outline-none
-          prose ${proseClass} prose-sm max-w-none
-          [&_.ProseMirror]:outline-none
-          [&_.ProseMirror_p.is-editor-empty:first-child::before]:content-[attr(data-placeholder)]
-          [&_.ProseMirror_p.is-editor-empty:first-child::before]:opacity-40
-          [&_.ProseMirror_p.is-editor-empty:first-child::before]:pointer-events-none
-          [&_.ProseMirror_blockquote]:border-l-4
-          [&_.ProseMirror_blockquote]:pl-4
-          [&_.ProseMirror_blockquote]:opacity-70
-          [&_.ProseMirror_a]:text-blue-500
-          [&_.ProseMirror_a]:underline
-          [&_.ProseMirror_img]:max-w-full
-          [&_.ProseMirror_img]:rounded
-        `}
+        className="min-h-[200px] max-h-[500px] overflow-y-auto px-4 py-3"
       />
     </div>
   );

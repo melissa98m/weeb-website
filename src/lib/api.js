@@ -13,6 +13,23 @@ function resolveApiBase() {
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
 
+/** Refresh token unique partagé entre les appels concurrents. */
+let _refreshingPromise = null;
+
+async function _tryRefreshToken() {
+  if (_refreshingPromise) return _refreshingPromise;
+  _refreshingPromise = (async () => {
+    const csrf = getCookie("csrftoken") ?? (await ensureCsrf());
+    const r = await fetch(`${API}/refresh/`, {
+      method: "POST",
+      credentials: "include",
+      headers: { Accept: "application/json", "X-CSRFToken": csrf },
+    });
+    if (!r.ok) throw new Error("refresh failed");
+  })().finally(() => { _refreshingPromise = null; });
+  return _refreshingPromise;
+}
+
 /** Base WebSocket (ws:// ou wss://) dérivée de API_BASE. */
 export const WS_BASE = API_BASE
   .replace(/^https/, "wss")
@@ -357,7 +374,7 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
   }
 
   const url = `${API}${path}`;
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && appEnv.DEV) {
     console.debug("[AUTH] request", { method, url, hasBody: !!body, csrf });
   }
   let response;
@@ -375,7 +392,7 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
   const data = await parseResponsePayload(response);
 
   if (!response.ok) {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && appEnv.DEV) {
       console.debug("[AUTH] error", { url, status: response.status, details: data });
     }
     throw buildHttpError(response, data, { url, method });
@@ -384,7 +401,7 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
   return data;
 }
 
-async function apiRequest(path, { method = "GET", body, headers = {}, csrf = false } = {}) {
+async function apiRequest(path, { method = "GET", body, headers = {}, csrf = false, _retry = false } = {}) {
   const finalHeaders = {
     Accept: "application/json",
     ...headers,
@@ -418,6 +435,15 @@ async function apiRequest(path, { method = "GET", body, headers = {}, csrf = fal
   const data = await parseResponsePayload(response);
 
   if (!response.ok) {
+    // Tentative de refresh automatique sur 401 (access token expiré)
+    if (response.status === 401 && !_retry) {
+      try {
+        await _tryRefreshToken();
+        return apiRequest(path, { method, body, headers, csrf, _retry: true });
+      } catch {
+        // refresh échoué — on laisse l'erreur 401 originale remonter
+      }
+    }
     throw buildHttpError(response, data, { url, method });
   }
 

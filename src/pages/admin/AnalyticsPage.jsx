@@ -1,6 +1,8 @@
 import React, { lazy, Suspense, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
@@ -53,6 +55,7 @@ export default function AnalyticsPage() {
           <AnalyticsCharts theme={theme} />
         </Suspense>
       </section>
+      <AdminAccessFooter allowedRoles={STAFF_ROLES} />
     </main>
   );
 }

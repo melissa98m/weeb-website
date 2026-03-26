@@ -5,6 +5,7 @@ import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
 import { getCookie } from "../lib/cookies";
+import { highlightContainer } from "../lib/hljs";
 import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
@@ -181,6 +182,7 @@ export default function BlogDetail() {
   }, []);
 
   const containerRef = useRef(null);
+  const articleBodyRef = useRef(null);
   const { scrollYProgress } = useScroll({ container: containerRef });
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
 
@@ -326,6 +328,11 @@ export default function BlogDetail() {
       if (document.head.contains(link)) document.head.removeChild(link);
     };
   }, [coverUrl]);
+
+  // Coloration syntaxique des blocs de code dans le rendu HTML
+  useEffect(() => {
+    highlightContainer(articleBodyRef.current);
+  }, [post?.article_content]);
 
   // voisins
   // prevId et nextId viennent du state (initialisé par le useEffect neighbors)
@@ -536,10 +543,8 @@ export default function BlogDetail() {
               const isHtml = /^\s*</.test(raw);
               return (
                 <div
-                  ref={containerRef}
-                  className={`prose max-w-none leading-relaxed ${
-                    theme === "dark" ? "prose-invert prose-headings:text-white" : ""
-                  }`}
+                  ref={articleBodyRef}
+                  className="article-body max-w-none leading-relaxed"
                 >
                   {isHtml ? (
                     // Contenu HTML sanitisé côté serveur (bleach)
