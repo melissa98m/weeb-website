@@ -1,12 +1,46 @@
+import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import legalEn from "../../locales/en/legal.json";
 import legalFr from "../../locales/fr/legal.json";
+import { setCanonical, setOgMeta, setHreflang, SITE_URL } from "../lib/seo";
 
 export default function Legal() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? legalFr : legalEn;
+
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr
+      ? "Mentions légales | Weeb"
+      : "Legal Notice | Weeb";
+    const desc = isFr
+      ? "Mentions légales du site Weeb : éditeur, hébergeur, propriété intellectuelle et conditions d'utilisation."
+      : "Legal notice for Weeb: publisher, host, intellectual property and terms of use.";
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const cleanCanonical = setCanonical("/mentions-legales");
+    const cleanHreflang = setHreflang("/mentions-legales");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/mentions-legales`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanHreflang();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+    };
+  }, [language]);
 
   const sectionClass = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
   const cardClass = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";

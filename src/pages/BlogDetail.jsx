@@ -11,7 +11,7 @@ import blogFr from "../../locales/fr/blog.json";
 import RelatedCarousel from "../components/Blog/RelatedCarousel";
 import { safeChipStyle } from "../utils/colors";
 import { getEnv } from "../lib/env";
-import { setCanonical, setOgMeta, setJsonLd, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setJsonLd, setHreflang, SITE_URL } from "../lib/seo";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -229,6 +229,7 @@ export default function BlogDetail() {
     const imgUrl = resolveImageUrl(post.cover_image_url || post.link_image || post.cover || post.image);
 
     const cleanCanonical = setCanonical(articlePath);
+    const cleanHreflang = setHreflang(articlePath);
     const cleanOgUrl = setOgMeta("og:url", articleUrl);
     const cleanOgTitle = setOgMeta("og:title", document.title);
     const cleanOgDesc = excerpt ? setOgMeta("og:description", excerpt) : () => {};
@@ -266,6 +267,7 @@ export default function BlogDetail() {
     return () => {
       document.title = prev;
       cleanCanonical();
+      cleanHreflang();
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
@@ -406,7 +408,7 @@ export default function BlogDetail() {
               height={528}
               className="h-64 md:h-[22rem] w-full object-cover"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
               onError={(e) => {
                 const fallback = `https://picsum.photos/seed/article-${post?.id ?? currId}/1200/600`;
                 if (e.currentTarget.src !== fallback) {

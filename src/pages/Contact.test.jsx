@@ -16,6 +16,17 @@ vi.mock("../context/ThemeContext", () => ({
   useTheme: vi.fn(),
 }));
 
+vi.mock("../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
+vi.mock("../lib/seo", () => ({
+  setCanonical: () => () => {},
+  setOgMeta: () => () => {},
+  setHreflang: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
 });

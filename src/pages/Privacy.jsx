@@ -1,12 +1,46 @@
+import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import privacyEn from "../../locales/en/privacy.json";
 import privacyFr from "../../locales/fr/privacy.json";
+import { setCanonical, setOgMeta, setHreflang, SITE_URL } from "../lib/seo";
 
 export default function Privacy() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? privacyFr : privacyEn;
+
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr
+      ? "Politique de confidentialité | Weeb"
+      : "Privacy Policy | Weeb";
+    const desc = isFr
+      ? "Découvrez comment Weeb collecte, utilise et protège vos données personnelles conformément au RGPD."
+      : "Learn how Weeb collects, uses and protects your personal data in compliance with GDPR.";
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const cleanCanonical = setCanonical("/politique-confidentialite");
+    const cleanHreflang = setHreflang("/politique-confidentialite");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/politique-confidentialite`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanHreflang();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+    };
+  }, [language]);
 
   const sectionClass = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
   const cardClass = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
