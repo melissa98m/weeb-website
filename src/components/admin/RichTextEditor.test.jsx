@@ -88,6 +88,16 @@ function buildMockEditor(overrides = {}) {
       undo: vi.fn(() => true),
       redo: vi.fn(() => true),
     })),
+    state: {
+      selection: { $from: { pos: 0 } },
+      doc: {
+        content: { size: 0 },
+        nodesBetween: vi.fn(),
+        nodeAt: vi.fn(() => null),
+      },
+      tr: { insertText: vi.fn(() => ({ insertText: vi.fn() })) },
+    },
+    view: { dispatch: vi.fn() },
     ...overrides,
   };
 }

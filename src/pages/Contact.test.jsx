@@ -24,7 +24,9 @@ vi.mock("../lib/seo", () => ({
   setCanonical: () => () => {},
   setOgMeta: () => () => {},
   setHreflang: () => () => {},
+  setTwitterMeta: () => () => {},
   SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "https://weeb.melissa-mangione.com/og-image.jpg",
 }));
 
 beforeEach(() => {

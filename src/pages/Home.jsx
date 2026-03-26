@@ -3,7 +3,7 @@ import { useLanguage } from "../context/LanguageContext";
 import HeroSection from "../components/Home/HeroSection";
 import LearningSection from "../components/Home/LearningSection";
 import TrendsSection from "../components/Home/TrendsSection";
-import { setCanonical, setOgMeta, setJsonLd, setHreflang, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setJsonLd, setHreflang, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
 // Lazy load TrustedBy car il contient des composants Icon volumineux non critiques
 const TrustedBy = lazy(() => import("../components/Home/TrustedBy"));
@@ -29,6 +29,10 @@ export default function Home() {
     const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/`);
     const cleanOgTitle = setOgMeta("og:title", document.title);
     const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanOgImg = setOgMeta("og:image", DEFAULT_OG_IMAGE);
+    const cleanTwTitle = setTwitterMeta("twitter:title", document.title);
+    const cleanTwDesc = setTwitterMeta("twitter:description", desc);
+    const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
 
     const cleanHreflang = setHreflang("/");
 
@@ -52,6 +56,10 @@ export default function Home() {
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
+      cleanOgImg();
+      cleanTwTitle();
+      cleanTwDesc();
+      cleanTwImg();
       cleanJsonLd();
     };
   }, [language]);

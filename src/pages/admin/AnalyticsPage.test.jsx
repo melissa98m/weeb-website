@@ -11,6 +11,9 @@ vi.mock("../../context/ThemeContext", () => ({
 vi.mock("../../context/LanguageContext", () => ({
   useLanguage: () => ({ language: "fr" }),
 }));
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: () => ({ user: { roles: ["Personnel"] } }),
+}));
 
 // Mock recharts pour éviter les erreurs ResizeObserver dans jsdom
 vi.mock("recharts", () => ({

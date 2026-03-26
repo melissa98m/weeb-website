@@ -66,6 +66,42 @@ describe("api csrf", () => {
   });
 });
 
+describe("api timeout", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // fetch qui attend indéfiniment mais respecte le signal d'abort
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url, options) =>
+        new Promise((_resolve, reject) => {
+          options?.signal?.addEventListener("abort", () => {
+            reject(options.signal.reason ?? new DOMException("Aborted", "AbortError"));
+          });
+        })
+      )
+    );
+    document.cookie = "csrftoken=test; Path=/";
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    clearCookie("csrftoken");
+  });
+
+  it("aborts and rejects with a network error after 10 seconds", async () => {
+    const promise = AuthApi.me();
+    // Attacher le handler avant d'avancer les timers pour éviter une unhandled rejection
+    const assertion = expect(promise).rejects.toMatchObject({
+      name: "ApiClientError",
+      network: true,
+    });
+    await vi.advanceTimersByTimeAsync(10_001);
+    await assertion;
+  });
+});
+
 describe("api error helpers", () => {
   it("maps field and global messages from the normalized error payload", () => {
     const error = {

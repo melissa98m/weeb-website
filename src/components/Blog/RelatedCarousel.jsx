@@ -60,8 +60,11 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
           <img
             src={cover}
             alt={item.title}
+            width={260}
+            height={144}
             className="h-full w-full object-cover"
             loading="lazy"
+            decoding="async"
           />
         </div>
       )}

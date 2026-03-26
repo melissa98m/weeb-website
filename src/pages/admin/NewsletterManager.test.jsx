@@ -12,6 +12,9 @@ vi.mock("../../context/ThemeContext", () => ({
 vi.mock("../../context/LanguageContext", () => ({
   useLanguage: () => ({ language: "fr" }),
 }));
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: () => ({ user: { roles: ["Personnel"] } }),
+}));
 vi.mock("../../components/admin/RichTextEditor", () => ({
   default: ({ onChange, value }) => (
     <textarea

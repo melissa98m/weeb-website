@@ -3,7 +3,7 @@ import { appEnv } from "./env";
 
 /** Résout la base API de façon simple et lisible. */
 const EXPLICIT_API_URL = appEnv.VITE_API_URL?.replace(/\/$/, "");
-const FALLBACK_API_URL = "https://weebbackend.melissa-mangione.com/api";
+const FALLBACK_API_URL = import.meta.env.DEV ? "http://localhost:8000/api" : "";
 
 function resolveApiBase() {
   if (EXPLICIT_API_URL) return EXPLICIT_API_URL;
@@ -281,6 +281,18 @@ export function getApiLockoutMessage(error, language = "en", fallbackSeconds = 3
     : `Too many attempts. Retry in ${retryAfter}s.`;
 }
 
+/** ========== Timeout ========== */
+const _DEFAULT_TIMEOUT_MS = 10_000; // 10 secondes
+
+function _withTimeout(ms = _DEFAULT_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new DOMException("Request timeout", "TimeoutError")),
+    ms,
+  );
+  return { signal: controller.signal, clear: () => clearTimeout(timer) };
+}
+
 /** ========== CSRF ========== */
 async function fetchCsrfToken(url) {
   let r;
@@ -377,16 +389,20 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
   if (typeof window !== "undefined" && appEnv.DEV) {
     console.debug("[AUTH] request", { method, url, hasBody: !!body, csrf });
   }
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
       method,
       credentials: "include",
       headers: finalHeaders,
-        body: isFormData ? payload : payload ?? undefined,
+      body: isFormData ? payload : payload ?? undefined,
+      signal,
     });
   } catch (networkError) {
     throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
   const data = await parseResponsePayload(response);
@@ -420,16 +436,20 @@ async function apiRequest(path, { method = "GET", body, headers = {}, csrf = fal
   }
 
   const url = `${API_BASE}${path}`;
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
       method,
       credentials: "include",
       headers: finalHeaders,
-        body: isFormData ? payload : payload ?? undefined,
+      body: isFormData ? payload : payload ?? undefined,
+      signal,
     });
   } catch (networkError) {
     throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
   const data = await parseResponsePayload(response);
@@ -462,15 +482,19 @@ async function authRequestRaw(path, { method = "GET", headers = {}, csrf = false
   }
 
   const url = `${API}${path}`;
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
       method,
       credentials: "include",
       headers: finalHeaders,
+      signal,
     });
   } catch (networkError) {
     throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
   if (!response.ok) {

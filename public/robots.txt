@@ -7,5 +7,7 @@ Disallow: /reset-password/
 Disallow: /forgot-password/
 Disallow: /register/
 Disallow: /login/
+Disallow: /messages/
+Disallow: /feedbacks/
 
 Sitemap: https://weeb.melissa-mangione.com/sitemap.xml

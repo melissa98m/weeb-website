@@ -3,7 +3,7 @@ import ContactIntro from "../components/Contact/ContactIntro";
 import ContactForm from "../components/Contact/ContactForm";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { setCanonical, setOgMeta, setHreflang, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setHreflang, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
 export default function Contact() {
   const { theme } = useTheme();
@@ -30,6 +30,10 @@ export default function Contact() {
     const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/contact`);
     const cleanOgTitle = setOgMeta("og:title", title);
     const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanOgImg = setOgMeta("og:image", DEFAULT_OG_IMAGE);
+    const cleanTwTitle = setTwitterMeta("twitter:title", title);
+    const cleanTwDesc = setTwitterMeta("twitter:description", desc);
+    const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
 
     return () => {
       document.title = prev;
@@ -38,6 +42,10 @@ export default function Contact() {
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
+      cleanOgImg();
+      cleanTwTitle();
+      cleanTwDesc();
+      cleanTwImg();
     };
   }, [language]);
 

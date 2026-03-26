@@ -1,7 +1,7 @@
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,9 @@ vi.mock("../lib/seo", () => ({
   setOgMeta: vi.fn(),
   setJsonLd: vi.fn(),
   setHreflang: vi.fn(),
-  SITE_URL: "https://weeb.fr",
+  setTwitterMeta: vi.fn(),
+  SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "https://weeb.melissa-mangione.com/og-image.jpg",
 }));
 
 vi.mock("../lib/env", () => ({

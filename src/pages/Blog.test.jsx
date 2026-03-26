@@ -12,7 +12,9 @@ vi.mock("../lib/seo", () => ({
   setOgMeta: () => () => {},
   setHreflang: () => () => {},
   setJsonLd: () => () => {},
+  setTwitterMeta: () => () => {},
   SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "https://weeb.melissa-mangione.com/og-image.jpg",
 }));
 
 vi.mock("framer-motion", () => ({

@@ -10,7 +10,7 @@ import Pagination from "../components/ui/Pagination";
 import blogEn from "../../locales/en/blog.json";
 import blogFr from "../../locales/fr/blog.json";
 import { getEnv } from "../lib/env";
-import { setCanonical, setOgMeta, setHreflang, setJsonLd, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setHreflang, setJsonLd, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 const PAGE_SIZE = 9;
@@ -103,6 +103,10 @@ export default function Blog() {
     const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/blog`);
     const cleanOgTitle = setOgMeta("og:title", title);
     const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanOgImg = setOgMeta("og:image", DEFAULT_OG_IMAGE);
+    const cleanTwTitle = setTwitterMeta("twitter:title", title);
+    const cleanTwDesc = setTwitterMeta("twitter:description", desc);
+    const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
     const cleanJsonLd = setJsonLd("jsonld-blog", {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
@@ -119,6 +123,10 @@ export default function Blog() {
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
+      cleanOgImg();
+      cleanTwTitle();
+      cleanTwDesc();
+      cleanTwImg();
       cleanJsonLd();
     };
   }, [language]);
