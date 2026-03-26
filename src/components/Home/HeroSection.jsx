@@ -56,7 +56,11 @@ export default function HeroSection() {
       </div>
       <motion.img
         src="/home/mokup.png"
-        alt="Mockup"
+        alt="Mockup de l'interface Weeb sur desktop"
+        width={1280}
+        height={720}
+        loading="lazy"
+        decoding="async"
         className="mt-12 w-full max-w-5xl mx-auto rounded-md"
         style={{
           cursor: "grab",

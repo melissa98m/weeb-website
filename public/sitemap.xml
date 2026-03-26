@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/</loc>
+    <loc>https://weeb.melissa-mangione.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/about-us</loc>
+    <loc>https://weeb.melissa-mangione.com/about-us</loc>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/blog</loc>
+    <loc>https://weeb.melissa-mangione.com/blog</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/formations</loc>
+    <loc>https://weeb.melissa-mangione.com/formations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/contact</loc>
+    <loc>https://weeb.melissa-mangione.com/contact</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/mentions-legales</loc>
+    <loc>https://weeb.melissa-mangione.com/mentions-legales</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
   <url>
-    <loc>https://weebbackend.melissa-mangione.com/politique-confidentialite</loc>
+    <loc>https://weeb.melissa-mangione.com/politique-confidentialite</loc>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>

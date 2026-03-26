@@ -6,5 +6,6 @@ Disallow: /search/
 Disallow: /reset-password/
 Disallow: /forgot-password/
 Disallow: /register/
+Disallow: /login/
 
-Sitemap: https://weebbackend.melissa-mangione.com/sitemap.xml
+Sitemap: https://weeb.melissa-mangione.com/sitemap.xml

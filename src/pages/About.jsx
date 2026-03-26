@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { Link } from "react-router-dom";
@@ -5,6 +6,7 @@ import AboutIntro from "../components/About/AboutIntro";
 import aboutEn from "../../locales/en/about.json";
 import aboutFr from "../../locales/fr/about.json";
 import { motion } from "framer-motion";
+import { setCanonical, setOgMeta, setHreflang, SITE_URL } from "../lib/seo";
 
 
 function IconAward({ size = 24 }) {
@@ -50,6 +52,38 @@ export default function About() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? aboutFr : aboutEn;
+
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr
+      ? "À propos | Weeb — Notre mission et notre équipe"
+      : "About | Weeb — Our Mission and Team";
+    const desc = isFr
+      ? "Découvrez la mission de Weeb : rendre l'apprentissage du développement web accessible à tous, avec des formations pratiques et des articles de qualité."
+      : "Discover Weeb's mission: making web development learning accessible to everyone, with practical courses and quality articles.";
+
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+
+    const cleanCanonical = setCanonical("/about-us");
+    const cleanHreflang = setHreflang("/about-us");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/about-us`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+
+    return () => {
+      document.title = prev;
+      cleanCanonical();
+      cleanHreflang();
+      cleanOgUrl();
+      cleanOgTitle();
+      cleanOgDesc();
+    };
+  }, [language]);
 
   const cardClass = theme === "dark" 
     ? "bg-[#1c1c1c] border-[#333] text-white" 

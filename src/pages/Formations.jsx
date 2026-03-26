@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { setCanonical, setOgMeta, SITE_URL } from "../lib/seo";
+import { setCanonical, setOgMeta, setHreflang, setJsonLd, SITE_URL } from "../lib/seo";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
@@ -85,18 +85,35 @@ export default function Formations() {
     if (metaRobots) metaRobots.setAttribute("content", "index, follow");
 
     const cleanCanonical = setCanonical("/formations");
+    const cleanHreflang = setHreflang("/formations");
     const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/formations`);
     const cleanOgTitle = setOgMeta("og:title", title);
     const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanJsonLd = setJsonLd("jsonld-formations", {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: title,
+      description: desc,
+      url: `${SITE_URL}/formations`,
+      numberOfItems: items.length || undefined,
+      itemListElement: items.slice(0, 10).map((f, idx) => ({
+        "@type": "ListItem",
+        position: idx + 1,
+        name: f.name,
+        url: `${SITE_URL}/formation/${f.id}`,
+      })),
+    });
 
     return () => {
       document.title = prev;
       cleanCanonical();
+      cleanHreflang();
       cleanOgUrl();
       cleanOgTitle();
       cleanOgDesc();
+      cleanJsonLd();
     };
-  }, [language]);
+  }, [language, items]);
 
   const openSummary = useCallback((f) => { setSelected(f); setOpen(true); }, []);
   const closeSummary = useCallback(() => { setOpen(false); setSelected(null); }, []);

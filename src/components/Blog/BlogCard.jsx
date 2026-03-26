@@ -114,6 +114,8 @@ export default function BlogCard({
         <img
           src={post.cover}
           alt={title}
+          width={600}
+          height={176}
           className="h-44 w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading={isLcp ? "eager" : "lazy"}
           fetchPriority={isLcp ? "high" : "auto"}

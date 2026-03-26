@@ -54,6 +54,36 @@ export function setOgMeta(property, content) {
   };
 }
 
+/**
+ * Injecte les balises hreflang pour une page bilingue FR/EN.
+ * path — chemin commun à la version FR et EN (ex: "/blog").
+ * Crée 3 balises : hreflang="fr", hreflang="en", hreflang="x-default" (→ FR).
+ */
+export function setHreflang(path) {
+  const langs = [
+    { hreflang: "fr", href: `${SITE_URL}${path}` },
+    { hreflang: "en", href: `${SITE_URL}${path}` },
+    { hreflang: "x-default", href: `${SITE_URL}${path}` },
+  ];
+  const created = [];
+  for (const { hreflang, href } of langs) {
+    let link = document.querySelector(`link[rel="alternate"][hreflang="${hreflang}"]`);
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "alternate";
+      link.setAttribute("hreflang", hreflang);
+      document.head.appendChild(link);
+      created.push(link);
+    }
+    link.setAttribute("href", href);
+  }
+  return () => {
+    for (const link of created) {
+      if (document.head.contains(link)) link.remove();
+    }
+  };
+}
+
 /** Injecte ou met à jour un script JSON-LD dans le <head>. */
 export function setJsonLd(id, data) {
   let script = document.getElementById(id);

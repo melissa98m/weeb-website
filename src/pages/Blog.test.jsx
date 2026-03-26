@@ -7,6 +7,14 @@ import blogEn from "../../locales/en/blog.json";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 
+vi.mock("../lib/seo", () => ({
+  setCanonical: () => () => {},
+  setOgMeta: () => () => {},
+  setHreflang: () => () => {},
+  setJsonLd: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
+}));
+
 vi.mock("framer-motion", () => ({
   motion: {
     header: (props) => <header {...props} />,
@@ -65,6 +73,12 @@ describe("Blog page", () => {
   it("loads posts and opens summary modal", async () => {
     const user = userEvent.setup();
 
+    // First call: genres
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: [{ id: 10, name: "Tech" }] }),
+    });
+    // Second call: articles
     fetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
@@ -78,6 +92,7 @@ describe("Blog page", () => {
             genres: [{ id: 10, name: "Tech" }],
           },
         ],
+        count: 1,
         next: null,
       }),
     });
@@ -91,9 +106,15 @@ describe("Blog page", () => {
   });
 
   it("shows empty state when no posts", async () => {
+    // First call: genres
     fetch.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ results: [], next: null }),
+      json: async () => ({ results: [] }),
+    });
+    // Second call: articles
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: [], count: 0, next: null }),
     });
 
     render(<Blog />);

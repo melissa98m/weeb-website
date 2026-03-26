@@ -54,7 +54,7 @@ describe("HeroSection", () => {
 
   it("affiche l'image mockup avec un attribut alt", () => {
     renderHero();
-    expect(screen.getByAltText("Mockup")).toBeInTheDocument();
+    expect(screen.getByAltText("Mockup de l'interface Weeb sur desktop")).toBeInTheDocument();
   });
 
   it("est encapsulé dans une balise section", () => {

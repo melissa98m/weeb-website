@@ -11,7 +11,8 @@ vi.mock("../lib/seo", () => ({
   setCanonical: () => () => {},
   setOgMeta: () => () => {},
   setJsonLd: () => () => {},
-  SITE_URL: "https://weeb.fr",
+  setHreflang: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
 }));
 
 vi.mock("../components/Home/HeroSection", () => ({
