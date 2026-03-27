@@ -29,5 +29,10 @@
     "subject_error": "Sujet invalide.",
     "privacy_notice": "Vos données sont utilisées uniquement pour traiter votre demande.",
     "consent_label": "J'accepte le traitement de mes données pour répondre à ma demande.",
-    "consent_error": "Veuillez accepter le traitement de vos données."
+    "consent_error": "Veuillez accepter le traitement de vos données.",
+    "too_many": "Trop de tentatives. Réessayez dans 15 minutes.",
+    "cooldown": "Patientez {sec} secondes avant un nouvel envoi.",
+    "cooldown_info": "Prochain envoi possible dans",
+    "subjects_retry": "Réessayer",
+    "subjects_empty": "Aucun sujet disponible pour le moment."
 }

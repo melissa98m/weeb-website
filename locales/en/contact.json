@@ -29,5 +29,10 @@
     "subject_error": "Invalid subject.",
     "privacy_notice": "Your data is used only to process your request.",
     "consent_label": "I agree to the processing of my data for this request.",
-    "consent_error": "Please accept data processing to continue."
+    "consent_error": "Please accept data processing to continue.",
+    "too_many": "Too many attempts. Please try again in 15 minutes.",
+    "cooldown": "Please wait {sec} seconds before sending again.",
+    "cooldown_info": "Next submission available in",
+    "subjects_retry": "Retry",
+    "subjects_empty": "No subjects available at the moment."
 }

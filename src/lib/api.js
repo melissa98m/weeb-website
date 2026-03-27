@@ -594,6 +594,7 @@ export const MessagesApi = {
     return apiRequest("/messages/", {
       method: "POST",
       body: payload,
+      csrf: true,
     });
   },
 };

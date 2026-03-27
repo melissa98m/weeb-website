@@ -7,11 +7,17 @@ import contactEn from "../../../locales/en/contact.json";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 
-vi.mock("framer-motion", () => ({
-  motion: {
-    form: (props) => <form {...props} />,
-  },
-}));
+vi.mock("framer-motion", () => {
+  const strip = ({ animate: _a, transition: _t, initial: _i, exit: _e, whileHover: _wh, whileTap: _wt, drag: _d, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, ...props }) => props;
+  return {
+    AnimatePresence: ({ children }) => <>{children}</>,
+    motion: {
+      form: (props) => <form {...strip(props)} />,
+      div: (props) => <div {...strip(props)} />,
+      path: (props) => <path {...strip(props)} />,
+    },
+  };
+});
 
 vi.mock("../../context/ThemeContext", () => ({
   useTheme: vi.fn(),
@@ -30,11 +36,15 @@ beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
   localStorage.clear();
+  // Fournir un token CSRF pour éviter un appel réseau supplémentaire
+  document.cookie = "csrftoken=testtoken; path=/";
   vi.stubGlobal("fetch", fetchMock);
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  // Supprimer le cookie CSRF injecté pour le test
+  document.cookie = "csrftoken=; path=/; max-age=0";
 });
 
 describe("ContactForm", () => {
