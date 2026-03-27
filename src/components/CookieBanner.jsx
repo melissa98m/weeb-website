@@ -55,7 +55,7 @@ const CookieBanner = () => {
 
   const containerClasses =
     theme === "dark"
-      ? "bg-[#0b1220] border-slate-700 text-slate-100"
+      ? "bg-background border-slate-700 text-slate-100"
       : "bg-white border-slate-200 text-slate-900";
   const subtleText = theme === "dark" ? "text-slate-300" : "text-slate-600";
   const primaryBtn =
@@ -99,11 +99,11 @@ const CookieBanner = () => {
   return (
     <>
       {visible && (
-        <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4">
+        <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-4" style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}>
           <div
             className={`mx-auto max-w-4xl rounded-2xl border p-4 shadow-xl ${containerClasses}`}
             role="dialog"
-            aria-live="polite"
+            aria-modal="true"
             aria-label="Consentement aux cookies"
           >
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">

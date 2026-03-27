@@ -65,13 +65,13 @@ export default function ArticleEditorModal({
 
   /* ---------- UI styles ---------- */
   const card = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333]"
+    ? "bg-surface text-white border-border"
     : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+    ? "bg-surface text-white border-border placeholder-white/60"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+    ? "bg-surface text-white border-border hover:bg-surface-raised"
     : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const cta = theme === "dark"
     ? "bg-secondary text-white border-secondary hover:brightness-110"
@@ -464,7 +464,7 @@ export default function ArticleEditorModal({
                     <li
                       key={rev.id}
                       className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
-                        theme === "dark" ? "border-[#333]" : "border-gray-200"
+                        theme === "dark" ? "border-border" : "border-gray-200"
                       }`}
                     >
                       <div className="min-w-0">

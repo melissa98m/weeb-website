@@ -47,7 +47,7 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
 
   const frame =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white"
+      ? "bg-surface border-border text-white"
       : "bg-white border-gray-200 text-gray-900";
 
   return (
@@ -171,7 +171,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
             aria-label={language === "fr" ? "Faire défiler vers la gauche" : "Scroll left"}
             className={`px-3 py-1.5 rounded-md border text-sm ${
               theme === "dark"
-                ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >
@@ -183,7 +183,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
             aria-label={language === "fr" ? "Faire défiler vers la droite" : "Scroll right"}
             className={`px-3 py-1.5 rounded-md border text-sm ${
               theme === "dark"
-                ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >

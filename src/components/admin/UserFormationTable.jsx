@@ -13,16 +13,16 @@ function UserFormationTable({
 
   const card =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
-  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const headRow = theme === "dark" ? "bg-surface-2" : "bg-gray-50";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
-  const borderRow = theme === "dark" ? "border-[#333]" : "border-gray-200";
+  const borderRow = theme === "dark" ? "border-border" : "border-gray-200";
 
   const btn =
     theme === "dark"
-      ? "bg-red-400 text-white border-[#333] hover:bg-[#222]"
+      ? "bg-red-400 text-white border-border hover:bg-surface-raised"
       : "bg-red-400 text-gray-900 border-gray-200 hover:bg-gray-50";
 
   /* ---------- ÉTATS COMMUNS ---------- */

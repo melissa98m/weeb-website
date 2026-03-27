@@ -1,13 +1,33 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand */
   --color-primary: #c084fc;
   --color-secondary: #9333ea;
+
+  /* Page backgrounds */
   --color-background: #0f172a;
-  --color-muted: #94a3b8;
   --color-dark: #181e2c;
   --color-light: #f2f2f2;
-  --font-sans: "Roboto", sans-serif;
+
+  /* Dark-mode surface scale */
+  --color-surface: #1c1c1c;
+  --color-surface-raised: #222222;
+  --color-surface-2: #262626;
+  --color-surface-3: #2a2a2a;
+  --color-surface-deep: #111111;
+
+  /* Dark-mode borders */
+  --color-border: #333333;
+  --color-border-2: #444444;
+
+  /* Utility */
+  --color-muted: #94a3b8;
+
+  /* Corps : Plus Jakarta Sans — humaniste, lisible, distinctif */
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  /* Titres : Syne — géométrique, caractère fort en Bold/ExtraBold */
+  --font-display: "Syne", system-ui, sans-serif;
   --animate-spin: spin 4s linear infinite
 }
 

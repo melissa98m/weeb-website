@@ -20,7 +20,7 @@ const Button = forwardRef(function Button(
   ref
 ) {
   const baseClasses =
-    "transition-transform transition-colors duration-200 ease-in-out transform hover:scale-110 focus:outline-none";
+    "transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500";
   const combinedClasses = `${baseClasses} ${className}`.trim();
 
   if (to) {
@@ -41,9 +41,7 @@ const Button = forwardRef(function Button(
     );
   }
 
-  // Heuristique : si aucun type n'est fourni, on met "submit" par défaut,
-  // sauf si onClick est présent (cas bouton d'action hors submit).
-  const computedType = type ?? (onClick ? "button" : "submit");
+  const computedType = type ?? "button";
 
   return (
     <button

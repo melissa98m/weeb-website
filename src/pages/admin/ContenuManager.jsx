@@ -68,11 +68,11 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
   };
 
   const overlay = theme === "dark" ? "bg-black/60" : "bg-black/40";
-  const panel = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const panel = theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#111] border-[#444] text-white placeholder-white/40"
+    ? "bg-surface-deep border-border-2 text-white placeholder-white/40"
     : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400";
-  const rowHover = theme === "dark" ? "hover:bg-[#2a2a2a]" : "hover:bg-gray-50";
+  const rowHover = theme === "dark" ? "hover:bg-surface-3" : "hover:bg-gray-50";
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
 
   return (
@@ -83,7 +83,7 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
       >
         <div className="flex items-center justify-between">
           <h3 className="font-semibold">Rattacher un cours existant</h3>
-          <button type="button" onClick={onClose} className={`text-sm px-2 py-1 rounded ${theme === "dark" ? "hover:bg-[#333]" : "hover:bg-gray-100"}`}>✕</button>
+          <button type="button" onClick={onClose} className={`text-sm px-2 py-1 rounded ${theme === "dark" ? "hover:bg-border" : "hover:bg-gray-100"}`}>✕</button>
         </div>
         <input
           autoFocus
@@ -121,9 +121,9 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
 
 function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
-  const block = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const block = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#111] border-[#444] text-white"
+    ? "bg-surface-deep border-border-2 text-white"
     : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition focus:ring-1 ${inputCls}`;
 
@@ -187,7 +187,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
 
   const btnSm = (variant) => {
     const base = "text-xs px-2 py-0.5 rounded border transition disabled:opacity-50";
-    if (variant === "ghost") return `${base} ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`;
+    if (variant === "ghost") return `${base} ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100"}`;
     if (variant === "danger") return `${base} ${theme === "dark" ? "border-red-800 text-red-400 hover:bg-red-900/20" : "border-red-200 text-red-600 hover:bg-red-50"}`;
     if (variant === "primary") return `${base} bg-indigo-600 text-white border-transparent hover:bg-indigo-700`;
     return base;
@@ -261,7 +261,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
 
         {/* Body */}
         {open && (
-          <div className={`border-t px-3 py-2 space-y-1 ${theme === "dark" ? "border-[#2a2a2a]" : "border-gray-100"}`}>
+          <div className={`border-t px-3 py-2 space-y-1 ${theme === "dark" ? "border-surface-3" : "border-gray-100"}`}>
 
             {/* Liste cours */}
             {module.cours.length === 0 && (
@@ -285,7 +285,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
             </div>
 
             {/* QCM */}
-            <div className={`border-t mt-2 pt-2 ${theme === "dark" ? "border-[#2a2a2a]" : "border-gray-100"}`}>
+            <div className={`border-t mt-2 pt-2 ${theme === "dark" ? "border-surface-3" : "border-gray-100"}`}>
               {showQCM ? (
                 <QCMEditor
                   apiBase={apiBase}
@@ -312,7 +312,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
 
 function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onModuleUpdated, onModuleDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
-  const inputCls = theme === "dark" ? "bg-[#111] border-[#444] text-white" : "bg-white border-gray-300 text-gray-900";
+  const inputCls = theme === "dark" ? "bg-surface-deep border-border-2 text-white" : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${inputCls}`;
 
   const [adding, setAdding] = useState(false);
@@ -364,7 +364,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
 
       {/* Formulaire création */}
       {adding && (
-        <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"}`}>
+        <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-surface border-border" : "bg-gray-50 border-gray-200"}`}>
           <input
             autoFocus
             className={inputBase}
@@ -375,7 +375,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
           />
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={() => { setAdding(false); setNewTitle(""); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>{t.common_cancel}</button>
+            <button type="button" onClick={() => { setAdding(false); setNewTitle(""); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}>{t.common_cancel}</button>
             <button type="button" onClick={createModule} disabled={busy} className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
               {busy ? <Spinner /> : null}{t.common_create}
             </button>
@@ -410,7 +410,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
 
 function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
-  const block = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const block = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
 
   const [busy, setBusy] = useState(false);
 
@@ -426,7 +426,7 @@ function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onD
 
   const btnSm = (variant) => {
     const base = "text-xs px-2 py-0.5 rounded border transition disabled:opacity-50";
-    if (variant === "ghost") return `${base} ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`;
+    if (variant === "ghost") return `${base} ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100"}`;
     if (variant === "danger") return `${base} ${theme === "dark" ? "border-red-800 text-red-400 hover:bg-red-900/20" : "border-red-200 text-red-600 hover:bg-red-50"}`;
     return base;
   };
@@ -454,7 +454,7 @@ function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onD
 
 function CoursTab({ apiBase, cours, theme, t, onCoursCreated, onCoursUpdated, onCoursDeleted }) {
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
-  const inputCls = theme === "dark" ? "bg-[#111] border-[#444] text-white" : "bg-white border-gray-300 text-gray-900";
+  const inputCls = theme === "dark" ? "bg-surface-deep border-border-2 text-white" : "bg-white border-gray-300 text-gray-900";
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCours, setEditingCours] = useState(null);
@@ -550,7 +550,7 @@ export default function ContenuManager() {
   const [err, setErr] = useState("");
   const ctrlRef = useRef(null);
 
-  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#2a2a2a]" : "bg-white border-gray-200";
+  const card = theme === "dark" ? "bg-surface border-surface-3" : "bg-white border-gray-200";
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
 
   const load = useCallback(async () => {
@@ -604,7 +604,7 @@ export default function ContenuManager() {
         {/* Card principale */}
         <div className={`rounded-2xl border ${card} overflow-hidden`}>
           {/* Onglets */}
-          <div className={`px-4 flex gap-0 border-b ${theme === "dark" ? "border-[#2a2a2a]" : "border-gray-200"}`}>
+          <div className={`px-4 flex gap-0 border-b ${theme === "dark" ? "border-surface-3" : "border-gray-200"}`}>
             {tabBtn("modules", `${t.content_tab_modules} (${modules.length})`)}
             {tabBtn("cours", `${t.content_tab_courses} (${cours.length})`)}
           </div>

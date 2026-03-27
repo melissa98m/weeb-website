@@ -17,6 +17,7 @@ vi.mock("framer-motion", () => ({
     img: ({ drag: _drag, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, whileTap: _wt, ...rest }) =>
       <img {...rest} />,
   },
+  useReducedMotion: () => false,
 }));
 
 function renderHero() {

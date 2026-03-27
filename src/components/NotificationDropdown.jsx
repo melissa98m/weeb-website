@@ -22,10 +22,10 @@ export default function NotificationDropdown({ onClose, theme = "light" }) {
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white"
+      ? "bg-surface border-border text-white"
       : "bg-white border-gray-200 text-gray-900";
   const divider = theme === "dark" ? "divide-[#333]" : "divide-gray-100";
-  const itemHover = theme === "dark" ? "hover:bg-[#262626]" : "hover:bg-gray-50";
+  const itemHover = theme === "dark" ? "hover:bg-surface-2" : "hover:bg-gray-50";
 
   // Fermeture au clic extérieur
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function NotificationDropdown({ onClose, theme = "light" }) {
       className={`absolute right-0 top-11 w-80 rounded-2xl border shadow-xl z-50 overflow-hidden ${card}`}
     >
       {/* Header */}
-      <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+      <div className={`flex items-center justify-between px-4 py-3 border-b ${theme === "dark" ? "border-border" : "border-gray-100"}`}>
         <span className="font-semibold text-sm">Notifications</span>
         {unreadCount > 0 && (
           <button

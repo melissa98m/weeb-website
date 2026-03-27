@@ -26,11 +26,11 @@ export default function AdminChatPanel() {
   const t = language === "fr" ? adminFr : adminEn;
   const dark = theme === "dark";
 
-  const panel = dark ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
-  const sidebar = dark ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200";
-  const inputBg = dark ? "bg-[#111] border-[#333] text-white placeholder:text-white/30" : "bg-white border-gray-300 text-gray-900";
+  const panel = dark ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
+  const sidebar = dark ? "bg-surface border-border" : "bg-gray-50 border-gray-200";
+  const inputBg = dark ? "bg-surface-deep border-border text-white placeholder:text-white/30" : "bg-white border-gray-300 text-gray-900";
   const bubbleAdmin = "bg-blue-600 text-white self-end";
-  const bubbleUser = dark ? "bg-[#333] text-white self-start" : "bg-gray-100 text-gray-900 self-start";
+  const bubbleUser = dark ? "bg-border text-white self-start" : "bg-gray-100 text-gray-900 self-start";
 
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
@@ -170,7 +170,7 @@ export default function AdminChatPanel() {
                 onClick={() => handleSelectRoom(room)}
                 className={`w-full text-left px-4 py-3 border-b transition hover:brightness-105 ${
                   activeRoom?.room_id === room.room_id
-                    ? dark ? "bg-[#262626]" : "bg-blue-50"
+                    ? dark ? "bg-surface-2" : "bg-blue-50"
                     : ""
                 }`}
               >

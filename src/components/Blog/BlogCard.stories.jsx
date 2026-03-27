@@ -1,4 +1,5 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import BlogCard from "./BlogCard";
 
 const post = {
@@ -23,9 +24,11 @@ const meta = {
   component: BlogCard,
   decorators: [
     (Story) => (
-      <div className="p-6 max-w-sm">
-        <Story />
-      </div>
+      <MemoryRouter>
+        <div className="p-6 max-w-sm">
+          <Story />
+        </div>
+      </MemoryRouter>
     ),
   ],
   argTypes: {

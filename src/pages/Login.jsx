@@ -221,7 +221,7 @@ export default function Login() {
       hasError
         ? "border-red-500 focus:ring-red-400 focus:border-red-500"
         : theme === "dark"
-        ? "bg-[#1c1c1c] border-[#333] text-white focus:ring-primary focus:border-primary"
+        ? "bg-surface border-border text-white focus:ring-primary focus:border-primary"
         : "bg-white border-gray-300 text-gray-900 focus:ring-secondary focus:border-secondary"
     } ${isLocked ? "opacity-50 cursor-not-allowed" : ""}`;
 
@@ -411,7 +411,7 @@ export default function Login() {
                 </div>
                 <p
                   className={`relative mx-auto w-fit px-2 text-xs ${
-                    theme === "dark" ? "bg-[#181818] text-muted" : "bg-white text-gray-500"
+                    theme === "dark" ? "bg-surface text-muted" : "bg-white text-gray-500"
                   }`}
                 >
                   {L.or_continue_with || "Or continue with"}
@@ -423,7 +423,7 @@ export default function Login() {
                     <div
                       className={`overflow-hidden rounded-md border shadow-sm transition-all ${
                         theme === "dark"
-                          ? "border-gray-700 bg-[#1f1f1f] hover:border-gray-600"
+                          ? "border-gray-700 bg-surface hover:border-gray-600"
                           : "border-gray-300 bg-white hover:border-gray-400"
                       } focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2`}
                     >
@@ -448,7 +448,7 @@ export default function Login() {
                     onClick={() => handleOAuthLogin(provider.url)}
                     className={`w-full rounded-md border px-4 py-3 text-sm font-medium transition-colors ${
                       theme === "dark"
-                        ? "border-gray-700 bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]"
+                        ? "border-gray-700 bg-surface text-white hover:bg-surface-3"
                         : "border-gray-300 bg-white text-gray-900 hover:bg-gray-50"
                     }`}
                   >

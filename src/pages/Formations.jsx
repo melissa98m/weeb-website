@@ -137,11 +137,11 @@ export default function Formations() {
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
   const input =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white placeholder-white/50"
+      ? "bg-surface border-border text-white placeholder-white/50"
       : "bg-white border-gray-300 text-gray-900 placeholder-gray-400";
 
   return (
@@ -149,10 +149,15 @@ export default function Formations() {
       <motion.header
         initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
+        className="mb-10"
       >
-        <h1 className="text-3xl md:text-4xl font-bold mb-2">{t.title}</h1>
-        <p className={`text-sm md:text-base ${theme === "dark" ? "text-white/70" : "text-gray-600"}`}>{t.subtitle}</p>
+        <p className={`text-xs uppercase tracking-widest font-medium mb-3 ${
+          theme === "dark" ? "text-primary" : "text-secondary"
+        }`}>
+          {language === "fr" ? "Catalogue" : "Catalog"}
+        </p>
+        <h1 className="text-4xl md:text-5xl font-bold mb-3">{t.title}</h1>
+        <p className={`text-base md:text-lg max-w-2xl ${theme === "dark" ? "text-white/60" : "text-gray-500"}`}>{t.subtitle}</p>
       </motion.header>
 
       {/* Controls */}
@@ -162,7 +167,7 @@ export default function Formations() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t.search_placeholder}
-            className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 ${input}`}
+            className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-primary ${input}`}
             aria-label={t.search_placeholder}
           />
           <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60">⌘K</span>

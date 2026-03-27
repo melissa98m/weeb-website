@@ -93,13 +93,13 @@ export default function CoursEditorModal({
   /* ── Styles ── */
   const overlay = theme === "dark" ? "bg-black/70" : "bg-black/50";
   const panel = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333]"
+    ? "bg-surface text-white border-border"
     : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#111] border-[#444] text-white placeholder-white/40 focus:ring-indigo-500/50"
+    ? "bg-surface-deep border-border-2 text-white placeholder-white/40 focus:ring-indigo-500/50"
     : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-indigo-400/40";
   const ghostBtn = theme === "dark"
-    ? "border-[#444] text-white hover:bg-[#2a2a2a]"
+    ? "border-border-2 text-white hover:bg-surface-3"
     : "border-gray-300 text-gray-700 hover:bg-gray-100";
 
   return (

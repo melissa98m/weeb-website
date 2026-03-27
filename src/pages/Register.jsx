@@ -236,7 +236,7 @@ export default function Register() {
       hasError
         ? "border-red-500 focus:ring-red-400 focus:border-red-500"
         : theme === "dark"
-        ? "bg-[#1c1c1c] border-[#333] text-white focus:ring-primary focus:border-primary"
+        ? "bg-surface border-border text-white focus:ring-primary focus:border-primary"
         : "bg-white border-gray-300 text-gray-900 focus:ring-secondary focus:border-secondary"
     } ${isLocked ? "opacity-50 cursor-not-allowed" : ""}`;
 
@@ -623,7 +623,7 @@ export default function Register() {
               disabled={isLocked}
               className={`mt-1 h-4 w-4 rounded border transition-colors focus:outline-none focus:ring-2 ${
                 theme === "dark"
-                  ? "border-[#333] bg-[#1c1c1c] text-primary focus:ring-primary"
+                  ? "border-border bg-surface text-primary focus:ring-primary"
                   : "border-gray-300 bg-white text-secondary focus:ring-secondary"
               } ${errors.rgpdConsent ? "border-red-500 focus:ring-red-400" : ""} ${
                 isLocked ? "opacity-50 cursor-not-allowed" : "cursor-pointer"

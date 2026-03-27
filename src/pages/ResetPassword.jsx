@@ -163,7 +163,7 @@ export default function ResetPassword() {
       hasError
         ? "border-red-500 focus:ring-red-400"
         : theme === "dark"
-        ? "bg-[#1c1c1c] border-[#333] text-white focus:ring-blue-500"
+        ? "bg-surface border-border text-white focus:ring-blue-500"
         : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
     }`;
 

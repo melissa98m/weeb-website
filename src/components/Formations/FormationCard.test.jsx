@@ -4,6 +4,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import FormationCard from "./FormationCard";
 
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
 const formation = { name: "React Basics", description: "Learn React" };
 
 describe("FormationCard", () => {
@@ -16,7 +20,8 @@ describe("FormationCard", () => {
     expect(screen.getByText("React Basics")).toBeInTheDocument();
     expect(screen.getByText("Learn React")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /voir les détails de la formation/i }));
+    // aria-label: "Voir les détails de React Basics"
+    await user.click(screen.getByRole("button", { name: /voir les détails de/i }));
     expect(onView).toHaveBeenCalledWith(formation);
   });
 });

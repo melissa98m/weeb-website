@@ -12,7 +12,7 @@ import adminFr from "../../../locales/fr/admin.json";
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 function StatCard({ label, value, sub, theme, accent = false }) {
-  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
   return (
     <div className={`rounded-xl border shadow p-4 ${card}`}>
       <div className={`text-2xl font-bold ${accent ? "text-indigo-500" : ""}`}>{value ?? "—"}</div>
@@ -31,7 +31,7 @@ export default function CommercialDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
   const meta = theme === "dark" ? "text-white/60" : "text-gray-500";
 
   const isAllowed = hasAnyRole(user, ["Commercial"]);

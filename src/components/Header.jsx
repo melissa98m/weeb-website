@@ -11,9 +11,33 @@ import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
 
 
+function IconSun({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+  );
+}
+
+function IconMoon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  );
+}
+
 function IconMenu({ size = 24 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <line x1="3" y1="12" x2="21" y2="12"></line>
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -23,7 +47,7 @@ function IconMenu({ size = 24 }) {
 
 function IconX({ size = 24 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <line x1="18" y1="6" x2="6" y2="18"></line>
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
@@ -59,11 +83,11 @@ export default function Header() {
 
   return (
     <header
-      className={`shadow-md fixed md:top-6 translate-x-[-50%] left-[50%] md:rounded-t-xl rounded-b-xl md:w-[95%] max-w-5xl z-10 w-full ${
+      className={`shadow-md fixed md:top-6 translate-x-[-50%] left-[50%] md:rounded-xl md:w-[98%] z-10 w-full ${
         theme === "dark" ? "bg-dark" : "bg-gray-100"
       }`}
     >
-      <div className="px-6 py-4 flex items-center justify-between">
+      <div className="px-8 py-5 flex items-center justify-between">
         <div className="flex items-center space-x-8">
           <div
             className={`font-bold text-lg tracking-wide ${
@@ -123,19 +147,27 @@ export default function Header() {
           <Button
             onClick={toggleTheme}
             aria-label={t("change_theme", "Change theme")}
-            className="text-2xl focus:outline-none"
+            className={`p-1.5 rounded-md transition-colors ${
+              theme === "dark"
+                ? "text-amber-400 hover:text-amber-300"
+                : "text-violet-500 hover:text-violet-700"
+            }`}
             title={t("change_theme", "Change theme")}
           >
-            {theme === "dark" ? "☀️" : "🌙"}
+            {theme === "dark" ? <IconSun /> : <IconMoon />}
           </Button>
 
           <Button
             onClick={toggleLanguage}
             aria-label={t("change_language", "Change language")}
-            className="text-2xl focus:outline-none"
+            className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors ${
+              theme === "dark"
+                ? "bg-violet-500/15 text-violet-400 hover:bg-violet-500/25 hover:text-violet-300"
+                : "bg-violet-100 text-violet-600 hover:bg-violet-200 hover:text-violet-700"
+            }`}
             title={t("change_language", "Change language")}
           >
-            {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
+            {language === "fr" ? "EN" : "FR"}
           </Button>
 
           {user ? (
@@ -317,10 +349,14 @@ export default function Header() {
                 setIsOpen(false);
               }}
               aria-label={t("change_theme", "Change theme")}
-              className="text-2xl focus:outline-none"
+              className={`p-1.5 rounded-md transition-colors ${
+                theme === "dark"
+                  ? "text-amber-400 hover:text-amber-300"
+                  : "text-violet-500 hover:text-violet-700"
+              }`}
               title={t("change_theme", "Change theme")}
             >
-              {theme === "dark" ? "☀️" : "🌙"}
+              {theme === "dark" ? <IconSun /> : <IconMoon />}
             </Button>
             <Button
               onClick={() => {
@@ -328,10 +364,14 @@ export default function Header() {
                 setIsOpen(false);
               }}
               aria-label={t("change_language", "Change language")}
-              className="text-2xl focus:outline-none"
+              className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors ${
+                theme === "dark"
+                  ? "bg-violet-500/15 text-violet-400 hover:bg-violet-500/25 hover:text-violet-300"
+                  : "bg-violet-100 text-violet-600 hover:bg-violet-200 hover:text-violet-700"
+              }`}
               title={t("change_language", "Change language")}
             >
-              {language === "fr" ? "​🇬🇧​​" : "​🇫🇷​"}
+              {language === "fr" ? "EN" : "FR"}
             </Button>
           </div>
         </div>

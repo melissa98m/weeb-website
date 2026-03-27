@@ -70,7 +70,7 @@ function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme, t }) 
   }, [open, onCancel]);
 
   if (!open) return null;
-  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface border-border text-white" : "bg-white border-gray-200 text-gray-900";
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50" onClick={onCancel} aria-hidden="true" />
@@ -101,9 +101,9 @@ function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme, t }) 
 }
 
 function SubscribersList({ theme, t }) {
-  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/40"
+    ? "bg-surface text-white border-border placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const mutedCls = theme === "dark" ? "text-white/50" : "text-gray-400";
   const rowHover = theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-50";
@@ -195,7 +195,7 @@ function SubscribersList({ theme, t }) {
           <table className="w-full text-sm">
             <caption className="sr-only">{t.newsletter_subscribers_table_caption}</caption>
             <thead>
-              <tr className={`text-left text-xs uppercase tracking-wide ${mutedCls} border-b ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+              <tr className={`text-left text-xs uppercase tracking-wide ${mutedCls} border-b ${theme === "dark" ? "border-border" : "border-gray-100"}`}>
                 <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_email}</th>
                 <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_subscribed}</th>
                 <th scope="col" className="px-4 py-2 font-medium">{t.newsletter_col_last_sent}</th>
@@ -218,7 +218,7 @@ function SubscribersList({ theme, t }) {
 
       {/* Pagination */}
       {data && (data.num_pages > 1 || data.count > 5) && (
-        <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+        <div className={`flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-t ${theme === "dark" ? "border-border" : "border-gray-100"}`}>
           <PageSizer pageSize={pageSize} onChange={(n) => { setPageSize(n); setPage(1); }} />
           <Pagination page={page} pageCount={data.num_pages} onPageChange={setPage} theme={theme} />
         </div>
@@ -243,7 +243,7 @@ function CampaignsBadge({ status, t }) {
 }
 
 function CampaignsList({ theme, onSelect, refresh, t }) {
-  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
   const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -275,7 +275,7 @@ function CampaignsList({ theme, onSelect, refresh, t }) {
 
   return (
     <section className={`rounded-2xl border ${card}`} aria-labelledby="campaigns-list-heading">
-      <h2 id="campaigns-list-heading" className="text-base font-semibold px-5 pt-4 pb-3 border-b ${theme === 'dark' ? 'border-[#333]' : 'border-gray-100'}">
+      <h2 id="campaigns-list-heading" className="text-base font-semibold px-5 pt-4 pb-3 border-b ${theme === 'dark' ? 'border-border' : 'border-gray-100'}">
         {t.newsletter_campaigns}
       </h2>
       <ul className="divide-y divide-inherit">
@@ -335,11 +335,11 @@ export default function NewsletterManager() {
     return () => { document.title = prev; };
   }, [t]);
 
-  const card = theme === "dark" ? "bg-[#262626] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
+  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/40"
+    ? "bg-surface text-white border-border placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
-  const ghostBtn = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+  const ghostBtn = theme === "dark" ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
 
   const [editingCampaignId, setEditingCampaignId] = useState(null);

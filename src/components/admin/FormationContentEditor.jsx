@@ -40,10 +40,10 @@ export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
     theme === "dark"
-      ? "bg-[#1a1a1a] border-[#444] text-white focus:border-white/40"
+      ? "bg-surface-deep border-border-2 text-white focus:border-white/40"
       : "bg-white border-gray-300 text-gray-900 focus:border-gray-500"
   }`;
-  const card = theme === "dark" ? "bg-[#1e1e1e] border-[#333]" : "bg-gray-50 border-gray-200";
+  const card = theme === "dark" ? "bg-surface border-border" : "bg-gray-50 border-gray-200";
 
   const [title, setTitle] = useState("QCM du module");
   const [passing, setPassing] = useState(70);
@@ -175,7 +175,7 @@ export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
       </div>
 
       {questions.map((q, qi) => (
-        <div key={qi} className={`rounded-lg border p-2.5 space-y-2 ${theme === "dark" ? "border-[#444] bg-[#1a1a1a]" : "border-gray-300 bg-white"}`}>
+        <div key={qi} className={`rounded-lg border p-2.5 space-y-2 ${theme === "dark" ? "border-border-2 bg-surface-deep" : "border-gray-300 bg-white"}`}>
           <div className="flex items-start gap-2">
             <span className={`text-xs font-bold mt-2 shrink-0 ${muted}`}>Q{qi + 1}</span>
             <input
@@ -248,7 +248,7 @@ export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
             type="button"
             onClick={() => onClose?.()}
             disabled={busy}
-            className={`text-xs px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}
+            className={`text-xs px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}
           >Annuler</button>
           <button
             type="button"
@@ -267,7 +267,7 @@ function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
     theme === "dark"
-      ? "bg-[#1a1a1a] border-[#444] text-white focus:border-white/40"
+      ? "bg-surface-deep border-border-2 text-white focus:border-white/40"
       : "bg-white border-gray-300 text-gray-900 focus:border-gray-500"
   }`;
 
@@ -311,7 +311,7 @@ function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
 
   if (editing) {
     return (
-      <div className={`rounded-lg border p-2.5 space-y-2 ${theme === "dark" ? "border-[#444] bg-[#1a1a1a]" : "border-gray-200 bg-white"}`}>
+      <div className={`rounded-lg border p-2.5 space-y-2 ${theme === "dark" ? "border-border-2 bg-surface-deep" : "border-gray-200 bg-white"}`}>
         <input className={input} placeholder="Titre du cours *" value={title} onChange={(e) => setTitle(e.target.value)} />
         <RichTextEditor
           value={content}
@@ -323,7 +323,7 @@ function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
         <ErrMsg msg={err} />
         <div className="flex gap-2 justify-end">
           <button type="button" onClick={() => { setEditing(false); setErr(""); }} disabled={busy}
-            className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>
+            className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}>
             Annuler
           </button>
           <button type="button" onClick={save} disabled={busy}
@@ -343,7 +343,7 @@ function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
       <span className="text-sm flex-1 truncate">{cours.title}</span>
       {cours.video_url && <span className={`text-xs ${muted}`} title="Vidéo">▶</span>}
       <button type="button" onClick={() => setEditing(true)} disabled={busy}
-        className={`text-xs px-2 py-0.5 rounded border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`}>
+        className={`text-xs px-2 py-0.5 rounded border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100"}`}>
         Éditer
       </button>
       <button type="button" onClick={remove} disabled={busy}
@@ -359,10 +359,10 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
     theme === "dark"
-      ? "bg-[#1a1a1a] border-[#444] text-white focus:border-white/40"
+      ? "bg-surface-deep border-border-2 text-white focus:border-white/40"
       : "bg-white border-gray-300 text-gray-900 focus:border-gray-500"
   }`;
-  const block = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const block = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -471,7 +471,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
               {busy ? <Spinner /> : null}OK
             </button>
             <button type="button" onClick={() => { setEditing(false); setErr(""); setTitle(module.title); }}
-              className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-[#444]" : "border-gray-300"}`}>
+              className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-border-2" : "border-gray-300"}`}>
               ✕
             </button>
           </>
@@ -481,7 +481,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
             <span className={`text-xs ${muted}`}>ordre {module.order}</span>
             {hasQCM && <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400">QCM</span>}
             <button type="button" onClick={() => setEditing(true)} disabled={busy}
-              className={`text-xs px-2 py-0.5 rounded border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`}>
+              className={`text-xs px-2 py-0.5 rounded border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100"}`}>
               Éditer
             </button>
             <button type="button" onClick={deleteModule} disabled={busy}
@@ -495,7 +495,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
 
       {/* Contenu (cours + QCM) */}
       {open && (
-        <div className={`border-t px-3 py-2 space-y-1 ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+        <div className={`border-t px-3 py-2 space-y-1 ${theme === "dark" ? "border-border" : "border-gray-100"}`}>
 
           {/* Cours list */}
           {cours.map((c) => (
@@ -512,7 +512,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
 
           {/* Ajouter un cours */}
           {addingCours ? (
-            <div className={`rounded-lg border p-2.5 space-y-2 mt-1 ${theme === "dark" ? "border-[#444] bg-[#1a1a1a]" : "border-gray-200 bg-gray-50"}`}>
+            <div className={`rounded-lg border p-2.5 space-y-2 mt-1 ${theme === "dark" ? "border-border-2 bg-surface-deep" : "border-gray-200 bg-gray-50"}`}>
               <input
                 className={input}
                 placeholder="Titre du cours *"
@@ -535,7 +535,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
               <ErrMsg msg={addErr} />
               <div className="flex gap-2 justify-end">
                 <button type="button" onClick={() => { setAddingCours(false); setAddErr(""); }} disabled={busy}
-                  className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-[#444]" : "border-gray-300"}`}>
+                  className={`text-xs px-2 py-1 rounded border ${theme === "dark" ? "border-border-2" : "border-gray-300"}`}>
                   Annuler
                 </button>
                 <button type="button" onClick={addCours} disabled={busy}
@@ -553,7 +553,7 @@ function ModuleBlock({ apiBase, module, theme, onUpdated, onDeleted }) {
           )}
 
           {/* QCM section */}
-          <div className={`border-t mt-2 pt-2 ${theme === "dark" ? "border-[#333]" : "border-gray-100"}`}>
+          <div className={`border-t mt-2 pt-2 ${theme === "dark" ? "border-border" : "border-gray-100"}`}>
             {showQCM ? (
               <QCMEditor
                 apiBase={apiBase}
@@ -587,7 +587,7 @@ function AttachModulePanel({ apiBase, formationId, linkedModuleIds, theme, onAtt
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
     theme === "dark"
-      ? "bg-[#1a1a1a] border-[#444] text-white focus:border-white/40"
+      ? "bg-surface-deep border-border-2 text-white focus:border-white/40"
       : "bg-white border-gray-300 text-gray-900 focus:border-gray-500"
   }`;
   const [q, setQ] = useState("");
@@ -620,7 +620,7 @@ function AttachModulePanel({ apiBase, formationId, linkedModuleIds, theme, onAtt
   };
 
   return (
-    <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-[#1c1c1c] border-[#444]" : "bg-gray-50 border-gray-200"}`}>
+    <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-surface border-border-2" : "bg-gray-50 border-gray-200"}`}>
       <p className={`text-xs font-medium ${muted}`}>Rechercher un module existant</p>
       <input
         className={input}
@@ -655,7 +655,7 @@ function AttachModulePanel({ apiBase, formationId, linkedModuleIds, theme, onAtt
       <ErrMsg msg={err} />
       <div className="flex justify-end">
         <button type="button" onClick={onCancel} disabled={busy}
-          className={`text-xs px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>
+          className={`text-xs px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}>
           Annuler
         </button>
       </div>
@@ -669,7 +669,7 @@ export default function FormationContentEditor({ apiBase, formationId, theme }) 
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
     theme === "dark"
-      ? "bg-[#1a1a1a] border-[#444] text-white focus:border-white/40"
+      ? "bg-surface-deep border-border-2 text-white focus:border-white/40"
       : "bg-white border-gray-300 text-gray-900 focus:border-gray-500"
   }`;
 
@@ -760,7 +760,7 @@ export default function FormationContentEditor({ apiBase, formationId, theme }) 
 
       {/* Ajouter un nouveau module */}
       {addingModule ? (
-        <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"}`}>
+        <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-surface border-border" : "bg-gray-50 border-gray-200"}`}>
           <input
             className={input}
             placeholder="Titre du module *"
@@ -771,7 +771,7 @@ export default function FormationContentEditor({ apiBase, formationId, theme }) 
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => { setAddingModule(false); setAddErr(""); }} disabled={busy}
-              className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-300 hover:bg-gray-100"}`}>
+              className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}>
               Annuler
             </button>
             <button type="button" onClick={addModule} disabled={busy}
@@ -794,7 +794,7 @@ export default function FormationContentEditor({ apiBase, formationId, theme }) 
             onClick={() => setAttachingModule(true)}
             className={`flex-1 rounded-xl border border-dashed py-2.5 text-sm transition ${
               theme === "dark"
-                ? "text-white/50 hover:bg-white/5 border-[#444]"
+                ? "text-white/50 hover:bg-white/5 border-border-2"
                 : "text-gray-500 hover:bg-gray-50 border-gray-300"
             }`}
           >
