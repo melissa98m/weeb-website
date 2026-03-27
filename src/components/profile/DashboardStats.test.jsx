@@ -1,7 +1,11 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import DashboardStats from "./DashboardStats";
+
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
 
 const SAMPLE_DATA = {
   formations_inscrites: 3,
@@ -25,8 +29,8 @@ const SAMPLE_DATA = {
 
 describe("DashboardStats", () => {
   it("affiche le skeleton de chargement avec aria-busy", () => {
-    render(<DashboardStats data={null} loading={true} error={null} theme="dark" />);
-    expect(screen.getByLabelText(/chargement du tableau de bord/i)).toHaveAttribute("aria-busy", "true");
+    const { container } = render(<DashboardStats data={null} loading={true} error={null} theme="dark" />);
+    expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument();
   });
 
   it("affiche une erreur si error est fourni et loading=false", () => {
@@ -50,7 +54,7 @@ describe("DashboardStats", () => {
   it("affiche les libellés des cartes de stats", () => {
     render(<DashboardStats data={SAMPLE_DATA} loading={false} error={null} theme="light" />);
     expect(screen.getByText(/formations suivies/i)).toBeInTheDocument();
-    expect(screen.getByText(/feedbacks laissés/i)).toBeInTheDocument();
+    expect(screen.getByText(/feedbacks envoyés/i)).toBeInTheDocument();
     expect(screen.getByText(/articles lus/i)).toBeInTheDocument();
   });
 

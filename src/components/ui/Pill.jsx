@@ -61,9 +61,9 @@ function Pill({
 
   const paletteDark = {
     neutral: {
-      soft: "bg-[#1f1f1f] text-white border border-[#333]",
+      soft: "bg-surface text-white border border-border",
       solid: "bg-white/10 text-white",
-      outline: "bg-transparent text-white border border-[#444]",
+      outline: "bg-transparent text-white border border-border-2",
     },
     primary: {
       soft: "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30",

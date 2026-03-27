@@ -33,7 +33,7 @@ function QCMPanel({ moduleId, theme, onPassed }) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
 
-  const card = theme === "dark" ? "bg-[#262626] border-[#333]" : "bg-gray-50 border-gray-200";
+  const card = theme === "dark" ? "bg-surface-2 border-border" : "bg-gray-50 border-gray-200";
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
 
   useEffect(() => {
@@ -186,7 +186,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
   const [localModule, setLocalModule] = useState(module);
 
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
-  const itemBase = theme === "dark" ? "border-[#333] bg-[#1c1c1c]" : "border-gray-200 bg-white";
+  const itemBase = theme === "dark" ? "border-border bg-surface" : "border-gray-200 bg-white";
   const lockedCls = theme === "dark" ? "opacity-40 cursor-not-allowed" : "opacity-40 cursor-not-allowed";
 
   useEffect(() => { setLocalModule(module); }, [module]);
@@ -196,7 +196,10 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
     setCoursLoading(true);
     try {
       const r = await fetch(`${API_BASE}/modules/${module.id}/courses/`, { credentials: "include" });
-      if (r.ok) setCours(await r.json());
+      if (r.ok) {
+        const data = await r.json();
+        setCours(Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []));
+      }
     } catch { /* noop */ }
     finally { setCoursLoading(false); }
   }, [module.id, cours.length]);
@@ -311,8 +314,8 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
                         c.is_completed
                           ? (theme === "dark" ? "border-green-500/30 bg-green-500/10" : "border-green-200 bg-green-50")
                           : !c.is_accessible
-                          ? (theme === "dark" ? "border-[#333] opacity-40 cursor-not-allowed" : "border-gray-200 opacity-40 cursor-not-allowed")
-                          : (theme === "dark" ? "border-[#444] hover:bg-white/5" : "border-gray-200 hover:bg-gray-50")
+                          ? (theme === "dark" ? "border-border opacity-40 cursor-not-allowed" : "border-gray-200 opacity-40 cursor-not-allowed")
+                          : (theme === "dark" ? "border-border-2 hover:bg-white/5" : "border-gray-200 hover:bg-gray-50")
                       }`}
                       disabled={!c.is_accessible}
                       aria-expanded={activeCours?.id === c.id}
@@ -329,7 +332,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
                   {/* Contenu du cours */}
                   {activeCours?.id === c.id && c.is_accessible && (
                     <div className={`mt-2 ml-6 rounded-lg border p-3 text-sm ${
-                      theme === "dark" ? "bg-[#222] border-[#333]" : "bg-gray-50 border-gray-200"
+                      theme === "dark" ? "bg-surface-raised border-border" : "bg-gray-50 border-gray-200"
                     }`}>
                       {c.video_url && (
                         <div className="mb-3">
@@ -453,7 +456,7 @@ export default function FormationModal({ open, onClose, formation, theme, t, use
 
   if (!open || !formation) return null;
 
-  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
 
   return createPortal(
@@ -477,7 +480,7 @@ export default function FormationModal({ open, onClose, formation, theme, t, use
               onClick={onClose}
               className={`px-3 py-1.5 rounded-md border text-sm shrink-0 ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
               aria-label={t?.close}
@@ -541,7 +544,7 @@ export default function FormationModal({ open, onClose, formation, theme, t, use
 
           {/* CTA Contact */}
           <div className={`mt-6 p-4 rounded-lg border ${
-            theme === "dark" ? "border-primary/40 bg-[#262626]" : "border-secondary/40 bg-white"
+            theme === "dark" ? "border-primary/40 bg-surface-2" : "border-secondary/40 bg-white"
           }`}>
             <p className="mb-3">Pour vous inscrire ou avoir plus de détails, contactez-nous.</p>
             <Button

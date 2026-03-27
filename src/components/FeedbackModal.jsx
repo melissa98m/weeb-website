@@ -32,7 +32,7 @@ export default function FeedbackModal({
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   const send = async () => {
@@ -86,7 +86,7 @@ export default function FeedbackModal({
             placeholder={t.placeholder}
             className={`w-full resize-y rounded-md border px-3 py-2 outline-none ${
               theme === "dark"
-                ? "bg-[#0f0f0f] border-[#333] text-white placeholder-white/40"
+                ? "bg-surface-deep border-border text-white placeholder-white/40"
                 : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
             }`}
           />
@@ -100,7 +100,7 @@ export default function FeedbackModal({
               onClick={onClose}
               className={`px-4 py-2 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
             >

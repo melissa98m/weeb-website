@@ -32,7 +32,7 @@ export default function AnalyticsPage() {
 
   const card =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   return (

@@ -23,7 +23,7 @@ export default function AdminLayout({ children }) {
           onClick={() => setOpen(true)}
           className={`rounded-xl border px-3 py-2 text-sm ${
             theme === "dark"
-              ? "bg-[#1c1c1c] border-[#333] text-white"
+              ? "bg-surface border-border text-white"
               : "bg-white border-gray-200 text-gray-900"
           }`}
           aria-label="Ouvrir le menu d'administration"

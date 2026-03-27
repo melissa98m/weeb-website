@@ -10,13 +10,13 @@ export default function GenrePicker({
 }) {
   const { theme } = useTheme();
 
-  const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface-2 text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+    ? "bg-surface text-white border-border placeholder-white/60"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const chipCls = "px-2 py-1 rounded-full border text-xs";
   const ghostBtn = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+    ? "bg-surface text-white border-border hover:bg-surface-raised"
     : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
   const [all, setAll] = useState([]);         // [{id,name,color?}]

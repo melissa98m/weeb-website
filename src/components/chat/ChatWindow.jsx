@@ -13,11 +13,11 @@ export default function ChatWindow({ onClose }) {
   const dialogRef = useRef(null);
 
   const dark = theme === "dark";
-  const bg = dark ? "bg-[#1c1c1c] border-[#333] text-white" : "bg-white border-gray-200 text-gray-900";
-  const headerBg = dark ? "bg-[#262626] border-[#333]" : "bg-gray-50 border-gray-200";
-  const inputBg = dark ? "bg-[#111] border-[#333] text-white placeholder:text-white/30" : "bg-white border-gray-300 text-gray-900";
+  const bg = dark ? "bg-surface border-border text-white" : "bg-white border-gray-200 text-gray-900";
+  const headerBg = dark ? "bg-surface-2 border-border" : "bg-gray-50 border-gray-200";
+  const inputBg = dark ? "bg-surface-deep border-border text-white placeholder:text-white/30" : "bg-white border-gray-300 text-gray-900";
   const bubbleUser = "bg-blue-600 text-white self-end";
-  const bubbleAdmin = dark ? "bg-[#333] text-white self-start" : "bg-gray-100 text-gray-900 self-start";
+  const bubbleAdmin = dark ? "bg-border text-white self-start" : "bg-gray-100 text-gray-900 self-start";
 
   useEffect(() => {
     markRead();

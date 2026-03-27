@@ -154,7 +154,7 @@ export default function Profile() {
   if (authLoading) {
     return (
       <main className="min-h-[60vh] px-6 py-16 flex justify-center">
-        <div className={`w-full max-w-2xl rounded-xl border shadow p-6 ${theme==="dark"?"bg-[#1c1c1c] border-[#333]":"bg-white border-gray-200"}`}>
+        <div className={`w-full max-w-2xl rounded-xl border shadow p-6 ${theme==="dark"?"bg-surface border-border":"bg-white border-gray-200"}`}>
           <div className="animate-pulse space-y-4">
             <div className="h-6 w-1/3 bg-gray-300/30 rounded" />
             <div className="grid grid-cols-2 gap-4">
@@ -234,7 +234,7 @@ export default function Profile() {
           </button>
 
           {showLoginHistory && (
-            <div className={`rounded-xl border shadow overflow-hidden ${theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200"}`}>
+            <div className={`rounded-xl border shadow overflow-hidden ${theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200"}`}>
               {loginHistoryLoading && (
                 <div className="p-4 text-sm opacity-60">Chargement…</div>
               )}
@@ -253,7 +253,7 @@ export default function Profile() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-current/5">
-                      {loginHistory.map((ev) => (
+                      {loginHistory.slice(0, 5).map((ev) => (
                         <tr key={ev.id} className={`${!ev.success ? theme === "dark" ? "bg-red-500/5" : "bg-red-50" : ""}`}>
                           <td className="px-4 py-2 whitespace-nowrap opacity-70">
                             {new Date(ev.created_at).toLocaleString(language === "fr" ? "fr-FR" : "en-US")}

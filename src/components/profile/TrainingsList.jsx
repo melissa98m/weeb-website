@@ -12,7 +12,7 @@ export default function TrainingsList({
 }) {
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   return (
@@ -26,7 +26,7 @@ export default function TrainingsList({
               key={i}
               className={`rounded-lg border p-4 animate-pulse ${
                 theme === "dark"
-                  ? "bg-[#1c1c1c] border-[#333]"
+                  ? "bg-surface border-border"
                   : "bg-white border-gray-200"
               }`}
             >

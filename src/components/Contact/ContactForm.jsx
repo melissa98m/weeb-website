@@ -442,16 +442,16 @@ export default function ContactForm() {
                 aria-required="true"
                 aria-describedby={errors.subject ? "subject-error" : undefined}
               >
-                <option value="" className={theme === "dark" ? "bg-[#0f172a] text-white" : "bg-white text-dark"}>
+                <option value="" className={theme === "dark" ? "bg-background text-white" : "bg-white text-dark"}>
                   {t?.subject_placeholder || "Sélectionnez un sujet"}
                 </option>
                 {loadingSubjects ? (
-                  <option value="" disabled className={theme === "dark" ? "bg-[#0f172a] text-white" : "bg-white text-dark"}>
+                  <option value="" disabled className={theme === "dark" ? "bg-background text-white" : "bg-white text-dark"}>
                     {t?.loading || "Chargement..."}
                   </option>
                 ) : (
                   subjects.map((s) => (
-                    <option key={s.id} value={s.id} className={theme === "dark" ? "bg-[#0f172a] text-white" : "bg-white text-dark"}>
+                    <option key={s.id} value={s.id} className={theme === "dark" ? "bg-background text-white" : "bg-white text-dark"}>
                       {s.name || s.title || `#${s.id}`}
                     </option>
                   ))

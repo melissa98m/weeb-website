@@ -3,7 +3,7 @@ import React from "react";
 export default function ProfileInfo({ user, t, theme, onRefresh: _onRefresh, onSignout: _onSignout }) {
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   return (

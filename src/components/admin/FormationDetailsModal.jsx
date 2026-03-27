@@ -25,13 +25,13 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
 
   const card =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
-  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const headRow = theme === "dark" ? "bg-surface-2" : "bg-gray-50";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
   const btnGhost =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+      ? "bg-surface text-white border-border hover:bg-surface-raised"
       : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const btnDanger =
     theme === "dark"
@@ -202,7 +202,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
         </div>
 
         {/* Onglets */}
-        <div className={`mt-4 flex gap-1 border-b ${theme === "dark" ? "border-[#333]" : "border-gray-200"}`}>
+        <div className={`mt-4 flex gap-1 border-b ${theme === "dark" ? "border-border" : "border-gray-200"}`}>
           {[
             { key: "inscrits", label: "Inscrits" },
             { key: "contenu", label: "Contenu" },

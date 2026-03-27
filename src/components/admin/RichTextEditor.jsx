@@ -132,7 +132,7 @@ function Icon({ children, title, active, onClick, disabled }) {
       className={`p-1.5 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-1
         ${active
           ? "bg-blue-500 text-white"
-          : "hover:bg-gray-200 dark:hover:bg-[#333] text-inherit"
+          : "hover:bg-gray-200 dark:hover:bg-border text-inherit"
         }
         ${disabled ? "opacity-30 cursor-not-allowed" : ""}
       `}
@@ -161,7 +161,7 @@ function Divider() {
 function FontSizePicker({ editor, theme }) {
   const current = editor.getAttributes("textStyle").fontSize ?? null;
 
-  const border = theme === "dark" ? "border-[#444] bg-[#1a1a1a] text-white" : "border-gray-300 bg-white text-gray-900";
+  const border = theme === "dark" ? "border-border-2 bg-surface-deep text-white" : "border-gray-300 bg-white text-gray-900";
 
   return (
     <select
@@ -198,8 +198,8 @@ function ColorPicker({ editor, theme }) {
     setOpen(false);
   };
 
-  const border = theme === "dark" ? "border-[#444]" : "border-gray-200";
-  const bg = theme === "dark" ? "bg-[#1c1c1c]" : "bg-white";
+  const border = theme === "dark" ? "border-border-2" : "border-gray-200";
+  const bg = theme === "dark" ? "bg-surface" : "bg-white";
 
   return (
     <div className="relative">
@@ -208,7 +208,7 @@ function ColorPicker({ editor, theme }) {
         title="Couleur du texte"
         onClick={() => setOpen((v) => !v)}
         className={`p-1.5 rounded transition focus:outline-none focus:ring-2 focus:ring-offset-1
-          hover:bg-gray-200 dark:hover:bg-[#333]`}
+          hover:bg-gray-200 dark:hover:bg-border`}
         aria-label="Couleur du texte"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -240,7 +240,7 @@ function ColorPicker({ editor, theme }) {
             type="button"
             onClick={remove}
             className={`w-full text-xs py-0.5 rounded border text-center transition
-              ${theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100"}`}
+              ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100"}`}
           >
             Supprimer la couleur
           </button>
@@ -257,7 +257,7 @@ function CodeLanguagePicker({ editor, theme }) {
 
   const currentLang = editor.getAttributes("codeBlock").language || "";
   const border = theme === "dark"
-    ? "border-[#444] bg-[#1a1a1a] text-white"
+    ? "border-border-2 bg-surface-deep text-white"
     : "border-gray-300 bg-white text-gray-900";
 
   const handleChange = async (e) => {
@@ -385,7 +385,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
   return (
     <div
       className={`flex flex-wrap items-center gap-0.5 p-2 border-b text-sm
-        ${theme === "dark" ? "border-[#333] text-white" : "border-gray-200 text-gray-800"}`}
+        ${theme === "dark" ? "border-border text-white" : "border-gray-200 text-gray-800"}`}
       role="toolbar"
       aria-label="Outils de formatage"
     >
@@ -656,8 +656,8 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
     }
   }, [value, editor]);
 
-  const border = theme === "dark" ? "border-[#333]" : "border-gray-200";
-  const bg = theme === "dark" ? "bg-[#1c1c1c] text-white" : "bg-white text-gray-900";
+  const border = theme === "dark" ? "border-border" : "border-gray-200";
+  const bg = theme === "dark" ? "bg-surface text-white" : "bg-white text-gray-900";
   return (
     <div className={`rounded-lg border overflow-hidden ${border} ${bg} ${className}`}>
       <Toolbar editor={editor} theme={theme} uploadEndpoint={uploadEndpoint} />

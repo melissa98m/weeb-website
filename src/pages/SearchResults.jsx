@@ -9,7 +9,7 @@ import searchFr from "../../locales/fr/search.json";
 function ArticleCard({ article, theme, t }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const card = theme === "dark"
-    ? "bg-[#1c1c1c] border-[#333] text-white hover:bg-[#222]"
+    ? "bg-surface border-border text-white hover:bg-surface-raised"
     : "bg-white border-gray-200 text-gray-900 hover:bg-gray-50";
 
   return (
@@ -31,7 +31,7 @@ function ArticleCard({ article, theme, t }) {
 function FormationCard({ formation, theme, t }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const card = theme === "dark"
-    ? "bg-[#1c1c1c] border-[#333] text-white hover:bg-[#222]"
+    ? "bg-surface border-border text-white hover:bg-surface-raised"
     : "bg-white border-gray-200 text-gray-900 hover:bg-gray-50";
 
   return (
@@ -49,7 +49,7 @@ function FormationCard({ formation, theme, t }) {
 }
 
 function Skeleton({ theme }) {
-  const bg = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const bg = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border p-4 animate-pulse ${bg}`}>
       <div className="h-3 w-16 bg-gray-300/20 rounded mb-2" />
@@ -85,7 +85,7 @@ export default function SearchResults() {
   }, [q]);
 
   const card = theme === "dark"
-    ? "bg-[#262626] border-[#333] text-white"
+    ? "bg-surface-2 border-border text-white"
     : "bg-white border-gray-200 text-gray-900";
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
 
@@ -143,7 +143,7 @@ export default function SearchResults() {
       )}
 
       {loading && (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[1, 2, 3, 4].map((i) => <Skeleton key={i} theme={theme} />)}
         </div>
       )}
@@ -163,7 +163,7 @@ export default function SearchResults() {
               <h2 className="text-sm font-semibold uppercase tracking-wide opacity-50 mb-3">
                 {t.section_articles.replace("{count}", results.articles.length)}
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {results.articles.map((a) => (
                   <ArticleCard key={a.id} article={a} theme={theme} t={t} />
                 ))}
@@ -177,7 +177,7 @@ export default function SearchResults() {
               <h2 className="text-sm font-semibold uppercase tracking-wide opacity-50 mb-3">
                 {t.section_formations.replace("{count}", results.formations.length)}
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {results.formations.map((f) => (
                   <FormationCard key={f.id} formation={f} theme={theme} t={t} />
                 ))}

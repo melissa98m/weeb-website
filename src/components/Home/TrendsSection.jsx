@@ -17,14 +17,16 @@ export default function TrendsSection() {
           width={240}
           height={240}
           loading="lazy"
-          className="w-60 h-60 animate-spin"
+          className="w-60 h-60 motion-safe:animate-spin"
         />
       </div>
       <div className="lg:w-1/2 text-center lg:text-left">
-        <h3 className="text-sm uppercase mb-2">
+        <p className={`text-sm uppercase tracking-widest mb-2 font-medium ${
+          theme === "dark" ? "text-primary" : "text-secondary"
+        }`}>
           {language === "fr" ? homeFr.home_title_8 : homeEn.home_title_8}
-        </h3>
-        <h2 className="text-6xl font-bold">
+        </p>
+        <h2 className="text-5xl md:text-6xl font-bold">
           {language === "fr" ? homeFr.home_title_9 : homeEn.home_title_9}{" "}
           <span
             className={`${

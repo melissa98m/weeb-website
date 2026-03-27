@@ -36,8 +36,8 @@ export default function NotificationBell({ theme = "light" }) {
 
   const hover =
     theme === "dark"
-      ? "hover:bg-[#262626] focus:ring-[#444]"
-      : "hover:bg-gray-100 focus:ring-gray-300";
+      ? "text-violet-400 hover:text-violet-300 hover:bg-violet-500/10 focus:ring-violet-500/40"
+      : "text-violet-500 hover:text-violet-700 hover:bg-violet-50 focus:ring-violet-300";
 
   return (
     <div className="relative">

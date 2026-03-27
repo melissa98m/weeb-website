@@ -18,7 +18,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
   const navigate = useNavigate();
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   const [dataLoading, setDataLoading] = useState(false);
@@ -145,7 +145,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
             <pre
               className={`rounded-lg border p-3 text-xs overflow-auto max-h-80 ${
                 theme === "dark"
-                  ? "bg-[#141414] border-[#333] text-slate-200"
+                  ? "bg-surface-deep border-border text-slate-200"
                   : "bg-gray-50 border-gray-200 text-gray-700"
               }`}
             >

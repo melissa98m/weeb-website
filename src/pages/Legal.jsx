@@ -43,7 +43,7 @@ export default function Legal() {
   }, [language]);
 
   const sectionClass = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
-  const cardClass = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const cardClass = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   const mutedTextClass = theme === "dark" ? "text-slate-300" : "text-slate-600";
   const titleAccentClass = theme === "dark" ? "text-primary" : "text-secondary";
 

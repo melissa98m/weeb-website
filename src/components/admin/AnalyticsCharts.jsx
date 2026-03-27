@@ -30,7 +30,7 @@ const SATISFACTION_LABELS = {
 function StatCard({ label, value, theme, accent }) {
   const base =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white"
+      ? "bg-surface border-border text-white"
       : "bg-white border-gray-200 text-gray-900";
   return (
     <div className={`rounded-xl border p-4 flex flex-col gap-1 ${base}`}>

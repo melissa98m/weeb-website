@@ -51,7 +51,7 @@ export const WithDateRange = {
 export const DarkStyle = {
   args: {
     type: "messages",
-    className: "border-[#444] text-white bg-[#1c1c1c] hover:bg-[#2a2a2a]",
+    className: "border-border-2 text-white bg-surface hover:bg-surface-3",
   },
   parameters: {
     backgrounds: { default: "dark" },

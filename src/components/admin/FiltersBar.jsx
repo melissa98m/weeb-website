@@ -18,7 +18,7 @@ function FiltersBar({
     "w-full rounded-xl border px-3 py-2 outline-none transition placeholder:truncate";
   const inputThemed =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
+      ? "bg-surface text-white border-border placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
       : "bg-white text-gray-900 border-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-black/10 focus:border-gray-300";
 
   const labelThemed = theme === "dark" ? "text-white/90" : "text-gray-800";

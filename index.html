@@ -30,6 +30,32 @@
     <!-- hreflang -->
     <link rel="alternate" hreflang="x-default" href="https://weeb.melissa-mangione.com/" />
 
+    <!-- Polices web — chargement non-bloquant (évite render-blocking + FOIT) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      media="print" force le navigateur à charger la feuille en arrière-plan
+      sans bloquer le rendu initial. onload bascule vers media="all" une fois
+      le fichier reçu. Le <noscript> est le fallback sans JS.
+    -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
     <!-- Resource hints — connexions anticipées -->
     <link rel="preconnect" href="https://weebbackend.melissa-mangione.com" crossorigin />
     <link rel="dns-prefetch" href="https://accounts.google.com" />

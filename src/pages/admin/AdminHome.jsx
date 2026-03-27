@@ -87,7 +87,7 @@ function ExportSection({ card: _card, ghostBtn, theme, canStaff, canPersonnel, t
 
   const inputClass = `rounded-lg border px-2 py-1 text-sm ${
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] placeholder:text-white/40"
+      ? "bg-surface text-white border-border placeholder:text-white/40"
       : "bg-white text-gray-900 border-gray-200"
   }`;
 
@@ -213,9 +213,9 @@ export default function AdminHome() {
   const canRedact = hasAnyRedactionRole(user);  // Rédaction
 
   const card =
-    theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+    theme === "dark" ? "bg-surface-2 text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const ghostBtn =
-    theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+    theme === "dark" ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
   // Résumé analytiques
   const [analytics, setAnalytics] = useState(null);
@@ -388,7 +388,7 @@ export default function AdminHome() {
               <div
                 key={label}
                 className={`rounded-xl border p-3 flex flex-col gap-0.5 ${
-                  theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-gray-50 border-gray-200"
+                  theme === "dark" ? "bg-surface border-border" : "bg-gray-50 border-gray-200"
                 }`}
               >
                 <span className={`text-2xl font-bold ${accent ? "text-amber-500" : ""}`}>

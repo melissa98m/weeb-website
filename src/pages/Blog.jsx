@@ -4,7 +4,6 @@ import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import Button from "../components/Button";
 import BlogCard from "../components/Blog/BlogCard";
-import SummaryModal from "../components/Blog/SummaryModal";
 import GenreChips from "../components/Blog/GenreChips";
 import Pagination from "../components/ui/Pagination";
 import blogEn from "../../locales/en/blog.json";
@@ -14,12 +13,22 @@ import { setCanonical, setOgMeta, setHreflang, setJsonLd, setTwitterMeta, SITE_U
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 const PAGE_SIZE = 9;
+const TAG_REGEX = /<[^>]+>/g;
+const WHITESPACE_REGEX = /\s+/g;
+
+function stripHtml(html = "") {
+  return String(html).replace(TAG_REGEX, " ").replace(WHITESPACE_REGEX, " ").trim();
+}
 
 function makeExcerpt(html = "", maxWords = 40) {
-  const text = String(html).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  const words = text.split(/\s+/);
+  const words = stripHtml(html).split(/\s+/);
   const cut = words.slice(0, maxWords).join(" ");
   return words.length > maxWords ? `${cut}…` : cut;
+}
+
+function estimateReadingMinutes(html = "") {
+  const words = stripHtml(html).split(/\s+/).filter(Boolean).length || 0;
+  return Math.max(1, Math.ceil(words / 200));
 }
 
 function normalizeArticle(a, language) {
@@ -34,11 +43,12 @@ function normalizeArticle(a, language) {
     tags: genres.map((g) => g.name),
     _genres: genres,
     _genreIds: genres.map((g) => g.id),
+    readingMin: estimateReadingMinutes(a.article_content || ""),
   };
 }
 
 function CardSkeleton({ theme }) {
-  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const card = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow p-4 ${card} animate-pulse`}>
       <div className="h-40 w-full rounded-lg mb-4 bg-gray-300/30" />
@@ -66,10 +76,6 @@ export default function Blog() {
   const [debouncedQ, setDebouncedQ] = useState("");
   const [selectedGenreId, setSelectedGenreId] = useState(null);
   const [page, setPage] = useState(1);
-
-  // Modal
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState(null);
 
   // Debounce search input
   const debounceRef = useRef(null);
@@ -184,15 +190,6 @@ export default function Blog() {
     setPage(1);
   }, [selectedGenreId]);
 
-  const openSummary = useCallback((post) => {
-    setSelected(post);
-    setOpen(true);
-  }, []);
-  const closeSummary = useCallback(() => {
-    setOpen(false);
-    setSelected(null);
-  }, []);
-
   // Genre chips — all available genres + "All" option
   const allGenres = useMemo(
     () => [{ id: null, name: t.all_genres, color: null }, ...genres],
@@ -208,10 +205,10 @@ export default function Blog() {
   const pageCount = Math.ceil(totalCount / PAGE_SIZE);
 
   const card =
-    theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+    theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const input =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white placeholder-white/50"
+      ? "bg-surface border-border text-white placeholder-white/50"
       : "bg-white border-gray-300 text-gray-900 placeholder-gray-400";
 
   return (
@@ -230,9 +227,8 @@ export default function Blog() {
             value={q}
             onChange={handleSearchChange}
             placeholder={t.search_placeholder}
-            className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500 ${input}`}
+            className={`w-full rounded-lg border px-4 py-2 outline-none focus:ring-2 focus:ring-purple-500 ${input}`}
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60">⌘K</span>
         </div>
 
         <GenreChips
@@ -252,7 +248,35 @@ export default function Blog() {
         </div>
       ) : filtered.length === 0 ? (
         <div className={`rounded-xl border p-8 text-center ${card}`}>
-          <p className="opacity-80">{t.empty}</p>
+          <p className="opacity-80 mb-4">{t.empty}</p>
+          <div className="flex justify-center gap-3 flex-wrap">
+            {debouncedQ && (
+              <button
+                type="button"
+                onClick={() => { setQ(""); setDebouncedQ(""); setPage(1); }}
+                className={`px-3 py-1.5 text-sm rounded-md border ${
+                  theme === "dark"
+                    ? "border-border text-white/70 hover:bg-surface-2"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {language === "fr" ? "Effacer la recherche" : "Clear search"}
+              </button>
+            )}
+            {selectedGenreId !== null && (
+              <button
+                type="button"
+                onClick={() => setSelectedGenreId(null)}
+                className={`px-3 py-1.5 text-sm rounded-md border ${
+                  theme === "dark"
+                    ? "border-border text-white/70 hover:bg-surface-2"
+                    : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {language === "fr" ? "Voir tous les articles" : "View all articles"}
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <>
@@ -266,8 +290,6 @@ export default function Blog() {
                   theme={theme}
                   idx={idx}
                   isLcp={idx === 0}
-                  onViewSummary={openSummary}
-                  labels={{ viewSummary: t.view_summary }}
                 />
               ))}
             </AnimatePresence>
@@ -286,14 +308,6 @@ export default function Blog() {
         </>
       )}
 
-      <SummaryModal
-        open={open}
-        onClose={closeSummary}
-        post={selected}
-        theme={theme}
-        language={language}
-        t={t}
-      />
     </main>
   );
 }

@@ -94,7 +94,7 @@ export default function About() {
   }, [language]);
 
   const cardClass = theme === "dark" 
-    ? "bg-[#1c1c1c] border-[#333] text-white" 
+    ? "bg-surface border-border text-white" 
     : "bg-white border-gray-200 text-dark";
 
   const sectionClass = theme === "dark"
@@ -102,7 +102,7 @@ export default function About() {
     : "bg-light text-dark";
 
   const valueCardClass = theme === "dark"
-    ? "bg-[#262626] border-[#333] hover:bg-[#2a2a2a]"
+    ? "bg-surface-2 border-border hover:bg-surface-3"
     : "bg-gray-50 border-gray-200 hover:bg-gray-100";
 
   const primaryButtonClass = theme === "dark"

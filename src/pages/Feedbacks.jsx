@@ -87,9 +87,9 @@ export default function Feedback() {
 
   const card =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
-  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const headRow = theme === "dark" ? "bg-surface-2" : "bg-gray-50";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
 
   const [items, setItems] = useState([]);
@@ -456,7 +456,7 @@ export default function Feedback() {
               return (
                 <tr
                   key={row.id ?? `${row.userId}-${row.formationId}`}
-                  className="border-t border-gray-200 dark:border-[#333]"
+                  className="border-t border-gray-200 dark:border-border"
                 >
                   <td className="px-4 py-2 align-top">
                     <div className="whitespace-normal break-words">{row.userName}</div>
@@ -532,7 +532,7 @@ export default function Feedback() {
               onChange={(e) => setSort(e.target.value)}
               className={`px-2 py-1 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#1c1c1c] text-white border-[#333]"
+                  ? "bg-surface text-white border-border"
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >

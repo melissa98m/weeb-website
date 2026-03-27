@@ -11,14 +11,14 @@ export default function LearningSection() {
   return (
     <section className="flex flex-col lg:flex-row items-center gap-10 px-6 py-20 max-w-6xl mx-auto text-left">
       <div className="lg:w-1/2">
-        <h3
-          className={`text-sm uppercase mb-2 ${
-            theme === "dark" ? "text-white" : "text-dark"
+        <p
+          className={`text-sm uppercase tracking-widest mb-2 font-medium ${
+            theme === "dark" ? "text-primary" : "text-secondary"
           }`}
         >
           {language === "fr" ? homeFr.home_title_4 : homeEn.home_title_4}
-        </h3>
-        <h2 className="text-6xl font-bold">
+        </p>
+        <h2 className="text-5xl md:text-6xl font-bold">
           <span
             className={`${
               theme === "dark" ? "text-primary" : "text-secondary"

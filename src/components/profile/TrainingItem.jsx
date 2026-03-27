@@ -5,9 +5,9 @@ import { getEnv } from "../../lib/env";
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
 export default function TrainingItem({ formation, existingFeedback, theme, t, onGiveFeedback }) {
-  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const card = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
-  const innerCard = theme === "dark" ? "bg-[#262626] border-[#333]" : "bg-gray-50 border-gray-200";
+  const innerCard = theme === "dark" ? "bg-surface-2 border-border" : "bg-gray-50 border-gray-200";
 
   const [showModules, setShowModules] = useState(false);
   const [progressDetail, setProgressDetail] = useState(null);
@@ -137,7 +137,7 @@ export default function TrainingItem({ formation, existingFeedback, theme, t, on
           {isCompleted && (
             existingFeedback ? (
               <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg border font-medium ${
-                theme === "dark" ? "border-[#444] text-white/50" : "border-gray-200 text-gray-500"
+                theme === "dark" ? "border-border-2 text-white/50" : "border-gray-200 text-gray-500"
               }`}>
                 ✓ {t.already_sent}
               </span>

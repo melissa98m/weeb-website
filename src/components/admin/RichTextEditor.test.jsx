@@ -648,10 +648,10 @@ describe("RichTextEditor — image par URL", () => {
 // ── Thème ──────────────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — thème", () => {
-  it("thème dark : la toolbar a la classe border-[#333]", () => {
+  it("thème dark : la toolbar a la classe border-border", () => {
     render(<RichTextEditor value="" onChange={vi.fn()} theme="dark" />);
     const toolbar = screen.getByRole("toolbar");
-    expect(toolbar.className).toContain("border-[#333]");
+    expect(toolbar.className).toContain("border-border");
   });
 
   it("thème light : la toolbar a la classe border-gray-200", () => {

@@ -41,7 +41,7 @@ function resolveImageUrl(src) {
 }
 
 function Skeleton({ theme }) {
-  const base = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const base = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow overflow-hidden ${base} animate-pulse`}>
       <div className="h-56 w-full bg-gray-300/20" />
@@ -345,7 +345,7 @@ export default function BlogDetail() {
   // voisins
   // prevId et nextId viennent du state (initialisé par le useEffect neighbors)
 
-  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const meta = theme === "dark" ? "text-white/70" : "text-gray-600";
 
   if (loading) {
@@ -394,7 +394,7 @@ export default function BlogDetail() {
       {!reduceMotion && (
         <motion.div
           style={{ scaleX }}
-          className="fixed left-0 top-0 right-0 h-1 origin-left bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-500 z-40"
+          className="fixed left-0 top-0 right-0 h-1 origin-left bg-gradient-to-r from-purple-700 to-purple-400 z-40"
         />
       )}
 
@@ -405,7 +405,7 @@ export default function BlogDetail() {
             to="/blog"
             className={`px-4 py-2 rounded-md border text-sm ${
               theme === "dark"
-                ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >
@@ -486,7 +486,7 @@ export default function BlogDetail() {
                       isLiked
                         ? "bg-rose-500 text-white"
                         : theme === "dark"
-                        ? "bg-[#2a2a2a] text-white/70 border border-[#444]"
+                        ? "bg-surface-3 text-white/70 border border-border-2"
                         : "bg-white text-gray-600 border border-gray-200"
                     }`}
                     aria-label={isLiked ? txt.unlike : txt.like}
@@ -590,7 +590,7 @@ export default function BlogDetail() {
               to={`/blog/${prevId}`}
               className={`px-4 py-2 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
               onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
@@ -606,7 +606,7 @@ export default function BlogDetail() {
               to={`/blog/${nextId}`}
               className={`px-4 py-2 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
               onClick={() => window.scrollTo({ top: 0, behavior: "auto" })}
@@ -658,9 +658,9 @@ export default function BlogDetail() {
                 placeholder={replyTo ? txt.comment_reply_placeholder : txt.comment_placeholder}
                 rows={3}
                 maxLength={2000}
-                className={`w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-indigo-400 ${
+                className={`w-full rounded-lg border px-4 py-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 ${
                   theme === "dark"
-                    ? "bg-[#252525] border-[#444] text-white placeholder-white/40"
+                    ? "bg-surface-2 border-border-2 text-white placeholder-white/40"
                     : "bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-400"
                 }`}
               />

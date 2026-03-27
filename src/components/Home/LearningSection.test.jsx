@@ -50,8 +50,8 @@ describe("LearningSection", () => {
   });
 
   it("affiche un sous-titre uppercase", () => {
-    renderSection();
-    // Le h3 est affiché en uppercase via CSS mais le texte vient du JSON
-    expect(screen.getByRole("heading", { level: 3 })).toBeInTheDocument();
+    const { container } = renderSection();
+    // Le sous-titre est un <p> stylé uppercase via CSS
+    expect(container.querySelector("p.uppercase, p[class*='uppercase']")).toBeInTheDocument();
   });
 });

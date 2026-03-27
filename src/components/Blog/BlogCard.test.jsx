@@ -1,14 +1,15 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import BlogCard from "./BlogCard";
 
 vi.mock("framer-motion", () => ({
   motion: {
-    article: (props) => <article {...props} />,
+    article: ({ layout: _l, initial: _i, animate: _a, exit: _e, transition: _t, ...rest }) => <article {...rest} />,
     div: (props) => <div {...props} />,
   },
+  useReducedMotion: () => false,
 }));
 
 const post = {
@@ -22,25 +23,26 @@ const post = {
 };
 
 describe("BlogCard", () => {
-  it("renders content and triggers summary", async () => {
-    const user = userEvent.setup();
-    const onViewSummary = vi.fn();
-
+  it("renders content", () => {
     render(
-      <BlogCard
-        post={post}
-        language="en"
-        theme="light"
-        onViewSummary={onViewSummary}
-        labels={{ viewSummary: "View summary" }}
-      />
+      <MemoryRouter>
+        <BlogCard post={post} language="en" theme="light" />
+      </MemoryRouter>
     );
 
     expect(screen.getByText("Hello")).toBeInTheDocument();
-    expect(screen.getByText("Short text")).toBeInTheDocument();
+    expect(screen.getAllByText("Short text").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Tech")).toBeInTheDocument();
+  });
 
-    await user.click(screen.getByRole("button", { name: "View summary" }));
-    expect(onViewSummary).toHaveBeenCalledWith(post);
+  it("links to the article detail page", () => {
+    render(
+      <MemoryRouter>
+        <BlogCard post={post} language="en" theme="light" />
+      </MemoryRouter>
+    );
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveAttribute("href", "/blog/1");
   });
 });

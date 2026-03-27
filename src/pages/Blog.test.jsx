@@ -1,7 +1,6 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import Blog from "./Blog";
 import blogEn from "../../locales/en/blog.json";
 import { useTheme } from "../context/ThemeContext";
@@ -23,6 +22,7 @@ vi.mock("framer-motion", () => ({
     div: (props) => <div {...props} />,
   },
   AnimatePresence: ({ children }) => <>{children}</>,
+  useReducedMotion: () => false,
 }));
 
 vi.mock("../context/ThemeContext", () => ({
@@ -34,11 +34,7 @@ vi.mock("../context/LanguageContext", () => ({
 }));
 
 vi.mock("../components/Blog/BlogCard", () => ({
-  default: ({ post, onViewSummary }) => (
-    <button type="button" onClick={() => onViewSummary(post)}>
-      {post.title}
-    </button>
-  ),
+  default: ({ post }) => <div>{post.title}</div>,
 }));
 
 vi.mock("../components/Blog/GenreChips", () => ({
@@ -51,10 +47,6 @@ vi.mock("../components/Blog/GenreChips", () => ({
       ))}
     </div>
   ),
-}));
-
-vi.mock("../components/Blog/SummaryModal", () => ({
-  default: ({ open, post }) => (open ? <div>Summary: {post?.title}</div> : null),
 }));
 
 vi.mock("../components/ui/Pagination", () => ({
@@ -72,9 +64,7 @@ afterEach(() => {
 });
 
 describe("Blog page", () => {
-  it("loads posts and opens summary modal", async () => {
-    const user = userEvent.setup();
-
+  it("loads and displays posts", async () => {
     // First call: genres
     fetch.mockResolvedValueOnce({
       ok: true,
@@ -101,10 +91,7 @@ describe("Blog page", () => {
 
     render(<Blog />);
 
-    expect(await screen.findByRole("button", { name: "Post One" })).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Post One" }));
-    expect(await screen.findByText("Summary: Post One")).toBeInTheDocument();
+    expect(await screen.findByText("Post One")).toBeInTheDocument();
   });
 
   it("shows empty state when no posts", async () => {

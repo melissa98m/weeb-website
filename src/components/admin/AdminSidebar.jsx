@@ -193,14 +193,14 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
 
   const panel =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
   const itemBase =
     "flex items-center gap-2 px-3 py-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-offset-1";
   const itemLight = "hover:bg-gray-100 focus:ring-gray-400";
-  const itemDark = "hover:bg-[#262626] focus:ring-[#444]";
+  const itemDark = "hover:bg-surface-2 focus:ring-[#444]";
   const activeLight = "bg-gray-100 font-medium";
-  const activeDark = "bg-[#262626] font-medium";
+  const activeDark = "bg-surface-2 font-medium";
 
   // Capacités par rôle
   const canPersonnel = hasPersonnelRole(user);

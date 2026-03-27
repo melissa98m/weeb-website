@@ -122,9 +122,9 @@ export default function Messages() {
 
   const panel =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
-  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const headRow = theme === "dark" ? "bg-surface-2" : "bg-gray-50";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
   const btnPrimary =
     theme === "dark"
@@ -132,11 +132,11 @@ export default function Messages() {
       : "bg-primary text-dark hover:brightness-110";
   const btnGhost =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+      ? "bg-surface text-white border-border hover:bg-surface-raised"
       : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const inputCls =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#444] text-white placeholder-white/40"
+      ? "bg-surface border-border-2 text-white placeholder-white/40"
       : "bg-white border-gray-300 text-gray-900 placeholder-gray-400";
 
   const [items, setItems] = useState([]);
@@ -294,7 +294,7 @@ export default function Messages() {
     const draft = replyDraft[row.id] ?? row.reply_content;
     const isDirty = replyDraft[row.id] !== undefined && replyDraft[row.id] !== row.reply_content;
     return (
-      <tr className={theme === "dark" ? "bg-[#1e1e1e]" : "bg-gray-50"}>
+      <tr className={theme === "dark" ? "bg-surface" : "bg-gray-50"}>
         <td colSpan={6} className="px-4 py-3">
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             {/* Message complet */}
@@ -346,7 +346,7 @@ export default function Messages() {
                 className={`px-3 py-1 rounded-full text-xs border transition ${
                   row.status === s
                     ? (theme === "dark" ? "border-white/40 font-semibold" : "border-gray-500 font-semibold")
-                    : (theme === "dark" ? "border-[#444] hover:bg-[#333]" : "border-gray-200 hover:bg-gray-100")
+                    : (theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-200 hover:bg-gray-100")
                 }`}
               >
                 <StatusBadge status={s} theme={theme} />
@@ -375,7 +375,7 @@ export default function Messages() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className={`px-2 py-1 rounded-md border text-sm ${theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200"}`}
+            className={`px-2 py-1 rounded-md border text-sm ${theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200"}`}
             aria-label={t.filter_status}
           >
             <option value="all">{t.filter_all}</option>
@@ -389,7 +389,7 @@ export default function Messages() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
-            className={`px-2 py-1 rounded-md border text-sm ${theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200"}`}
+            className={`px-2 py-1 rounded-md border text-sm ${theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200"}`}
           >
             <option value="priority">{t.sort_priority}</option>
             <option value="recent">{t.sort_recent}</option>
@@ -492,7 +492,7 @@ export default function Messages() {
                   return [
                     <tr
                       key={row.id}
-                      className={`border-t border-gray-200 dark:border-[#333] cursor-pointer hover:${theme === "dark" ? "bg-[#2a2a2a]" : "bg-gray-50"}`}
+                      className={`border-t border-gray-200 dark:border-border cursor-pointer hover:${theme === "dark" ? "bg-surface-3" : "bg-gray-50"}`}
                       onClick={() => setExpandedId(isOpen ? null : row.id)}
                     >
                       <td className="px-4 py-2">
