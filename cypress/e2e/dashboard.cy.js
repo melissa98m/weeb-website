@@ -22,7 +22,7 @@ describe("dashboard", () => {
                     </div>
                     <div>
                       <span>${stats.feedbacks_laisses}</span>
-                      <span>Feedbacks laissés</span>
+                      <span>Feedbacks envoyés</span>
                     </div>
                     <div>
                       <span>${stats.articles_lus}</span>
@@ -91,7 +91,7 @@ describe("dashboard", () => {
       ensureDashboardDom(stats);
 
       cy.contains(stats.feedbacks_laisses.toString()).should("be.visible");
-      cy.contains(/feedbacks laissés/i).should("be.visible");
+      cy.contains(/feedbacks envoyés/i).should("be.visible");
     });
   });
 
