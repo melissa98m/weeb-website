@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, cleanup } from "@testing-library/react";
 
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
@@ -124,7 +124,11 @@ beforeEach(() => {
   window.HTMLElement.prototype.scrollTo = vi.fn();
 });
 
-afterEach(() => {
+afterEach(async () => {
+  cleanup();
+  // Drain pending microtasks so in-flight fetch callbacks resolve before
+  // the jsdom window is torn down (prevents "window is not defined" async leak).
+  await new Promise((r) => setTimeout(r, 0));
   vi.unstubAllGlobals();
 });
 
