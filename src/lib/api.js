@@ -574,12 +574,32 @@ export function getEnabledOAuthProviders() {
 }
 
 export const NewsletterApi = {
-  subscribe(payload) {
-    return apiRequest("/newsletter-consents/", {
-      method: "POST",
-      body: payload,
-      csrf: true,
-    });
+  async subscribe(payload) {
+    // Use a direct fetch to capture the response status:
+    // 201 = new subscription, 200 = already subscribed (backend is idempotent).
+    // apiRequest() would swallow the status and only return the parsed body.
+    const url = `${API_BASE}/newsletter-consents/`;
+    const csrf = getCookie("csrftoken");
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(csrf ? { "X-CSRFToken": csrf } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (networkErr) {
+      throw buildNetworkError({ url, method: "POST", cause: networkErr });
+    }
+    const data = await parseResponsePayload(response);
+    if (!response.ok) {
+      throw buildHttpError(response, data, { url, method: "POST" });
+    }
+    return { data, created: response.status === 201 };
   },
 };
 

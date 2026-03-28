@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import ContactIntro from "../components/Contact/ContactIntro";
+import ContactFAQ from "../components/Contact/ContactFAQ";
 import ContactForm from "../components/Contact/ContactForm";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -56,7 +57,10 @@ export default function Contact() {
       }`}
     >
       <ContactIntro />
-      <ContactForm />
+      <ContactFAQ />
+      <div id="contact-form">
+        <ContactForm />
+      </div>
     </div>
   );
 }

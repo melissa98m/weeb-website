@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import footerEn from "../../locales/en/footer.json";
 import footerFr from "../../locales/fr/footer.json";
@@ -45,244 +45,291 @@ function IconLinkedin({ className }) {
   );
 }
 
+// Simple RFC 5322-inspired regex — rejects obvious typos without over-constraining
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 const FOOTER_LINKS = [
-    {
-      title: {
-        en: footerEn.product,
-        fr: footerFr.product,
-      },
-      links: [
-        {
-          label: {
-            en: footerEn.pricing,
-            fr: footerFr.pricing,
-          },
-          href: "/formations",
-        },
-        {
-          label: {
-            en: footerEn.overview,
-            fr: footerFr.overview,
-          },
-          href: "/",
-        },
-        {
-          label: {
-            en: footerEn.browse,
-            fr: footerFr.browse,
-          },
-          href: "/formations",
-        },
-      ],
-    },
-    {
-      title: {
-        en: footerEn.solutions,
-        fr: footerFr.solutions,
-      },
-      links: [
-        {
-          label: {
-            en: footerEn.research,
-            fr: footerFr.research,
-          },
-          href: "/blog",
-        },
-      ],
-    },
-    {
-      title: {
-        en: footerEn.ressources,
-        fr: footerFr.ressources,
-      },
-      links: [
-        {
-          label: {
-            en: footerEn.help_center,
-            fr: footerFr.help_center,
-          },
-          href: "/contact",
-        },
-        {
-          label: {
-            en: footerEn.blog,
-            fr: footerFr.blog,
-          },
-          href: "/blog",
-        },
-        {
-          label: {
-            en: footerEn.tutorials,
-            fr: footerFr.tutorials,
-          },
-          href: "/blog",
-        },
-      ],
-    },
-    {
-      title: {
-        en: footerEn.company,
-        fr: footerFr.company,
-      },
-      links: [
-        {
-          label: {
-            en: footerEn.about,
-            fr: footerFr.about,
-          },
-          href: "/about-us",
-        },
-        {
-          label: {
-            en: footerEn.legal_notice,
-            fr: footerFr.legal_notice,
-          },
-          href: "/legal-notices",
-        },
-        {
-          label: {
-            en: footerEn.privacy_policy,
-            fr: footerFr.privacy_policy,
-          },
-          href: "/privacy-policy",
-        },
-      ],
-    },
-  ];
+  {
+    title: { en: footerEn.product, fr: footerFr.product },
+    links: [
+      { label: { en: footerEn.overview, fr: footerFr.overview }, href: "/" },
+      { label: { en: footerEn.browse, fr: footerFr.browse }, href: "/formations" },
+    ],
+  },
+  {
+    title: { en: footerEn.ressources, fr: footerFr.ressources },
+    links: [
+      { label: { en: footerEn.help_center, fr: footerFr.help_center }, href: "/contact" },
+      { label: { en: footerEn.blog, fr: footerFr.blog }, href: "/blog" },
+    ],
+  },
+  {
+    title: { en: footerEn.company, fr: footerFr.company },
+    links: [
+      { label: { en: footerEn.about, fr: footerFr.about }, href: "/about-us" },
+      { label: { en: footerEn.legal_notice, fr: footerFr.legal_notice }, href: "/legal-notices" },
+      { label: { en: footerEn.privacy_policy, fr: footerFr.privacy_policy }, href: "/privacy-policy" },
+    ],
+  },
+];
 
 export default function Footer() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? footerFr : footerEn;
-  const [newsletterConsent, setNewsletterConsent] = useState(false);
+
   const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
   const [newsletterStatus, setNewsletterStatus] = useState("idle");
-  const footerLinks = FOOTER_LINKS;
+  const [emailError, setEmailError] = useState("");
+
+  const successRef = useRef(null);
+
+  // Move focus to the success message so screen readers announce it immediately
+  useEffect(() => {
+    if (newsletterStatus === "success" || newsletterStatus === "success_duplicate") {
+      successRef.current?.focus();
+    }
+  }, [newsletterStatus]);
+
+  const validateEmailFormat = (value) => {
+    if (value && !EMAIL_REGEX.test(value)) {
+      setEmailError(t.newsletter_email_invalid);
+    } else {
+      setEmailError("");
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!newsletterConsent || newsletterStatus === "loading") return;
+
+    // Re-validate before submitting
+    if (!EMAIL_REGEX.test(newsletterEmail.trim())) {
+      setEmailError(t.newsletter_email_invalid);
+      return;
+    }
+
+    setNewsletterStatus("loading");
+    try {
+      const { created } = await NewsletterApi.subscribe({ email: newsletterEmail.trim() });
+      setNewsletterStatus(created ? "success" : "success_duplicate");
+      setNewsletterEmail("");
+      setNewsletterConsent(false);
+      setEmailError("");
+    } catch (err) {
+      if (err.network) {
+        setNewsletterStatus("error_network");
+      } else if (err.status === 429) {
+        setNewsletterStatus("error_rate_limit");
+      } else if (err.status === 400 || err.status === 409) {
+        // DRF unique constraint returns 400 with errors on the email field
+        const emailErrors = err.details?.errors?.email;
+        const isAlreadySubscribed =
+          err.status === 409 ||
+          emailErrors?.some?.((msg) => /already|existe|unique/i.test(msg));
+        setNewsletterStatus(
+          isAlreadySubscribed ? "error_duplicate" : "error_server"
+        );
+      } else {
+        setNewsletterStatus("error_server");
+      }
+    }
+  };
+
+  const isDark = theme === "dark";
+
+  // Footer uses inverted colours for contrast against the page background
+  const footerBg = isDark
+    ? "bg-white text-dark border-t border-slate-200"
+    : "bg-dark text-white";
+  const cardBg = isDark
+    ? "bg-slate-50 border-slate-200"
+    : "bg-white/[0.06] border-white/15";
+  const subtleText = isDark ? "text-slate-600" : "text-slate-300";
+  const mutedText = isDark ? "text-slate-500" : "text-slate-400";
+  const inputCls = isDark
+    ? "border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-500"
+    : "border-white/30 text-white placeholder-slate-400 focus:border-white/60";
+  const inputErrorCls = isDark
+    ? "border-red-400 focus:border-red-500"
+    : "border-red-400 focus:border-red-400";
+  const navLinkCls = `transition-colors duration-150 ${
+    isDark ? "text-slate-700 hover:text-dark" : "text-slate-300 hover:text-white"
+  }`;
+  // Separator: slightly stronger than before for visibility in both modes
+  const dividerCls = isDark ? "border-slate-200" : "border-white/20";
+
+  const errorMessageMap = {
+    error_network: t.newsletter_error_network,
+    error_duplicate: t.newsletter_error_duplicate,
+    error_rate_limit: t.newsletter_error_rate_limit,
+    error_server: t.newsletter_error_server,
+  };
+  const currentErrorMessage = errorMessageMap[newsletterStatus] ?? null;
+
+  const isSubmitDisabled =
+    !newsletterConsent || newsletterStatus === "loading";
 
   return (
-    <footer
-      className={`text-sm px-12 py-12 w-full ${
-        theme === "dark"
-          ? "bg-white text-dark border-t border-slate-200"
-          : "bg-dark text-white"
-      }`}
-    >
+    <footer className={`text-sm px-6 sm:px-12 py-12 w-full ${footerBg}`}>
+
+      {/* ── Newsletter ─────────────────────────────────────── */}
       <div
-        className={`max-w-5xl mx-auto mb-10 rounded-2xl border px-6 py-6 sm:px-8 ${
-          theme === "dark" ? "bg-slate-50 border-slate-200" : "bg-white/[0.06] border-white/15"
-        }`}
+        className={`max-w-5xl mx-auto mb-10 rounded-2xl border px-6 py-6 sm:px-8 ${cardBg}`}
       >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-xl">
-            <p
-              className={`text-xs uppercase tracking-[0.2em] ${
-                theme === "dark" ? "text-slate-500" : "text-slate-400"
-              }`}
-            >
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+
+          {/* Description */}
+          <div className="lg:max-w-xs">
+            <p className={`text-xs uppercase tracking-[0.2em] ${mutedText}`}>
               Newsletter
             </p>
-            <h2 className="text-lg font-semibold">{t.newsletter_title}</h2>
-            <p className={theme === "dark" ? "text-slate-600" : "text-slate-300"}>
-              {t.newsletter_subtitle}
-            </p>
+            <h2 className="text-lg font-semibold mt-1">{t.newsletter_title}</h2>
+            <p className={`mt-1 ${subtleText}`}>{t.newsletter_subtitle}</p>
           </div>
-          <form
-            className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center"
-            onSubmit={async (event) => {
-              event.preventDefault();
-              if (!newsletterConsent || newsletterStatus === "loading") return;
-              try {
-                setNewsletterStatus("loading");
-                await NewsletterApi.subscribe({
-                  email: newsletterEmail.trim(),
-                });
-                setNewsletterStatus("success");
-                setNewsletterEmail("");
-                setNewsletterConsent(false);
-              } catch (_) {
-                setNewsletterStatus("error");
-              }
-            }}
-          >
-            <label htmlFor="newsletter-email" className="sr-only">
-              {t.newsletter_placeholder}
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              required
-              placeholder={t.newsletter_placeholder}
-              className={`w-full rounded-md border bg-transparent px-3 py-2 focus:outline-none sm:w-64 ${
-                theme === "dark"
-                  ? "border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-500"
-                  : "border-white/30 text-white placeholder-slate-400 focus:border-white/60"
-              }`}
-              autoComplete="email"
-              value={newsletterEmail}
-              onChange={(event) => setNewsletterEmail(event.target.value)}
-            />
-            <button
-              type="submit"
-              disabled={!newsletterConsent || newsletterStatus === "loading"}
-              className={`rounded-md px-4 py-2 font-medium transition-colors ${
-                newsletterConsent && newsletterStatus !== "loading"
-                  ? theme === "dark"
-                    ? "bg-dark text-white hover:bg-dark/80"
-                    : "bg-primary text-dark hover:bg-primary/80"
-                  : "bg-gray-400 text-white cursor-not-allowed"
-              }`}
-            >
-              {newsletterStatus === "loading" ? t.newsletter_loading : t.newsletter_cta}
-            </button>
-          </form>
-          <div className={`text-xs ${theme === "dark" ? "text-slate-600" : "text-slate-300"}`}>
-            <p id="newsletter-privacy">
-              {t.newsletter_privacy}{" "}
-              <a href="/privacy-policy" className="underline">
-                {t.privacy_policy}
-              </a>
-            </p>
-            <label className="mt-2 flex items-start gap-2">
-              <input
-                id="newsletter-consent"
-                type="checkbox"
-                required
-                className={`mt-0.5 h-4 w-4 ${
-                  theme === "dark" ? "accent-slate-600" : "accent-primary"
+
+          {/*
+            Form — grid layout ensures correct reading order on both mobile and desktop:
+              Mobile (1 col):  email → consent → privacy → button
+              Desktop (2 col): [email | button] / [consent + privacy + status]
+          */}
+          <form className="flex-1" onSubmit={handleSubmit} noValidate>
+            <div className="sm:grid sm:grid-cols-[1fr_auto] sm:gap-x-3 sm:items-start">
+
+              {/* Col 1, Row 1: email input + inline error */}
+              <div className="sm:col-start-1 sm:row-start-1">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  {t.newsletter_placeholder}
+                </label>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  inputMode="email"
+                  required
+                  placeholder={t.newsletter_placeholder}
+                  className={`w-full rounded-md border bg-transparent px-3 py-2 focus:outline-none transition-colors ${
+                    emailError ? inputErrorCls : inputCls
+                  }`}
+                  autoComplete="email"
+                  value={newsletterEmail}
+                  aria-describedby={
+                    emailError ? "newsletter-email-error" : "newsletter-privacy"
+                  }
+                  aria-invalid={emailError ? "true" : undefined}
+                  onChange={(e) => {
+                    setNewsletterEmail(e.target.value);
+                    // Clear inline error as the user corrects their input
+                    if (emailError && EMAIL_REGEX.test(e.target.value)) {
+                      setEmailError("");
+                    }
+                  }}
+                  onBlur={(e) => validateEmailFormat(e.target.value)}
+                />
+                {emailError && (
+                  <p
+                    id="newsletter-email-error"
+                    role="alert"
+                    className="mt-1 text-xs text-red-500"
+                  >
+                    {emailError}
+                  </p>
+                )}
+              </div>
+
+              {/* Col 1–2, Row 2: consent + privacy + status */}
+              <div
+                className={`mt-3 text-xs sm:col-start-1 sm:col-end-3 sm:row-start-2 ${subtleText}`}
+              >
+                <label className="flex items-start gap-2">
+                  <input
+                    id="newsletter-consent"
+                    type="checkbox"
+                    required
+                    className={`mt-0.5 h-4 w-4 ${
+                      isDark ? "accent-slate-600" : "accent-primary"
+                    }`}
+                    aria-describedby="newsletter-privacy"
+                    checked={newsletterConsent}
+                    onChange={(e) => setNewsletterConsent(e.target.checked)}
+                  />
+                  <span>{t.newsletter_consent}</span>
+                </label>
+                <p id="newsletter-privacy" className="mt-1.5">
+                  {t.newsletter_privacy}{" "}
+                  <a href="/privacy-policy" className="underline">
+                    {t.privacy_policy}
+                  </a>
+                </p>
+                {/* Live region for all async status messages */}
+                <div aria-live="polite" aria-atomic="true">
+                  {(newsletterStatus === "success" || newsletterStatus === "success_duplicate") && (
+                    <p
+                      ref={successRef}
+                      tabIndex={-1}
+                      className={`mt-2 focus:outline-none ${
+                        newsletterStatus === "success_duplicate"
+                          ? "text-amber-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {newsletterStatus === "success_duplicate"
+                        ? t.newsletter_success_duplicate
+                        : t.newsletter_success}
+                    </p>
+                  )}
+                  {currentErrorMessage && (
+                    <p className="mt-2 text-red-500">{currentErrorMessage}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Col 2, Row 1: submit button — last in DOM so mobile order is correct */}
+              <button
+                type="submit"
+                disabled={isSubmitDisabled}
+                title={
+                  !newsletterConsent ? t.newsletter_consent_required : undefined
+                }
+                className={`mt-3 w-full sm:mt-0 sm:w-auto sm:col-start-2 sm:row-start-1 rounded-md px-4 py-2 font-medium transition-colors ${
+                  !isSubmitDisabled
+                    ? isDark
+                      ? "bg-dark text-white hover:bg-dark/80"
+                      : "bg-primary text-dark hover:bg-primary/80"
+                    : "bg-gray-400 text-white cursor-not-allowed"
                 }`}
-                aria-describedby="newsletter-privacy"
-                checked={newsletterConsent}
-                onChange={(event) => {
-                  const checked = event.target.checked;
-                  setNewsletterConsent(checked);
-                }}
-              />
-              <span>{t.newsletter_consent}</span>
-            </label>
-            {newsletterStatus === "success" && (
-              <p className="mt-2 text-xs text-green-500">{t.newsletter_success}</p>
-            )}
-            {newsletterStatus === "error" && (
-              <p className="mt-2 text-xs text-red-500">{t.newsletter_error}</p>
-            )}
-          </div>
+              >
+                {newsletterStatus === "loading"
+                  ? t.newsletter_loading
+                  : t.newsletter_cta}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
+      {/* ── Nav columns ────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
-        {/* Colonne 1 : Logo */}
-        <div>
+
+        {/* Logo + tagline */}
+        <div className="lg:max-w-[180px]">
           <h2 className="text-xl font-bold">weeb</h2>
+          <p className={`mt-1.5 text-xs leading-relaxed ${subtleText}`}>
+            {t.tagline}
+          </p>
         </div>
-        {footerLinks.map(({ title, links }) => (
+
+        {FOOTER_LINKS.map(({ title, links }) => (
           <div key={language === "fr" ? title.fr : title.en}>
-            <h3 className={`font-semibold uppercase mb-2 ${theme === "dark" ? "text-slate-600" : "text-slate-300"}`}>
+            <h3 className={`font-semibold uppercase mb-3 ${subtleText}`}>
               {language === "fr" ? title.fr : title.en}
             </h3>
-            <ul className="space-y-1">
+            <ul className="space-y-1.5">
               {links.map(({ label, href }) => (
                 <li key={language === "fr" ? label.fr : label.en}>
-                  <a href={href}>{language === "fr" ? label.fr : label.en}</a>
+                  <a href={href} className={navLinkCls}>
+                    {language === "fr" ? label.fr : label.en}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -290,12 +337,13 @@ export default function Footer() {
         ))}
       </div>
 
-      {/* Ligne du bas */}
-      <div className="border-t border-gray-200 mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto">
-        <p>
-          &copy; {t.copyright}
+      {/* ── Bottom bar ─────────────────────────────────────── */}
+      <div
+        className={`border-t mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto ${dividerCls}`}
+      >
+        <p className={subtleText}>
+          &copy; {new Date().getFullYear()} {t.copyright}
         </p>
-        {/* Reseaux sociaux */}
         <div className="flex gap-4">
           {[
             { Icon: IconYoutube, label: "YouTube", href: "#" },
@@ -311,7 +359,7 @@ export default function Footer() {
               rel="noopener noreferrer"
               target="_blank"
               className={`transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
-                theme === "dark"
+                isDark
                   ? "text-slate-400 hover:text-primary"
                   : "text-slate-500 hover:text-secondary"
               }`}
