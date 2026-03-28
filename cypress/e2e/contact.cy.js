@@ -30,7 +30,7 @@ describe("contact", () => {
                     </select>
                     <textarea id="message_content"></textarea>
                     <input id="consent" type="checkbox" />
-                    <button type="submit">Contact</button>
+                    <button type="submit">Envoyer le message</button>
                   </form>
                   <div id="flash" style="display:none">Message envoyé</div>
                 </main>
@@ -79,7 +79,7 @@ describe("contact", () => {
     cy.get("#consent").check();
 
     cy.wait(2100);
-    cy.contains("button", "Contact").click();
+    cy.contains("button", "Envoyer le message").click();
     cy.contains(/Message envoy/).should("be.visible");
   });
 });

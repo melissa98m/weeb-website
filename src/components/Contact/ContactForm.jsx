@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import contactEn from "../../../locales/en/contact.json";
@@ -80,6 +80,7 @@ export default function ContactForm() {
   const [subjects, setSubjects] = useState([]);
   const [loadingSubjects, setLoadingSubjects] = useState(false);
   const [subjectsError, setSubjectsError] = useState(null);
+  const alertRef = useRef(null);
 
   // Cooldown restant en secondes pour informer l'utilisateur
   const [cooldownSec, setCooldownSec] = useState(
@@ -201,6 +202,14 @@ export default function ContactForm() {
       setErrors(validationErrors);
       setShake(true);
       setTimeout(() => setShake(false), 500);
+      const firstErrorId = Object.keys(validationErrors)[0];
+      setTimeout(() => {
+        const el = document.getElementById(firstErrorId);
+        if (el) {
+          el.scrollIntoView?.({ behavior: "smooth", block: "center" });
+          el.focus();
+        }
+      }, 50);
       return;
     }
 
@@ -233,6 +242,7 @@ export default function ContactForm() {
       });
       setErrors({});
       setServerMsg({ type: "success", text: t?.sent_ok || "Message sent. Thank you!" });
+      setTimeout(() => alertRef.current?.focus(), 50);
     } catch (err) {
       const fieldErrors = mapApiFieldErrors(err, {
         first_name: "first_name",
@@ -261,15 +271,14 @@ export default function ContactForm() {
     }
   };
 
-  const baseInputClasses = `peer w-full bg-transparent border-b pt-5 pb-1.5 placeholder-transparent focus:outline-none text-sm transition-colors duration-200 ${
+  const baseInputClasses = `w-full bg-transparent border-b pb-2 focus:outline-none text-sm transition-colors duration-200 ${
     theme === "dark"
       ? "border-white/20 focus:border-primary text-white"
       : "border-dark/20 focus:border-secondary text-dark"
   }`;
   const errorBorder = "border-red-400 focus:border-red-400";
   const labelTextColor = theme === "dark" ? "text-primary/80" : "text-secondary";
-  // Label flottant : part du centre du champ et remonte en xs sur focus/fill
-  const floatLabel = `absolute left-0 top-5 text-sm pointer-events-none select-none transition-all duration-200 ease-out ${labelTextColor} peer-focus:top-0 peer-focus:text-xs peer-focus:font-medium peer-[&:not(:placeholder-shown)]:top-0 peer-[&:not(:placeholder-shown)]:text-xs peer-[&:not(:placeholder-shown)]:font-medium`;
+  const staticLabel = `block text-xs font-medium mb-1 ${labelTextColor}`;
 
   return (
     <section className="px-4 sm:px-6 pb-12 sm:pb-20 flex justify-center">
@@ -285,7 +294,7 @@ export default function ContactForm() {
         noValidate
       >
         {/* Message global */}
-        <div role="alert" aria-live="assertive">
+        <div role="alert" aria-live="assertive" ref={alertRef} tabIndex={-1} className="outline-none">
           <AnimatePresence mode="wait">
             {serverMsg && (
               <motion.div
@@ -342,7 +351,8 @@ export default function ContactForm() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Last Name */}
-          <div className="relative">
+          <div>
+            <label htmlFor="last_name" className={staticLabel}>{t.name}</label>
             <input
               id="last_name"
               type="text"
@@ -350,19 +360,18 @@ export default function ContactForm() {
               placeholder={t.name}
               onChange={handleChange}
               maxLength={50}
-              className={`${baseInputClasses} ${errors.last_name ? errorBorder : ""} peer`}
+              autoComplete="family-name"
+              className={`${baseInputClasses} ${errors.last_name ? errorBorder : ""}`}
               aria-invalid={!!errors.last_name}
               aria-required="true"
               aria-describedby={errors.last_name ? "last_name-error" : undefined}
             />
-            <label htmlFor="last_name" className={floatLabel}>
-              {t.name}
-            </label>
             {errors.last_name && <p id="last_name-error" className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
           </div>
 
           {/* First Name */}
-          <div className="relative">
+          <div>
+            <label htmlFor="first_name" className={staticLabel}>{t.firstname}</label>
             <input
               id="first_name"
               type="text"
@@ -370,62 +379,58 @@ export default function ContactForm() {
               placeholder={t.firstname}
               onChange={handleChange}
               maxLength={50}
-              className={`${baseInputClasses} ${errors.first_name ? errorBorder : ""} peer`}
+              autoComplete="given-name"
+              className={`${baseInputClasses} ${errors.first_name ? errorBorder : ""}`}
               aria-invalid={!!errors.first_name}
               aria-required="true"
               aria-describedby={errors.first_name ? "first_name-error" : undefined}
             />
-            <label htmlFor="first_name" className={floatLabel}>
-              {t.firstname}
-            </label>
             {errors.first_name && <p id="first_name-error" className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
           </div>
 
           {/* Telephone */}
-          <div className="relative">
+          <div>
+            <label htmlFor="telephone" className={staticLabel}>{t.phone}</label>
             <input
               id="telephone"
               type="text"
               value={form.telephone}
-              placeholder={t.phone}
+              placeholder="0612345678"
               onChange={(e) => {
                 const digits = e.target.value.replace(/\D/g, "").slice(0, 10);
                 handleChange({ target: { id: "telephone", value: digits } });
               }}
               inputMode="numeric"
               maxLength={10}
-              className={`${baseInputClasses} ${errors.telephone ? errorBorder : ""} peer`}
+              autoComplete="tel"
+              className={`${baseInputClasses} ${errors.telephone ? errorBorder : ""}`}
               aria-invalid={!!errors.telephone}
               aria-describedby={errors.telephone ? "telephone-error" : undefined}
             />
-            <label htmlFor="telephone" className={floatLabel}>
-              {t.phone}
-            </label>
             {errors.telephone && <p id="telephone-error" className="text-red-500 text-xs mt-1">{errors.telephone}</p>}
           </div>
 
           {/* Email */}
-          <div className="relative">
+          <div>
+            <label htmlFor="email" className={staticLabel}>{t.email}</label>
             <input
               id="email"
               type="email"
               value={form.email}
-              placeholder={t.email}
+              placeholder="email@example.com"
               onChange={handleChange}
-              className={`${baseInputClasses} ${errors.email ? errorBorder : ""} peer`}
+              autoComplete="email"
+              className={`${baseInputClasses} ${errors.email ? errorBorder : ""}`}
               aria-invalid={!!errors.email}
               aria-required="true"
               aria-describedby={errors.email ? "email-error" : undefined}
             />
-            <label htmlFor="email" className={floatLabel}>
-              {t.email}
-            </label>
             {errors.email && <p id="email-error" className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
           {/* Subject */}
           <div className="relative md:col-span-2">
-            <label htmlFor="subject" className={`block text-xs font-medium mb-1 ${labelTextColor}`}>
+            <label htmlFor="subject" className={staticLabel}>
               {t?.subject || "Sujet"}
             </label>
             <div className="relative">
@@ -490,7 +495,8 @@ export default function ContactForm() {
         </div>
 
         {/* Message */}
-        <div className="relative">
+        <div>
+          <label htmlFor="message_content" className={staticLabel}>{t.message}</label>
           <textarea
             id="message_content"
             rows="5"
@@ -498,14 +504,11 @@ export default function ContactForm() {
             placeholder={t.message}
             onChange={handleChange}
             maxLength={5000}
-            className={`${baseInputClasses} ${errors.message_content ? errorBorder : ""} peer resize-none sm:resize-y`}
+            className={`${baseInputClasses} ${errors.message_content ? errorBorder : ""} resize-none sm:resize-y`}
             aria-invalid={!!errors.message_content}
             aria-required="true"
             aria-describedby={errors.message_content ? "message_content-error" : "message_content-count"}
           />
-          <label htmlFor="message_content" className={floatLabel}>
-            {t.message}
-          </label>
           <div className="flex justify-between items-start mt-1">
             {errors.message_content
               ? <p id="message_content-error" className="text-red-500 text-xs">{errors.message_content}</p>
