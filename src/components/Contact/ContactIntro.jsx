@@ -14,9 +14,12 @@ export default function ContactIntro() {
           ? "text-primary border-primary/30 bg-primary/10"
           : "text-secondary border-secondary/25 bg-secondary/5"
       }`}>
-        Contact
+        <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        {t.contact_badge}
       </span>
-      <h1 className={`text-3xl md:text-4xl font-bold mb-4 leading-tight ${theme === "dark" ? "text-white" : "text-dark"}`}>
+      <h1 className={`font-display text-3xl md:text-4xl font-bold mb-4 leading-tight ${theme === "dark" ? "text-white" : "text-dark"}`}>
         {t.contact_title}
       </h1>
       <p className={`text-sm md:text-base max-w-xl mx-auto leading-relaxed ${theme === "dark" ? "text-white/60" : "text-dark/60"}`}>

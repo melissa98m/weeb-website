@@ -27,11 +27,12 @@ export default function ContactFAQ() {
   const divider = isDark ? "border-border" : "border-gray-100";
 
   return (
-    <section className="px-4 sm:px-6 pb-12 max-w-3xl mx-auto w-full">
+    <section className="px-4 sm:px-6 pb-12 max-w-3xl mx-auto w-full" aria-labelledby="faq-heading">
       {/* Header */}
       <div className="text-center mb-10">
         <h2
-          className={`text-2xl md:text-3xl font-bold ${
+          id="faq-heading"
+          className={`font-display text-2xl md:text-3xl font-bold ${
             isDark ? "text-white" : "text-dark"
           }`}
         >
@@ -80,7 +81,7 @@ export default function ContactFAQ() {
                     </button>
                     <div
                       className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isOpen ? "max-h-64 opacity-100" : "max-h-0 opacity-0"
+                        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                       }`}
                     >
                       <p
