@@ -65,6 +65,7 @@ html.light {
   font-size: 0.875rem !important;
   line-height: 1.6 !important;
   white-space: pre !important;
+  text-align: left !important;
 }
 
 /* Le <code> dans <pre> : fond transparent, hljs gère les couleurs de syntaxe */
