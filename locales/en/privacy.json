@@ -1,15 +1,17 @@
 {
   "title": "Privacy Policy",
-  "updated": "Last updated: 2026-02-16",
-  "intro": "We take data protection seriously. This policy explains how we collect and use personal data.",
+  "updated": "Last updated: February 16, 2026",
+  "intro": "We take data protection seriously. This policy explains how we collect, use and protect your personal data in compliance with the GDPR.",
+  "tocLabel": "Table of contents",
+  "backToTop": "Back to top",
   "sections": [
     {
       "title": "Data we collect",
       "items": [
-        "Account data (name, email, profile details).",
+        "Account data (name, email address, profile details).",
         "Contact form messages and related metadata.",
         "Newsletter subscription data (email address).",
-        "Technical data such as logs and device information."
+        "Technical data such as connection logs and device information."
       ]
     },
     {
@@ -24,7 +26,7 @@
     {
       "title": "Legal bases",
       "items": [
-        "Contract performance for account services.",
+        "Contract performance for account-related services.",
         "Consent for newsletters and optional communications.",
         "Legitimate interest for security and service improvement."
       ]
@@ -32,40 +34,42 @@
     {
       "title": "Retention",
       "items": [
-        "Data is kept for the duration of the relationship.",
+        "Data is kept for the duration of the contractual relationship.",
         "Contact data is kept up to 3 years after the last interaction."
       ]
     },
     {
       "title": "Your rights",
       "items": [
-        "Access, rectification, erasure, and restriction.",
+        "Access, rectification, erasure, and restriction of processing.",
         "Objection and data portability.",
-        "Withdraw consent at any time."
-      ]
-    },
-    {
-      "title": "Contact",
-      "items": [
-        "For privacy requests, contact: contact@weebbackend.melissa-mangione.com."
+        "Withdraw consent at any time, without retroactive effect.",
+        "You may also lodge a complaint with your local data protection authority."
       ]
     },
     {
       "title": "Cookies",
       "items": [
-        "We use necessary cookies for site operation.",
-        "Optional cookies are only set with your consent."
+        "We use strictly necessary cookies for site operation.",
+        "Optional cookies (analytics, preferences) are only set with your explicit consent."
       ]
     },
     {
-      "title": "User information",
+      "title": "Automated feedback analysis",
+      "type": "paragraphs",
       "items": [
         "When you leave feedback on the platform, we may automatically analyze the content of your message to derive a satisfaction indicator (positive, negative, or neutral) and a confidence score.",
-        "This analysis is used solely to improve the quality of the service and training courses by helping us identify feedback that should be handled first.",
-        "Your feedback text is not used to build a broader profile about you, and no decision producing legal or similarly significant effects is made solely on the basis of this processing.",
-        "The results (class and confidence) are stored with your feedback and are deleted if your account is deleted.",
-        "Depending on the configuration, a translation step may be used before the analysis; in that case, the text is transmitted only for the purpose of enabling this processing.",
-        "You can exercise your rights (access, export, deletion) through the features available in your account."
+        "This analysis is used solely to improve the quality of the service and training courses by helping us identify feedback that should be prioritized.",
+        "Your feedback text is not used to build a broader profile about you. No decision producing legal or similarly significant effects is made solely on the basis of this automated processing.",
+        "The results (class and confidence score) are stored with your feedback and deleted if your account is deleted.",
+        "Depending on the configuration, an automatic translation step may be used before the analysis; in that case, the text is transmitted only to enable this processing.",
+        "You can exercise your rights (access, export, deletion) through the features available in your personal account."
+      ]
+    },
+    {
+      "title": "Contact",
+      "items": [
+        "For any request regarding your personal data, contact us at: contact@weebbackend.melissa-mangione.com"
       ]
     }
   ]
