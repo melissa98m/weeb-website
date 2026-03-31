@@ -56,6 +56,12 @@
       />
     </noscript>
 
+    <!-- LCP image — préchargée pour éviter le resource load delay -->
+    <link rel="preload" as="image" href="/home/mokup-1176.webp"
+      imagesrcset="/home/mokup-400.webp 400w, /home/mokup-800.webp 800w, /home/mokup-1176.webp 1176w"
+      imagesizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1176px"
+      fetchpriority="high" type="image/webp" />
+
     <!-- Resource hints — connexions anticipées -->
     <link rel="preconnect" href="https://weebbackend.melissa-mangione.com" crossorigin />
     <link rel="dns-prefetch" href="https://accounts.google.com" />

@@ -43,8 +43,14 @@ export default function LearningSection() {
         </Link>
       </div>
       <motion.img
-        src="/home/mokup.png"
+        src="/home/mokup-800.webp"
+        srcSet="/home/mokup-400.webp 400w, /home/mokup-800.webp 800w"
+        sizes="(max-width: 640px) 400px, 800px"
         alt="Mockup 2"
+        width={800}
+        height={531}
+        loading="lazy"
+        decoding="async"
         className="w-full max-w-md rounded-md"
         initial={{ x: 100, opacity: 0 }}
         whileInView={{ x: 0, opacity: 1 }}

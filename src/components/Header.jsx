@@ -147,7 +147,7 @@ export default function Header() {
           <Button
             onClick={toggleTheme}
             aria-label={t("change_theme", "Change theme")}
-            className={`p-1.5 rounded-md transition-colors ${
+            className={`p-1.5 rounded-md transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
               theme === "dark"
                 ? "text-amber-400 hover:text-amber-300"
                 : "text-violet-500 hover:text-violet-700"
@@ -160,7 +160,7 @@ export default function Header() {
           <Button
             onClick={toggleLanguage}
             aria-label={t("change_language", "Change language")}
-            className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors ${
+            className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors min-h-[44px] ${
               theme === "dark"
                 ? "bg-violet-500/15 text-violet-400 hover:bg-violet-500/25 hover:text-violet-300"
                 : "bg-violet-100 text-violet-600 hover:bg-violet-200 hover:text-violet-700"
@@ -349,7 +349,7 @@ export default function Header() {
                 setIsOpen(false);
               }}
               aria-label={t("change_theme", "Change theme")}
-              className={`p-1.5 rounded-md transition-colors ${
+              className={`p-1.5 rounded-md transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
                 theme === "dark"
                   ? "text-amber-400 hover:text-amber-300"
                   : "text-violet-500 hover:text-violet-700"
@@ -364,7 +364,7 @@ export default function Header() {
                 setIsOpen(false);
               }}
               aria-label={t("change_language", "Change language")}
-              className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors ${
+              className={`px-2 py-1 rounded text-xs font-semibold tracking-wider transition-colors min-h-[44px] ${
                 theme === "dark"
                   ? "bg-violet-500/15 text-violet-400 hover:bg-violet-500/25 hover:text-violet-300"
                   : "bg-violet-100 text-violet-600 hover:bg-violet-200 hover:text-violet-700"

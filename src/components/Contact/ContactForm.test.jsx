@@ -11,6 +11,7 @@ vi.mock("framer-motion", () => {
   const strip = ({ animate: _a, transition: _t, initial: _i, exit: _e, whileHover: _wh, whileTap: _wt, drag: _d, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, ...props }) => props;
   return {
     AnimatePresence: ({ children }) => <>{children}</>,
+    useReducedMotion: () => false,
     motion: {
       form: (props) => <form {...strip(props)} />,
       div: (props) => <div {...strip(props)} />,
