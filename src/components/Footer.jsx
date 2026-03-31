@@ -358,7 +358,7 @@ export default function Footer() {
               aria-label={label}
               rel="noopener noreferrer"
               target="_blank"
-              className={`transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+              className={`min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
                 isDark
                   ? "text-slate-400 hover:text-primary"
                   : "text-slate-500 hover:text-secondary"

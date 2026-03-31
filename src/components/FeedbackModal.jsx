@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import feedbackFr from "../../locales/fr/feedback.json";
 import feedbackEn from "../../locales/en/feedback.json";
 import { getEnv } from "../lib/env";
@@ -19,12 +19,16 @@ export default function FeedbackModal({
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      triggerRef.current = document.activeElement;
+    } else {
       setContent("");
       setErr(null);
       setSending(false);
+      triggerRef.current?.focus();
     }
   }, [open]);
 

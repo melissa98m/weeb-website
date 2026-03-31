@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import contactEn from "../../../locales/en/contact.json";
 import contactFr from "../../../locales/fr/contact.json";
@@ -57,6 +57,7 @@ export default function ContactForm() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? contactFr : contactEn;
+  const prefersReducedMotion = useReducedMotion();
 
   // Champs alignés avec le modèle Django
   const [form, setForm] = useState({
@@ -289,7 +290,7 @@ export default function ContactForm() {
             ? "bg-primary/[0.04] border-primary/25"
             : "bg-white border-secondary/20 shadow-sm"
         }`}
-        animate={shake ? { x: [0, -10, 10, -10, 10, 0] } : {}}
+        animate={shake && !prefersReducedMotion ? { x: [0, -10, 10, -10, 10, 0] } : {}}
         transition={{ duration: 0.5 }}
         noValidate
       >

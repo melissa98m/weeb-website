@@ -64,12 +64,14 @@ export default function HeroSection() {
         </Link>
       </div>
       <motion.img
-        src="/home/mokup.png"
+        src="/home/mokup-1176.webp"
+        srcSet="/home/mokup-400.webp 400w, /home/mokup-800.webp 800w, /home/mokup-1176.webp 1176w"
+        sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1176px"
         alt="Mockup de l'interface Weeb sur desktop"
-        width={1280}
-        height={720}
-        loading="lazy"
-        decoding="async"
+        width={1176}
+        height={780}
+        fetchPriority="high"
+        decoding="sync"
         className="mt-12 w-full max-w-5xl mx-auto rounded-md"
         style={{ cursor: "grab" }}
         animate={idleFloat}

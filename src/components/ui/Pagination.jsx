@@ -4,7 +4,7 @@ export default function Pagination({ page, pageCount, onPageChange, theme }) {
   if (pageCount <= 1) return null;
 
   const baseBtn =
-    "min-w-9 h-9 px-3 rounded-md border text-sm flex items-center justify-center";
+    "min-w-11 h-11 px-3 rounded-md border text-sm flex items-center justify-center";
   const solid =
     theme === "dark"
       ? "bg-secondary text-white border-secondary"
