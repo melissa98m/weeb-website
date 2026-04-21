@@ -6,6 +6,7 @@
  * Les grammars sont déjà dans le bundle via `createLowlight(common)` dans
  * RichTextEditor.jsx — aucun code supplémentaire n'est ajouté.
  */
+import DOMPurify from "dompurify";
 import hljs from "highlight.js/lib/core";
 import bash from "highlight.js/lib/languages/bash";
 import c from "highlight.js/lib/languages/c";
@@ -70,7 +71,8 @@ export function highlightContainer(container) {
  */
 export function parseAndHighlight(html) {
   if (!html) return html;
-  const doc = new DOMParser().parseFromString(html, "text/html");
+  const clean = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+  const doc = new DOMParser().parseFromString(clean, "text/html");
   doc.querySelectorAll("pre code").forEach((block) => {
     hljs.highlightElement(block);
   });

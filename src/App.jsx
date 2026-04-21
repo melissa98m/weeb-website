@@ -163,11 +163,11 @@ function App() {
             <Route
               path="/admin/newsletter"
               element={
-                <ProtectedRoute>
+                <StaffRoute>
                   <AdminLayout>
                     <NewsletterManager />
                   </AdminLayout>
-                </ProtectedRoute>
+                </StaffRoute>
               }
             />
             <Route
@@ -213,11 +213,11 @@ function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <StaffRoute>
                   <AdminLayout>
                     <AdminHome />
                   </AdminLayout>
-                </ProtectedRoute>
+                </StaffRoute>
               }
             />
             {/* 404 */}
