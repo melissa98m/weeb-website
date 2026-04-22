@@ -22,8 +22,8 @@ function IconSearch({ size = 16 }) {
 }
 
 /**
- * Barre de recherche globale — redirige vers /search?q=…
- * Place dans le Header entre la nav et les actions.
+ * Global search bar — redirects to /search?q=…
+ * Placed in the Header between the nav links and the action buttons.
  */
 export default function SearchBar() {
   const { theme } = useTheme();
@@ -55,12 +55,12 @@ export default function SearchBar() {
     }
   };
 
-  // Focus automatique quand la barre s'ouvre
+  // Auto-focus when the bar opens
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
 
-  // Raccourci clavier Ctrl+K / Cmd+K pour ouvrir
+  // Keyboard shortcut Ctrl+K / Cmd+K to open the bar
   useEffect(() => {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {

@@ -77,7 +77,7 @@ export default function Header() {
 
   const isLoginPage = location.pathname === "/login";
 
-  // Accès à l’administration si au moins un des rôles suivants
+  // Admin access granted if the user has at least one of the following roles
   const canAdmin =
     !!user && (hasAnyStaffRole(user) || hasAnyRedactionRole(user) || hasPersonnelRole(user));
 

@@ -15,7 +15,7 @@ vi.mock("../../context/AuthContext", () => ({
   useAuth: () => ({ user: { roles: ["Personnel"] } }),
 }));
 
-// Mock recharts pour éviter les erreurs ResizeObserver dans jsdom
+// Mock recharts to avoid ResizeObserver errors in jsdom
 vi.mock("recharts", () => ({
   BarChart: ({ children }) => <div data-testid="bar-chart">{children}</div>,
   Bar: () => null,

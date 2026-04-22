@@ -163,7 +163,7 @@ export default function CoursEditorModal({
             />
           </div>
 
-          {/* URL Vidéo */}
+          {/* Video URL */}
           <div>
             <label
               htmlFor="cours-video"

@@ -37,14 +37,14 @@ beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
   localStorage.clear();
-  // Fournir un token CSRF pour éviter un appel réseau supplémentaire
+  // Provide a CSRF token to avoid an extra network call
   document.cookie = "csrftoken=testtoken; path=/";
   vi.stubGlobal("fetch", fetchMock);
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  // Supprimer le cookie CSRF injecté pour le test
+  // Remove the CSRF cookie injected for the test
   document.cookie = "csrftoken=; path=/; max-age=0";
 });
 

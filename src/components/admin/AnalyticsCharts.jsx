@@ -203,7 +203,7 @@ export default function AnalyticsCharts({ theme }) {
         )}
       </div>
 
-      {/* ── Ligne 3 : BarCharts côte à côte ── */}
+      {/* ── Row 3: side-by-side BarCharts ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <SectionTitle>Inscriptions par mois</SectionTitle>

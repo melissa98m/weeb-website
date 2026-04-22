@@ -17,8 +17,8 @@ import AppErrorBoundary from "./components/AppErrorBoundary.jsx";
 const sentryDsn = appEnv.VITE_SENTRY_DSN;
 const sentryEnabled = appEnv.PROD && Boolean(sentryDsn);
 
-// RGPD : Sentry n'est initialisé qu'après vérification du consentement optional
-// Le cookie cookie_consent est lu de manière synchrone avant tout rendu
+// GDPR: Sentry is only initialized after verifying optional cookie consent.
+// The cookie_consent cookie is read synchronously before any rendering.
 function hasCookieConsent() {
   try {
     const raw = document.cookie
@@ -47,7 +47,7 @@ if (sentryEnabled && hasCookieConsent()) {
     dsn: sentryDsn,
     integrations,
     traces_sample_rate: 1.0,
-    // Session replay désactivé — risque PII (RGPD)
+    // Session replay disabled — PII risk (GDPR)
     replays_session_sample_rate: 0,
     replays_on_error_sample_rate: 0,
   });
@@ -60,7 +60,7 @@ const appTree = (
         <AuthProvider>
           <NotificationProvider>
             <App />
-            {/* RGPD : Vercel Analytics uniquement si consentement optional accordé */}
+            {/* GDPR: Vercel Analytics only loaded when the user has given optional consent */}
             {hasCookieConsent() && <Analytics />}
           </NotificationProvider>
         </AuthProvider>

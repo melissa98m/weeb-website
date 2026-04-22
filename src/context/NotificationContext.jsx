@@ -48,11 +48,11 @@ export function NotificationProvider({ children }) {
           setNotifications((prev) => [data.notification, ...prev]);
           setUnreadCount((c) => c + 1);
         }
-      } catch { /* malformed frame — ignoré */ }
+      } catch { /* malformed frame — ignored */ }
     };
 
     ws.onclose = () => {
-      // Reconnexion automatique toutes les 5s
+      // Auto-reconnect every 5s
       reconnectTimer.current = setTimeout(() => {
         if (user) connect();
       }, 5000);
@@ -72,14 +72,14 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     const handlePageHide = (e) => {
       if (e.persisted) {
-        // Page en train d'entrer dans le bfcache — fermer la WS pour l'autoriser
+        // Page entering the bfcache — close the WS to allow it
         clearTimeout(reconnectTimer.current);
         wsRef.current?.close();
       }
     };
     const handlePageShow = (e) => {
       if (e.persisted) {
-        // Page restaurée depuis le bfcache — reconnecter
+        // Page restored from the bfcache — reconnect
         connect();
       }
     };
@@ -91,7 +91,7 @@ export function NotificationProvider({ children }) {
     };
   }, [connect]);
 
-  // Réinitialiser à la déconnexion
+  // Reset on logout
   useEffect(() => {
     if (!user) {
       wsRef.current?.close();
@@ -120,7 +120,7 @@ export function NotificationProvider({ children }) {
       });
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
-    } catch { /* silencieux */ }
+    } catch { /* silent */ }
   }, []);
 
   return (

@@ -13,7 +13,7 @@ export default function TrainingItem({ formation, existingFeedback, theme, t, on
   const [progressDetail, setProgressDetail] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Charge la progression dès le montage
+  // Load progress on mount
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -50,7 +50,7 @@ export default function TrainingItem({ formation, existingFeedback, theme, t, on
 
   return (
     <div className={`rounded-xl border ${card} overflow-hidden`}>
-      {/* Barre de progression colorée en haut */}
+      {/* Colored progress bar at the top */}
       <div className="h-1 w-full bg-gray-100 dark:bg-white/5">
         <div
           className={`h-full transition-all duration-500 ${isCompleted ? "bg-green-500" : "bg-indigo-500"}`}
@@ -153,7 +153,7 @@ export default function TrainingItem({ formation, existingFeedback, theme, t, on
             )
           )}
 
-          {/* Détail modules */}
+          {/* Module details toggle */}
           {progress !== null && (
             <button
               type="button"
@@ -167,7 +167,7 @@ export default function TrainingItem({ formation, existingFeedback, theme, t, on
           )}
         </div>
 
-        {/* ── Détail modules ── */}
+        {/* ── Module details ── */}
         {showModules && (
           <div
             id={`modules-${formation.id}`}

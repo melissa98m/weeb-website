@@ -39,7 +39,7 @@ describe("SearchBar", () => {
     vi.restoreAllMocks();
   });
 
-  // ── État fermé (bouton déclencheur) ──────────────────────────────────────
+  // ── Closed state (trigger button) ────────────────────────────────────────
 
   it("affiche le bouton 'Ouvrir la recherche' par défaut", () => {
     renderSearchBar();
@@ -96,7 +96,7 @@ describe("SearchBar", () => {
     await user.type(screen.getByRole("searchbox"), "django");
 
     await user.keyboard("{Escape}");
-    // Après réouverture, le champ doit être vide
+    // After reopening, the field should be empty
     fireEvent.keyDown(window, { key: "k", ctrlKey: true });
     await waitFor(() => {
       expect(screen.getByRole("searchbox")).toHaveValue("");
@@ -158,7 +158,7 @@ describe("SearchBar", () => {
     expect(screen.queryByRole("searchbox")).toBeNull();
   });
 
-  // ── Accessibilité ────────────────────────────────────────────────────────
+  // ── Accessibility ────────────────────────────────────────────────────────
 
   it("le formulaire a role='search'", async () => {
     const user = userEvent.setup();

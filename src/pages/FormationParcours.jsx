@@ -1,19 +1,19 @@
 /**
- * Page d'apprentissage d'une formation.
- * Route : /formation/:id/learn
+ * Learning page for a formation.
+ * Route: /formation/:id/learn
  *
- * Layout :
- *  - Mobile  : sidebar drawer (slide-in, focus-trap) + contenu en dessous
- *  - Desktop : sidebar fixe gauche + contenu principal à droite
+ * Layout:
+ *  - Mobile  : slide-in sidebar drawer (with focus trap) + content below
+ *  - Desktop : fixed left sidebar + main content on the right
  *
- * Accessibilité :
- *  - Skip link vers le contenu principal
- *  - Focus trap dans le drawer mobile
- *  - aria-current sur l'élément actif de la sidebar
- *  - aria-live pour les changements d'état (complétion, score QCM)
- *  - prefers-reduced-motion respecté
- *  - Gestion du focus : h1 focusé lors du changement de cours
- *  - Échap ferme le drawer
+ * Accessibility:
+ *  - Skip link to the main content area
+ *  - Focus trap inside the mobile drawer
+ *  - aria-current on the active sidebar item
+ *  - aria-live for state changes (completion, QCM score)
+ *  - Respects prefers-reduced-motion
+ *  - Focus management: h1 receives focus on course change
+ *  - Escape key closes the drawer
  */
 import React, {
   useCallback, useEffect, useMemo, useRef, useState,
@@ -27,7 +27,7 @@ import { parseAndHighlight } from "../lib/hljs";
 import formationsFr from "../../locales/fr/formations.json";
 import formationsEn from "../../locales/en/formations.json";
 
-// ── Hook : prefers-reduced-motion ─────────────────────────────────────────────
+// ── Hook: prefers-reduced-motion ──────────────────────────────────────────────
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(
@@ -88,7 +88,7 @@ function getYoutubeEmbedUrl(url) {
   return null;
 }
 
-// ── Focus trap (drawer mobile) ────────────────────────────────────────────────
+// ── Focus trap (mobile drawer) ────────────────────────────────────────────────
 
 function useFocusTrap(ref, active) {
   useEffect(() => {
@@ -134,7 +134,7 @@ function ProgressBar({ pct, thin = false, className = "", label }) {
   );
 }
 
-// ── Icône de statut ────────────────────────────────────────────────────────────
+// ── Status icon ────────────────────────────────────────────────────────────────
 
 function StatusDot({ done, accessible, small = false }) {
   const { language } = useLanguage();
@@ -420,7 +420,7 @@ function QCMPanel({ moduleId, onPassed, theme, onAnnounce, onAuthError }) {
   );
 }
 
-// ── Contenu d'un cours ─────────────────────────────────────────────────────────
+// ── Course content ─────────────────────────────────────────────────────────────
 
 function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNext, hasNext, titleRef, onAnnounce, onAuthError }) {
   const [completing, setCompleting] = useState(false);
@@ -433,14 +433,14 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
   const card = theme === "dark" ? "bg-zinc-800/60 border-zinc-700" : "bg-gray-50 border-gray-200";
 
-  // Réinitialiser les états quand le cours change
+  // Reset state when the course changes
   useEffect(() => {
     setJustCompleted(false);
     setErr("");
     setDownloadErr("");
   }, [cours.id]);
 
-  // Coloration syntaxique : pré-traitée avant injection dans le DOM
+  // Syntax highlighting pre-processed before injecting into the DOM
   const highlightedContent = useMemo(() => parseAndHighlight(cours.content), [cours.content]);
 
   const complete = async () => {
@@ -497,7 +497,7 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
     <article className={`space-y-6 rounded-2xl border p-4 sm:p-6 overflow-hidden ${
       theme === "dark" ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-100 shadow-sm"
     }`}>
-      {/* Titre — ref pour gestion du focus */}
+      {/* Title — ref used for focus management */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <h1
@@ -545,7 +545,7 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
         </div>
       </div>
 
-      {/* Vidéo */}
+      {/* Video */}
       {cours.video_url && (
         embedUrl ? (
           <div className="rounded-xl overflow-hidden bg-black" style={{ aspectRatio: "16/9" }}>
@@ -578,7 +578,7 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
         )
       )}
 
-      {/* Contenu texte — HTML sanitisé par bleach côté serveur */}
+      {/* Text content — HTML sanitized server-side by bleach */}
       <div className={`article-body max-w-none leading-relaxed ${theme === "dark" ? "" : "text-gray-700"}`}>
         {highlightedContent ? (
           <div dangerouslySetInnerHTML={{ __html: highlightedContent }} />
@@ -587,7 +587,7 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
         )}
       </div>
 
-      {/* Zone action complétion */}
+      {/* Completion action area */}
       <div className={`rounded-xl border p-4 ${card}`}>
         {isMarkedDone ? (
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -633,7 +633,7 @@ function CoursContent({ cours, moduleId, formationId, theme, onCompleted, onGoNe
   );
 }
 
-// ── Bannière de fin de formation ──────────────────────────────────────────────
+// ── Formation completion banner ───────────────────────────────────────────────
 
 function CompletionBanner({ formationName, theme }) {
   const { language } = useLanguage();
@@ -656,7 +656,7 @@ function CompletionBanner({ formationName, theme }) {
   );
 }
 
-// ── Page principale ────────────────────────────────────────────────────────────
+// ── Main page ──────────────────────────────────────────────────────────────────
 
 export default function FormationParcours() {
   const { id: formationId } = useParams();
@@ -683,13 +683,13 @@ export default function FormationParcours() {
   const [showQCM, setShowQCM] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Message annoncé aux lecteurs d'écran via aria-live
+  // Message announced to screen readers via aria-live
   const [announcement, setAnnouncement] = useState("");
 
   const contentRef = useRef(null);
-  const titleRef = useRef(null);        // h1 du cours actif
-  const drawerRef = useRef(null);       // drawer mobile (focus trap)
-  const menuBtnRef = useRef(null);      // bouton ☰ pour restaurer le focus à la fermeture
+  const titleRef = useRef(null);        // h1 of the active course
+  const drawerRef = useRef(null);       // mobile drawer (focus trap)
+  const menuBtnRef = useRef(null);      // ☰ button to restore focus on close
 
   useFocusTrap(drawerRef, sidebarOpen);
 
@@ -699,7 +699,7 @@ export default function FormationParcours() {
 
   const safeModules = Array.isArray(modules) ? modules : [];
 
-  // ── Chargement ──────────────────────────────────────────────────────────────
+  // ── Load data ───────────────────────────────────────────────────────────────
 
   const load = useCallback(async () => {
     if (!formationId) return;
@@ -733,7 +733,7 @@ export default function FormationParcours() {
         }
       }
 
-      // Sélectionner le premier cours non terminé
+      // Select the first incomplete course
       let found = false;
       for (const m of modsWithCours) {
         if (!m.is_accessible) continue;
@@ -764,7 +764,7 @@ export default function FormationParcours() {
 
   useEffect(() => { load(); }, [load]);
 
-  // ── SEO : titre dynamique formation → module → cours ─────────────────────
+  // ── SEO: dynamic title formation → module → course ───────────────────────
   useEffect(() => {
     if (!formation) return;
     const parts = ["weeb"];
@@ -779,7 +779,7 @@ export default function FormationParcours() {
     return () => { document.title = prev; };
   }, [formation, activeCours?.title]);
 
-  // Focus vers le h1 du cours quand le contenu change
+  // Move focus to the course h1 when the content changes
   const activeCourseId = activeCours?.id;
   useEffect(() => {
     if (!loading && (activeCours || showQCM)) {
@@ -789,12 +789,12 @@ export default function FormationParcours() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCourseId, showQCM, loading]);
 
-  // Scroll en haut du contenu lors du changement de cours
+  // Scroll content area to the top when the course changes
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: reducedMotion ? "instant" : "smooth" });
   }, [activeCours?.id, showQCM, reducedMotion]);
 
-  // Fermer drawer si on passe en desktop
+  // Close the drawer when switching to desktop viewport
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
     const close = () => { if (mq.matches) closeSidebar(); };
@@ -802,7 +802,7 @@ export default function FormationParcours() {
     return () => mq.removeEventListener("change", close);
   }, []);
 
-  // Touche Échap ferme le drawer
+  // Escape key closes the drawer
   useEffect(() => {
     const handler = (e) => {
       if (e.key === "Escape" && sidebarOpen) closeSidebar();
@@ -811,15 +811,15 @@ export default function FormationParcours() {
     return () => document.removeEventListener("keydown", handler);
   }, [sidebarOpen]);
 
-  // ── Gestion sidebar ──────────────────────────────────────────────────────────
+  // ── Sidebar management ───────────────────────────────────────────────────────
 
   const closeSidebar = () => {
     setSidebarOpen(false);
-    // Rendre le focus au bouton ☰
+    // Return focus to the ☰ button
     setTimeout(() => menuBtnRef.current?.focus(), 50);
   };
 
-  // ── Handlers ────────────────────────────────────────────────────────────────
+  // ── Event handlers ──────────────────────────────────────────────────────────
 
   const selectCours = (cours, moduleId) => {
     if (!cours.is_accessible) return;
@@ -868,7 +868,7 @@ export default function FormationParcours() {
     });
   };
 
-  // ── Navigation prev/next ────────────────────────────────────────────────────
+  // ── Prev/next navigation ────────────────────────────────────────────────────
 
   const allItems = useMemo(() => safeModules.flatMap((m) => [
     ...m.coursList.map((c) => ({ type: "cours", data: c, moduleId: m.id, label: c.title })),
@@ -903,7 +903,7 @@ export default function FormationParcours() {
   const isAllDone = globalPct >= 100 && totalCours > 0 && doneCours >= totalCours;
   const activeModule = safeModules.find((m) => m.id === activeModuleId);
 
-  // ── Sidebar content (partagé desktop + mobile) ────────────────────────────
+  // ── Sidebar content (shared between desktop and mobile) ──────────────────
 
   const SidebarContent = () => (
     <nav aria-label={t.sidebar_label}>
@@ -914,7 +914,7 @@ export default function FormationParcours() {
 
           return (
             <li key={m.id} className="mb-1">
-              {/* En-tête module */}
+              {/* Module header */}
               <div
                 className={`flex items-center gap-2 px-2 py-2 rounded-lg transition-colors ${
                   isActiveMod
@@ -938,7 +938,7 @@ export default function FormationParcours() {
                 </div>
               </div>
 
-              {/* Cours du module */}
+              {/* Module courses */}
               <ul className="ml-5 mt-0.5 space-y-0.5" role="list">
                 {m.coursList.map((c) => {
                   const isActive = !showQCM && activeCours?.id === c.id;
@@ -1007,7 +1007,7 @@ export default function FormationParcours() {
     </nav>
   );
 
-  // ── Rendu ─────────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────────
 
   if (loading) return <PageSkeleton theme={theme} />;
 
@@ -1025,7 +1025,7 @@ export default function FormationParcours() {
   return (
     <div className={`min-h-screen flex flex-col ${bg}`}>
 
-      {/* ── Skip link ─────────────────────────────────────────────────────── */}
+      {/* ── Skip link ──────────────────────────────────────────────────────── */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-indigo-600 focus:text-white focus:text-sm focus:font-semibold focus:shadow-lg"
@@ -1033,7 +1033,7 @@ export default function FormationParcours() {
         {t.skip_to_content}
       </a>
 
-      {/* ── Zone aria-live pour les annonces ──────────────────────────────── */}
+      {/* ── aria-live region for screen reader announcements ─────────────── */}
       <div
         aria-live="polite"
         aria-atomic="true"
@@ -1074,7 +1074,7 @@ export default function FormationParcours() {
           </div>
         </div>
 
-        {/* Bouton sidebar mobile */}
+        {/* Mobile sidebar toggle button */}
         <button
           ref={menuBtnRef}
           type="button"
@@ -1101,7 +1101,7 @@ export default function FormationParcours() {
         </button>
       </header>
 
-      {/* ── Body ───────────────────────────────────────────────────────────── */}
+      {/* ── Body ────────────────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden">
 
         {/* Sidebar desktop */}
@@ -1112,7 +1112,7 @@ export default function FormationParcours() {
           <SidebarContent />
         </aside>
 
-        {/* Overlay drawer mobile */}
+        {/* Mobile drawer overlay */}
         {sidebarOpen && (
           <div
             className="md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
@@ -1121,7 +1121,7 @@ export default function FormationParcours() {
           />
         )}
 
-        {/* Drawer mobile */}
+        {/* Mobile drawer */}
         <aside
           ref={drawerRef}
           id="mobile-sidebar"
@@ -1149,7 +1149,7 @@ export default function FormationParcours() {
           </div>
         </aside>
 
-        {/* Contenu principal */}
+        {/* Main content */}
         <main
           ref={contentRef}
           id="main-content"
@@ -1185,7 +1185,7 @@ export default function FormationParcours() {
               </nav>
             )}
 
-            {/* État vide */}
+            {/* Empty state */}
             {!activeCours && !showQCM && (
               <div className={`text-center py-20 ${muted}`}>
                 <p className="text-5xl mb-4" aria-hidden="true">📚</p>
@@ -1201,14 +1201,14 @@ export default function FormationParcours() {
               </div>
             )}
 
-            {/* Bannière formation terminée */}
+            {/* Formation completed banner */}
             {isAllDone && !showQCM && (!activeCours || activeCours?.is_completed) && (
               <div className="mb-6">
                 <CompletionBanner formationName={formation?.name} theme={theme} />
               </div>
             )}
 
-            {/* Cours actif */}
+            {/* Active course */}
             {activeCours && !showQCM && (
               <CoursContent
                 key={activeCours.id}
@@ -1225,7 +1225,7 @@ export default function FormationParcours() {
               />
             )}
 
-            {/* QCM actif */}
+            {/* Active QCM */}
             {showQCM && activeModuleId && (
               <section aria-label={t.qcm_validation_title} className={`space-y-5 rounded-2xl border p-4 sm:p-6 overflow-hidden ${
                 theme === "dark" ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-100 shadow-sm"
@@ -1252,7 +1252,7 @@ export default function FormationParcours() {
               </section>
             )}
 
-            {/* Navigation précédent / suivant */}
+            {/* Previous / next navigation */}
             {(activeCours || showQCM) && (
               <nav
                 aria-label={t.nav_lessons_label}

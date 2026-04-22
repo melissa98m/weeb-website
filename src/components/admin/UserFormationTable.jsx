@@ -83,7 +83,7 @@ function UserFormationTable({
   const DesktopTable = () => (
     <div className="hidden md:block overflow-x-auto">
       <table
-        className="min-w-full text-sm table-fixed" // table-fixed pour contrôle des largeurs + ellipsis
+        className="min-w-full text-sm table-fixed" // table-fixed for column-width control + text ellipsis
         aria-busy={loading ? "true" : "false"}
       >
         <colgroup>

@@ -1,10 +1,10 @@
 /**
  * Helpers SEO — canonical, Open Graph, Twitter Cards, robots
  *
- * Ces fonctions manipulent le <head> de manière impérative depuis les useEffect
- * des pages. Elles retournent un cleanup pour le démontage du composant.
+ * These functions imperatively update the <head> from page-level useEffect hooks.
+ * Each one returns a cleanup function for use as the useEffect return value.
  *
- * Utilisation dans un useEffect :
+ * Usage inside a useEffect:
  *   const cleanCanonical = setCanonical("/blog");
  *   return cleanCanonical;
  */
@@ -15,7 +15,7 @@ const SITE_URL =
 
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
-/** Ajoute ou met à jour <link rel="canonical">. */
+/** Adds or updates the <link rel="canonical"> tag. */
 export function setCanonical(path) {
   const url = `${SITE_URL}${path}`;
   let link = document.querySelector('link[rel="canonical"]');
@@ -36,7 +36,7 @@ export function setCanonical(path) {
   };
 }
 
-/** Ajoute ou met à jour une <meta property="og:*">. */
+/** Adds or updates a <meta property="og:*"> tag. */
 export function setOgMeta(property, content) {
   let meta = document.querySelector(`meta[property="${property}"]`);
   const created = !meta;
@@ -56,7 +56,7 @@ export function setOgMeta(property, content) {
   };
 }
 
-/** Ajoute ou met à jour une <meta name="twitter:*">. */
+/** Adds or updates a <meta name="twitter:*"> tag. */
 export function setTwitterMeta(name, content) {
   let meta = document.querySelector(`meta[name="${name}"]`);
   const created = !meta;
@@ -77,9 +77,9 @@ export function setTwitterMeta(name, content) {
 }
 
 /**
- * Injecte les balises hreflang pour un site bilingue FR/EN sur une même URL.
- * Utilise uniquement x-default car les deux langues partagent le même chemin.
- * path — chemin de la page (ex: "/blog").
+ * Injects hreflang tags for a bilingual FR/EN site sharing a single URL structure.
+ * Only x-default is used since both languages live at the same path.
+ * path — the page path (e.g. "/blog").
  */
 export function setHreflang(path) {
   const href = `${SITE_URL}${path}`;
@@ -102,7 +102,7 @@ export function setHreflang(path) {
   };
 }
 
-/** Injecte ou met à jour un script JSON-LD dans le <head>. */
+/** Injects or updates a JSON-LD script block in the <head>. */
 export function setJsonLd(id, data) {
   let script = document.getElementById(id);
   const created = !script;

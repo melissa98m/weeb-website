@@ -10,7 +10,7 @@ import { API_BASE } from "../../lib/api";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
-/* ==== Icônes (SVG inline, zéro dépendance) ==== */
+/* ==== Icons (inline SVG, zero extra dependencies) ==== */
 function IconLink({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -193,7 +193,7 @@ export default function AdminHome() {
   const { language } = useLanguage();
   const t = language === "fr" ? adminFr : adminEn;
 
-  // SEO : les pages admin ne doivent jamais être indexées
+  // SEO: admin pages should never be indexed
   useEffect(() => {
     const prev = document.title;
     document.title = t.page_title_admin;
@@ -207,17 +207,17 @@ export default function AdminHome() {
     return () => { document.title = prev; };
   }, []);
 
-  // Visibilités par rôle
-  const canStaff = hasAnyStaffRole(user);       // ex: Commercial / Personnel
-  const canPersonnel = hasPersonnelRole(user);  // permissions “Personnel”
-  const canRedact = hasAnyRedactionRole(user);  // Rédaction
+  // Role-based visibility
+  const canStaff = hasAnyStaffRole(user);       // e.g. Commercial / Personnel
+  const canPersonnel = hasPersonnelRole(user);  // “Personnel” permissions
+  const canRedact = hasAnyRedactionRole(user);  // Redaction
 
   const card =
     theme === "dark" ? "bg-surface-2 text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const ghostBtn =
     theme === "dark" ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
-  // Résumé analytiques
+  // Analytics summary
   const [analytics, setAnalytics] = useState(null);
   useEffect(() => {
     if (!canStaff) return;
@@ -229,7 +229,7 @@ export default function AdminHome() {
     return () => { alive = false; };
   }, [canStaff]);
 
-  // Compteurs “à traiter”
+  // Pending action counters
   const [fbPending, setFbPending] = useState(null);
   const [msgPending, setMsgPending] = useState(null);
   const ctrlRef = useRef(null);
@@ -251,12 +251,12 @@ export default function AdminHome() {
     const ac = new AbortController();
     ctrlRef.current = ac;
     try {
-      // Feedbacks “à traiter”
+      // Pending feedbacks
       const c1 = await fetchCount(`${API_BASE}/feedbacks/?to_process=false`, ac.signal);
       setFbPending(c1);
     } catch { setFbPending(null); }
     try {
-      // Messages “à traiter”
+      // Pending messages
       const c2 = await fetchCount(`${API_BASE}/messages/?is_processed=false`, ac.signal);
       setMsgPending(c2);
     } catch { setMsgPending(null); }
@@ -278,7 +278,7 @@ export default function AdminHome() {
         </p>
       </header>
 
-      {/* Grille de raccourcis (affichés selon rôles) */}
+      {/* Shortcut grid (shown based on role) */}
       <section className={`rounded-2xl border p-3 ${card}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {/* Affectations (Personnel / Staff) */}
@@ -303,7 +303,7 @@ export default function AdminHome() {
             </Link>
           )}
 
-          {/* Articles (Rédaction) */}
+          {/* Articles (Redaction) */}
           {canRedact && (
             <Link to="/admin/articles" className={`rounded-xl border p-4 flex items-start gap-3 hover:brightness-105 transition ${card}`}>
               <div className="mt-0.5"><IconPen /></div>
@@ -362,7 +362,7 @@ export default function AdminHome() {
         </div>
       </section>
 
-      {/* Résumé analytiques */}
+      {/* Analytics summary */}
       {canStaff && (
         <section className={`mt-4 rounded-2xl border p-4 ${card}`}>
           <div className="flex items-center justify-between mb-3">
@@ -444,7 +444,7 @@ export default function AdminHome() {
         </section>
       )}
 
-      {/* Footer accès/roles */}
+      {/* Access/roles footer */}
       <div className="mt-4">
         <AdminAccessFooter />
       </div>

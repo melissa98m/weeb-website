@@ -69,7 +69,7 @@ describe("api csrf", () => {
 describe("api timeout", () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    // fetch qui attend indéfiniment mais respecte le signal d'abort
+    // fetch that waits forever but respects the abort signal
     vi.stubGlobal(
       "fetch",
       vi.fn((_url, options) =>
@@ -92,7 +92,7 @@ describe("api timeout", () => {
 
   it("aborts and rejects with a network error after 10 seconds", async () => {
     const promise = AuthApi.me();
-    // Attacher le handler avant d'avancer les timers pour éviter une unhandled rejection
+    // Attach the handler before advancing timers to avoid an unhandled rejection
     const assertion = expect(promise).rejects.toMatchObject({
       name: "ApiClientError",
       network: true,

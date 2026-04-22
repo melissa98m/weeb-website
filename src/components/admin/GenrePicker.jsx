@@ -24,9 +24,9 @@ export default function GenrePicker({
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
 
-  // création rapide
+  // Quick create
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState("#6b7280"); // gris par défaut
+  const [newColor, setNewColor] = useState("#6b7280"); // default gray
   const [creating, setCreating] = useState(false);
   const lastColorRef = useRef(new Map());
 
@@ -96,7 +96,7 @@ export default function GenrePicker({
     onChange(value.filter(v => String(v.id) !== String(id)));
   }, [value, onChange]);
 
-  // PATCH couleur d’un genre sélectionné
+  // PATCH the color of a selected genre
   const patchColor = useCallback(async (id, color) => {
     // Optimistic update local
     onChange(value.map(v => (String(v.id) === String(id) ? { ...v, color } : v)));
@@ -126,7 +126,7 @@ export default function GenrePicker({
     patchColor(id, next);
   }, [patchColor]);
 
-  // Créer un genre (avec couleur)
+  // Create a genre (with color)
   const createGenre = useCallback(async () => {
     const n = newName.trim();
     if (!n) return;
@@ -157,7 +157,7 @@ export default function GenrePicker({
   return (
     <section className={`rounded-xl border ${card}`}>
       <div className="p-4 space-y-3">
-        {/* sélection actuelle */}
+        {/* Current selection */}
         <div className="flex flex-wrap gap-2">
           {value.length === 0 && (
             <span className={theme === "dark" ? "text-white/60" : "text-gray-600"}>
@@ -171,7 +171,7 @@ export default function GenrePicker({
               style={safeChipStyle(g.color, theme)}
             >
               {g.name}
-              {/* Color picker inline pour le genre sélectionné */}
+              {/* Inline color picker for the selected genre */}
               <input
                 type="color"
                 value={(g.color && /^#[0-9A-Fa-f]{6}$/.test(g.color)) ? g.color : "#6b7280"}
@@ -239,7 +239,7 @@ export default function GenrePicker({
           )}
         </div>
 
-        {/* création rapide — pas de <form> ici */}
+        {/* Quick create — no nested <form> here */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
           <input
             className={`min-w-[200px] rounded-lg border px-3 py-2 ${inputCls}`}

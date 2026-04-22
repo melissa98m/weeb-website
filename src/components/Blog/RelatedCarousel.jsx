@@ -74,7 +74,7 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
           {authorLabel} • {formatDate(dateIso, language)}
         </div>
 
-        {/* genres (bordure/texte colorés) */}
+        {/* Genres (colored border/text chips) */}
         <div className="mt-2 flex flex-wrap gap-1.5">
           {(Array.isArray(item.genres) ? item.genres : []).slice(0, 3).map((g) => (
             <span
@@ -150,7 +150,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
   if (loading || !genreIds.length) return null;
   if (err || items.length === 0) return null;
 
-  // CSS pour masquer les barres de défilement (Firefox, WebKit, Edge/IE)
+  // CSS to hide scrollbars (Firefox, WebKit, Edge/IE)
   const HIDE_SCROLLBAR_CSS = `
     .related-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .related-scroll::-webkit-scrollbar { display: none; }

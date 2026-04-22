@@ -50,7 +50,7 @@ export default function NotFound() {
         isDark ? "bg-background text-white" : "bg-light text-dark"
       }`}
     >
-      {/* Glow décoratif */}
+      {/* Decorative glow */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 overflow-hidden"

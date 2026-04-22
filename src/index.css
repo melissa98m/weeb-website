@@ -26,7 +26,7 @@
 
   /* Corps : Plus Jakarta Sans — humaniste, lisible, distinctif */
   --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
-  /* Titres : Syne — géométrique, caractère fort en Bold/ExtraBold */
+  /* Headings: Syne — geometric, strong character in Bold/ExtraBold */
   --font-display: "Syne", system-ui, sans-serif;
   --animate-spin: spin 4s linear infinite
 }
@@ -38,7 +38,7 @@ html.light {
   background-color: #f2f2f2;
 }
 
-/* ── RichTextEditor (éditeur) + article-body (rendu) ─────────────────────── */
+/* ── RichTextEditor (editor) + article-body (render) ────────────────────── */
 
 .ProseMirror {
   outline: none;
@@ -51,7 +51,7 @@ html.light {
   pointer-events: none;
 }
 
-/* Bloc de code — éditeur (Tiptap v3 = .tiptap.ProseMirror) ET rendu article */
+/* Code block — editor (Tiptap v3 = .tiptap.ProseMirror) AND article render */
 .tiptap pre,
 .ProseMirror pre,
 .article-body pre {
@@ -68,7 +68,7 @@ html.light {
   text-align: left !important;
 }
 
-/* Le <code> dans <pre> : fond transparent, hljs gère les couleurs de syntaxe */
+/* <code> inside <pre>: transparent background, hljs handles syntax colors */
 .tiptap pre code,
 .ProseMirror pre code,
 .article-body pre code {
@@ -99,7 +99,7 @@ html.dark .article-body :not(pre) > code {
   color: #f87171;
 }
 
-/* Autres éléments */
+/* Other elements */
 .tiptap blockquote,
 .ProseMirror blockquote,
 .article-body blockquote {

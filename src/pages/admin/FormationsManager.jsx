@@ -152,7 +152,7 @@ export default function FormationsManager() {
     }
   }, [fetchJSON, startTask, pageSize, debouncedQ]);
 
-  // initial + changements de critères
+  // Initial load + re-fetch when criteria change
   useEffect(() => { setPage(1); }, [pageSize, debouncedQ]);
   useEffect(() => { load(page); }, [page, load]);
 
@@ -164,13 +164,13 @@ export default function FormationsManager() {
   const onDeleted = (id) => {
     setOpen(false);
     setItems((prev) => prev.filter((f) => String(f.id) !== String(id)));
-    // load(1); // si tu préfères recharger depuis l'API
+    // load(1); // uncomment to reload from the API instead
   };
 
   const handleCreated = useCallback((created) => {
-    // ferme la modale de création
+    // Close the create modal
     setShowCreate(false);
-    // ouvre directement la modale de détails sur l'élément créé
+    // Open the detail modal directly on the newly created item
     const f = {
       id: created.id,
       title: created.title ?? created.name ?? created.label ?? `formation#${created.id}`,
@@ -178,7 +178,7 @@ export default function FormationsManager() {
     };
     setCurrent(f);
     setOpen(true);
-    // rafraîchit la liste (et la pagination)
+    // Refresh the list (and pagination)
     setTimeout(() => {
       setPage(1);
       load(1);
@@ -203,7 +203,7 @@ export default function FormationsManager() {
           </p>
         </div>
 
-        {/* Actions: créer + recherche + taille de page */}
+        {/* Actions: create + search + page size */}
         <div className="flex items-center gap-2 flex-wrap sm:justify-end">
           <button
             type="button"
@@ -270,7 +270,7 @@ export default function FormationsManager() {
         <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
       </div>
 
-      {/* Modal détails */}
+      {/* Detail modal */}
       <FormationDetailsModal
         open={open}
         onClose={() => setOpen(false)}
@@ -279,7 +279,7 @@ export default function FormationsManager() {
         onDeleted={onDeleted}
       />
 
-      {/* Modal création */}
+      {/* Create modal */}
       <CreateFormationModal
         open={showCreate}
         onClose={() => setShowCreate(false)}

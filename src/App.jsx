@@ -48,8 +48,8 @@ function App() {
   const { theme } = useTheme();
   const location = useLocation();
 
-  // La page d'apprentissage est une interface plein-écran autonome :
-  // elle gère son propre header, pas besoin du header/footer global.
+  // The learning page is a standalone full-screen interface with its own header —
+  // the global header/footer should not render there.
   const isLearnPage = /^\/formation\/[^/]+\/learn/.test(location.pathname);
 
   return (
@@ -79,7 +79,7 @@ function App() {
             <Route path="/formation/:id" element={<FormationModal />} />
             <Route path="/search" element={<SearchResults />} />
 
-            {/* Formation parcours — utilisateur inscrit */}
+            {/* Formation learning path — enrolled users only */}
             <Route
               path="/formation/:id/learn"
               element={

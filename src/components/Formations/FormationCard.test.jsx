@@ -20,7 +20,7 @@ describe("FormationCard", () => {
     expect(screen.getByText("React Basics")).toBeInTheDocument();
     expect(screen.getByText("Learn React")).toBeInTheDocument();
 
-    // aria-label: "Voir les détails de React Basics"
+    // aria-label: "Voir les détails de React Basics" (French UI label from locales)
     await user.click(screen.getByRole("button", { name: /voir les détails de/i }));
     expect(onView).toHaveBeenCalledWith(formation);
   });

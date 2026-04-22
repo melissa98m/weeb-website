@@ -41,7 +41,7 @@ function ErrMsg({ msg }) {
   return <p className="text-xs text-red-500 mt-1">{msg}</p>;
 }
 
-// ── Onglet Modules ────────────────────────────────────────────────────────────
+// ── Modules tab ───────────────────────────────────────────────────────────────
 
 function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAttached, onClose }) {
   const [q, setQ] = useState("");
@@ -278,7 +278,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
               </div>
             ))}
 
-            {/* Créer un cours */}
+            {/* Create a new course */}
             <div className="flex gap-3 mt-1 pt-1">
               <button type="button" onClick={() => setCoursModalOpen(true)} className={`text-xs ${muted} hover:underline`}>{t.content_btn_add_course}</button>
               <button type="button" onClick={() => setShowAttach(true)} className={`text-xs ${muted} hover:underline`}>+ rattacher un cours existant</button>
@@ -344,7 +344,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
 
   return (
     <div className="space-y-2">
-      {/* Barre de recherche + bouton créer */}
+      {/* Search bar + create button */}
       <div className="flex gap-2 items-center">
         <input
           className={`flex-1 rounded-lg border px-3 py-1.5 text-sm outline-none ${inputCls}`}
@@ -362,7 +362,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
         </button>
       </div>
 
-      {/* Formulaire création */}
+      {/* Create form */}
       {adding && (
         <div className={`rounded-xl border p-3 space-y-2 ${theme === "dark" ? "bg-surface border-border" : "bg-gray-50 border-gray-200"}`}>
           <input

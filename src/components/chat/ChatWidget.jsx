@@ -8,7 +8,7 @@ export default function ChatWidget() {
   const { unreadCount } = useChat();
   const [open, setOpen] = useState(false);
 
-  // Pas affiché pour les anonymes ni pour les admins (qui ont leur propre panel)
+  // Not shown for anonymous users or admins (who have their own chat panel)
   if (!user || user.is_staff || user.is_superuser) return null;
 
   return (

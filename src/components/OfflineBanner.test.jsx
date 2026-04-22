@@ -68,7 +68,7 @@ describe("OfflineBanner", () => {
     const { unmount } = render(<OfflineBanner />);
     unmount();
 
-    // Après démontage, l'événement offline ne doit plus rien afficher
+    // After unmount, the offline event should no longer show anything
     act(() => {
       window.dispatchEvent(new Event("offline"));
     });

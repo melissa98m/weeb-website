@@ -112,7 +112,7 @@ describe("ChatWindow", () => {
     const textarea = screen.getByRole("textbox");
     await userEvent.type(textarea, "Message perdu");
 
-    // Le bouton est disabled quand non connecté
+    // Button is disabled when not connected
     expect(screen.getByRole("button", { name: /envoyer/i })).toBeDisabled();
   });
 
@@ -124,7 +124,7 @@ describe("ChatWindow", () => {
   it("bouton d'envoi désactivé si non connecté", () => {
     mockUseChat.mockReturnValue({ ...chatConnecte, connected: false });
     render(<ChatWindow onClose={onClose} />);
-    // Le bouton reste disabled même avec du texte car !connected
+    // Button stays disabled even with text because !connected
     expect(screen.getByRole("button", { name: /envoyer/i })).toBeDisabled();
   });
 

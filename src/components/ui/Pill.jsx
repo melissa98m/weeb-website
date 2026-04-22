@@ -25,7 +25,7 @@ function Pill({
     md: "text-sm px-3 py-1",
   };
 
-  // palettes par thème
+  // Color palettes by theme
   const paletteLight = {
     neutral: {
       soft: "bg-gray-100 text-gray-800 border border-gray-200",

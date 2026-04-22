@@ -20,7 +20,7 @@ export default function Profile() {
   const { language } = useLanguage();
   const t = useMemo(() => (language === "fr" ? profileFr : profileEn), [language]);
 
-  // SEO : profil utilisateur — données personnelles, jamais indexées
+  // SEO: user profile — personal data, never indexed
   useEffect(() => {
     const prev = document.title;
     document.title = "Mon profil | Weeb";
@@ -36,7 +36,7 @@ export default function Profile() {
 
   const userId = user?.id ?? user?.pk ?? user?.user_id ?? null;
 
-  // ---------- Formations + Feedbacks + Dashboard (parallèle) ----------
+  // ---------- Formations + Feedbacks + Dashboard (parallel) ----------
   const [formations, setFormations] = useState([]);
   const [fLoading, setFLoading] = useState(true);
   const [fError, setFError] = useState(null);
@@ -118,7 +118,7 @@ export default function Profile() {
         setDashData(dashRes.value);
         setDashError(null);
       } else {
-        setDashError(dashRes.reason?.message || "Erreur");
+        setDashError(dashRes.reason?.message || "Error");
       }
       setDashLoading(false);
     })();
@@ -126,7 +126,7 @@ export default function Profile() {
     return () => { alive = false; ctr.abort(); };
   }, [API_BASE, authLoading, userId]);
 
-  // ---------- Historique connexions ----------
+  // ---------- Login history ----------
   const [loginHistory, setLoginHistory] = useState([]);
   const [loginHistoryLoading, setLoginHistoryLoading] = useState(false);
   const [showLoginHistory, setShowLoginHistory] = useState(false);
@@ -146,11 +146,11 @@ export default function Profile() {
     return () => { alive = false; };
   }, [showLoginHistory, authLoading, userId]);
 
-  // ---------- Modale feedback ----------
+  // ---------- Feedback modal ----------
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
 
-  // tant que l'auth charge, on peut afficher un skeleton basique
+  // While auth is loading, show a basic skeleton
   if (authLoading) {
     return (
       <main className="min-h-[60vh] px-6 py-16 flex justify-center">
@@ -172,7 +172,7 @@ export default function Profile() {
   if (!user) return null;
 
   const openFeedback = (formation) => {
-    if (fbMap[formation.id]) return; // si déjà envoyé, on bloque
+    if (fbMap[formation.id]) return; // already submitted — prevent duplicate
     setSelectedFormation(formation);
     setOpenFb(true);
   };
@@ -220,7 +220,7 @@ export default function Profile() {
           onGiveFeedback={openFeedback}
         />
 
-        {/* Historique des connexions */}
+        {/* Login history */}
         <section className="w-full max-w-2xl mt-10">
           <button
             type="button"

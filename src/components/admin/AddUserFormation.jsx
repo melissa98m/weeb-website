@@ -23,7 +23,7 @@ function AddUserFormationForm({
     try {
       const params = new URLSearchParams();
       params.set("search", query);
-      params.set("page_size", "20"); // Limiter les résultats
+      params.set("page_size", "20"); // Limit results
 
       const response = await fetch(`${API_BASE}/users/?${params.toString()}`, {
         credentials: "include",
@@ -61,7 +61,7 @@ function AddUserFormationForm({
     try {
       const params = new URLSearchParams();
       params.set("search", query);
-      params.set("page_size", "20"); // Limiter les résultats
+      params.set("page_size", "20"); // Limit results
 
       const response = await fetch(`${API_BASE}/formations/?${params.toString()}`, {
         credentials: "include",

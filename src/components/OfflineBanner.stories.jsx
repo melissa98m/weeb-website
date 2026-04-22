@@ -31,7 +31,7 @@ const meta = {
 
 export default meta;
 
-/** Connecté — la bannière ne s'affiche pas */
+/** Online — the banner is not shown */
 export const Online = {
   render: () => (
     <div className="p-10 text-sm text-gray-500">
@@ -41,7 +41,7 @@ export const Online = {
   ),
 };
 
-/** Hors-ligne — la bannière est visible en bas de page */
+/** Offline — the banner is visible at the bottom of the page */
 export const Offline = {
   render: () => (
     <div style={{ minHeight: "300px", position: "relative" }}>

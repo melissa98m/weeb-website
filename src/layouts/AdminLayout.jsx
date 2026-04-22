@@ -8,8 +8,8 @@ export default function AdminLayout({ children }) {
   const { theme } = useTheme();
   const [open, setOpen] = useState(false); // drawer mobile
 
-  // Accès: tout utilisateur connecté peut voir le layout.
-  // Les pages internes restent libres d'ajouter leurs propres gardes si besoin.
+  // Any authenticated user can see this layout.
+  // Individual pages are free to add their own guards on top.
   if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
 
   const bg = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";

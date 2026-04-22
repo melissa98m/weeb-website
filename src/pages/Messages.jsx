@@ -302,7 +302,7 @@ export default function Messages() {
               <div className={`font-medium mb-1 ${muted}`}>{t.message}</div>
               <p className="whitespace-pre-wrap break-words">{row.message_content || "—"}</p>
             </div>
-            {/* Réponse interne */}
+            {/* Internal reply */}
             <div>
               <div className={`font-medium mb-1 ${muted}`}>{t.reply}</div>
               <textarea

@@ -1,10 +1,10 @@
 /**
- * Instance highlight.js pré-configurée avec les langages communs.
- * Utilisée pour la coloration syntaxique dans les pages de rendu
- * (BlogDetail, FormationParcours) — l'éditeur Tiptap utilise lowlight.
+ * Pre-configured highlight.js instance with common languages.
+ * Used for syntax highlighting in rendering pages
+ * (BlogDetail, FormationParcours) — the Tiptap editor uses lowlight instead.
  *
- * Les grammars sont déjà dans le bundle via `createLowlight(common)` dans
- * RichTextEditor.jsx — aucun code supplémentaire n'est ajouté.
+ * Language grammars are already bundled via `createLowlight(common)` in
+ * RichTextEditor.jsx — no extra code is loaded here.
  */
 import DOMPurify from "dompurify";
 import hljs from "highlight.js/lib/core";
@@ -45,8 +45,8 @@ hljs.registerLanguage("yaml", yaml);
 hljs.configure({ ignoreUnescapedHTML: true });
 
 /**
- * Applique la coloration syntaxique à tous les blocs <pre><code> dans un
- * élément conteneur. Ignore les blocs déjà traités (data-highlighted).
+ * Applies syntax highlighting to all <pre><code> blocks inside a container.
+ * Skips blocks that have already been processed (data-highlighted).
  *
  * @param {HTMLElement|null} container
  */
@@ -60,11 +60,11 @@ export function highlightContainer(container) {
 }
 
 /**
- * Parse une chaîne HTML, applique la coloration syntaxique sur tous les
- * blocs <pre><code>, et retourne le HTML résultant.
+ * Parses an HTML string, applies syntax highlighting to all <pre><code>
+ * blocks, and returns the resulting HTML.
  *
- * Utilisation : const html = parseAndHighlight(rawHtml)
- * puis <div dangerouslySetInnerHTML={{ __html: html }} />
+ * Usage: const html = parseAndHighlight(rawHtml)
+ * then <div dangerouslySetInnerHTML={{ __html: html }} />
  *
  * @param {string} html
  * @returns {string}

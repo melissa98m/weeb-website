@@ -51,7 +51,7 @@ describe("LearningSection", () => {
 
   it("affiche un sous-titre uppercase", () => {
     const { container } = renderSection();
-    // Le sous-titre est un <p> stylé uppercase via CSS
+    // The subtitle is a <p> styled uppercase via CSS
     expect(container.querySelector("p.uppercase, p[class*='uppercase']")).toBeInTheDocument();
   });
 });

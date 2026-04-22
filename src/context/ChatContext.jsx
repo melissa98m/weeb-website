@@ -24,9 +24,9 @@ export function ChatProvider({ children }) {
 
     setConnecting(true);
 
-    // Obtenir un ticket éphémère via HTTP (les cookies passent normalement en HTTP)
-    // afin d'authentifier la connexion WebSocket (les cookies HttpOnly ne sont pas
-    // toujours transmis lors du handshake WS en cross-port en local).
+    // Fetch an ephemeral ticket via HTTP (cookies flow normally over HTTP)
+    // to authenticate the WebSocket connection (HttpOnly cookies are not always
+    // forwarded during WS handshakes on cross-port origins in local dev).
     let ticket = "";
     try {
       const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
@@ -39,7 +39,7 @@ export function ChatProvider({ children }) {
         ticket = data.ticket ?? "";
       }
     } catch {
-      // silencieux — le fallback cookie sera tenté côté serveur
+      // silent — the server will fall back to the cookie
     }
 
     const wsUrl = ticket
@@ -69,14 +69,14 @@ export function ChatProvider({ children }) {
           }
         }
       } catch {
-        // JSON invalide — ignoré
+        // invalid JSON — ignored
       }
     };
 
     newWs.onclose = (e) => {
       setConnected(false);
       setConnecting(false);
-      // Ne pas reconnecter si fermeture intentionnelle (code 4401 = non auth)
+      // Don't reconnect on intentional close (code 4401 = unauthenticated)
       if (e.code === 4401 || e.code === 1000) return;
       reconnectRef.current = setTimeout(() => {
         if (userRef.current) connect();
@@ -84,19 +84,19 @@ export function ChatProvider({ children }) {
     };
 
     newWs.onerror = () => newWs.close();
-  }, []); // stable — utilise userRef pour éviter les re-créations
+  }, []); // stable — uses userRef to avoid re-creation on every render
 
   useEffect(() => {
     const handlePageHide = (e) => {
       if (e.persisted) {
-        // Page en train d'entrer dans le bfcache — fermer la WS pour l'autoriser
+        // Page entering the bfcache — close the WS to allow it
         clearTimeout(reconnectRef.current);
         wsRef.current?.close(1000, "bfcache");
       }
     };
     const handlePageShow = (e) => {
       if (e.persisted) {
-        // Page restaurée depuis le bfcache — reconnecter
+        // Page restored from the bfcache — reconnect
         connect();
       }
     };

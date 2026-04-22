@@ -47,12 +47,12 @@ export default function ArticlesManager() {
     ? "bg-secondary text-white border-secondary hover:brightness-110"
     : "bg-primary text-dark border-primary hover:brightness-110";
 
-  // Liste affichée
+  // Displayed items
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  // Recherche
+  // Search
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
@@ -65,19 +65,19 @@ export default function ArticlesManager() {
   const [genres, setGenres] = useState([]); // [{id,name,color}]
   const [selectedGenreId, setSelectedGenreId] = useState(null);
 
-  // Onglet actif
+  // Active tab
   const [activeTab, setActiveTab] = useState("articles"); // "articles" | "comments"
 
-  // Modération commentaires
+  // Comment moderation
   const [allComments, setAllComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [commentsFilter, setCommentsFilter] = useState("all"); // "all" | "true" | "false"
 
-  // Modale
+  // Modal
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(null);
 
-  // Deux contrôleurs distincts
+  // Two separate abort controllers
   const genresCtrlRef = useRef(null);
   const listCtrlRef = useRef(null);
 
@@ -153,7 +153,7 @@ export default function ArticlesManager() {
         raw: a,
       }));
 
-      // Filtre local (genre + recherche) comme Blog
+      // Local filter (genre + search) like the Blog page
       const localFiltered = normalized.filter((it) => {
         const genreOk =
           selectedGenreId == null
@@ -304,13 +304,13 @@ export default function ArticlesManager() {
           <GenreChips
             genres={genresForChips}
             selectedId={selectedGenreId}
-            onChange={(id) => setSelectedGenreId(id)} // id peut être null (“Tous”)
+            onChange={(id) => setSelectedGenreId(id)} // id can be null (“All”)
             theme={theme}
           />
         </section>
       )}
 
-      {/* Panel modération commentaires */}
+      {/* Comment moderation panel */}
       {activeTab === "comments" && (
         <section className={`mt-3 rounded-2xl border p-4 ${card}`}>
           <div className="flex items-center gap-3 mb-4">

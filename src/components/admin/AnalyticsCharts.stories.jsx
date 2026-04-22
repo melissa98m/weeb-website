@@ -86,7 +86,7 @@ export const DarkTheme = {
 export const Loading = {
   decorators: [
     (Story) => {
-      // Fetch qui ne se résout jamais = état loading permanent
+      // Fetch that never resolves = permanent loading state
       useEffect(() => {
         const original = window.fetch;
         window.fetch = () => new Promise(() => {});

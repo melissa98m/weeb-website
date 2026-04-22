@@ -224,7 +224,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
       setCours((prev) => prev.map((x) => {
         if (x.id !== c.id) return x;
         const updated = { ...x, is_completed: true };
-        // Déverrouille le cours suivant
+        // Unlock the next course
         return updated;
       }).map((x, i, arr) => {
         if (i === 0) return { ...x, is_accessible: true };
@@ -232,7 +232,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
       }));
       setLocalModule((m) => ({ ...m, completed_cours: data.completed_cours }));
       onProgressUpdate?.();
-      // Si tous les cours terminés et QCM existe, proposer le QCM
+      // If all courses are done and a QCM exists, prompt the quiz
       if (data.all_cours_done && localModule.has_qcm) setShowQCM(true);
     } catch { /* noop */ }
   };
@@ -260,7 +260,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
         aria-expanded={open}
         disabled={!localModule.is_accessible}
       >
-        {/* Icône statut */}
+        {/* Status icon */}
         <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs shrink-0 ${
           localModule.is_completed
             ? "border-green-500 bg-green-500 text-white"
@@ -294,7 +294,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
         <span className={`text-xs ${muted}`} aria-hidden="true">{open ? "▲" : "▼"}</span>
       </button>
 
-      {/* Contenu accordéon */}
+      {/* Accordion content */}
       {open && (
         <div className="px-4 pb-4 border-t border-inherit">
           {/* Cours list */}
@@ -420,7 +420,7 @@ export default function FormationModal({ open, onClose, formation, theme, t, use
     setEnrolledLoading(true);
     try {
       const userId = user.id ?? user.pk ?? user.user_id;
-      // Vérifie si cette formation est dans la liste des formations de l'utilisateur
+      // Check whether this formation is in the user's enrolled list
       const r = await fetch(
         `${API_BASE}/formations/?user=${encodeURIComponent(userId)}`,
         { credentials: "include" }
@@ -494,7 +494,7 @@ export default function FormationModal({ open, onClose, formation, theme, t, use
             <p className={`${muted} whitespace-pre-line mb-4`}>{formation.description}</p>
           )}
 
-          {/* Vérification inscription en cours */}
+          {/* Enrollment check in progress */}
           {user && enrolledLoading && (
             <div className={`h-8 rounded-lg animate-pulse mb-4 ${theme === "dark" ? "bg-white/5" : "bg-gray-100"}`} />
           )}
