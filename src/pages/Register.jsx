@@ -94,7 +94,7 @@ export default function Register() {
     });
   }, [form.password]);
 
-  // Helpers téléphone
+  // Phone helpers
   const onlyDialable = (s) => (s || "").replace(/[^\d]/g, "");
   const normalizePhone = (raw) => {
     const source = (raw || "").trim();
@@ -171,7 +171,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Vérifier si le compte est verrouillé
+    // Check if the account is locked
     if (isLocked) {
       setErrors({
         form: language === "fr" 
@@ -357,7 +357,7 @@ export default function Register() {
             )}
           </div>
 
-          {/* Prénom */}
+          {/* First name */}
           <div>
             <label htmlFor="prenom" className="block font-medium mb-2">
               {t.firstname}
@@ -413,7 +413,7 @@ export default function Register() {
             )}
           </div>
 
-          {/* Téléphone */}
+          {/* Phone */}
           <div className="md:col-span-2">
             <label htmlFor="telephone" className="block font-medium mb-2">
               {t.phone}

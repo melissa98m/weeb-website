@@ -12,7 +12,7 @@ vi.mock("@sentry/react", () => ({
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
-/** Composant qui lève une erreur au rendu */
+/** Component that throws an error on render */
 function Bomb({ message = "Boom" }) {
   throw new Error(message);
 }
@@ -102,7 +102,7 @@ describe("AppErrorBoundary", () => {
     expect(screen.getByRole("button", { name: /reload app/i })).toBeInTheDocument();
   });
 
-  // ── Message d'erreur par défaut ──────────────────────────────────────────
+  // ── Default error message ────────────────────────────────────────────────
 
   it("affiche un message générique si l'erreur n'a pas de message", () => {
     function BombNoMessage() {
@@ -153,7 +153,7 @@ describe("AppErrorBoundary", () => {
     expect(reloadMock).toHaveBeenCalledTimes(1);
   });
 
-  // ── Structure sémantique ─────────────────────────────────────────────────
+  // ── Semantic structure ───────────────────────────────────────────────────
 
   it("le fallback utilise une balise <section>", () => {
     render(

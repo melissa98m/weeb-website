@@ -41,7 +41,7 @@ export default function BlogCard({
     post.excerpt ||
     title;
 
-  // readingMin calculé sur le contenu complet dans normalizeArticle (Blog.jsx)
+  // readingMin computed from the full content inside normalizeArticle (Blog.jsx)
   const readingMin = post.readingMin ?? 1;
 
   const authorLabel =
@@ -100,7 +100,7 @@ export default function BlogCard({
             fetchPriority={isLcp ? "high" : "auto"}
             decoding="async"
           />
-          {/* Overlay avec extrait — desktop uniquement, masqué si reduced-motion */}
+          {/* Excerpt overlay — desktop only, hidden when reduced-motion is preferred */}
           {!shouldReduceMotion && (
             <div
               className="absolute inset-0 hidden md:flex flex-col justify-end p-4 bg-gradient-to-t from-purple-950/85 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -116,7 +116,7 @@ export default function BlogCard({
         <div className="p-5">
           <h2 className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-400 transition-colors duration-200">{title}</h2>
 
-          {/* Extrait visible sur mobile uniquement (affiché dans l'overlay sur desktop) */}
+          {/* Excerpt visible on mobile only (shown in the overlay on desktop) */}
           <p
             className={`text-sm mb-4 line-clamp-3 md:hidden ${
               theme === "dark" ? "text-white/70" : "text-gray-600"
@@ -141,7 +141,7 @@ export default function BlogCard({
             </div>
           )}
 
-          {/* Meta : auteur · date · durée + likes */}
+          {/* Meta: author · date · reading time + likes */}
           <div className={`flex items-center justify-between text-xs ${metaColor}`}>
             <span>
               {authorLabel} •{" "}

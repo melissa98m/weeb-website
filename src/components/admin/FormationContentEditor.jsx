@@ -35,7 +35,7 @@ function ErrMsg({ msg }) {
   return <p className="text-xs text-red-500 mt-1">{msg}</p>;
 }
 
-/** Éditeur QCM inline — crée ou remplace le QCM d'un module */
+/** Inline QCM editor — creates or replaces the quiz for a module */
 export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${
@@ -106,7 +106,7 @@ export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
         if (i !== qi) return q;
         const choices = q.choices.map((c, j) => {
           if (field === "is_correct") {
-            // radio : une seule bonne réponse
+            // radio: only one correct answer
             return { ...c, is_correct: j === ci };
           }
           return j === ci ? { ...c, [field]: value } : c;
@@ -262,7 +262,7 @@ export function QCMEditor({ apiBase, moduleId, theme, onClose }) {
   );
 }
 
-/** Ligne de cours avec édition inline */
+/** Course row with inline editing */
 function CoursRow({ apiBase, cours, theme, onUpdated, onDeleted }) {
   const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
   const input = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${

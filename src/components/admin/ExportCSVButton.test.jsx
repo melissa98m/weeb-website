@@ -9,7 +9,7 @@ vi.mock("../../lib/cookies", () => ({ getCookie: vi.fn(() => "csrf-token") }));
 
 describe("ExportCSVButton", () => {
   beforeEach(() => {
-    // Intercepter le clic sur les <a> créés dynamiquement
+    // Intercept clicks on dynamically created <a> elements
     const origCreate = document.createElement.bind(document);
     vi.spyOn(document, "createElement").mockImplementation((tag) => {
       const el = origCreate(tag);

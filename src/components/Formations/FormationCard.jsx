@@ -18,7 +18,7 @@ function FormationCardBase({ f, theme, onView }) {
           : "bg-white border-gray-200 hover:border-purple-500/40 text-gray-900 focus-within:ring-offset-white",
       ].join(" ")}
     >
-      {/* Barre d'accent colorée en haut */}
+      {/* Colored accent bar at the top */}
       <div className={`h-1 w-full ${
         isDark
           ? "bg-gradient-to-r from-primary via-secondary to-primary/30"
@@ -27,7 +27,7 @@ function FormationCardBase({ f, theme, onView }) {
 
       {/* Corps */}
       <div className="flex-1 p-5">
-        {/* Badge catégorie */}
+        {/* Category badge */}
         <div className="mb-3">
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
             isDark

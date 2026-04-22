@@ -14,7 +14,7 @@ import {
 
 /* ====================== ANTI-SPAM (front only) ====================== */
 const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 min
-const RATE_LIMIT_MAX = 3;                    // max 3 envois par fenêtre
+const RATE_LIMIT_MAX = 3;                    // max 3 submissions per window
 const COOLDOWN_MS = 30 * 1000;               // 30 s entre deux envois
 
 const getNow = () => Date.now();
@@ -59,7 +59,7 @@ export default function ContactForm() {
   const t = language === "fr" ? contactFr : contactEn;
   const prefersReducedMotion = useReducedMotion();
 
-  // Champs alignés avec le modèle Django
+  // Fields aligned with the Django model
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -88,7 +88,7 @@ export default function ContactForm() {
     Math.ceil(cooldownRemainingMs() / 1000)
   );
 
-  // Tick chaque seconde — s'arrête dès que le cooldown atteint 0
+  // Tick every second — stops as soon as the cooldown reaches 0
   const isCoolingDown = cooldownSec > 0;
   useEffect(() => {
     if (!isCoolingDown) return;
@@ -118,7 +118,7 @@ export default function ContactForm() {
       }
     })();
     return () => { active = false; };
-  }, [language]); // t est toujours dérivé de language, pas besoin de le dupliquer
+  }, [language]); // t is always derived from language, no need to list it separately
 
   useEffect(loadSubjects, [loadSubjects]);
 
@@ -214,7 +214,7 @@ export default function ContactForm() {
       return;
     }
 
-    // Normaliser les données pour l’API (subject null si vide)
+    // Normalize data for the API (subject is null when empty)
     const payload = {
       subject: form.subject ? Number(form.subject) : null,
       telephone: form.telephone.trim(),

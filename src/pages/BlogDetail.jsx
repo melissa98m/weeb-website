@@ -90,7 +90,7 @@ export default function BlogDetail() {
     setCoverBroken(false);
   }, [id]);
 
-  // Tracking de lecture (fire-and-forget, uniquement si connecté)
+  // Read tracking (fire-and-forget, only runs when logged in)
   useEffect(() => {
     if (!user || !currId) return;
     const csrfToken = getCookie("csrftoken");
@@ -99,7 +99,7 @@ export default function BlogDetail() {
       credentials: "include",
       headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
     }).catch(() => {
-      // silencieux — ne pas bloquer la lecture en cas d'erreur réseau
+      // silent — don't block reading on a network error
     });
   }, [currId, user]);
 
@@ -186,7 +186,7 @@ export default function BlogDetail() {
   const { scrollYProgress } = useScroll({ container: containerRef });
   const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 20, mass: 0.2 });
 
-  // Article courant
+  // Fetch the current article
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -211,7 +211,7 @@ export default function BlogDetail() {
     return () => { alive = false; };
   }, [currId]);
 
-  // SEO dynamique : titre, description, robots, canonical, og:*, JSON-LD Article + Breadcrumb
+  // Dynamic SEO: title, description, robots, canonical, og:*, JSON-LD Article + Breadcrumb
   useEffect(() => {
     if (!post) return;
     const prev = document.title;
@@ -288,7 +288,7 @@ export default function BlogDetail() {
     };
   }, [post]);
 
-  // Prev/next IDs via endpoint dédié (1 requête au lieu de N pages)
+  // Prev/next IDs via a dedicated endpoint (1 request instead of N page fetches)
   useEffect(() => {
     if (!currId) return;
     let alive = true;
@@ -300,7 +300,7 @@ export default function BlogDetail() {
         if (!alive) return;
         setPrevId(data.prev_id ?? null);
         setNextId(data.next_id ?? null);
-      } catch { /* noop — navigation prev/next non critique */ }
+      } catch { /* noop — prev/next navigation is non-critical */ }
     })();
     return () => { alive = false; };
   }, [currId]);
@@ -337,13 +337,12 @@ export default function BlogDetail() {
     };
   }, [coverUrl]);
 
-  // Coloration syntaxique des blocs de code dans le rendu HTML
+  // Syntax-highlight code blocks in the rendered HTML
   useEffect(() => {
     highlightContainer(articleBodyRef.current);
   }, [post?.article_content]);
 
-  // voisins
-  // prevId et nextId viennent du state (initialisé par le useEffect neighbors)
+  // prevId and nextId come from state (set by the neighbors useEffect above)
 
   const card = theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const meta = theme === "dark" ? "text-white/70" : "text-gray-600";
@@ -390,7 +389,7 @@ export default function BlogDetail() {
 
   return (
     <main className="px-0 md:px-6 py-12 md:py-16">
-      {/* Barre de progression — masquée si prefers-reduced-motion */}
+      {/* Progress bar — hidden when prefers-reduced-motion is set */}
       {!reduceMotion && (
         <motion.div
           style={{ scaleX }}
@@ -399,7 +398,7 @@ export default function BlogDetail() {
       )}
 
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Retour */}
+        {/* Back button */}
         <div className="px-6">
           <Button
             to="/blog"
@@ -502,14 +501,14 @@ export default function BlogDetail() {
                   </span>
                 )}
 
-                {/* Partager / Copier le lien */}
+                {/* Share / Copy link */}
                 <Button
                   type="button"
                   onClick={async () => {
                     if (typeof navigator.share === "function") {
                       try {
                         await navigator.share({ title, url: window.location.href });
-                      } catch { /* annulé par l'utilisateur — noop */ }
+                      } catch { /* cancelled by the user — noop */ }
                     } else {
                       try {
                         await navigator.clipboard.writeText(window.location.href);
@@ -545,7 +544,7 @@ export default function BlogDetail() {
               </div>
             )}
 
-            {/* Contenu — HTML (Tiptap) ou texte brut (rétro-compatibilité) */}
+            {/* Content — HTML (Tiptap) or plain text (legacy) */}
             {(() => {
               const raw = post?.article_content ?? "";
               const isHtml = /^\s*</.test(raw);
@@ -555,10 +554,10 @@ export default function BlogDetail() {
                   className="article-body max-w-none leading-relaxed"
                 >
                   {isHtml ? (
-                    // Contenu HTML sanitisé côté serveur (bleach)
+                    // Server-sanitized HTML (bleach)
                     <div dangerouslySetInnerHTML={{ __html: raw }} />
                   ) : (
-                    // Texte brut (anciens articles)
+                    // Plain text (legacy articles)
                     <AnimatePresence>
                       {raw
                         .split(/\n{2,}|\r?\n\r?\n/)
@@ -583,7 +582,7 @@ export default function BlogDetail() {
           </div>
         </article>
 
-        {/* Navigation précédente / suivante */}
+        {/* Previous / next navigation */}
         <div className="px-6 flex items-center justify-between gap-3">
           {prevId ? (
             <Link
@@ -618,7 +617,7 @@ export default function BlogDetail() {
           )}
         </div>
 
-        {/* Section commentaires */}
+        {/* Comments section */}
         <section
           aria-labelledby="comments-heading"
           className={`rounded-xl border shadow p-6 md:p-8 ${card}`}
@@ -630,7 +629,7 @@ export default function BlogDetail() {
             )}
           </h2>
 
-          {/* Formulaire */}
+          {/* Comment form */}
           {user ? (
             <form onSubmit={submitComment} className="mb-8">
               {replyTo && (
@@ -683,7 +682,7 @@ export default function BlogDetail() {
             <p className={`text-sm mb-6 ${meta}`}>{txt.comment_login_required}</p>
           )}
 
-          {/* Liste des commentaires */}
+          {/* Comment list */}
           {commentsLoading && (
             <div className="space-y-4 animate-pulse">
               {[1, 2].map((i) => (
@@ -701,7 +700,7 @@ export default function BlogDetail() {
             <ul className="space-y-6">
               {comments.map((c) => (
                 <li key={c.id}>
-                  {/* Commentaire racine */}
+                  {/* Root comment */}
                   <div className={`rounded-lg p-4 ${theme === "dark" ? "bg-white/5" : "bg-gray-50"}`}>
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <span className="font-medium text-sm">
@@ -734,7 +733,7 @@ export default function BlogDetail() {
                     </div>
                   </div>
 
-                  {/* Réponses (niveau 1) */}
+                  {/* Replies (level 1) */}
                   {c.replies?.length > 0 && (
                     <ul className="ml-6 mt-3 space-y-3">
                       {c.replies.map((r) => (
@@ -770,7 +769,7 @@ export default function BlogDetail() {
           )}
         </section>
 
-        {/* Carrousel "même genre" (composant séparé) */}
+        {/* Related articles carousel (same genre, extracted into its own component) */}
         <RelatedCarousel
           currentId={currId}
           currentGenres={chips}

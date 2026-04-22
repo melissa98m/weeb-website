@@ -120,7 +120,7 @@ beforeEach(() => {
     removeEventListener: vi.fn(),
   })));
 
-  // jsdom ne supporte pas scrollTo sur les éléments
+  // jsdom doesn't support scrollTo on elements
   window.HTMLElement.prototype.scrollTo = vi.fn();
 });
 
@@ -154,7 +154,7 @@ describe("FormationParcours — CoursContent : coloration syntaxique", () => {
       expect(screen.getByText("Cours sur les hooks")).toBeInTheDocument();
     });
 
-    // parseAndHighlight doit être appelé avec le contenu HTML
+    // parseAndHighlight must be called with the HTML content
     expect(mockParseAndHighlight).toHaveBeenCalledWith(COURS_WITH_CODE.content);
   });
 
@@ -175,7 +175,7 @@ describe("FormationParcours — CoursContent : coloration syntaxique", () => {
       expect(screen.getByText("Cours sur les hooks")).toBeInTheDocument();
     });
 
-    // Le HTML injecté doit contenir la span hljs (coloration)
+    // The injected HTML should contain the hljs span (syntax coloring)
     const keyword = document.querySelector(".article-body .hljs-keyword");
     expect(keyword).not.toBeNull();
     expect(keyword.textContent).toBe("const");
@@ -195,7 +195,7 @@ describe("FormationParcours — CoursContent : coloration syntaxique", () => {
       expect(screen.getByText("Cours sans contenu")).toBeInTheDocument();
     });
 
-    // parseAndHighlight appelé avec contenu vide
+    // parseAndHighlight called with empty content
     expect(mockParseAndHighlight).toHaveBeenCalledWith("");
     // Pas de pre/code dans le DOM
     expect(document.querySelector(".article-body pre")).toBeNull();
@@ -215,7 +215,7 @@ describe("FormationParcours — CoursContent : coloration syntaxique", () => {
       expect(screen.getByText("Cours sur les hooks")).toBeInTheDocument();
     });
 
-    // parseAndHighlight doit avoir été appelé pour le premier cours
+    // parseAndHighlight should have been called for the first course
     expect(mockParseAndHighlight).toHaveBeenCalledWith(COURS_WITH_CODE.content);
   });
 
@@ -267,7 +267,7 @@ describe("FormationParcours — CoursContent : rendu de contenu", () => {
       expect(screen.getByText("Cours vidéo")).toBeInTheDocument();
     });
 
-    // iframe YouTube ou lien vers la vidéo
+    // YouTube iframe or a link to the video
     const iframe = document.querySelector("iframe");
     const videoLink = screen.queryByRole("link", { name: /ouvrir/i });
     expect(iframe || videoLink).not.toBeNull();

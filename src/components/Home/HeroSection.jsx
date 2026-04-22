@@ -10,7 +10,7 @@ export default function HeroSection() {
   const { language } = useLanguage();
   const prefersReducedMotion = useReducedMotion();
 
-  // Idle float — arrêté si l'utilisateur préfère moins de mouvement
+  // Idle float animation — disabled when the user prefers reduced motion
   const idleFloat = prefersReducedMotion
     ? {}
     : { y: [0, -4, 0], transition: { duration: 3, ease: "easeInOut", repeat: Infinity, repeatType: "loop" } };

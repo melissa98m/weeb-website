@@ -52,12 +52,12 @@ export default function AdminChatPanel() {
     return () => { document.title = prev; meta.content = "index, follow"; };
   }, []);
 
-  // Charger la liste des rooms
+  // Load the room list
   const loadRooms = useCallback(async () => {
     try {
       const res = await fetch(`${API_BASE}/chat/rooms/`, { credentials: "include" });
       if (res.ok) setRooms(await res.json());
-    } catch { /* silencieux */ }
+    } catch { /* silent */ }
   }, []);
 
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function AdminChatPanel() {
     return () => clearInterval(id);
   }, [loadRooms]);
 
-  // Connexion WS à la room active
+  // Connect WS to the active room
   const connectRoom = useCallback(async (room) => {
     wsRef.current?.close();
     clearTimeout(reconnectRef.current);
@@ -75,7 +75,7 @@ export default function AdminChatPanel() {
 
     const userPk = room.room_id.replace("support_", "");
 
-    // Ticket éphémère pour contourner le manque de cookie HttpOnly en WS cross-port
+    // Ephemeral ticket to work around missing HttpOnly cookie in cross-port WS
     let ticket = "";
     try {
       const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
@@ -84,7 +84,7 @@ export default function AdminChatPanel() {
         headers: { "X-CSRFToken": getCookie("csrftoken") ?? "" },
       });
       if (res.ok) ticket = (await res.json()).ticket ?? "";
-    } catch { /* silencieux */ }
+    } catch { /* silent */ }
 
     const wsUrl = ticket
       ? `${WS_BASE}/ws/chat/support/${userPk}/?ticket=${ticket}`
@@ -100,10 +100,10 @@ export default function AdminChatPanel() {
           setMessages(data.messages);
         } else if (data.type === "message") {
           setMessages((prev) => prev.some((m) => m.id === data.message.id) ? prev : [...prev, data.message]);
-          // Mettre à jour le compteur de la room
+          // Update the room's unread counter
           loadRooms();
         }
-      } catch { /* JSON invalide */ }
+      } catch { /* invalid JSON */ }
     };
     ws.onclose = () => {
       setConnected(false);

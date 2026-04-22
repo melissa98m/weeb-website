@@ -5,7 +5,7 @@ import { ThemeProvider } from "../context/ThemeContext";
 
 function withProviders(theme = "light") {
   return (Story) => {
-    // Pré-applique le thème pour ThemeProvider
+    // Pre-apply the theme so ThemeProvider picks it up
     if (typeof document !== "undefined") {
       localStorage.setItem("theme", theme);
       document.documentElement.dataset.theme = theme;
@@ -30,7 +30,7 @@ const meta = {
 
 export default meta;
 
-/** État fermé — affiche le bouton déclencheur */
+/** Closed state — shows the trigger button */
 export const Closed = {
   decorators: [withProviders("light")],
 };

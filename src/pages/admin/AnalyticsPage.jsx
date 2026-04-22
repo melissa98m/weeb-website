@@ -6,7 +6,7 @@ import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
-// recharts ~348KB — chargé uniquement quand la page admin est visitée
+// recharts ~348KB — only loaded when the admin analytics page is visited
 const AnalyticsCharts = lazy(() => import("../../components/admin/AnalyticsCharts"));
 
 export default function AnalyticsPage() {

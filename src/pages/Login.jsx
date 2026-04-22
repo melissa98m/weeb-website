@@ -160,7 +160,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Vérifier si le compte est verrouillé
+    // Check if the account is locked
     if (isLocked) {
       setErrors({
         form: language === "fr" 

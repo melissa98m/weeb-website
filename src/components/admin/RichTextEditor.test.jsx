@@ -321,7 +321,7 @@ describe("RichTextEditor — bloc de code", () => {
   });
 });
 
-// ── Comportement onMouseDown (focus préservé) ──────────────────────────────────
+// ── onMouseDown behavior (focus preserved) ────────────────────────────────────
 
 describe("RichTextEditor — préservation du focus éditeur", () => {
   it("mousedown sur le bouton Gras ne déclenche pas de blur sur l'éditeur (preventDefault)", () => {
@@ -645,7 +645,7 @@ describe("RichTextEditor — image par URL", () => {
   });
 });
 
-// ── Thème ──────────────────────────────────────────────────────────────────────
+// ── Theme ─────────────────────────────────────────────────────────────────────
 
 describe("RichTextEditor — thème", () => {
   it("thème dark : la toolbar a la classe border-border", () => {

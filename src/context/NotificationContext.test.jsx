@@ -49,7 +49,7 @@ class FakeWebSocket {
     if (this.onclose) this.onclose({});
   }
 
-  // Helper de test : simuler la réception d'un message du serveur
+  // Test helper: simulate receiving a message from the server
   receive(data) {
     if (this.onmessage) {
       this.onmessage({ data: JSON.stringify(data) });
@@ -232,7 +232,7 @@ describe("NotificationContext", () => {
       await ctxValue.markAllRead();
     });
 
-    // Pas d'exception levée
+    // No exception thrown
     expect(screen.getByTestId("count").textContent).toBe("0");
   });
 
@@ -252,7 +252,7 @@ describe("NotificationContext", () => {
 
     expect(screen.getByTestId("length").textContent).toBe("1");
 
-    // Déconnexion
+    // Sign out
     useAuth.mockReturnValue({ user: null });
     rerender(
       <NotificationProvider>

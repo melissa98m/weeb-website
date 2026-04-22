@@ -12,7 +12,7 @@ import { API_BASE } from "../../lib/api";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 
-/* ==== Icônes inline (SVG) sans dépendance ==== */
+/* ==== Inline SVG icons — no extra dependencies ==== */
 function IconBase({ children, size = 18 }) {
   return (
     <svg
@@ -95,7 +95,7 @@ function IconTag() {
   );
 }
 
-/* ==== Mini badge "à traiter" ==== */
+/* ==== Mini "pending" badge ==== */
 function MiniBadge({ children, theme = "light", title }) {
   const base =
     "px-1.5 py-0.5 rounded-full text-[10px] leading-none font-semibold border";
@@ -108,7 +108,7 @@ function MiniBadge({ children, theme = "light", title }) {
   );
 }
 
-/* ===== Items de navigation (toutes les entrées potentielles) ===== */
+/* ===== Navigation items (all possible entries) ===== */
 function IconMail() {
   return (
     <IconBase>
@@ -202,15 +202,15 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
   const activeLight = "bg-gray-100 font-medium";
   const activeDark = "bg-surface-2 font-medium";
 
-  // Capacités par rôle
+  // Role capabilities
   const canPersonnel = hasPersonnelRole(user);
-  const canStaff = hasAnyStaffRole(user); // ex: Commercial OU Personnel
+  const canStaff = hasAnyStaffRole(user); // e.g. Commercial OR Personnel
   const canRedaction = hasAnyRedactionRole(user);
   const isAdmin = !!(user?.is_staff || user?.is_superuser);
 
   const NAV_ALL = useMemo(() => buildNav(t), [t]);
 
-  // Filtrage des onglets visibles selon rôles
+  // Filter navigation tabs based on the user's roles
   const NAV = useMemo(() => {
     return NAV_ALL.filter(({ key }) => {
       switch (key) {
@@ -315,7 +315,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
         role="navigation"
         aria-label={t.nav_admin_label}
       >
-        {/* Entête mobile */}
+        {/* Mobile header */}
         <div className="md:hidden flex items-center justify-between px-4 h-14 border-b">
           <div className="font-semibold">{t.nav_administration}</div>
           <button

@@ -66,7 +66,7 @@ function useCountUp(target) {
 function MetricItem({ target, suffix, labelFr, labelEn, theme, language }) {
   const { triggerRef, count } = useCountUp(target);
 
-  // Formatage avec séparateur de milliers selon la locale
+  // Format with thousands separator based on current locale
   const formatted = new Intl.NumberFormat(language === "fr" ? "fr-FR" : "en-US").format(
     Math.round(count)
   );

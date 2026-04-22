@@ -70,7 +70,7 @@ export default function SearchResults() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // SEO : les pages de résultats de recherche ne doivent pas être indexées
+  // SEO: search result pages should never be indexed
   useEffect(() => {
     const prev = document.title;
     document.title = q ? t.page_title_query.replace("{q}", q) : t.page_title_empty;

@@ -11,7 +11,7 @@ import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, common } from "lowlight";
 import { ensureCsrf } from "../../lib/api";
 
-/* ---- Langages supportés par prettier (chargement dynamique) ---- */
+/* ---- Languages supported by prettier (loaded dynamically) ---- */
 const PRETTIER_PARSERS = {
   javascript: "babel",
   typescript: "typescript",
@@ -120,7 +120,7 @@ const PRESET_COLORS = [
   { label: "Gris",    value: "#6b7280" },
 ];
 
-/* ---- Icônes toolbar (SVG inline) ---- */
+/* ---- Toolbar icons (inline SVG) ---- */
 function Icon({ children, title, active, onClick, disabled }) {
   return (
     <button
@@ -263,7 +263,7 @@ function CodeLanguagePicker({ editor, theme }) {
   const handleChange = async (e) => {
     const newLang = e.target.value;
 
-    // Repérer le code block courant avant de modifier l'état
+    // Locate the current code block before modifying editor state
     const { state } = editor;
     const { $from } = state.selection;
     let codeText = "";
@@ -279,10 +279,10 @@ function CodeLanguagePicker({ editor, theme }) {
       }
     });
 
-    // 1. Changer le langage immédiatement (synchrone)
+    // 1. Update the language immediately (synchronous)
     editor.chain().focus().updateAttributes("codeBlock", { language: newLang }).run();
 
-    // 2. Formater si le langage est supporté et le bloc non vide
+    // 2. Format if the language is supported and the block is not empty
     if (!codeText.trim() || nodePos === -1 || !PRETTIER_PARSERS[newLang]) return;
 
     setIsFormatting(true);
@@ -294,7 +294,7 @@ function CodeLanguagePicker({ editor, theme }) {
       const content = formatted.endsWith("\n") ? formatted.slice(0, -1) : formatted;
       if (content.trim() === codeText.trim()) return;
 
-      // Remplacer le contenu texte du code block dans l'état courant
+      // Replace the text content of the code block in the current state
       const { state: newState } = editor;
       const currentNode = newState.doc.nodeAt(nodePos);
       if (!currentNode || currentNode.type.name !== "codeBlock") return;
@@ -351,7 +351,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    // Reset pour permettre de re-sélectionner le même fichier
+    // Reset so the same file can be re-selected
     e.target.value = "";
 
     setIsUploading(true);
@@ -410,7 +410,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
         <line x1="15" y1="4" x2="9" y2="20" />
       </Icon>
 
-      {/* Barré */}
+      {/* Strikethrough */}
       <Icon
         title="Barré"
         active={editor.isActive("strike")}
@@ -540,7 +540,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
         <path d="m14 14 2-2-2-2" />
       </Icon>
 
-      {/* Sélecteur de langage — visible uniquement dans un bloc de code */}
+      {/* Language picker — only visible inside a code block */}
       <CodeLanguagePicker editor={editor} theme={theme} />
 
       <Divider />
@@ -570,7 +570,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
         <polyline points="21 15 16 10 5 21" />
       </Icon>
 
-      {/* Upload image depuis l'ordinateur — affiché uniquement si uploadEndpoint fourni */}
+      {/* Upload image from disk — only shown when uploadEndpoint is provided */}
       {uploadEndpoint && (
         <>
           <Icon
@@ -595,7 +595,7 @@ function Toolbar({ editor, theme, uploadEndpoint }) {
 
       <Divider />
 
-      {/* Annuler / Rétablir */}
+      {/* Undo / Redo */}
       <Icon
         title="Annuler (Ctrl+Z)"
         onClick={() => editor.chain().focus().undo().run()}
@@ -646,8 +646,8 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
     },
   });
 
-  // Synchronise le contenu quand `value` change depuis l'extérieur
-  // (ex : ouverture de la modale avec un article existant)
+  // Sync editor content when `value` changes from outside
+  // (e.g. opening the modal with an existing article)
   useEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
@@ -662,7 +662,7 @@ export default function RichTextEditor({ value, onChange, theme = "light", class
     <div className={`rounded-lg border overflow-hidden ${border} ${bg} ${className}`}>
       <Toolbar editor={editor} theme={theme} uploadEndpoint={uploadEndpoint} />
 
-      {/* Zone d'édition */}
+      {/* Editing area */}
       <EditorContent
         editor={editor}
         className="min-h-[200px] max-h-[500px] overflow-y-auto px-4 py-3"

@@ -57,7 +57,7 @@ export default function ArticleEditorModal({
   onClose = () => {},
   apiBase,
   userId: _userId = null,
-  article = null,             // null => création ; sinon objet article
+  article = null,             // null = creating a new article; otherwise the existing article object
   onSaved = () => {},
   onDeleted = () => {},
 }) {
@@ -85,7 +85,7 @@ export default function ArticleEditorModal({
   const [content, setContent] = useState(article?.article_content ?? "");
   const [imageUrl, setImageUrl] = useState(article?.link_image ?? "");
 
-  // genres sélectionnés : [{id,name,color?}]
+  // Selected genres: [{id,name,color?}]
   const initialGenres = useMemo(() => {
     const g = Array.isArray(article?.genres) ? article.genres : [];
     return g.map((x) => (typeof x === "object" ? x : { id: x }));
@@ -95,7 +95,7 @@ export default function ArticleEditorModal({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
-  /* ---------- Révisions ---------- */
+  /* ---------- Revisions ---------- */
   const [showRevisions, setShowRevisions] = useState(false);
   const [revisions, setRevisions] = useState([]);
   const [revisionsLoading, setRevisionsLoading] = useState(false);
@@ -124,7 +124,7 @@ export default function ArticleEditorModal({
       });
       if (r.ok) {
         const data = await r.json();
-        // Recharge la révision fraîche depuis l'API
+        // Reload the article fresh from the API after restoring
         const articleR = await fetch(`${apiBase}/articles/${artId}/`, { credentials: "include" });
         if (articleR.ok) {
           const updated = await articleR.json();
@@ -164,7 +164,7 @@ export default function ArticleEditorModal({
     return () => { try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, []);
 
-  /* ---------- (Ré)initialisation quand on ouvre/ferme ---------- */
+  /* ---------- (Re)initialize when the modal opens or closes ---------- */
   useEffect(() => {
     if (!open) return;
     setErr("");
@@ -237,7 +237,7 @@ export default function ArticleEditorModal({
         /* continue */
       }
     }
-    // fallback: on tente de relire l’article pour récupérer ses genres
+    // Fallback: re-fetch the article to recover its genres
     try {
       const detail = await fetchJSON(`${apiBase}/articles/${articleId}/`, { signal });
       const g = Array.isArray(detail?.genres) ? detail.genres : [];
@@ -254,7 +254,7 @@ export default function ArticleEditorModal({
     const csrf = await ensureCsrf();
     const { assocBase, rawList } = await getAssocEndpointAndList(articleId, signal);
 
-    // Normalise lignes renvoyées
+    // Normalize returned rows
     const rows = (rawList || []).map((row) => ({
       id: row?.id ?? row?.pk ?? null,
       article: (() => {
@@ -271,7 +271,7 @@ export default function ArticleEditorModal({
       })(),
     }));
 
-    // On n’agit QUE sur les lignes qui appartiennent bien à cet article
+    // Only act on rows that actually belong to this article
     const current = rows.filter((r) => Number(r.article) === Number(articleId) && r.genre != null);
 
     const wantIds = new Set((desiredIds || []).map(Number));
@@ -295,7 +295,7 @@ export default function ArticleEditorModal({
         });
       }
     } else {
-      // Pas d’endpoint dédié => on tente un PATCH direct (genres M2M sur article)
+      // No dedicated endpoint — fall back to a direct PATCH (M2M genres on the article)
       try {
         await fetch(`${apiBase}/articles/${articleId}/`, {
           method: "PATCH",
@@ -310,7 +310,7 @@ export default function ArticleEditorModal({
       }
     }
 
-    // Suppressions (précises)
+    // Precise deletions
     if (assocBase && canDelete) {
       for (const rec of toRemove) {
         if (rec.id != null) {
@@ -321,7 +321,7 @@ export default function ArticleEditorModal({
             headers: { "X-CSRFToken": csrf },
           });
         } else {
-          // Si on n’a pas d’ID d’association, recherche ciblée
+          // No association ID — do a targeted lookup
           try {
             const data = await fetchJSON(`${assocBase}?article=${articleId}&genre=${rec.genre}`, { signal });
             const found = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : [];
@@ -335,7 +335,7 @@ export default function ArticleEditorModal({
               });
             }
           } catch {
-            // on s’abstient si on ne peut pas cibler précisément
+            // skip if we can’t target the association precisely
           }
         }
       }
@@ -373,7 +373,7 @@ export default function ArticleEditorModal({
 
       await syncArticleGenres(saved.id ?? saved.pk, desiredIds, task.signal);
 
-      // Renvoie à l’appelant : on “force” genres = ce que l’utilisateur a choisi
+      // Pass back to the caller: enforce genres = what the user actually selected
       onSaved({
         ...saved,
         genres: genres,
@@ -450,7 +450,7 @@ export default function ArticleEditorModal({
             </div>
           </header>
 
-          {/* Panneau révisions */}
+          {/* Revisions panel */}
           {showRevisions && (
             <div className="p-4 border-b">
               <h3 className="text-sm font-semibold mb-3">Historique des révisions</h3>
@@ -531,7 +531,7 @@ export default function ArticleEditorModal({
               />
             </div>
 
-            {/* Sélection des genres (aucun <form> à l’intérieur) */}
+            {/* Genre selection (no nested <form> here) */}
             <div>
               <label className="block text-sm mb-2">Genres</label>
               <GenrePicker

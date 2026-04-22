@@ -27,7 +27,7 @@ export default function NotificationDropdown({ onClose, theme = "light" }) {
   const divider = theme === "dark" ? "divide-[#333]" : "divide-gray-100";
   const itemHover = theme === "dark" ? "hover:bg-surface-2" : "hover:bg-gray-50";
 
-  // Fermeture au clic extérieur
+  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) onClose();

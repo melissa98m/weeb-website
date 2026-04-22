@@ -81,7 +81,7 @@ describe("SearchResults", () => {
     let resolve;
     global.fetch = vi.fn(() => new Promise((r) => { resolve = r; }));
     renderWithQuery("Django");
-    // Déclencher le debounce de 300ms pour que setLoading(true) soit appelé
+    // Trigger the 300ms debounce so setLoading(true) is called
     await act(async () => { vi.advanceTimersByTime(300); });
     // Le fetch est en attente → skeletons visibles
     expect(document.querySelectorAll(".animate-pulse").length).toBeGreaterThan(0);

@@ -445,7 +445,7 @@ export default function NewsletterManager() {
         </p>
       </header>
 
-      {/* Liste des abonnés */}
+      {/* Subscriber list */}
       <SubscribersList theme={theme} t={t} />
 
       {/* Historique campagnes */}

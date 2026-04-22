@@ -65,11 +65,11 @@ vi.mock("../../locales/en/cookies.json", () => ({
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function setupNoConsent() {
-  mockGetCookie.mockReturnValue(null); // aucun consentement → bannière visible
+  mockGetCookie.mockReturnValue(null); // no consent → banner visible
 }
 
 function setupWithConsent(value = '{"optional":true}') {
-  mockGetCookie.mockReturnValue(value); // consentement existant → bannière cachée
+  mockGetCookie.mockReturnValue(value); // existing consent → banner hidden
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ describe("CookieBanner", () => {
   });
 
   it("ne rend rien si pas de consentement et pas visible (état impossible par défaut géré)", () => {
-    // Sans cookie → visible=true, hasConsent=false → dialog affiché
+    // No cookie → visible=true, hasConsent=false → dialog shown
     setupNoConsent();
     const { container } = render(<CookieBanner />);
     expect(container).not.toBeEmptyDOMElement();
@@ -148,7 +148,7 @@ describe("CookieBanner", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // ── Bouton "Enregistrer" (préférences personnalisées) ────────────────────
+  // ── "Save" button (custom preferences) ─────────────────────────────────
 
   it("enregistre les préférences actuelles en cliquant 'Enregistrer'", async () => {
     const user = userEvent.setup();
@@ -175,24 +175,24 @@ describe("CookieBanner", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // ── Bouton "Réinitialiser" ────────────────────────────────────────────────
+  // ── "Reset" button ───────────────────────────────────────────────────────
 
   it("réaffiche la bannière après 'Réinitialiser'", async () => {
     const user = userEvent.setup();
-    setupWithConsent(); // consentement existant → bouton gérer visible
+    setupWithConsent(); // existing consent → "manage cookies" button visible
     render(<CookieBanner />);
 
-    // Ouvrir la bannière via le bouton gérer
+    // Open the banner via the manage button
     await user.click(screen.getByRole("button", { name: /gérer les cookies/i }));
     expect(screen.getByRole("dialog")).toBeInTheDocument();
 
-    // Cliquer sur réinitialiser
+    // Click reset
     await user.click(screen.getByRole("button", { name: /réinitialiser/i }));
     expect(mockDeleteCookie).toHaveBeenCalledWith("cookie_consent");
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  // ── Bouton "Gérer les cookies" ────────────────────────────────────────────
+  // ── "Manage cookies" button ──────────────────────────────────────────────
 
   it("ouvre la bannière en cliquant sur 'Gérer les cookies'", async () => {
     const user = userEvent.setup();
@@ -204,12 +204,12 @@ describe("CookieBanner", () => {
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
-  // ── Consentement enregistré comme "accepted"/"rejected" (legacy) ──────────
+  // ── Consent stored as "accepted"/"rejected" (legacy format) ─────────────
 
   it("interprète correctement le consentement legacy 'accepted'", () => {
     setupWithConsent("accepted");
     render(<CookieBanner />);
-    // Pas de bannière → le consentement a été reconnu
+    // No banner → consent was recognized
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
@@ -219,7 +219,7 @@ describe("CookieBanner", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  // ── Accessibilité ────────────────────────────────────────────────────────
+  // ── Accessibility ────────────────────────────────────────────────────────
 
   it("le dialog a aria-label='Consentement aux cookies'", () => {
     setupNoConsent();

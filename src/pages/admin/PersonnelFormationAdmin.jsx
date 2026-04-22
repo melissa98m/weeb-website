@@ -22,7 +22,7 @@ import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import { getEnv } from "../../lib/env";
 
-// Normalise toujours vers .../api
+// Always normalizes to .../api
 const API_BASE = (() => {
   const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
@@ -68,7 +68,7 @@ export default function PersonnelFormationAdmin() {
   const [searchUser, setSearchUser] = useState("");
   const searchQ = useDeferredValue(searchUser.trim().toLowerCase());
 
-  // debounce pour la recherche (évite les fetchs à chaque frappe)
+  // Debounce search input to avoid fetching on every keystroke
   const [searchTrigger, setSearchTrigger] = useState("");
   useEffect(() => {
     const t = setTimeout(() => setSearchTrigger(searchQ), 250);
@@ -86,7 +86,7 @@ export default function PersonnelFormationAdmin() {
   const [busy, setBusy] = useState(false);
   const [addError, setAddError] = useState("");
 
-  // 2 contrôleurs séparés
+  // 2 separate abort controllers
   const bootCtrlRef = useRef(null);
   const linksCtrlRef = useRef(null);
 
@@ -206,7 +206,7 @@ export default function PersonnelFormationAdmin() {
     }
   }, [fetchJSON, startTask, fmtUser, fmtFormation]);
 
-  // charge liens (pagination + filtres + recherche) et met à jour linksTotal
+  // Load links (pagination + filters + search) and update linksTotal
   const loadLinks = useCallback(
     async (p = 1) => {
       setLinksLoading(true);
@@ -261,7 +261,7 @@ export default function PersonnelFormationAdmin() {
         });
         setLinks(mapped);
 
-        // Totaux renvoyés par l'API si paginée
+        // Totals returned by the API when paginated
         const total =
           typeof data?.count === "number"
             ? data.count
@@ -373,7 +373,7 @@ export default function PersonnelFormationAdmin() {
               errorMessage = errorText;
             }
             
-            // Détecter si c'est une erreur de duplication
+            // Detect duplicate-enrollment errors
             const errorLower = errorMessage.toLowerCase();
             if (
               res.status === 400 ||
@@ -388,7 +388,7 @@ export default function PersonnelFormationAdmin() {
               errorMessage = t.personnel_already_registered;
             }
           } catch (_parseError) {
-            // Si on ne peut pas parser le JSON, utiliser le message par défaut
+            // If JSON can't be parsed, fall back to the default message
             if (res.status === 400 || res.status === 409) {
               errorMessage = t.personnel_already_registered;
             }

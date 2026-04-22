@@ -50,18 +50,18 @@ export function AuthProvider({ children }) {
     run();
   }, [fetchMe]);
 
-  //  Accepte email/username/identifier + password, pose les cookies, puis charge /me
+  // Accepts email/username/identifier + password, sets auth cookies, then loads /me
   const login = useCallback(
     async ({ email, username, identifier, password }) => {
       const id = (email ?? username ?? identifier ?? "").trim();
       await AuthApi.login({ login: id, password });
-      const me = await fetchMe(); // hydrate le context
+      const me = await fetchMe(); // hydrate the context
       return me;                  
     },
     [fetchMe]
   );
 
-  // Après register, on tente de connecter puis on charge /me
+  // After registration, attempt auto-login then reload /me
   const register = useCallback(
     async (payload) => {
       await AuthApi.register(payload);

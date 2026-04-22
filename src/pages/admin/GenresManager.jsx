@@ -48,18 +48,18 @@ export default function GenresManager() {
     ? "bg-red-600/20 text-red-400 border-red-600/40 hover:bg-red-600/30"
     : "bg-red-50 text-red-700 border-red-200 hover:bg-red-100";
 
-  // Liste des genres
+  // Genre list
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  // Recherche
+  // Search
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
-  // Modale création/édition
+  // Create/edit modal
   const [open, setOpen] = useState(false);
-  const [current, setCurrent] = useState(null); // null => création, sinon {id, name, color}
+  const [current, setCurrent] = useState(null); // null = creating, otherwise {id, name, color}
   const [formName, setFormName] = useState("");
   const [formColor, setFormColor] = useState("#6b7280");
   const [saving, setSaving] = useState(false);
@@ -322,7 +322,7 @@ export default function GenresManager() {
         <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
       </div>
 
-      {/* Modale création/édition */}
+      {/* Create/edit modal */}
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"

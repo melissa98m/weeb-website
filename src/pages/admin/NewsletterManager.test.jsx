@@ -140,7 +140,7 @@ describe("NewsletterManager", () => {
     const user = setup();
     await waitFor(() => screen.getByText(/42 abonné/i));
 
-    // Le stats fetch est déjà résolu ; on configure le send fetch
+    // Stats fetch already resolved; now set up the send fetch
     global.fetch = vi.fn()
       .mockResolvedValueOnce({
         ok: true,

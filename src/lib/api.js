@@ -1,7 +1,7 @@
 import { deleteCookie, getCookie, setCookie } from "./cookies";
 import { appEnv } from "./env";
 
-/** Résout la base API de façon simple et lisible. */
+/** Resolves the API base URL in a simple, readable way. */
 const EXPLICIT_API_URL = appEnv.VITE_API_URL?.replace(/\/$/, "");
 const FALLBACK_API_URL = import.meta.env.DEV ? "http://localhost:8000/api" : "";
 
@@ -13,7 +13,7 @@ function resolveApiBase() {
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
 
-/** Refresh token unique partagé entre les appels concurrents. */
+/** Single refresh promise shared across concurrent calls to avoid refresh races. */
 let _refreshingPromise = null;
 
 async function _tryRefreshToken() {
@@ -30,7 +30,7 @@ async function _tryRefreshToken() {
   return _refreshingPromise;
 }
 
-/** Base WebSocket (ws:// ou wss://) dérivée de API_BASE. */
+/** WebSocket base URL (ws:// or wss://) derived from API_BASE. */
 export const WS_BASE = API_BASE
   .replace(/^https/, "wss")
   .replace(/^http/, "ws")
@@ -42,7 +42,7 @@ const RESERVED_ERROR_KEYS = new Set(["detail", "code", "status", "request_id", "
 
 
 if (typeof window !== "undefined" && isDev) {
-  window.__API_BASE__ = API_BASE; // pratique debug
+  window.__API_BASE__ = API_BASE; // handy for debugging
 }
 
 function storeAuthTokens() {
@@ -282,7 +282,7 @@ export function getApiLockoutMessage(error, language = "en", fallbackSeconds = 3
 }
 
 /** ========== Timeout ========== */
-const _DEFAULT_TIMEOUT_MS = 10_000; // 10 secondes
+const _DEFAULT_TIMEOUT_MS = 10_000; // 10 seconds
 
 function _withTimeout(ms = _DEFAULT_TIMEOUT_MS) {
   const controller = new AbortController();
@@ -455,13 +455,13 @@ async function apiRequest(path, { method = "GET", body, headers = {}, csrf = fal
   const data = await parseResponsePayload(response);
 
   if (!response.ok) {
-    // Tentative de refresh automatique sur 401 (access token expiré)
+    // Auto-retry on 401 (expired access token)
     if (response.status === 401 && !_retry) {
       try {
         await _tryRefreshToken();
         return apiRequest(path, { method, body, headers, csrf, _retry: true });
       } catch {
-        // refresh échoué — on laisse l'erreur 401 originale remonter
+        // refresh failed — let the original 401 bubble up
       }
     }
     throw buildHttpError(response, data, { url, method });

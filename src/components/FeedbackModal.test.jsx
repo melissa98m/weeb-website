@@ -90,7 +90,7 @@ describe("FeedbackModal", () => {
     expect(screen.getByRole("heading", { name: /laisser un avis/i })).toBeInTheDocument();
   });
 
-  // ── Accessibilité ────────────────────────────────────────────────────────
+  // ── Accessibility ────────────────────────────────────────────────────────
 
   it("le dialog a role='dialog' et aria-modal='true'", () => {
     renderModal();
@@ -125,7 +125,7 @@ describe("FeedbackModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  // ── Bouton Envoyer — état disabled ───────────────────────────────────────
+  // ── Send button — disabled state ─────────────────────────────────────────
 
   it("le bouton 'Envoyer' est désactivé si le textarea est vide", () => {
     renderModal();
@@ -146,7 +146,7 @@ describe("FeedbackModal", () => {
     expect(screen.getByRole("button", { name: /envoyer/i })).toBeDisabled();
   });
 
-  // ── Soumission réussie ───────────────────────────────────────────────────
+  // ── Successful submission ────────────────────────────────────────────────
 
   it("envoie le feedback au bon endpoint", async () => {
     const user = userEvent.setup();

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import AnalyticsCharts from "./AnalyticsCharts";
 
-// Recharts utilise ResizeObserver — stub nécessaire en jsdom
+// Recharts uses ResizeObserver — stub required in jsdom
 global.ResizeObserver = class {
   observe() {}
   unobserve() {}
