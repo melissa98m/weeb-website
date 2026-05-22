@@ -4,7 +4,6 @@ import footerEn from "../../locales/en/footer.json";
 import footerFr from "../../locales/fr/footer.json";
 import { useLanguage } from "../context/LanguageContext";
 import { NewsletterApi } from "../lib/api";
-import Button from "./Button";
 
 function IconYoutube({ className }) {
   return (
@@ -71,6 +70,14 @@ const FOOTER_LINKS = [
       { label: { en: footerEn.privacy_policy, fr: footerFr.privacy_policy }, href: "/privacy-policy" },
     ],
   },
+];
+
+const SOCIALS = [
+  { Icon: IconYoutube,   label: "YouTube",    href: "#" },
+  { Icon: IconFacebook,  label: "Facebook",   href: "#" },
+  { Icon: IconTwitter,   label: "Twitter / X", href: "#" },
+  { Icon: IconInstagram, label: "Instagram",  href: "#" },
+  { Icon: IconLinkedin,  label: "LinkedIn",   href: "#" },
 ];
 
 export default function Footer() {
@@ -142,198 +149,204 @@ export default function Footer() {
   const currentErrorMessage = errorMessageMap[newsletterStatus] ?? null;
   const isSubmitDisabled = !newsletterConsent || newsletterStatus === "loading";
 
+  const label = (obj) => (language === "fr" ? obj.fr : obj.en);
+
   return (
     <footer
-      className={`text-sm px-6 sm:px-12 py-12 w-full border-t ${
-        isDark
-          ? "bg-surface-deep text-white border-border"
-          : "bg-white text-dark border-gray-200"
+      className={`text-sm w-full border-t ${
+        isDark ? "bg-surface-deep text-white border-border" : "bg-white text-dark border-gray-200"
       }`}
     >
-      {/* Newsletter */}
-      <div
-        className={`max-w-5xl mx-auto mb-10 rounded-xl border px-6 py-6 sm:px-8 ${
-          isDark ? "bg-surface border-border" : "bg-gray-50 border-gray-200"
-        }`}
-      >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+      {/* ── Newsletter ─────────────────────────────────────── */}
+      <div className={`border-b ${isDark ? "border-border/50" : "border-gray-100"}`}>
+        <div className="max-w-5xl mx-auto px-6 sm:px-12 py-10">
+          <div
+            className={`rounded-2xl border px-6 py-7 sm:px-10 ${
+              isDark
+                ? "border-primary/20 bg-gradient-to-br from-primary/8 via-transparent to-transparent"
+                : "border-secondary/20 bg-gradient-to-br from-purple-50/80 to-white"
+            }`}
+          >
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-16">
 
-          <div className="lg:max-w-xs">
-            <p className={`text-xs uppercase tracking-[0.2em] ${isDark ? "text-muted" : "text-dark/40"}`}>
-              Newsletter
-            </p>
-            <h2 className={`text-lg font-semibold mt-1 ${isDark ? "text-white" : "text-dark"}`}>
-              {t.newsletter_title}
-            </h2>
-            <p className={`mt-1 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
-              {t.newsletter_subtitle}
-            </p>
-          </div>
+              {/* Left — copy */}
+              <div className="lg:max-w-xs">
+                <span className={`text-xs font-semibold uppercase tracking-widest ${isDark ? "text-primary/70" : "text-secondary"}`}>
+                  Newsletter
+                </span>
+                <h2 className={`font-display font-bold text-xl leading-snug mt-1.5 ${isDark ? "text-white" : "text-dark"}`}>
+                  {t.newsletter_title}
+                </h2>
+                <p className={`mt-2 text-sm leading-relaxed ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                  {t.newsletter_subtitle}
+                </p>
+              </div>
 
-          <form className="flex-1" onSubmit={handleSubmit} noValidate>
-            <div className="sm:grid sm:grid-cols-[1fr_auto] sm:gap-x-3 sm:items-start">
-
-              <div className="sm:col-start-1 sm:row-start-1">
+              {/* Right — form */}
+              <form className="flex-1 lg:max-w-sm" onSubmit={handleSubmit} noValidate>
                 <label htmlFor="newsletter-email" className="sr-only">
                   {t.newsletter_placeholder}
                 </label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  inputMode="email"
-                  required
-                  placeholder={t.newsletter_placeholder}
-                  className={`w-full rounded-md border bg-transparent px-3 py-2 text-sm focus:outline-none transition-colors ${
-                    emailError
-                      ? "border-red-400 focus:border-red-500"
-                      : isDark
-                      ? "border-border text-white placeholder-white/30 focus:border-border-2"
-                      : "border-gray-200 text-dark placeholder-dark/40 focus:border-gray-400"
-                  }`}
-                  autoComplete="email"
-                  value={newsletterEmail}
-                  aria-describedby={emailError ? "newsletter-email-error" : "newsletter-privacy"}
-                  aria-invalid={emailError ? "true" : undefined}
-                  onChange={(e) => {
-                    setNewsletterEmail(e.target.value);
-                    if (emailError && EMAIL_REGEX.test(e.target.value)) setEmailError("");
-                  }}
-                  onBlur={(e) => validateEmailFormat(e.target.value)}
-                />
+
+                <div className="flex gap-2">
+                  <input
+                    id="newsletter-email"
+                    type="email"
+                    inputMode="email"
+                    required
+                    placeholder={t.newsletter_placeholder}
+                    className={`flex-1 min-w-0 rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors ${
+                      emailError
+                        ? "border-red-400 focus:border-red-500 focus:ring-red-400/20"
+                        : isDark
+                        ? "bg-surface border-border text-white placeholder-white/30 focus:border-primary/40 focus:ring-primary/15"
+                        : "bg-white border-gray-200 text-dark placeholder-dark/40 focus:border-secondary/40 focus:ring-secondary/15"
+                    }`}
+                    autoComplete="email"
+                    value={newsletterEmail}
+                    aria-describedby={emailError ? "newsletter-email-error" : "newsletter-privacy"}
+                    aria-invalid={emailError ? "true" : undefined}
+                    onChange={(e) => {
+                      setNewsletterEmail(e.target.value);
+                      if (emailError && EMAIL_REGEX.test(e.target.value)) setEmailError("");
+                    }}
+                    onBlur={(e) => validateEmailFormat(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitDisabled}
+                    title={!newsletterConsent ? t.newsletter_consent_required : undefined}
+                    className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-all whitespace-nowrap ${
+                      isSubmitDisabled
+                        ? isDark
+                          ? "bg-white/5 text-white/25 cursor-not-allowed border-border"
+                          : "bg-gray-100 text-dark/30 cursor-not-allowed border-gray-200"
+                        : isDark
+                          ? "bg-primary/15 border-primary/30 text-primary hover:bg-primary/25"
+                          : "bg-secondary text-white border-secondary hover:brightness-110"
+                    }`}
+                  >
+                    {newsletterStatus === "loading" ? t.newsletter_loading : t.newsletter_cta}
+                  </button>
+                </div>
+
                 {emailError && (
-                  <p id="newsletter-email-error" role="alert" className="mt-1 text-xs text-red-500">
+                  <p id="newsletter-email-error" role="alert" className="mt-1.5 text-xs text-red-500">
                     {emailError}
                   </p>
                 )}
-              </div>
 
-              <div className={`mt-3 text-xs sm:col-start-1 sm:col-end-3 sm:row-start-2 ${isDark ? "text-white/40" : "text-dark/40"}`}>
-                <label className="flex items-start gap-2">
-                  <input
-                    id="newsletter-consent"
-                    type="checkbox"
-                    required
-                    className="mt-0.5 h-4 w-4 accent-primary"
-                    aria-describedby="newsletter-privacy"
-                    checked={newsletterConsent}
-                    onChange={(e) => setNewsletterConsent(e.target.checked)}
-                  />
-                  <span>{t.newsletter_consent}</span>
-                </label>
-                <p id="newsletter-privacy" className="mt-1.5">
-                  {t.newsletter_privacy}{" "}
-                  <a href="/privacy-policy" className={`underline underline-offset-2 ${isDark ? "text-white/60 hover:text-white" : "text-dark/60 hover:text-dark"}`}>
-                    {t.privacy_policy}
-                  </a>
-                </p>
-                <div aria-live="polite" aria-atomic="true">
-                  {(newsletterStatus === "success" || newsletterStatus === "success_duplicate") && (
-                    <p
-                      ref={successRef}
-                      tabIndex={-1}
-                      className={`mt-2 focus:outline-none ${
-                        newsletterStatus === "success_duplicate" ? "text-amber-500" : "text-green-500"
-                      }`}
+                <div className={`mt-3 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                  <label className="flex items-start gap-2 cursor-pointer">
+                    <input
+                      id="newsletter-consent"
+                      type="checkbox"
+                      required
+                      className="mt-0.5 h-4 w-4 accent-primary"
+                      aria-describedby="newsletter-privacy"
+                      checked={newsletterConsent}
+                      onChange={(e) => setNewsletterConsent(e.target.checked)}
+                    />
+                    <span>{t.newsletter_consent}</span>
+                  </label>
+                  <p id="newsletter-privacy" className="mt-1.5 pl-6">
+                    {t.newsletter_privacy}{" "}
+                    <a
+                      href="/privacy-policy"
+                      className={`underline underline-offset-2 ${isDark ? "text-white/60 hover:text-white" : "text-dark/60 hover:text-dark"}`}
                     >
-                      {newsletterStatus === "success_duplicate"
-                        ? t.newsletter_success_duplicate
-                        : t.newsletter_success}
-                    </p>
-                  )}
-                  {currentErrorMessage && (
-                    <p className="mt-2 text-red-500">{currentErrorMessage}</p>
-                  )}
+                      {t.privacy_policy}
+                    </a>
+                  </p>
+                  <div aria-live="polite" aria-atomic="true">
+                    {(newsletterStatus === "success" || newsletterStatus === "success_duplicate") && (
+                      <p
+                        ref={successRef}
+                        tabIndex={-1}
+                        className={`mt-2 pl-6 focus:outline-none ${
+                          newsletterStatus === "success_duplicate" ? "text-amber-500" : "text-green-500"
+                        }`}
+                      >
+                        {newsletterStatus === "success_duplicate"
+                          ? t.newsletter_success_duplicate
+                          : t.newsletter_success}
+                      </p>
+                    )}
+                    {currentErrorMessage && (
+                      <p className="mt-2 pl-6 text-red-500">{currentErrorMessage}</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-
-              <Button
-                type="submit"
-                variant={isSubmitDisabled ? undefined : "primary"}
-                size="md"
-                disabled={isSubmitDisabled}
-                title={!newsletterConsent ? t.newsletter_consent_required : undefined}
-                className={`mt-3 w-full sm:mt-0 sm:w-auto sm:col-start-2 sm:row-start-1 rounded-md px-4 py-2 font-medium transition-colors ${
-                  isSubmitDisabled
-                    ? isDark
-                      ? "bg-white/5 text-white/25 cursor-not-allowed border border-border"
-                      : "bg-gray-100 text-dark/30 cursor-not-allowed border border-gray-200"
-                    : ""
-                }`}
-              >
-                {newsletterStatus === "loading" ? t.newsletter_loading : t.newsletter_cta}
-              </Button>
+              </form>
             </div>
-          </form>
-        </div>
-      </div>
-
-      {/* Nav columns */}
-      <div className="max-w-5xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
-
-        <div className="lg:max-w-[180px]">
-          <p className={`text-lg font-display font-extrabold tracking-tight ${isDark ? "text-white" : "text-dark"}`}>
-            weeb
-          </p>
-          <p className={`mt-1.5 text-xs leading-relaxed ${isDark ? "text-white/40" : "text-dark/40"}`}>
-            {t.tagline}
-          </p>
-        </div>
-
-        {FOOTER_LINKS.map(({ title, links }) => (
-          <div key={language === "fr" ? title.fr : title.en}>
-            <h3 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${isDark ? "text-muted" : "text-dark/40"}`}>
-              {language === "fr" ? title.fr : title.en}
-            </h3>
-            <ul className="space-y-2">
-              {links.map(({ label, href }) => (
-                <li key={language === "fr" ? label.fr : label.en}>
-                  <a
-                    href={href}
-                    className={`transition-colors duration-150 ${
-                      isDark ? "text-white/50 hover:text-white" : "text-dark/50 hover:text-dark"
-                    }`}
-                  >
-                    {language === "fr" ? label.fr : label.en}
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Bottom bar */}
-      <div
-        className={`border-t mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto ${
-          isDark ? "border-border" : "border-gray-200"
-        }`}
-      >
-        <p className={isDark ? "text-muted" : "text-dark/40"}>
-          &copy; {new Date().getFullYear()} {t.copyright}
-        </p>
-        <div className="flex gap-1">
-          {[
-            { Icon: IconYoutube, label: "YouTube", href: "#" },
-            { Icon: IconFacebook, label: "Facebook", href: "#" },
-            { Icon: IconTwitter, label: "Twitter / X", href: "#" },
-            { Icon: IconInstagram, label: "Instagram", href: "#" },
-            { Icon: IconLinkedin, label: "LinkedIn", href: "#" },
-          ].map(({ Icon, label, href }) => (
-            <a
-              key={label}
-              href={href}
-              aria-label={label}
-              rel="noopener noreferrer"
-              target="_blank"
-              className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
-                isDark
-                  ? "text-muted hover:text-white hover:bg-white/5"
-                  : "text-dark/40 hover:text-dark hover:bg-dark/5"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-            </a>
-          ))}
+      {/* ── Nav + brand ────────────────────────────────────── */}
+      <div className="max-w-5xl mx-auto px-6 sm:px-12 py-12">
+        <div className="flex flex-col gap-10 lg:flex-row lg:justify-between">
+
+          {/* Brand */}
+          <div className="lg:max-w-[200px] shrink-0">
+            <p className="font-display font-extrabold text-2xl tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              weeb
+            </p>
+            <p className={`mt-2 text-xs leading-relaxed ${isDark ? "text-white/40" : "text-dark/40"}`}>
+              {t.tagline}
+            </p>
+            <div className="flex gap-0.5 mt-5 -ml-1.5" role="list" aria-label="Réseaux sociaux">
+              {SOCIALS.map(({ Icon, label: ariaLabel, href }) => (
+                <a
+                  key={ariaLabel}
+                  href={href}
+                  aria-label={ariaLabel}
+                  role="listitem"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  className={`min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                    isDark
+                      ? "text-white/30 hover:text-primary hover:bg-primary/10"
+                      : "text-dark/30 hover:text-secondary hover:bg-secondary/8"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Link columns */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:flex lg:gap-16">
+            {FOOTER_LINKS.map(({ title, links }) => (
+              <div key={label(title)}>
+                <h3 className={`text-xs font-semibold uppercase tracking-widest mb-4 ${isDark ? "text-white/25" : "text-dark/30"}`}>
+                  {label(title)}
+                </h3>
+                <ul className="space-y-2.5">
+                  {links.map(({ label: lbl, href }) => (
+                    <li key={label(lbl)}>
+                      <a
+                        href={href}
+                        className={`transition-colors duration-150 ${
+                          isDark ? "text-white/50 hover:text-primary" : "text-dark/50 hover:text-secondary"
+                        }`}
+                      >
+                        {label(lbl)}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Bottom bar ─────────────────────────────────────── */}
+        <div className={`border-t mt-10 pt-6 ${isDark ? "border-border/50" : "border-gray-100"}`}>
+          <p className={`text-xs ${isDark ? "text-white/20" : "text-dark/30"}`}>
+            &copy; {new Date().getFullYear()} {t.copyright}
+          </p>
         </div>
       </div>
     </footer>
