@@ -2,9 +2,18 @@ import React, { lazy, Suspense, useEffect } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
+
+function IconChart({ size = 20 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  );
+}
 
 // recharts ~348KB — only loaded when the admin analytics page is visited
 const AnalyticsCharts = lazy(() => import("../../components/admin/AnalyticsCharts"));
@@ -13,6 +22,7 @@ export default function AnalyticsPage() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const prev = document.title;
@@ -37,12 +47,13 @@ export default function AnalyticsPage() {
 
   return (
     <main className="px-4 md:px-6 py-6">
-      <header className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-bold">{t.analytics_title}</h1>
-        <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
-          {t.analytics_subtitle}
-        </p>
-      </header>
+      <AdminPageHeader
+        title={t.analytics_title}
+        subtitle={t.analytics_subtitle}
+        icon={IconChart}
+        iconBg={isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-100 text-emerald-600"}
+        isDark={isDark}
+      />
 
       <section className={`rounded-2xl border p-4 ${card}`}>
         <Suspense fallback={

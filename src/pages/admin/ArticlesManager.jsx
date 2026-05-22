@@ -4,6 +4,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { hasAnyRedactionRole, REDACTION_ROLES } from "../../utils/roles";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 import { safeChipStyle } from "../../utils/colors";
@@ -24,6 +25,7 @@ export default function ArticlesManager() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const prev = document.title;
@@ -259,25 +261,24 @@ export default function ArticlesManager() {
 
   return (
     <main className="px-4 md:px-6 py-4 md:py-6">
-      {/* Header */}
-      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold leading-tight">{t.articles_title}</h1>
-          <p className="text-xs mt-1 opacity-80">{t.articles_subtitle}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            className={`w-64 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder={t.articles_search}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <PageSizer pageSize={pageSize} onChange={setPageSize} />
-          <button type="button" onClick={openCreate} className={`rounded-xl border px-3 py-2 ${cta}`}>
-            {t.articles_new}
-          </button>
-        </div>
-      </header>
+      <AdminPageHeader
+        title={t.articles_title}
+        subtitle={t.articles_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>}
+        iconBg={isDark ? "bg-sky-500/10 text-sky-400" : "bg-sky-100 text-sky-600"}
+        isDark={isDark}
+      >
+        <input
+          className={`w-56 rounded-xl border px-3 py-2 text-sm ${inputCls}`}
+          placeholder={t.articles_search}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <PageSizer pageSize={pageSize} onChange={setPageSize} />
+        <button type="button" onClick={openCreate} className={`rounded-xl border px-4 py-2 text-sm font-medium ${cta}`}>
+          {t.articles_new}
+        </button>
+      </AdminPageHeader>
 
       {/* Onglets */}
       <div className="flex gap-2 mt-4 border-b border-current/10">
@@ -288,7 +289,7 @@ export default function ArticlesManager() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               activeTab === tab
-                ? "border-indigo-500 text-indigo-500"
+                ? "border-primary text-primary"
                 : "border-transparent opacity-60 hover:opacity-80"
             }`}
           >
@@ -322,7 +323,7 @@ export default function ArticlesManager() {
                 onClick={() => setCommentsFilter(val)}
                 className={`px-3 py-1 rounded-full text-xs border transition ${
                   commentsFilter === val
-                    ? "bg-indigo-500 text-white border-indigo-500"
+                    ? "bg-primary/20 text-primary border-primary/30"
                     : ghostBtn
                 }`}
               >
