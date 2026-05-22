@@ -82,11 +82,11 @@ export default function BlogCard({
       transition={
         shouldReduceMotion ? { duration: 0 } : { duration: 0.35, delay: idx * 0.04 }
       }
-      className={`rounded-xl border shadow ${cardClass} group hover:border-purple-500/40 transition-colors duration-200`}
+      className={`rounded-xl border ${cardClass} group hover:border-primary/40 transition-colors duration-200`}
     >
       <Link
         to={`/blog/${post.id}`}
-        className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
+        className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1"
       >
         {/* Image + hover overlay (desktop) */}
         <div className="relative overflow-hidden rounded-t-xl">
@@ -103,7 +103,7 @@ export default function BlogCard({
           {/* Excerpt overlay — desktop only, hidden when reduced-motion is preferred */}
           {!shouldReduceMotion && (
             <div
-              className="absolute inset-0 hidden md:flex flex-col justify-end p-4 bg-gradient-to-t from-purple-950/85 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              className="absolute inset-0 hidden md:flex flex-col justify-end p-4 bg-gradient-to-t from-background/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
               aria-hidden="true"
             >
               <p className="text-white text-sm line-clamp-3 leading-relaxed">
@@ -114,7 +114,7 @@ export default function BlogCard({
         </div>
 
         <div className="p-5">
-          <h2 className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-purple-400 transition-colors duration-200">{title}</h2>
+          <h2 className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-200">{title}</h2>
 
           {/* Excerpt visible on mobile only (shown in the overlay on desktop) */}
           <p
@@ -132,7 +132,7 @@ export default function BlogCard({
                 <span
                   key={c.key}
                   title={c.label}
-                  className="px-2 py-1 rounded-full border"
+                  className="font-mono text-[11px] px-2 py-0.5 rounded-full border"
                   style={safeChipStyle(c.color, theme)}
                 >
                   {c.label}
@@ -143,10 +143,16 @@ export default function BlogCard({
 
           {/* Meta: author · date · reading time + likes */}
           <div className={`flex items-center justify-between text-xs ${metaColor}`}>
-            <span>
+            <span className="flex items-center gap-1.5 flex-wrap">
               {authorLabel} •{" "}
               <time dateTime={dateIso}>{formatDate(dateIso, language)}</time>
-              {" "}• ~{readingMin} min
+              {" "}•{" "}
+              <span className="flex items-center gap-1">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                ~{readingMin} min
+              </span>
             </span>
             {(post.likes_count ?? 0) > 0 && (
               <span className="flex items-center gap-1">
