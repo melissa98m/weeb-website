@@ -212,9 +212,8 @@ export default function FormationsManager() {
 
       {/* Content */}
       <section className={`rounded-2xl border mt-3 p-4 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">{t.common_loading}</div>}
         {!loading && err && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400">
+          <div className={`rounded-xl border px-4 py-3 text-sm ${isDark ? "border-red-700/30 bg-red-900/10 text-red-400" : "border-red-200 bg-red-50 text-red-600"}`}>
             {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={() => load(page)}>
@@ -223,33 +222,64 @@ export default function FormationsManager() {
             </div>
           </div>
         )}
+
         {!loading && !err && items.length === 0 && (
-          <div className="p-4 text-sm opacity-80">{t.formations_no_results}</div>
+          <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/30" : "border-gray-200 text-gray-400"}`}>
+            {t.formations_no_results}
+          </div>
         )}
 
-        {!loading && !err && items.length > 0 && (
-          <ul
-            className="grid gap-3 p-3
-                       sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            {items.map((f) => (
-              <li key={f.id} className="rounded-xl border overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => openModal(f)}
-                  className="w-full text-left p-4 hover:brightness-105 transition"
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {loading
+            ? Array.from({ length: pageSize > 8 ? 8 : pageSize }).map((_, i) => (
+                <li
+                  key={i}
+                  className={`rounded-2xl border animate-pulse ${isDark ? "border-border bg-surface" : "border-gray-200 bg-white"}`}
                 >
-                  <div className="font-semibold truncate">{f.title}</div>
-                  {f.description && (
-                    <div className="mt-1 text-sm opacity-80 line-clamp-2">
-                      {f.description}
+                  <div className="p-4 flex flex-col gap-2.5">
+                    <div className={`w-9 h-9 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-100"}`} />
+                    <div className="space-y-1.5">
+                      <div className={`h-3 rounded-full w-3/4 ${isDark ? "bg-white/5" : "bg-gray-100"}`} />
+                      <div className={`h-2.5 rounded-full w-full ${isDark ? "bg-white/3" : "bg-gray-50"}`} />
+                      <div className={`h-2.5 rounded-full w-2/3 ${isDark ? "bg-white/3" : "bg-gray-50"}`} />
                     </div>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  </div>
+                </li>
+              ))
+            : items.map((f) => (
+                <li
+                  key={f.id}
+                  className={`rounded-2xl border transition-colors ${
+                    isDark
+                      ? "border-border hover:border-primary/30 bg-surface"
+                      : "border-gray-200 hover:border-secondary/30 bg-white"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => openModal(f)}
+                    className="w-full text-left p-4 flex flex-col gap-2.5 h-full"
+                  >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold font-display shrink-0 ${
+                      isDark ? "bg-primary/15 text-primary" : "bg-secondary/10 text-secondary"
+                    }`}>
+                      {(f.title || "?")[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div className={`font-display font-semibold text-sm leading-snug truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {f.title}
+                      </div>
+                      {f.description && (
+                        <div className={`mt-1 text-xs line-clamp-2 ${isDark ? "text-white/50" : "text-gray-400"}`}>
+                          {f.description}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              ))
+          }
+        </ul>
       </section>
 
       {/* Pagination */}
