@@ -9,6 +9,7 @@ import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import FormationDetailsModal from "../../components/admin/FormationDetailsModal";
@@ -60,10 +61,8 @@ export default function FormationsManager() {
   // AbortController
   const ctrlRef = useRef(null);
 
-  const card =
-    theme === "dark"
-      ? "bg-surface-2 text-white border-border"
-      : "bg-white text-gray-900 border-gray-200";
+  const isDark = theme === "dark";
+  const card = isDark ? "bg-surface border-border text-white" : "bg-white text-gray-900 border-gray-200";
   const inputCls =
     theme === "dark"
       ? "bg-surface text-white border-border placeholder-white/60"
@@ -192,36 +191,24 @@ export default function FormationsManager() {
 
   return (
     <main className="px-4 md:px-6 py-6">
-      {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight truncate">
-            {t.formations_title}
-          </h1>
-          <p className="mt-1 text-xs text-gray-500 dark:text-white/60">
-            {t.formations_subtitle}
-          </p>
-        </div>
-
-        {/* Actions: create + search + page size */}
-        <div className="flex items-center gap-2 flex-wrap sm:justify-end">
-          <button
-            type="button"
-            className={`rounded-xl border px-4 py-2 ${ctaBtn}`}
-            onClick={() => setShowCreate(true)}
-          >
-            {t.formations_new}
-          </button>
-
-          <input
-            className={`w-60 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder={t.formations_search}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <PageSizer pageSize={pageSize} onChange={setPageSize} />
-        </div>
-      </header>
+      <AdminPageHeader
+        title={t.formations_title}
+        subtitle={t.formations_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5 9-5z"/><path d="M4 10v4l8 4 8-4v-4"/></svg>}
+        iconBg={isDark ? "bg-primary/10 text-primary" : "bg-purple-100 text-purple-600"}
+        isDark={isDark}
+      >
+        <button type="button" className={`rounded-xl border px-4 py-2 text-sm font-medium ${ctaBtn}`} onClick={() => setShowCreate(true)}>
+          {t.formations_new}
+        </button>
+        <input
+          className={`w-52 rounded-xl border px-3 py-2 text-sm ${inputCls}`}
+          placeholder={t.formations_search}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <PageSizer pageSize={pageSize} onChange={setPageSize} />
+      </AdminPageHeader>
 
       {/* Content */}
       <section className={`rounded-2xl border mt-3 p-4 ${card}`}>

@@ -3,6 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import { API_BASE, ensureCsrf } from "../../lib/api";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import { QCMEditor } from "../../components/admin/FormationContentEditor";
@@ -246,7 +247,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
             <>
               <span className="text-sm font-medium flex-1 truncate">{module.title}</span>
               <span className={`text-xs ${muted} shrink-0`}>{module.total_cours} cours</span>
-              {module.has_qcm && <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-400 shrink-0">QCM</span>}
+              {module.has_qcm && <span className="text-xs px-1.5 py-0.5 rounded bg-primary/15 text-primary shrink-0">QCM</span>}
               {module.formations.length > 0 && (
                 <span className={`hidden sm:inline text-xs ${muted} shrink-0 truncate max-w-[120px]`} title={module.formations.map((f) => f.name).join(", ")}>
                   {module.formations.map((f) => f.name).join(", ")}
@@ -356,7 +357,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
         <button
           type="button"
           onClick={() => setAdding(true)}
-          className="shrink-0 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+          className="shrink-0 text-sm px-4 py-1.5 rounded-lg bg-secondary text-white hover:brightness-110 transition"
         >
           + Module
         </button>
@@ -376,7 +377,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
           <ErrMsg msg={addErr} />
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => { setAdding(false); setNewTitle(""); setAddErr(""); }} className={`text-sm px-3 py-1.5 rounded-lg border ${theme === "dark" ? "border-border-2 hover:bg-border" : "border-gray-300 hover:bg-gray-100"}`}>{t.common_cancel}</button>
-            <button type="button" onClick={createModule} disabled={busy} className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50">
+            <button type="button" onClick={createModule} disabled={busy} className="flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-secondary text-white hover:brightness-110 disabled:opacity-50">
               {busy ? <Spinner /> : null}{t.common_create}
             </button>
           </div>
@@ -497,7 +498,7 @@ function CoursTab({ apiBase, cours, theme, t, onCoursCreated, onCoursUpdated, on
           onChange={(e) => setQ(e.target.value)}
         />
         <PageSizer pageSize={pageSize} onChange={(n) => { setPageSize(n); setPage(1); }} />
-        <button type="button" onClick={openCreate} className="shrink-0 text-sm px-4 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition">
+        <button type="button" onClick={openCreate} className="shrink-0 text-sm px-4 py-1.5 rounded-lg bg-secondary text-white hover:brightness-110 transition">
           {t.content_btn_add_course_module}
         </button>
       </div>
@@ -550,8 +551,9 @@ export default function ContenuManager() {
   const [err, setErr] = useState("");
   const ctrlRef = useRef(null);
 
-  const card = theme === "dark" ? "bg-surface border-surface-3" : "bg-white border-gray-200";
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const isDark = theme === "dark";
+  const card = isDark ? "bg-surface border-surface-3" : "bg-white border-gray-200";
+  const muted = isDark ? "text-white/50" : "text-gray-400";
 
   const load = useCallback(async () => {
     ctrlRef.current?.abort();
@@ -583,8 +585,8 @@ export default function ContenuManager() {
       onClick={() => setTab(key)}
       className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition ${
         tab === key
-          ? "border-indigo-500 text-indigo-500"
-          : `border-transparent ${theme === "dark" ? "text-white/60 hover:text-white" : "text-gray-500 hover:text-gray-800"}`
+          ? isDark ? "border-primary text-primary" : "border-secondary text-secondary"
+          : `border-transparent ${isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-800"}`
       }`}
     >
       {label}
@@ -595,11 +597,13 @@ export default function ContenuManager() {
     <div className="px-4 md:px-6 py-6">
       <div className="space-y-6">
 
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold">{t.content_title}</h1>
-          <p className={`text-sm mt-1 ${muted}`}>Gérer les modules, les cours et les QCM.</p>
-        </div>
+        <AdminPageHeader
+          title={t.content_title}
+          subtitle="Gérer les modules, les cours et les QCM."
+          icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>}
+          iconBg={isDark ? "bg-violet-500/10 text-violet-400" : "bg-violet-100 text-violet-600"}
+          isDark={isDark}
+        />
 
         {/* Card principale */}
         <div className={`rounded-2xl border ${card} overflow-hidden`}>

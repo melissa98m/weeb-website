@@ -5,6 +5,7 @@ import { useLanguage } from "../../context/LanguageContext";
 import { API_BASE, WS_BASE } from "../../lib/api";
 import { getCookie } from "../../lib/cookies";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import { STAFF_ROLES } from "../../utils/roles";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
@@ -148,10 +149,13 @@ export default function AdminChatPanel() {
 
   return (
     <main className="px-4 md:px-6 py-6">
-      <header className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold">{t.chat_title}</h1>
-        <p className={dark ? "text-white/70" : "text-gray-600"}>{t.chat_subtitle}</p>
-      </header>
+      <AdminPageHeader
+        title={t.chat_title}
+        subtitle={t.chat_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
+        iconBg={dark ? "bg-sky-500/10 text-sky-400" : "bg-sky-100 text-sky-600"}
+        isDark={dark}
+      />
 
       <div className={`rounded-2xl border overflow-hidden flex ${panel}`} style={{ height: "70vh" }}>
 

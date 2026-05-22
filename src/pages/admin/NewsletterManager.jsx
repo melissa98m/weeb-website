@@ -5,6 +5,7 @@ import { getCookie } from "../../lib/cookies";
 import { API_BASE } from "../../lib/api";
 import RichTextEditor from "../../components/admin/RichTextEditor";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import { STAFF_ROLES } from "../../utils/roles";
@@ -90,7 +91,7 @@ function ConfirmModal({ open, onConfirm, onCancel, recipientsCount, theme, t }) 
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 rounded-lg border bg-blue-600 text-white text-sm hover:brightness-110"
+            className="px-4 py-2 rounded-lg border bg-secondary text-white text-sm hover:brightness-110"
           >
             {t.newsletter_confirm_send}
           </button>
@@ -170,7 +171,7 @@ function SubscribersList({ theme, t }) {
           />
           <button
             type="submit"
-            className="px-3 py-1.5 rounded-lg border bg-blue-600 text-white text-sm hover:brightness-110 transition"
+            className="px-3 py-1.5 rounded-lg border bg-secondary text-white text-sm hover:brightness-110 transition"
           >
             {t.newsletter_search_btn}
           </button>
@@ -321,6 +322,7 @@ export default function NewsletterManager() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const prev = document.title;
@@ -335,12 +337,12 @@ export default function NewsletterManager() {
     return () => { document.title = prev; };
   }, [t]);
 
-  const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
-  const inputCls = theme === "dark"
+  const card = isDark ? "bg-surface border-border text-white" : "bg-white border-gray-200 text-gray-900";
+  const inputCls = isDark
     ? "bg-surface text-white border-border placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
-  const ghostBtn = theme === "dark" ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
-  const muted = theme === "dark" ? "text-white/60" : "text-gray-500";
+  const ghostBtn = isDark ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
+  const muted = isDark ? "text-white/50" : "text-gray-500";
 
   const [editingCampaignId, setEditingCampaignId] = useState(null);
   const [subject, setSubject] = useState("");
@@ -438,12 +440,13 @@ export default function NewsletterManager() {
 
   return (
     <main className="px-4 md:px-6 py-6 space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">{t.newsletter_title}</h1>
-        <p className={`text-sm mt-1 ${muted}`}>
-          {t.newsletter_subtitle}
-        </p>
-      </header>
+      <AdminPageHeader
+        title={t.newsletter_title}
+        subtitle={t.newsletter_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>}
+        iconBg={isDark ? "bg-emerald-500/10 text-emerald-400" : "bg-emerald-100 text-emerald-600"}
+        isDark={isDark}
+      />
 
       {/* Subscriber list */}
       <SubscribersList theme={theme} t={t} />
@@ -525,7 +528,7 @@ export default function NewsletterManager() {
             type="button"
             onClick={() => setConfirm(true)}
             disabled={!canSend || sending || !stats?.total_abonnes}
-            className="px-5 py-2 rounded-xl border bg-blue-600 text-white text-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 rounded-xl border bg-secondary text-white text-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {sending
               ? t.newsletter_btn_sending

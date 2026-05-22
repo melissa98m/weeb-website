@@ -12,6 +12,7 @@ import { ensureCsrf } from "../../lib/api";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import adminEn from "../../../locales/en/admin.json";
 import adminFr from "../../../locales/fr/admin.json";
 import Pill from "../../components/ui/Pill";
@@ -34,6 +35,7 @@ export default function PersonnelFormationAdmin() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
 
   useEffect(() => {
     const prev = document.title;
@@ -447,28 +449,17 @@ export default function PersonnelFormationAdmin() {
 
   return (
     <div className="p-6 space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start md:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight">
-            {t.personnel_title}
-          </h1>
-          <div className="mt-0.5 text-xs text-gray-500 dark:text-white/60 sm:hidden">
-            {t.personnel_access_reserved}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Pill color="primary" variant="soft" size="md">
-            {usersTotal} {t.personnel_users}
-          </Pill>
-          <Pill color="info" variant="soft" size="md">
-            {formationsTotal} {t.personnel_formations}
-          </Pill>
-          <Pill color="success" variant="soft" size="md">
-            {linksTotal} {t.personnel_links}
-          </Pill>
-        </div>
-      </header>
+      <AdminPageHeader
+        title={t.personnel_title}
+        subtitle={t.personnel_access_reserved}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 7h2a4 4 0 0 1 0 8H8"/><path d="M16 17h-2a4 4 0 0 1 0-8h2"/><path d="M9 12h6"/></svg>}
+        iconBg={isDark ? "bg-primary/10 text-primary" : "bg-purple-100 text-purple-600"}
+        isDark={isDark}
+      >
+        <Pill color="primary" variant="soft" size="md">{usersTotal} {t.personnel_users}</Pill>
+        <Pill color="info" variant="soft" size="md">{formationsTotal} {t.personnel_formations}</Pill>
+        <Pill color="success" variant="soft" size="md">{linksTotal} {t.personnel_links}</Pill>
+      </AdminPageHeader>
 
       {bootError && (
         <div
