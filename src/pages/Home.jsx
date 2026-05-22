@@ -3,6 +3,7 @@ import { useLanguage } from "../context/LanguageContext";
 import HeroSection from "../components/Home/HeroSection";
 import MarqueeSection from "../components/Home/MarqueeSection";
 import BentoGrid from "../components/Home/BentoGrid";
+import StepsSection from "../components/Home/StepsSection";
 import CtaFinal from "../components/Home/CtaFinal";
 import { setCanonical, setOgMeta, setJsonLd, setHreflang, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
@@ -69,6 +70,7 @@ export default function Home() {
       <HeroSection />
       <MarqueeSection />
       <BentoGrid />
+      <StepsSection />
       <Suspense fallback={null}>
         <FeaturedArticle />
       </Suspense>
