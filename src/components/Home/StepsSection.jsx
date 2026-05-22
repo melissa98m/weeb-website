@@ -91,18 +91,21 @@ const STEPS_EN = [
 
 const COLOR_MAP = {
   primary: {
-    dark:  { icon: "bg-primary/10 text-primary",     number: "#c084fc" },
-    light: { icon: "bg-secondary/10 text-secondary", number: "#9333ea" },
+    dark:  { icon: "bg-primary/10 text-primary",        number: "#c084fc" },
+    light: { icon: "bg-secondary/10 text-secondary",    number: "#9333ea" },
   },
   violet: {
     dark:  { icon: "bg-violet-500/10 text-violet-400",  number: "#a78bfa" },
-    light: { icon: "bg-violet-100 text-violet-600",      number: "#7c3aed" },
+    light: { icon: "bg-violet-100 text-violet-600",     number: "#7c3aed" },
   },
   emerald: {
     dark:  { icon: "bg-emerald-500/10 text-emerald-400", number: "#34d399" },
-    light: { icon: "bg-emerald-100 text-emerald-600",    number: "#059669" },
+    light: { icon: "bg-emerald-100 text-emerald-600",   number: "#059669" },
   },
 };
+
+// Icon outer wrapper size: p-2 (8px) + w-12 (48px) + p-2 (8px) = 64px → center at 32px = top-8
+const ICON_CENTER_PX = 32;
 
 export default function StepsSection() {
   const { theme } = useTheme();
@@ -112,6 +115,9 @@ export default function StepsSection() {
   const isFr = language === "fr";
 
   const steps = isFr ? STEPS_FR : STEPS_EN;
+
+  // Page background color — used to mask the gradient line under each icon
+  const pageBg = isDark ? "#0f172a" : "#f2f2f2";
 
   return (
     <section
@@ -142,52 +148,63 @@ export default function StepsSection() {
         </p>
       </motion.div>
 
-      {/* Steps grid */}
-      <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Steps */}
+      <div className="relative">
 
-        {/* Connector line — desktop only */}
+        {/*
+          Gradient line — desktop only.
+          Spans the full width at exactly icon-center height (ICON_CENTER_PX from top).
+          Each icon has an opaque background wrapper (pageBg) with z-10 that masks the
+          line underneath, making it appear to connect icon-to-icon perfectly at any width.
+        */}
         <div
-          className="hidden md:block absolute top-[52px] left-[calc(16.66%+24px)] right-[calc(16.66%+24px)] h-px pointer-events-none"
+          className="hidden md:block absolute left-0 right-0 h-[2.5px] pointer-events-none"
           aria-hidden="true"
           style={{
+            top: `${ICON_CENTER_PX - 1}px`,
             background: isDark
-              ? "linear-gradient(to right, rgba(192,132,252,0.25), rgba(167,139,250,0.25), rgba(52,211,153,0.25))"
-              : "linear-gradient(to right, rgba(147,51,234,0.15), rgba(124,58,237,0.15), rgba(5,150,105,0.15))",
+              ? "linear-gradient(to right, #c084fc 0%, #a78bfa 50%, #34d399 100%)"
+              : "linear-gradient(to right, #9333ea 0%, #7c3aed 50%, #059669 100%)",
+            opacity: 0.4,
           }}
         />
 
-        {steps.map((step, i) => {
-          const colors = COLOR_MAP[step.color][isDark ? "dark" : "light"];
-          const Icon = step.icon;
+        {/* 3-column grid — icons centered so the line passes through them */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+          {steps.map((step, i) => {
+            const colors = COLOR_MAP[step.color][isDark ? "dark" : "light"];
+            const Icon = step.icon;
 
-          return (
-            <motion.div
-              key={step.number}
-              initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
-              className="flex flex-col items-center text-center md:items-start md:text-left"
-            >
-              {/* Number + icon row */}
-              <div className="flex items-center gap-4 mb-5">
-                {/* Icon */}
-                <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 ${colors.icon}`}>
-                  <Icon size={22} />
-                  {/* Dot above icon for connector */}
-                  <span
-                    className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-2 h-2 rounded-full hidden md:block"
-                    aria-hidden="true"
-                    style={{ background: colors.number, opacity: 0.5 }}
-                  />
+            return (
+              <motion.div
+                key={step.number}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-center text-center"
+              >
+                {/*
+                  Icon wrapper — p-2 creates an opaque ring matching the page background.
+                  z-10 places it above the gradient line so the line is hidden under it,
+                  giving the illusion the line ends exactly at the icon edge.
+                */}
+                <div
+                  className="relative z-10 p-2 rounded-2xl mb-4 flex-shrink-0"
+                  style={{ background: pageBg }}
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colors.icon}`}>
+                    <Icon size={22} />
+                  </div>
                 </div>
 
-                {/* Large number */}
+                {/* Gradient number */}
                 <span
-                  className="font-display font-black text-5xl leading-none tabular-nums select-none"
+                  className="font-display font-black leading-none tabular-nums select-none mb-3"
                   aria-hidden="true"
                   style={{
-                    background: `linear-gradient(135deg, ${colors.number} 0%, ${colors.number}80 100%)`,
+                    fontSize: "clamp(2.25rem, 4vw, 3rem)",
+                    background: `linear-gradient(135deg, ${colors.number} 0%, ${colors.number}70 100%)`,
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     backgroundClip: "text",
@@ -195,18 +212,20 @@ export default function StepsSection() {
                 >
                   {step.number}
                 </span>
-              </div>
 
-              {/* Text */}
-              <h3 className={`font-display font-bold text-xl mb-2 ${isDark ? "text-white" : "text-dark"}`}>
-                {step.title}
-              </h3>
-              <p className={`text-sm leading-relaxed ${isDark ? "text-white/50" : "text-dark/55"}`}>
-                {step.description}
-              </p>
-            </motion.div>
-          );
-        })}
+                {/* Title */}
+                <h3 className={`font-display font-bold text-xl mb-2 ${isDark ? "text-white" : "text-dark"}`}>
+                  {step.title}
+                </h3>
+
+                {/* Description */}
+                <p className={`text-sm leading-relaxed max-w-xs ${isDark ? "text-white/50" : "text-dark/55"}`}>
+                  {step.description}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Bottom CTA */}
