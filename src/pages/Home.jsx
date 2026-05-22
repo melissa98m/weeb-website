@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect } from "react";
 import { useLanguage } from "../context/LanguageContext";
 import HeroSection from "../components/Home/HeroSection";
-import LearningSection from "../components/Home/LearningSection";
-import TrendsSection from "../components/Home/TrendsSection";
+import MarqueeSection from "../components/Home/MarqueeSection";
+import BentoGrid from "../components/Home/BentoGrid";
+import CtaFinal from "../components/Home/CtaFinal";
 import { setCanonical, setOgMeta, setJsonLd, setHreflang, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
 
-// Lazy load TrustedBy car il contient des composants Icon volumineux non critiques
-const TrustedBy = lazy(() => import("../components/Home/TrustedBy"));
+// Lazy — below the fold, not critical for LCP
+const FeaturedArticle = lazy(() => import("../components/Home/FeaturedArticle"));
 
 export default function Home() {
   const { language } = useLanguage();
@@ -33,7 +34,6 @@ export default function Home() {
     const cleanTwTitle = setTwitterMeta("twitter:title", document.title);
     const cleanTwDesc = setTwitterMeta("twitter:description", desc);
     const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
-
     const cleanHreflang = setHreflang("/");
 
     const cleanJsonLd = setJsonLd("jsonld-website", {
@@ -67,11 +67,12 @@ export default function Home() {
   return (
     <>
       <HeroSection />
-      <Suspense fallback={<div className="text-center py-12"><div className="h-6 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-6" /></div>}>
-        <TrustedBy />
+      <MarqueeSection />
+      <BentoGrid />
+      <Suspense fallback={null}>
+        <FeaturedArticle />
       </Suspense>
-      <LearningSection />
-      <TrendsSection />
+      <CtaFinal />
     </>
   );
 }

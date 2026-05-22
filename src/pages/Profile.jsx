@@ -19,8 +19,9 @@ export default function Profile() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = useMemo(() => (language === "fr" ? profileFr : profileEn), [language]);
+  const isDark = theme === "dark";
 
-  // SEO: user profile — personal data, never indexed
+  // SEO: personal page — never indexed
   useEffect(() => {
     const prev = document.title;
     document.title = "Mon profil | Weeb";
@@ -90,7 +91,6 @@ export default function Profile() {
 
       if (!alive) return;
 
-      // Formations
       if (formationsRes.status === "fulfilled") {
         setFormations(formationsRes.value);
         setFError(null);
@@ -100,7 +100,6 @@ export default function Profile() {
       }
       setFLoading(false);
 
-      // Feedbacks → map { formation_id: feedback }
       if (feedbacksRes.status === "fulfilled") {
         const map = {};
         for (const item of feedbacksRes.value) {
@@ -113,7 +112,6 @@ export default function Profile() {
       }
       setFbLoading(false);
 
-      // Dashboard
       if (dashRes.status === "fulfilled") {
         setDashData(dashRes.value);
         setDashError(null);
@@ -150,18 +148,25 @@ export default function Profile() {
   const [openFb, setOpenFb] = useState(false);
   const [selectedFormation, setSelectedFormation] = useState(null);
 
-  // While auth is loading, show a basic skeleton
+  // Loading skeleton — test checks container.querySelector(".animate-pulse")
   if (authLoading) {
     return (
-      <main className="min-h-[60vh] px-6 py-16 flex justify-center">
-        <div className={`w-full max-w-2xl rounded-xl border shadow p-6 ${theme==="dark"?"bg-surface border-border":"bg-white border-gray-200"}`}>
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 w-1/3 bg-gray-300/30 rounded" />
-            <div className="grid grid-cols-2 gap-4">
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
-              <div className="h-4 bg-gray-300/30 rounded" />
+      <main className="min-h-screen px-6 pt-28 pb-20">
+        <div className="max-w-3xl mx-auto">
+          <div className={`rounded-2xl border p-6 ${isDark ? "bg-surface border-border" : "bg-white border-gray-200 shadow-sm"}`}>
+            <div className="animate-pulse space-y-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gray-300/30" />
+                <div className="h-6 w-1/3 bg-gray-300/30 rounded" />
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-300/10">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="h-3 w-1/3 bg-gray-300/20 rounded" />
+                    <div className="h-4 w-2/3 bg-gray-300/30 rounded" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -172,7 +177,7 @@ export default function Profile() {
   if (!user) return null;
 
   const openFeedback = (formation) => {
-    if (fbMap[formation.id]) return; // already submitted — prevent duplicate
+    if (fbMap[formation.id]) return;
     setSelectedFormation(formation);
     setOpenFb(true);
   };
@@ -193,8 +198,40 @@ export default function Profile() {
   };
 
   return (
-    <main className="min-h-[60vh] px-6 py-16 flex justify-center">
-      <div className="w-full max-w-2xl">
+    <main className="min-h-screen px-6 pt-28 pb-20">
+      <div className="max-w-3xl mx-auto">
+
+        {/* Greeting */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold font-display shrink-0 select-none ${
+                isDark ? "bg-primary/15 text-primary" : "bg-secondary/10 text-secondary"
+              }`}
+              aria-hidden="true"
+            >
+              {(user.first_name?.[0] || user.username?.[0] || "?").toUpperCase()}
+            </div>
+            <div>
+              <p
+                className={`font-display font-extrabold text-2xl md:text-3xl leading-tight ${
+                  isDark ? "text-white" : "text-dark"
+                }`}
+              >
+                {language === "fr"
+                  ? `Bonjour, ${user.first_name || user.username || ""}`.trim()
+                  : `Hello, ${user.first_name || user.username || ""}`.trim()}
+              </p>
+              {user.email && (
+                <p className={`text-sm mt-0.5 ${isDark ? "text-white/45" : "text-dark/45"}`}>
+                  {user.email}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Profile info */}
         <ProfileInfo
           user={user}
           t={t}
@@ -203,6 +240,7 @@ export default function Profile() {
           onSignout={logout}
         />
 
+        {/* Dashboard stats */}
         <DashboardStats
           data={dashData}
           loading={dashLoading}
@@ -210,6 +248,7 @@ export default function Profile() {
           theme={theme}
         />
 
+        {/* Trainings */}
         <TrainingsList
           formations={formations}
           fbMap={fbMap}
@@ -221,52 +260,104 @@ export default function Profile() {
         />
 
         {/* Login history */}
-        <section className="w-full max-w-2xl mt-10">
+        <section className="mt-6">
           <button
             type="button"
             onClick={() => setShowLoginHistory((v) => !v)}
-            className={`flex items-center gap-2 text-sm font-medium mb-3 underline-offset-2 hover:underline ${
-              theme === "dark" ? "text-white/70" : "text-gray-600"
+            className={`flex items-center gap-2 text-sm font-medium mb-3 rounded-lg px-3 py-2 -mx-3 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+              isDark
+                ? "text-white/50 hover:text-white hover:bg-white/5"
+                : "text-dark/50 hover:text-dark hover:bg-gray-100/80"
             }`}
             aria-expanded={showLoginHistory}
           >
-            {showLoginHistory ? "▾" : "▸"} Historique des connexions
+            <svg
+              className={`w-3.5 h-3.5 transition-transform ${showLoginHistory ? "rotate-90" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            {language === "fr" ? "Historique des connexions" : "Login history"}
           </button>
 
           {showLoginHistory && (
-            <div className={`rounded-xl border shadow overflow-hidden ${theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200"}`}>
+            <div
+              className={`rounded-2xl border overflow-hidden ${
+                isDark ? "bg-surface border-border" : "bg-white border-gray-200 shadow-sm"
+              }`}
+            >
               {loginHistoryLoading && (
-                <div className="p-4 text-sm opacity-60">Chargement…</div>
+                <div className={`p-5 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                  {language === "fr" ? "Chargement…" : "Loading…"}
+                </div>
               )}
               {!loginHistoryLoading && loginHistory.length === 0 && (
-                <div className="p-4 text-sm opacity-60">Aucun événement enregistré.</div>
+                <div className={`p-5 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                  {language === "fr" ? "Aucun événement enregistré." : "No events recorded."}
+                </div>
               )}
               {!loginHistoryLoading && loginHistory.length > 0 && (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className={`text-left text-xs uppercase tracking-wide ${theme === "dark" ? "bg-white/5 text-white/50" : "bg-gray-50 text-gray-500"}`}>
-                        <th className="px-4 py-2">Date</th>
-                        <th className="px-4 py-2">Statut</th>
-                        <th className="px-4 py-2">IP</th>
-                        <th className="px-4 py-2">Navigateur</th>
+                      <tr
+                        className={`text-left text-[11px] uppercase tracking-[.1em] ${
+                          isDark ? "bg-white/5 text-white/40" : "bg-gray-50 text-dark/40"
+                        }`}
+                      >
+                        <th className="px-5 py-3 font-semibold">
+                          {language === "fr" ? "Date" : "Date"}
+                        </th>
+                        <th className="px-5 py-3 font-semibold">
+                          {language === "fr" ? "Statut" : "Status"}
+                        </th>
+                        <th className="px-5 py-3 font-semibold">IP</th>
+                        <th className="px-5 py-3 font-semibold">
+                          {language === "fr" ? "Navigateur" : "Browser"}
+                        </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-current/5">
+                    <tbody className={`divide-y ${isDark ? "divide-border" : "divide-gray-100"}`}>
                       {loginHistory.slice(0, 5).map((ev) => (
-                        <tr key={ev.id} className={`${!ev.success ? theme === "dark" ? "bg-red-500/5" : "bg-red-50" : ""}`}>
-                          <td className="px-4 py-2 whitespace-nowrap opacity-70">
-                            {new Date(ev.created_at).toLocaleString(language === "fr" ? "fr-FR" : "en-US")}
+                        <tr
+                          key={ev.id}
+                          className={
+                            !ev.success
+                              ? isDark ? "bg-red-500/5" : "bg-red-50/60"
+                              : ""
+                          }
+                        >
+                          <td className={`px-5 py-3 whitespace-nowrap text-xs ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                            {new Date(ev.created_at).toLocaleString(
+                              language === "fr" ? "fr-FR" : "en-US"
+                            )}
                           </td>
-                          <td className="px-4 py-2">
-                            {ev.success
-                              ? <span className="text-green-500 font-medium">✓ Succès</span>
-                              : <span className="text-red-400 font-medium">✗ Échec</span>
-                            }
+                          <td className="px-5 py-3 text-xs">
+                            {ev.success ? (
+                              <span className="inline-flex items-center gap-1 text-emerald-500 font-semibold">
+                                <span>✓</span>
+                                {language === "fr" ? "Succès" : "Success"}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-red-400 font-semibold">
+                                <span>✗</span>
+                                {language === "fr" ? "Échec" : "Failed"}
+                              </span>
+                            )}
                           </td>
-                          <td className="px-4 py-2 opacity-70">{ev.ip_address || "—"}</td>
-                          <td className="px-4 py-2 opacity-60 truncate max-w-[200px]">
-                            {ev.user_agent ? ev.user_agent.split(" ").slice(0, 3).join(" ") : "—"}
+                          <td className={`px-5 py-3 text-xs ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                            {ev.ip_address || "—"}
+                          </td>
+                          <td className={`px-5 py-3 text-xs truncate max-w-[160px] ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                            {ev.user_agent
+                              ? ev.user_agent.split(" ").slice(0, 3).join(" ")
+                              : "—"}
                           </td>
                         </tr>
                       ))}
@@ -278,6 +369,7 @@ export default function Profile() {
           )}
         </section>
 
+        {/* Data rights (RGPD) */}
         <DataRights theme={theme} t={t} onSignedOut={logout} />
       </div>
 

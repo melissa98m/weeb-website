@@ -12,29 +12,24 @@ function FormationCardBase({ f, theme, onView }) {
     <article
       className={[
         "group relative flex flex-col rounded-xl border transition-all duration-200 overflow-hidden",
-        "focus-within:ring-2 focus-within:ring-violet-500/60 focus-within:ring-offset-1",
+        "focus-within:ring-2 focus-within:ring-primary/60 focus-within:ring-offset-1",
         isDark
-          ? "bg-surface border-surface-3 hover:border-purple-500/40 text-white focus-within:ring-offset-surface"
-          : "bg-white border-gray-200 hover:border-purple-500/40 text-gray-900 focus-within:ring-offset-white",
+          ? "bg-surface border-border hover:border-primary/30 text-white focus-within:ring-offset-surface"
+          : "bg-white border-gray-200 hover:border-primary/30 text-gray-900 focus-within:ring-offset-white",
       ].join(" ")}
     >
-      {/* Colored accent bar at the top */}
-      <div className={`h-1 w-full ${
-        isDark
-          ? "bg-gradient-to-r from-primary via-secondary to-primary/30"
-          : "bg-gradient-to-r from-secondary via-primary to-secondary/30"
-      }`} />
+      {/* Thin accent line */}
+      <div className="h-px w-full bg-primary" />
 
-      {/* Corps */}
+      {/* Body */}
       <div className="flex-1 p-5">
-        {/* Category badge */}
+        {/* Category badge — neutral, no violet */}
         <div className="mb-3">
-          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium font-mono ${
             isDark
-              ? "bg-primary/10 text-primary border border-primary/20"
-              : "bg-secondary/10 text-secondary border border-secondary/20"
+              ? "bg-surface-2 text-muted border border-border"
+              : "bg-gray-100 text-gray-500 border border-gray-200"
           }`}>
-            <span aria-hidden="true">✦</span>
             {language === "fr" ? "Formation" : "Course"}
           </span>
         </div>
@@ -44,8 +39,8 @@ function FormationCardBase({ f, theme, onView }) {
             "text-base md:text-lg font-bold tracking-tight leading-snug mb-2 line-clamp-2",
             "transition-colors duration-200",
             isDark
-              ? "text-white group-hover:text-purple-400"
-              : "text-gray-900 group-hover:text-purple-400",
+              ? "text-white group-hover:text-primary"
+              : "text-gray-900 group-hover:text-secondary",
           ].join(" ")}
         >
           {title}
@@ -58,14 +53,10 @@ function FormationCardBase({ f, theme, onView }) {
             {excerpt}
           </p>
         ) : (
-          <p className={`text-sm italic ${
-            isDark ? "text-white/30" : "text-gray-400"
-          }`}>
-            —
-          </p>
+          <p className={`text-sm italic ${isDark ? "text-white/30" : "text-gray-400"}`}>—</p>
         )}
 
-        {/* Barre de progression */}
+        {/* Progress bar */}
         {typeof f.progress_percent === "number" && (
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs mb-1.5">
@@ -73,21 +64,15 @@ function FormationCardBase({ f, theme, onView }) {
                 {language === "fr" ? "Progression" : "Progress"}
               </span>
               <span className={`font-semibold tabular-nums ${
-                f.progress_percent === 100
-                  ? "text-emerald-500"
-                  : isDark ? "text-primary" : "text-secondary"
+                f.progress_percent === 100 ? "text-emerald-500" : isDark ? "text-white/70" : "text-dark/70"
               }`}>
                 {f.progress_percent}%
               </span>
             </div>
-            <div className={`h-1.5 rounded-full overflow-hidden ${
-              isDark ? "bg-white/8" : "bg-gray-100"
-            }`}>
+            <div className={`h-1 rounded-full overflow-hidden ${isDark ? "bg-white/8" : "bg-gray-100"}`}>
               <div
                 className={`h-full rounded-full transition-all duration-500 ${
-                  f.progress_percent === 100
-                    ? "bg-emerald-500"
-                    : isDark ? "bg-primary" : "bg-secondary"
+                  f.progress_percent === 100 ? "bg-emerald-500" : "bg-primary"
                 }`}
                 style={{ width: `${f.progress_percent}%` }}
                 role="progressbar"
@@ -101,19 +86,15 @@ function FormationCardBase({ f, theme, onView }) {
         )}
       </div>
 
-      {/* Pied de carte */}
-      <div className={`px-5 py-3 border-t ${
-        isDark ? "border-surface-3" : "border-gray-100"
-      }`}>
+      {/* Footer */}
+      <div className={`px-5 py-3 border-t ${isDark ? "border-border" : "border-gray-100"}`}>
         <Button
           type="button"
+          variant="ghost"
+          size="md"
+          isDark={isDark}
           onClick={() => onView?.(f)}
-          className={[
-            "w-full text-sm font-medium py-2 rounded-md transition-colors duration-200",
-            isDark
-              ? "bg-primary/10 text-primary hover:bg-primary/20 border border-primary/20"
-              : "bg-secondary/8 text-secondary hover:bg-secondary/15 border border-secondary/20",
-          ].join(" ")}
+          className="w-full justify-center"
           aria-label={`${language === "fr" ? "Voir les détails de" : "View details for"} ${title}`}
         >
           {language === "fr" ? "Voir les détails" : "View details"}

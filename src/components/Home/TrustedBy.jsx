@@ -75,7 +75,7 @@ function MetricItem({ target, suffix, labelFr, labelEn, theme, language }) {
     <div ref={triggerRef} className="flex-1 text-center sm:px-8">
       <dt
         className={`font-display text-5xl font-bold tabular-nums tracking-tight ${
-          theme === "dark" ? "text-primary" : "text-secondary"
+          theme === "dark" ? "text-white" : "text-dark"
         }`}
         aria-label={`${target}${suffix}`}
       >
@@ -104,13 +104,10 @@ export default function TrustedBy() {
             : "bg-white border-gray-100 shadow-sm"
         }`}
       >
-        <p
-          className={`text-xs uppercase tracking-widest font-medium mb-8 ${
-            theme === "dark" ? "text-primary" : "text-secondary"
-          }`}
-        >
+        <p className="text-xs uppercase tracking-widest font-medium mb-6 text-muted">
           {language === "fr" ? "Weeb en chiffres" : "Weeb in numbers"}
         </p>
+        <div className={`border-t mb-8 ${theme === "dark" ? "border-border" : "border-gray-100"}`} />
 
         <dl className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-0 sm:divide-x sm:divide-border">
           {METRICS.map((metric) => (

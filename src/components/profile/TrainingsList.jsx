@@ -8,49 +8,73 @@ export default function TrainingsList({
   error,
   theme,
   t,
-  onGiveFeedback
+  onGiveFeedback,
 }) {
-  const card =
-    theme === "dark"
-      ? "bg-surface text-white border-border"
-      : "bg-white text-gray-900 border-gray-200";
+  const isDark = theme === "dark";
 
   return (
-    <section id="formations" className="w-full max-w-2xl mt-10">
-      <h2 className="text-xl font-semibold mb-4">{t.trainings}</h2>
+    <section id="formations" className="mt-6">
+      {/* Section label */}
+      <p
+        className={`text-[11px] uppercase tracking-[.15em] font-semibold mb-1.5 ${
+          isDark ? "text-primary/70" : "text-secondary/70"
+        }`}
+      >
+        {t.trainings}
+      </p>
+      <h2
+        className={`font-display font-bold text-xl mb-4 ${
+          isDark ? "text-white" : "text-dark"
+        }`}
+      >
+        {t.trainings}
+      </h2>
 
-      {(loading) && (
-        <div className="grid gap-4">
+      {/* Loading skeletons */}
+      {loading && (
+        <div className="space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className={`rounded-lg border p-4 animate-pulse ${
-                theme === "dark"
-                  ? "bg-surface border-border"
-                  : "bg-white border-gray-200"
+              className={`rounded-xl border p-5 animate-pulse ${
+                isDark ? "bg-surface border-border" : "bg-white border-gray-200"
               }`}
             >
-              <div className="h-4 w-2/3 bg-gray-300/30 rounded mb-2" />
-              <div className="h-3 w-1/3 bg-gray-300/30 rounded" />
+              <div className="h-4 w-2/3 bg-gray-300/30 rounded mb-3" />
+              <div className="h-2 w-full bg-gray-300/20 rounded mb-1" />
+              <div className="h-3 w-1/4 bg-gray-300/20 rounded" />
             </div>
           ))}
         </div>
       )}
 
+      {/* Error */}
       {!loading && error && (
-        <div className={`rounded-lg border p-4 text-sm ${card}`}>
+        <div
+          className={`rounded-xl border p-5 text-sm ${
+            isDark ? "bg-surface border-border text-white/60" : "bg-white border-gray-200 text-dark/60"
+          }`}
+        >
           {t.trainings_error}
         </div>
       )}
 
+      {/* Empty */}
       {!loading && !error && formations.length === 0 && (
-        <div className={`rounded-lg border p-4 text-sm ${card}`}>
-          {t.trainings_empty}
+        <div
+          className={`rounded-xl border p-8 text-center ${
+            isDark ? "bg-surface border-border" : "bg-white border-gray-200"
+          }`}
+        >
+          <p className={`text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            {t.trainings_empty}
+          </p>
         </div>
       )}
 
+      {/* List */}
       {!loading && !error && formations.length > 0 && (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="space-y-4">
           {formations.map((f) => (
             <TrainingItem
               key={f.id}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
 import faqEn from "../../../locales/en/faq.json";
@@ -21,75 +22,83 @@ export default function ContactFAQ() {
     });
   };
 
-  const card = isDark ? "bg-surface border-border" : "bg-white border-gray-200";
-  const muted = isDark ? "text-slate-400" : "text-slate-500";
+  const muted = isDark ? "text-white/50" : "text-dark/50";
   const accent = isDark ? "text-primary" : "text-secondary";
   const divider = isDark ? "border-border" : "border-gray-100";
+  const cardBg = isDark ? "bg-surface border-border" : "bg-white border-gray-200";
 
   return (
-    <section className="px-4 sm:px-6 pb-12 max-w-3xl mx-auto w-full" aria-labelledby="faq-heading">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h2
-          id="faq-heading"
-          className={`font-display text-2xl md:text-3xl font-bold ${
-            isDark ? "text-white" : "text-dark"
-          }`}
-        >
-          {t.faq_title}
-        </h2>
-        <p className={`mt-2 text-sm ${muted}`}>{t.faq_subtitle}</p>
-      </div>
+    <section aria-labelledby="faq-heading" className="pb-12">
+      {/* Section label */}
+      <p
+        className={`text-[11px] uppercase tracking-[.15em] font-semibold mb-3 ${
+          isDark ? "text-primary/70" : "text-secondary/70"
+        }`}
+      >
+        FAQ
+      </p>
 
-      {/* Categories */}
-      <div className="space-y-8">
+      <h2
+        id="faq-heading"
+        className={`font-display font-bold text-2xl md:text-3xl mb-2 ${
+          isDark ? "text-white" : "text-dark"
+        }`}
+      >
+        {t.faq_title}
+      </h2>
+      <p className={`text-sm mb-8 ${muted}`}>{t.faq_subtitle}</p>
+
+      <div className="space-y-6">
         {t.faq_categories.map((cat, ci) => (
           <div key={ci}>
             <h3
-              className={`text-xs font-semibold uppercase tracking-widest mb-3 ${muted}`}
+              className={`text-[11px] uppercase tracking-[.15em] font-semibold mb-3 ${muted}`}
             >
               {cat.category}
             </h3>
-            <div className={`rounded-xl border overflow-hidden ${card}`}>
+            <div className={`rounded-xl border overflow-hidden ${cardBg}`}>
               {cat.items.map((item, ii) => {
                 const key = `${ci}-${ii}`;
                 const isOpen = openItems.has(key);
                 return (
-                  <div
-                    key={ii}
-                    className={ii > 0 ? `border-t ${divider}` : ""}
-                  >
+                  <div key={ii} className={ii > 0 ? `border-t ${divider}` : ""}>
                     <button
                       type="button"
                       onClick={() => toggle(key)}
                       aria-expanded={isOpen}
-                      className={`w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-sm font-medium transition-colors duration-150 ${
+                      className={`w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-sm font-medium transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset ${
                         isDark
                           ? "text-white hover:bg-white/5"
                           : "text-dark hover:bg-gray-50"
                       }`}
                     >
                       <span>{item.q}</span>
-                      <span
-                        className={`shrink-0 text-xl leading-none font-light transition-transform duration-300 ${accent} ${
-                          isOpen ? "rotate-45" : ""
-                        }`}
+                      <motion.span
+                        animate={{ rotate: isOpen ? 45 : 0 }}
+                        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                        className={`shrink-0 text-xl leading-none font-light select-none ${accent}`}
                         aria-hidden="true"
                       >
                         +
-                      </span>
+                      </motion.span>
                     </button>
-                    <div
-                      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                      }`}
-                    >
-                      <p
-                        className={`px-5 pb-5 pt-1 text-sm leading-relaxed ${muted}`}
-                      >
-                        {item.a}
-                      </p>
-                    </div>
+
+                    <AnimatePresence initial={false}>
+                      {isOpen && (
+                        <motion.div
+                          key="answer"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                          style={{ overflow: "hidden" }}
+                        >
+                          <p className={`px-5 pb-5 pt-1 text-sm leading-relaxed ${muted}`}>
+                            {item.a}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 );
               })}
@@ -98,12 +107,12 @@ export default function ContactFAQ() {
         ))}
       </div>
 
-      {/* CTA vers le formulaire */}
-      <div className={`mt-10 rounded-xl border p-6 text-center ${card}`}>
+      {/* CTA to form */}
+      <div className={`mt-8 rounded-xl border p-5 text-center ${cardBg}`}>
         <p className={`text-sm ${muted}`}>{t.faq_not_found}</p>
         <a
           href="#contact-form"
-          className={`inline-block mt-3 text-sm font-medium underline underline-offset-4 transition-opacity duration-150 hover:opacity-75 ${accent}`}
+          className={`inline-block mt-3 text-sm font-medium underline underline-offset-4 transition-opacity hover:opacity-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded ${accent}`}
         >
           {t.faq_cta}
         </a>

@@ -4,6 +4,7 @@ import footerEn from "../../locales/en/footer.json";
 import footerFr from "../../locales/fr/footer.json";
 import { useLanguage } from "../context/LanguageContext";
 import { NewsletterApi } from "../lib/api";
+import Button from "./Button";
 
 function IconYoutube({ className }) {
   return (
@@ -40,12 +41,11 @@ function IconInstagram({ className }) {
 function IconLinkedin({ className }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 23.2 23.227 23.2 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
     </svg>
   );
 }
 
-// Simple RFC 5322-inspired regex — rejects obvious typos without over-constraining
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const FOOTER_LINKS = [
@@ -77,6 +77,7 @@ export default function Footer() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? footerFr : footerEn;
+  const isDark = theme === "dark";
 
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterConsent, setNewsletterConsent] = useState(false);
@@ -85,7 +86,6 @@ export default function Footer() {
 
   const successRef = useRef(null);
 
-  // Move focus to the success message so screen readers announce it immediately
   useEffect(() => {
     if (newsletterStatus === "success" || newsletterStatus === "success_duplicate") {
       successRef.current?.focus();
@@ -104,7 +104,6 @@ export default function Footer() {
     event.preventDefault();
     if (!newsletterConsent || newsletterStatus === "loading") return;
 
-    // Re-validate before submitting
     if (!EMAIL_REGEX.test(newsletterEmail.trim())) {
       setEmailError(t.newsletter_email_invalid);
       return;
@@ -123,42 +122,16 @@ export default function Footer() {
       } else if (err.status === 429) {
         setNewsletterStatus("error_rate_limit");
       } else if (err.status === 400 || err.status === 409) {
-        // DRF unique constraint returns 400 with errors on the email field
         const emailErrors = err.details?.errors?.email;
         const isAlreadySubscribed =
           err.status === 409 ||
           emailErrors?.some?.((msg) => /already|existe|unique/i.test(msg));
-        setNewsletterStatus(
-          isAlreadySubscribed ? "error_duplicate" : "error_server"
-        );
+        setNewsletterStatus(isAlreadySubscribed ? "error_duplicate" : "error_server");
       } else {
         setNewsletterStatus("error_server");
       }
     }
   };
-
-  const isDark = theme === "dark";
-
-  // Footer uses inverted colours for contrast against the page background
-  const footerBg = isDark
-    ? "bg-white text-dark border-t border-slate-200"
-    : "bg-dark text-white";
-  const cardBg = isDark
-    ? "bg-slate-50 border-slate-200"
-    : "bg-white/[0.06] border-white/15";
-  const subtleText = isDark ? "text-slate-600" : "text-slate-300";
-  const mutedText = isDark ? "text-slate-500" : "text-slate-400";
-  const inputCls = isDark
-    ? "border-slate-300 text-slate-900 placeholder-slate-400 focus:border-slate-500"
-    : "border-white/30 text-white placeholder-slate-400 focus:border-white/60";
-  const inputErrorCls = isDark
-    ? "border-red-400 focus:border-red-500"
-    : "border-red-400 focus:border-red-400";
-  const navLinkCls = `transition-colors duration-150 ${
-    isDark ? "text-slate-700 hover:text-dark" : "text-slate-300 hover:text-white"
-  }`;
-  // Separator: slightly stronger than before for visibility in both modes
-  const dividerCls = isDark ? "border-slate-200" : "border-white/20";
 
   const errorMessageMap = {
     error_network: t.newsletter_error_network,
@@ -167,37 +140,39 @@ export default function Footer() {
     error_server: t.newsletter_error_server,
   };
   const currentErrorMessage = errorMessageMap[newsletterStatus] ?? null;
-
-  const isSubmitDisabled =
-    !newsletterConsent || newsletterStatus === "loading";
+  const isSubmitDisabled = !newsletterConsent || newsletterStatus === "loading";
 
   return (
-    <footer className={`text-sm px-6 sm:px-12 py-12 w-full ${footerBg}`}>
-
-      {/* ── Newsletter ─────────────────────────────────────── */}
+    <footer
+      className={`text-sm px-6 sm:px-12 py-12 w-full border-t ${
+        isDark
+          ? "bg-surface-deep text-white border-border"
+          : "bg-white text-dark border-gray-200"
+      }`}
+    >
+      {/* Newsletter */}
       <div
-        className={`max-w-5xl mx-auto mb-10 rounded-2xl border px-6 py-6 sm:px-8 ${cardBg}`}
+        className={`max-w-5xl mx-auto mb-10 rounded-xl border px-6 py-6 sm:px-8 ${
+          isDark ? "bg-surface border-border" : "bg-gray-50 border-gray-200"
+        }`}
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
 
-          {/* Description */}
           <div className="lg:max-w-xs">
-            <p className={`text-xs uppercase tracking-[0.2em] ${mutedText}`}>
+            <p className={`text-xs uppercase tracking-[0.2em] ${isDark ? "text-muted" : "text-dark/40"}`}>
               Newsletter
             </p>
-            <h2 className="text-lg font-semibold mt-1">{t.newsletter_title}</h2>
-            <p className={`mt-1 ${subtleText}`}>{t.newsletter_subtitle}</p>
+            <h2 className={`text-lg font-semibold mt-1 ${isDark ? "text-white" : "text-dark"}`}>
+              {t.newsletter_title}
+            </h2>
+            <p className={`mt-1 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+              {t.newsletter_subtitle}
+            </p>
           </div>
 
-          {/*
-            Form — grid layout ensures correct reading order on both mobile and desktop:
-              Mobile (1 col):  email → consent → privacy → button
-              Desktop (2 col): [email | button] / [consent + privacy + status]
-          */}
           <form className="flex-1" onSubmit={handleSubmit} noValidate>
             <div className="sm:grid sm:grid-cols-[1fr_auto] sm:gap-x-3 sm:items-start">
 
-              {/* Col 1, Row 1: email input + inline error */}
               <div className="sm:col-start-1 sm:row-start-1">
                 <label htmlFor="newsletter-email" className="sr-only">
                   {t.newsletter_placeholder}
@@ -208,47 +183,37 @@ export default function Footer() {
                   inputMode="email"
                   required
                   placeholder={t.newsletter_placeholder}
-                  className={`w-full rounded-md border bg-transparent px-3 py-2 focus:outline-none transition-colors ${
-                    emailError ? inputErrorCls : inputCls
+                  className={`w-full rounded-md border bg-transparent px-3 py-2 text-sm focus:outline-none transition-colors ${
+                    emailError
+                      ? "border-red-400 focus:border-red-500"
+                      : isDark
+                      ? "border-border text-white placeholder-white/30 focus:border-border-2"
+                      : "border-gray-200 text-dark placeholder-dark/40 focus:border-gray-400"
                   }`}
                   autoComplete="email"
                   value={newsletterEmail}
-                  aria-describedby={
-                    emailError ? "newsletter-email-error" : "newsletter-privacy"
-                  }
+                  aria-describedby={emailError ? "newsletter-email-error" : "newsletter-privacy"}
                   aria-invalid={emailError ? "true" : undefined}
                   onChange={(e) => {
                     setNewsletterEmail(e.target.value);
-                    // Clear inline error as the user corrects their input
-                    if (emailError && EMAIL_REGEX.test(e.target.value)) {
-                      setEmailError("");
-                    }
+                    if (emailError && EMAIL_REGEX.test(e.target.value)) setEmailError("");
                   }}
                   onBlur={(e) => validateEmailFormat(e.target.value)}
                 />
                 {emailError && (
-                  <p
-                    id="newsletter-email-error"
-                    role="alert"
-                    className="mt-1 text-xs text-red-500"
-                  >
+                  <p id="newsletter-email-error" role="alert" className="mt-1 text-xs text-red-500">
                     {emailError}
                   </p>
                 )}
               </div>
 
-              {/* Col 1–2, Row 2: consent + privacy + status */}
-              <div
-                className={`mt-3 text-xs sm:col-start-1 sm:col-end-3 sm:row-start-2 ${subtleText}`}
-              >
+              <div className={`mt-3 text-xs sm:col-start-1 sm:col-end-3 sm:row-start-2 ${isDark ? "text-white/40" : "text-dark/40"}`}>
                 <label className="flex items-start gap-2">
                   <input
                     id="newsletter-consent"
                     type="checkbox"
                     required
-                    className={`mt-0.5 h-4 w-4 ${
-                      isDark ? "accent-slate-600" : "accent-primary"
-                    }`}
+                    className="mt-0.5 h-4 w-4 accent-primary"
                     aria-describedby="newsletter-privacy"
                     checked={newsletterConsent}
                     onChange={(e) => setNewsletterConsent(e.target.checked)}
@@ -257,20 +222,17 @@ export default function Footer() {
                 </label>
                 <p id="newsletter-privacy" className="mt-1.5">
                   {t.newsletter_privacy}{" "}
-                  <a href="/privacy-policy" className="underline">
+                  <a href="/privacy-policy" className={`underline underline-offset-2 ${isDark ? "text-white/60 hover:text-white" : "text-dark/60 hover:text-dark"}`}>
                     {t.privacy_policy}
                   </a>
                 </p>
-                {/* Live region for all async status messages */}
                 <div aria-live="polite" aria-atomic="true">
                   {(newsletterStatus === "success" || newsletterStatus === "success_duplicate") && (
                     <p
                       ref={successRef}
                       tabIndex={-1}
                       className={`mt-2 focus:outline-none ${
-                        newsletterStatus === "success_duplicate"
-                          ? "text-amber-500"
-                          : "text-green-500"
+                        newsletterStatus === "success_duplicate" ? "text-amber-500" : "text-green-500"
                       }`}
                     >
                       {newsletterStatus === "success_duplicate"
@@ -284,50 +246,53 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Col 2, Row 1: submit button — last in DOM so mobile order is correct */}
-              <button
+              <Button
                 type="submit"
+                variant={isSubmitDisabled ? undefined : "primary"}
+                size="md"
                 disabled={isSubmitDisabled}
-                title={
-                  !newsletterConsent ? t.newsletter_consent_required : undefined
-                }
+                title={!newsletterConsent ? t.newsletter_consent_required : undefined}
                 className={`mt-3 w-full sm:mt-0 sm:w-auto sm:col-start-2 sm:row-start-1 rounded-md px-4 py-2 font-medium transition-colors ${
-                  !isSubmitDisabled
+                  isSubmitDisabled
                     ? isDark
-                      ? "bg-dark text-white hover:bg-dark/80"
-                      : "bg-primary text-dark hover:bg-primary/80"
-                    : "bg-gray-400 text-white cursor-not-allowed"
+                      ? "bg-white/5 text-white/25 cursor-not-allowed border border-border"
+                      : "bg-gray-100 text-dark/30 cursor-not-allowed border border-gray-200"
+                    : ""
                 }`}
               >
-                {newsletterStatus === "loading"
-                  ? t.newsletter_loading
-                  : t.newsletter_cta}
-              </button>
+                {newsletterStatus === "loading" ? t.newsletter_loading : t.newsletter_cta}
+              </Button>
             </div>
           </form>
         </div>
       </div>
 
-      {/* ── Nav columns ────────────────────────────────────── */}
+      {/* Nav columns */}
       <div className="max-w-5xl mx-auto flex flex-col gap-8 lg:flex-row lg:justify-between text-left">
 
-        {/* Logo + tagline */}
         <div className="lg:max-w-[180px]">
-          <h2 className="text-xl font-bold">weeb</h2>
-          <p className={`mt-1.5 text-xs leading-relaxed ${subtleText}`}>
+          <p className={`text-lg font-display font-extrabold tracking-tight ${isDark ? "text-white" : "text-dark"}`}>
+            weeb
+          </p>
+          <p className={`mt-1.5 text-xs leading-relaxed ${isDark ? "text-white/40" : "text-dark/40"}`}>
             {t.tagline}
           </p>
         </div>
 
         {FOOTER_LINKS.map(({ title, links }) => (
           <div key={language === "fr" ? title.fr : title.en}>
-            <h3 className={`font-semibold uppercase mb-3 ${subtleText}`}>
+            <h3 className={`text-xs font-semibold uppercase tracking-widest mb-3 ${isDark ? "text-muted" : "text-dark/40"}`}>
               {language === "fr" ? title.fr : title.en}
             </h3>
-            <ul className="space-y-1.5">
+            <ul className="space-y-2">
               {links.map(({ label, href }) => (
                 <li key={language === "fr" ? label.fr : label.en}>
-                  <a href={href} className={navLinkCls}>
+                  <a
+                    href={href}
+                    className={`transition-colors duration-150 ${
+                      isDark ? "text-white/50 hover:text-white" : "text-dark/50 hover:text-dark"
+                    }`}
+                  >
                     {language === "fr" ? label.fr : label.en}
                   </a>
                 </li>
@@ -337,14 +302,16 @@ export default function Footer() {
         ))}
       </div>
 
-      {/* ── Bottom bar ─────────────────────────────────────── */}
+      {/* Bottom bar */}
       <div
-        className={`border-t mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto ${dividerCls}`}
+        className={`border-t mt-10 pt-6 flex flex-col sm:flex-row justify-between text-left gap-4 max-w-5xl mx-auto ${
+          isDark ? "border-border" : "border-gray-200"
+        }`}
       >
-        <p className={subtleText}>
+        <p className={isDark ? "text-muted" : "text-dark/40"}>
           &copy; {new Date().getFullYear()} {t.copyright}
         </p>
-        <div className="flex gap-4">
+        <div className="flex gap-1">
           {[
             { Icon: IconYoutube, label: "YouTube", href: "#" },
             { Icon: IconFacebook, label: "Facebook", href: "#" },
@@ -358,13 +325,13 @@ export default function Footer() {
               aria-label={label}
               rel="noopener noreferrer"
               target="_blank"
-              className={`min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 ${
+              className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                 isDark
-                  ? "text-slate-400 hover:text-primary"
-                  : "text-slate-500 hover:text-secondary"
+                  ? "text-muted hover:text-white hover:bg-white/5"
+                  : "text-dark/40 hover:text-dark hover:bg-dark/5"
               }`}
             >
-              <Icon className="w-5 h-5" />
+              <Icon className="w-4 h-4" />
             </a>
           ))}
         </div>
