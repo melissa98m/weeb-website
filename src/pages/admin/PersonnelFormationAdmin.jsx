@@ -442,13 +442,21 @@ export default function PersonnelFormationAdmin() {
   if (!user) return <div className="p-6">{t.common_please_login}</div>;
   if (!hasPersonnelRole(user))
     return (
-      <div className="p-6 text-red-600">
-        {t.common_access_denied}
-      </div>
+      <div className="p-6 text-red-600">{t.common_access_denied}</div>
     );
 
+  const card = isDark ? "bg-surface border-border" : "bg-white border-gray-200";
+  const errorCard = isDark
+    ? "border-red-700/40 bg-red-900/10 text-red-300"
+    : "border-red-200 bg-red-50 text-red-700";
+  const reloadBtn = isDark
+    ? "border-border text-white/60 hover:text-white hover:bg-surface-2"
+    : "border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50";
+
   return (
-    <div className="p-6 space-y-6">
+    <main className="px-4 md:px-6 py-6 space-y-5">
+
+      {/* ── Header ── */}
       <AdminPageHeader
         title={t.personnel_title}
         subtitle={t.personnel_access_reserved}
@@ -461,95 +469,81 @@ export default function PersonnelFormationAdmin() {
         <Pill color="success" variant="soft" size="md">{linksTotal} {t.personnel_links}</Pill>
       </AdminPageHeader>
 
+      {/* ── Errors ── */}
       {bootError && (
-        <div
-          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
-          role="alert"
-        >
-          {bootError}
-          <div className="mt-2">
-            <button
-              className="rounded-xl border px-3 py-1 text-sm"
-              onClick={loadBootstrap}
-              disabled={bootLoading}
-            >
-              {t.personnel_reload_users}
-            </button>
-          </div>
+        <div role="alert" className={`rounded-2xl border px-4 py-3 text-sm flex items-start justify-between gap-3 ${errorCard}`}>
+          <span>{bootError}</span>
+          <button onClick={loadBootstrap} disabled={bootLoading} className={`shrink-0 text-xs rounded-lg border px-2.5 py-1 transition-colors ${reloadBtn}`}>
+            {t.personnel_reload_users}
+          </button>
         </div>
       )}
-
       {linksError && (
-        <div
-          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
-          role="alert"
-        >
-          {linksError}
-          <div className="mt-2">
-            <button
-              className="rounded-xl border px-3 py-1 text-sm"
-              onClick={() => loadLinks(page)}
-              disabled={linksLoading}
-            >
-              {t.personnel_reload_links}
-            </button>
-          </div>
+        <div role="alert" className={`rounded-2xl border px-4 py-3 text-sm flex items-start justify-between gap-3 ${errorCard}`}>
+          <span>{linksError}</span>
+          <button onClick={() => loadLinks(page)} disabled={linksLoading} className={`shrink-0 text-xs rounded-lg border px-2.5 py-1 transition-colors ${reloadBtn}`}>
+            {t.personnel_reload_links}
+          </button>
         </div>
       )}
 
-      <FiltersBar
-        userOptions={userOptions}
-        formationOptions={formationOptions}
-        filterUser={filterUser}
-        setFilterUser={setFilterUser}
-        filterFormation={filterFormation}
-        setFilterFormation={setFilterFormation}
-        searchUser={searchUser}
-        setSearchUser={setSearchUser}
-      />
+      {/* ── Action card: Add + Filters ── */}
+      <section className={`rounded-2xl border p-5 space-y-5 ${card}`}>
+        <AddUserFormationForm
+          addUserId={addUserId}
+          setAddUserId={(v) => { setAddUserId(v); if (addError) setAddError(""); }}
+          addFormationId={addFormationId}
+          setAddFormationId={(v) => { setAddFormationId(v); if (addError) setAddError(""); }}
+          onSubmit={onSubmitAdd}
+          busy={busy}
+          error={addError}
+        />
 
-      <div className="flex items-center justify-end">
-        <PageSizer pageSize={pageSize} onChange={setPageSize} />
-      </div>
+        {/* Divider */}
+        <div className={`border-t ${isDark ? "border-border/60" : "border-gray-100"}`} />
 
-      <AddUserFormationForm
-        addUserId={addUserId}
-        setAddUserId={(value) => {
-          setAddUserId(value);
-          if (addError) setAddError("");
-        }}
-        addFormationId={addFormationId}
-        setAddFormationId={(value) => {
-          setAddFormationId(value);
-          if (addError) setAddError("");
-        }}
-        onSubmit={onSubmitAdd}
-        busy={busy}
-        error={addError}
-      />
+        <FiltersBar
+          userOptions={userOptions}
+          formationOptions={formationOptions}
+          filterUser={filterUser}
+          setFilterUser={setFilterUser}
+          filterFormation={filterFormation}
+          setFilterFormation={setFilterFormation}
+          searchUser={searchUser}
+          setSearchUser={setSearchUser}
+        />
+      </section>
 
-      <UserFormationTable
-        loading={linksLoading}
-        error={linksError}
-        links={links}
-        filteredLinks={filteredLinks}
-        onRemove={removeLink}
-        busy={busy}
-        page={page}
-        pageCount={pageCount}
-        onPageChange={setPage}
-      />
+      {/* ── Table card ── */}
+      <section className={`rounded-2xl border overflow-hidden ${card}`}>
+        {/* Table header bar */}
+        <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b ${isDark ? "border-border/60" : "border-gray-100"}`}>
+          <p className={`text-xs font-semibold ${isDark ? "text-white/40" : "text-gray-400"}`}>
+            {linksLoading ? "Chargement…" : `${filteredLinks.length} affectation${filteredLinks.length !== 1 ? "s" : ""}`}
+          </p>
+          <PageSizer pageSize={pageSize} onChange={setPageSize} />
+        </div>
 
-      <div className="mt-4">
-        <Pagination
+        <UserFormationTable
+          loading={linksLoading}
+          error={linksError}
+          links={links}
+          filteredLinks={filteredLinks}
+          onRemove={removeLink}
+          busy={busy}
           page={page}
           pageCount={pageCount}
           onPageChange={setPage}
-          theme={theme}
         />
-      </div>
+
+        {pageCount > 1 && (
+          <div className={`border-t px-4 py-3 ${isDark ? "border-border/60" : "border-gray-100"}`}>
+            <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+          </div>
+        )}
+      </section>
 
       <AdminAccessFooter allowedRoles={PERSONNEL_ROLE} />
-    </div>
+    </main>
   );
 }
