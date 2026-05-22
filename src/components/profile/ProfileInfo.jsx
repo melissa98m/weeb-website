@@ -2,44 +2,25 @@ import React from "react";
 
 export default function ProfileInfo({ user, t, theme, onRefresh, onSignout }) {
   const isDark = theme === "dark";
-  const initial = (user.first_name?.[0] || user.username?.[0] || "?").toUpperCase();
-
-  const fieldMuted = isDark ? "text-white/45" : "text-dark/45";
-  const fieldValue = isDark ? "text-white font-medium" : "text-dark font-medium";
 
   const fields = [
-    { label: t.username, value: user.username },
-    { label: t.email, value: user.email },
-    { label: t.firstName, value: user.first_name },
-    { label: t.lastName, value: user.last_name },
+    { label: t.username,   value: user.username   },
+    { label: t.email,      value: user.email      },
+    { label: t.firstName,  value: user.first_name },
+    { label: t.lastName,   value: user.last_name  },
   ];
 
   return (
     <section
-      className={`rounded-2xl border p-6 ${
+      className={`rounded-2xl border p-5 ${
         isDark ? "bg-surface border-border" : "bg-white border-gray-200 shadow-sm"
       }`}
     >
-      {/* Header row: avatar + title + actions */}
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div className="flex items-center gap-4">
-          <div
-            className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold font-display shrink-0 select-none ${
-              isDark ? "bg-primary/15 text-primary" : "bg-secondary/10 text-secondary"
-            }`}
-            aria-hidden="true"
-          >
-            {initial}
-          </div>
-          <h1
-            className={`font-display font-extrabold text-xl ${
-              isDark ? "text-white" : "text-dark"
-            }`}
-          >
-            {t.title}
-          </h1>
-        </div>
-
+      {/* Header: title + actions */}
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <p className={`text-xs font-semibold uppercase tracking-widest ${isDark ? "text-primary/70" : "text-secondary/70"}`}>
+          {t.title}
+        </p>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
@@ -66,12 +47,16 @@ export default function ProfileInfo({ user, t, theme, onRefresh, onSignout }) {
         </div>
       </div>
 
-      {/* Field grid */}
-      <div className={`border-t pt-5 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 ${isDark ? "border-border" : "border-gray-100"}`}>
+      {/* Fields grid */}
+      <div className={`border-t pt-4 grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 ${isDark ? "border-border/60" : "border-gray-100"}`}>
         {fields.map(({ label, value }) => (
           <div key={label}>
-            <p className={`text-xs mb-0.5 ${fieldMuted}`}>{label}</p>
-            <p className={`text-sm break-all ${fieldValue}`}>{value || "—"}</p>
+            <p className={`text-[10px] font-semibold uppercase tracking-widest mb-1 ${isDark ? "text-white/60" : "text-gray-400"}`}>
+              {label}
+            </p>
+            <p className={`text-sm break-all font-medium ${isDark ? "text-white" : "text-dark"}`}>
+              {value || "—"}
+            </p>
           </div>
         ))}
       </div>

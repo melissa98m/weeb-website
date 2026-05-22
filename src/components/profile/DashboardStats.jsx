@@ -9,20 +9,20 @@ import profileFr from "../../../locales/fr/profile.json";
 // - role="alert" on error
 // - stat value as isolated text node (getByText("3") etc.)
 
-function StatCard({ label, value, theme, accent }) {
+function StatCard({ label, value, theme, accent, icon }) {
   const isDark = theme === "dark";
   return (
     <div
-      className={`rounded-xl border p-4 flex flex-col gap-2 ${
+      className={`rounded-2xl border p-4 flex flex-col gap-2 ${
         isDark ? "bg-surface border-border" : "bg-white border-gray-200"
       }`}
     >
       <div
-        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0`}
-        style={{ background: accent + "18" }}
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{ background: accent + "1a", color: accent }}
         aria-hidden="true"
       >
-        <div className="w-3 h-3 rounded-full" style={{ background: accent }} />
+        {icon}
       </div>
       {/* value must stay as isolated text node — test uses getByText("3") */}
       <span
@@ -30,7 +30,7 @@ function StatCard({ label, value, theme, accent }) {
       >
         {value ?? "—"}
       </span>
-      <span className={`text-xs leading-tight ${isDark ? "text-white/50" : "text-dark/50"}`}>
+      <span className={`text-xs leading-tight ${isDark ? "text-white/70" : "text-dark/50"}`}>
         {label}
       </span>
     </div>
@@ -39,7 +39,7 @@ function StatCard({ label, value, theme, accent }) {
 
 function TimelineItem({ formation, theme, isLast, enrolledOnLabel, locale }) {
   const isDark = theme === "dark";
-  const textMuted = isDark ? "text-white/50" : "text-dark/45";
+  const textMuted = isDark ? "text-white/70" : "text-dark/45";
   const lineBg = isDark ? "bg-border-2" : "bg-gray-200";
 
   const date = new Date(formation.inscrit_le);
@@ -79,19 +79,25 @@ function TimelineItem({ formation, theme, isLast, enrolledOnLabel, locale }) {
   );
 }
 
-export default function DashboardStats({ data, loading, error, theme }) {
+export default function DashboardStats({ data, loading, error, theme, hideCards = false }) {
   const { language } = useLanguage();
   const t = language === "fr" ? profileFr : profileEn;
   const locale = language === "fr" ? "fr-FR" : "en-US";
   const isDark = theme === "dark";
-  const textMuted = isDark ? "text-white/50" : "text-dark/50";
+  const textMuted = isDark ? "text-white/70" : "text-dark/50";
 
   const ACCENTS = ["#c084fc", "#38bdf8", "#34d399"];
 
+  const ICONS = [
+    <svg key="cap" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5 9-5z"/><path d="M4 10v4l8 4 8-4v-4"/></svg>,
+    <svg key="msg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+    <svg key="book" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>,
+  ];
+
   return (
     <section
-      className={`rounded-2xl border p-5 mt-6 ${
-        isDark ? "bg-surface-2 border-border" : "bg-white border-gray-200 shadow-sm"
+      className={`rounded-2xl border p-5 ${
+        isDark ? "bg-surface border-border" : "bg-white border-gray-200 shadow-sm"
       }`}
       aria-label={t.dashboard_title}
     >
@@ -131,26 +137,13 @@ export default function DashboardStats({ data, loading, error, theme }) {
       {/* Data */}
       {data && !loading && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
-            <StatCard
-              label={t.dashboard_formations}
-              value={data.formations_inscrites}
-              theme={theme}
-              accent={ACCENTS[0]}
-            />
-            <StatCard
-              label={t.dashboard_feedback_sent}
-              value={data.feedbacks_laisses}
-              theme={theme}
-              accent={ACCENTS[1]}
-            />
-            <StatCard
-              label={t.dashboard_articles_read}
-              value={data.articles_lus}
-              theme={theme}
-              accent={ACCENTS[2]}
-            />
-          </div>
+          {!hideCards && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
+              <StatCard label={t.dashboard_formations}   value={data.formations_inscrites} theme={theme} accent={ACCENTS[0]} icon={ICONS[0]} />
+              <StatCard label={t.dashboard_feedback_sent} value={data.feedbacks_laisses}   theme={theme} accent={ACCENTS[1]} icon={ICONS[1]} />
+              <StatCard label={t.dashboard_articles_read} value={data.articles_lus}        theme={theme} accent={ACCENTS[2]} icon={ICONS[2]} />
+            </div>
+          )}
 
           {/* Timeline */}
           <div>
