@@ -1,0 +1,60 @@
+{
+    "faq_title": "Questions fréquentes",
+    "faq_subtitle": "Trouvez rapidement une réponse avant de nous écrire.",
+    "faq_not_found": "Vous ne trouvez pas votre réponse ?",
+    "faq_cta": "Envoyez-nous un message",
+    "faq_categories": [
+        {
+            "category": "Formations",
+            "items": [
+                {
+                    "q": "Comment accéder à mes formations après inscription ?",
+                    "a": "Rendez-vous dans votre espace personnel via le menu en haut à droite. Toutes vos formations achetées ou gratuites y sont listées, prêtes à être suivies à votre rythme."
+                },
+                {
+                    "q": "Les formations sont-elles accessibles hors connexion ?",
+                    "a": "Pas encore. Nous travaillons sur un mode hors-ligne qui sera disponible prochainement. Pour l'instant, une connexion internet est nécessaire pour accéder au contenu."
+                },
+                {
+                    "q": "Puis-je apprendre à mon propre rythme ?",
+                    "a": "Oui, toutes nos formations sont 100 % en autonomie. Pas de session en direct, pas de délai d'expiration : avancez quand vous voulez, revenez autant de fois que nécessaire."
+                }
+            ]
+        },
+        {
+            "category": "Compte & sécurité",
+            "items": [
+                {
+                    "q": "Comment modifier mon mot de passe ?",
+                    "a": "Depuis votre profil, rendez-vous dans les paramètres de sécurité puis cliquez sur « Changer le mot de passe ». Un lien de confirmation vous sera envoyé par email."
+                },
+                {
+                    "q": "Comment supprimer mon compte ?",
+                    "a": "Dans votre profil, section « Données personnelles », vous trouverez l'option de suppression. Conformément au RGPD, toutes vos données sont définitivement effacées dans un délai de 30 jours."
+                }
+            ]
+        },
+        {
+            "category": "Newsletter",
+            "items": [
+                {
+                    "q": "Comment me désinscrire de la newsletter ?",
+                    "a": "Cliquez sur le lien « Se désinscrire » en bas de n'importe quel email reçu. Vous pouvez également le faire depuis votre profil, dans l'onglet « Notifications »."
+                }
+            ]
+        },
+        {
+            "category": "Blog & contenu",
+            "items": [
+                {
+                    "q": "Comment suggérer un sujet d'article ?",
+                    "a": "Utilisez le formulaire ci-dessous en sélectionnant le sujet « Suggestion de contenu ». Nous lisons toutes les suggestions, même si nous ne pouvons pas toutes les traiter immédiatement."
+                },
+                {
+                    "q": "Les articles sont-ils disponibles en plusieurs langues ?",
+                    "a": "Oui, le site est disponible en français et en anglais. Utilisez le sélecteur de langue dans le menu de navigation pour basculer. Certains articles peuvent n'être disponibles que dans une seule langue."
+                }
+            ]
+        }
+    ]
+}

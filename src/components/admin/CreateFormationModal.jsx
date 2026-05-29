@@ -33,13 +33,13 @@ export default function CreateFormationModal({ open, onClose, onCreated, apiBase
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   const inputBase = "w-full rounded-xl border px-3 py-2 outline-none transition";
   const inputThemed =
     theme === "dark"
-      ? "bg-[#141414] text-white border-[#333] focus:ring-2 focus:ring-white/20 focus:border-white/30"
+      ? "bg-surface-deep text-white border-border focus:ring-2 focus:ring-white/20 focus:border-white/30"
       : "bg-white text-gray-900 border-gray-200 focus:ring-2 focus:ring-black/10 focus:border-gray-300";
 
   const btnPrimary =
@@ -49,7 +49,7 @@ export default function CreateFormationModal({ open, onClose, onCreated, apiBase
 
   const btnGhost =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+      ? "bg-surface-2 text-white border-border hover:bg-surface-3"
       : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
   const onSubmit = useCallback(async (e) => {

@@ -1,13 +1,33 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand */
   --color-primary: #c084fc;
   --color-secondary: #9333ea;
+
+  /* Page backgrounds */
   --color-background: #0f172a;
-  --color-muted: #94a3b8;
   --color-dark: #181e2c;
   --color-light: #f2f2f2;
-  --font-sans: "Roboto", sans-serif;
+
+  /* Dark-mode surface scale */
+  --color-surface: #1c1c1c;
+  --color-surface-raised: #222222;
+  --color-surface-2: #262626;
+  --color-surface-3: #2a2a2a;
+  --color-surface-deep: #111111;
+
+  /* Dark-mode borders */
+  --color-border: #333333;
+  --color-border-2: #444444;
+
+  /* Utility */
+  --color-muted: #94a3b8;
+
+  /* Corps : Plus Jakarta Sans — humaniste, lisible, distinctif */
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+  /* Headings: Syne — geometric, strong character in Bold/ExtraBold */
+  --font-display: "Syne", system-ui, sans-serif;
   --animate-spin: spin 4s linear infinite
 }
 
@@ -18,15 +38,94 @@ html.light {
   background-color: #f2f2f2;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+/* ── RichTextEditor (editor) + article-body (render) ────────────────────── */
+
+.ProseMirror {
+  outline: none;
+}
+
+/* Placeholder */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* Code block — editor (Tiptap v3 = .tiptap.ProseMirror) AND article render */
+.tiptap pre,
+.ProseMirror pre,
+.article-body pre {
+  border-radius: 0.5rem !important;
+  margin: 1rem 0 !important;
+  overflow-x: auto !important;
+  background-color: #22272e !important;
+  color: #adbac7 !important;
+  padding: 1rem !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  white-space: pre !important;
+  text-align: left !important;
+}
+
+/* <code> inside <pre>: transparent background, hljs handles syntax colors */
+.tiptap pre code,
+.ProseMirror pre code,
+.article-body pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  font-size: inherit !important;
+  font-family: inherit !important;
+  color: inherit !important;
+  white-space: inherit !important;
+}
+
+/* Code inline */
+.tiptap :not(pre) > code,
+.ProseMirror :not(pre) > code,
+.article-body :not(pre) > code {
+  background-color: #f1f5f9;
+  color: #dc2626;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875em;
+}
+
+html.dark .tiptap :not(pre) > code,
+html.dark .ProseMirror :not(pre) > code,
+html.dark .article-body :not(pre) > code {
+  background-color: #333;
+  color: #f87171;
+}
+
+/* Other elements */
+.tiptap blockquote,
+.ProseMirror blockquote,
+.article-body blockquote {
+  border-left: 4px solid currentColor;
+  padding-left: 1rem;
+  opacity: 0.7;
+}
+
+.tiptap a,
+.ProseMirror a,
+.article-body a {
+  color: #3b82f6;
+  text-decoration: underline;
+}
+
+.tiptap img,
+.ProseMirror img,
+.article-body img {
+  max-width: 100%;
+  border-radius: 0.25rem;
 }
 
 button:hover {
   border-color: #646cff;
 }
-button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
 }

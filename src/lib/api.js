@@ -1,10 +1,9 @@
-
 import { deleteCookie, getCookie, setCookie } from "./cookies";
 import { appEnv } from "./env";
 
-/** Résout la base API de façon simple et lisible. */
+/** Resolves the API base URL in a simple, readable way. */
 const EXPLICIT_API_URL = appEnv.VITE_API_URL?.replace(/\/$/, "");
-const FALLBACK_API_URL = "https://weebbackend.melissa-mangione.com/api";
+const FALLBACK_API_URL = import.meta.env.DEV ? "http://localhost:8000/api" : "";
 
 function resolveApiBase() {
   if (EXPLICIT_API_URL) return EXPLICIT_API_URL;
@@ -14,37 +13,40 @@ function resolveApiBase() {
 export const API_BASE = resolveApiBase();
 export const API = `${API_BASE}/auth`;
 
+/** Single refresh promise shared across concurrent calls to avoid refresh races. */
+let _refreshingPromise = null;
+
+async function _tryRefreshToken() {
+  if (_refreshingPromise) return _refreshingPromise;
+  _refreshingPromise = (async () => {
+    const csrf = getCookie("csrftoken") ?? (await ensureCsrf());
+    const r = await fetch(`${API}/refresh/`, {
+      method: "POST",
+      credentials: "include",
+      headers: { Accept: "application/json", "X-CSRFToken": csrf },
+    });
+    if (!r.ok) throw new Error("refresh failed");
+  })().finally(() => { _refreshingPromise = null; });
+  return _refreshingPromise;
+}
+
+/** WebSocket base URL (ws:// or wss://) derived from API_BASE. */
+export const WS_BASE = API_BASE
+  .replace(/^https/, "wss")
+  .replace(/^http/, "ws")
+  .replace(/\/api$/, "");
+const OAUTH_GITHUB_URL = appEnv.VITE_OAUTH_GITHUB_URL?.trim();
+
 const isDev = appEnv.DEV;
+const RESERVED_ERROR_KEYS = new Set(["detail", "code", "status", "request_id", "retry_after", "errors"]);
 
 
 if (typeof window !== "undefined" && isDev) {
-  window.__API_BASE__ = API_BASE; // pratique debug
+  window.__API_BASE__ = API_BASE; // handy for debugging
 }
 
-function storeAuthTokens(payload) {
-  if (typeof window === "undefined" || !payload) return;
-  const access =
-    payload.access ||
-    payload.access_token ||
-    payload.token ||
-    payload.accessToken ||
-    null;
-  const refresh =
-    payload.refresh ||
-    payload.refresh_token ||
-    payload.refreshToken ||
-    null;
-  try {
-    if (access) window.localStorage?.setItem?.("access_token", access);
-    if (refresh) window.localStorage?.setItem?.("refresh_token", refresh);
-  } catch {
-    // ignore storage errors
-  }
-
-  if (access) {
-    setCookie("access", access);
-    setCookie("access_token", access);
-  }
+function storeAuthTokens() {
+  // Backend auth is cookie-based (HttpOnly). Do not mirror tokens into JS storage.
 }
 
 function clearAuthTokens() {
@@ -61,20 +63,247 @@ function clearAuthTokens() {
   deleteCookie("access_token");
 }
 
+function firstMessage(value) {
+  if (typeof value === "string") return value;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const msg = firstMessage(item);
+      if (msg) return msg;
+    }
+    return null;
+  }
+  if (value && typeof value === "object") {
+    if (typeof value.detail === "string") return value.detail;
+    if (Array.isArray(value.non_field_errors)) {
+      const msg = firstMessage(value.non_field_errors);
+      if (msg) return msg;
+    }
+    for (const item of Object.values(value)) {
+      const msg = firstMessage(item);
+      if (msg) return msg;
+    }
+  }
+  return null;
+}
+
+function normalizeFieldErrors(payload) {
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return {};
+
+  const normalized = {};
+  const mergeFieldEntries = (source) => {
+    if (!source || typeof source !== "object" || Array.isArray(source)) return;
+    for (const [key, value] of Object.entries(source)) {
+      if (RESERVED_ERROR_KEYS.has(key)) continue;
+      if (typeof value === "string") {
+        normalized[key] = [value];
+        continue;
+      }
+      if (Array.isArray(value)) {
+        const cleaned = value.flatMap((item) => {
+          if (typeof item === "string") return [item];
+          const nested = firstMessage(item);
+          return nested ? [nested] : [];
+        });
+        if (cleaned.length) normalized[key] = cleaned;
+        continue;
+      }
+      if (value && typeof value === "object") {
+        const nested = firstMessage(value);
+        if (nested) normalized[key] = [nested];
+      }
+    }
+  };
+
+  mergeFieldEntries(payload.errors);
+  mergeFieldEntries(payload);
+  return normalized;
+}
+
+function normalizeErrorPayload(payload, { status, requestId } = {}) {
+  const base = payload && typeof payload === "object" && !Array.isArray(payload)
+    ? { ...payload }
+    : {};
+  const fields = normalizeFieldErrors(base);
+  const detail =
+    typeof base.detail === "string"
+      ? base.detail
+      : firstMessage(base.non_field_errors) || firstMessage(fields) || "Request failed.";
+
+  const normalized = {
+    ...base,
+    detail,
+    code: typeof base.code === "string" ? base.code : null,
+    status: Number.isFinite(base.status) ? base.status : status ?? null,
+    retry_after: Number.isFinite(Number(base.retry_after)) ? Math.ceil(Number(base.retry_after)) : null,
+    request_id: typeof base.request_id === "string" ? base.request_id : requestId ?? null,
+    errors: fields,
+  };
+
+  for (const [key, value] of Object.entries(fields)) {
+    if (normalized[key] === undefined) {
+      normalized[key] = value;
+    }
+  }
+
+  return normalized;
+}
+
+function createApiError({ message, details, status = null, url, method, cause = null, network = false }) {
+  const error = new Error(message);
+  error.name = "ApiClientError";
+  error.status = status;
+  error.url = url;
+  error.method = method;
+  error.network = network;
+  error.details = details || {};
+  error.code = error.details?.code || null;
+  error.requestId = error.details?.request_id || null;
+  error.retryAfter = Number.isFinite(Number(error.details?.retry_after))
+    ? Math.ceil(Number(error.details.retry_after))
+    : null;
+  error.cause = cause;
+  return error;
+}
+
+async function parseResponsePayload(response) {
+  const contentType = response.headers?.get?.("content-type") || "";
+  if (typeof response.json === "function" && (contentType.includes("application/json") || !contentType)) {
+    try {
+      return await response.json();
+    } catch {
+      // fall through to text parsing when available
+    }
+  }
+
+  if (response.status === 204) return null;
+
+  try {
+    const text = await response.text();
+    return text ? { detail: text } : null;
+  } catch {
+    return null;
+  }
+}
+
+function buildHttpError(response, data, { url, method }) {
+  const requestId = response.headers?.get?.("x-request-id") || null;
+  const details = normalizeErrorPayload(data, {
+    status: response.status,
+    requestId,
+  });
+  const message =
+    details.detail ||
+    `${method} ${url} failed with status ${response.status}`;
+
+  return createApiError({
+    message,
+    details,
+    status: response.status,
+    url,
+    method,
+  });
+}
+
+function buildNetworkError({ url, method, cause }) {
+  return createApiError({
+    message: `Network error while calling ${method} ${url}`,
+    details: {
+      detail: "Network error. Check your connection and try again.",
+      code: "network_error",
+      status: null,
+      request_id: null,
+      retry_after: null,
+      errors: {},
+    },
+    status: null,
+    url,
+    method,
+    cause,
+    network: true,
+  });
+}
+
+export function getApiErrorDetails(error) {
+  return error?.details && typeof error.details === "object" ? error.details : {};
+}
+
+export function getApiFieldError(error, keys) {
+  const keyList = Array.isArray(keys) ? keys : [keys];
+  const details = getApiErrorDetails(error);
+  for (const key of keyList) {
+    const source = details.errors?.[key] ?? details[key];
+    if (Array.isArray(source) && source.length) return source.join(" ");
+    if (typeof source === "string") return source;
+  }
+  return null;
+}
+
+export function mapApiFieldErrors(error, mapping) {
+  return Object.entries(mapping).reduce((acc, [uiField, apiFields]) => {
+    const message = getApiFieldError(error, apiFields);
+    if (message) acc[uiField] = message;
+    return acc;
+  }, {});
+}
+
+export function getApiErrorMessage(error, fallback = "Request failed.") {
+  if (!error) return fallback;
+  const details = getApiErrorDetails(error);
+  return (
+    firstMessage(details.non_field_errors) ||
+    details.detail ||
+    error.detail ||
+    error.message ||
+    fallback
+  );
+}
+
+export function getApiRetryAfter(error) {
+  const details = getApiErrorDetails(error);
+  const raw = error?.retryAfter ?? details?.retry_after;
+  return Number.isFinite(Number(raw)) && Number(raw) > 0 ? Math.ceil(Number(raw)) : null;
+}
+
+export function getApiRequestId(error) {
+  return error?.requestId || getApiErrorDetails(error)?.request_id || null;
+}
+
+export function getApiSupportHint(error, language = "en") {
+  const requestId = getApiRequestId(error);
+  if (!requestId) return null;
+  return language === "fr" ? `Référence support : ${requestId}` : `Support reference: ${requestId}`;
+}
+
+export function getApiLockoutMessage(error, language = "en", fallbackSeconds = 30) {
+  const retryAfter = getApiRetryAfter(error) ?? fallbackSeconds;
+  return language === "fr"
+    ? `Trop de tentatives. Réessayez dans ${retryAfter}s.`
+    : `Too many attempts. Retry in ${retryAfter}s.`;
+}
+
+/** ========== Timeout ========== */
+const _DEFAULT_TIMEOUT_MS = 10_000; // 10 seconds
+
+function _withTimeout(ms = _DEFAULT_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(new DOMException("Request timeout", "TimeoutError")),
+    ms,
+  );
+  return { signal: controller.signal, clear: () => clearTimeout(timer) };
+}
+
 /** ========== CSRF ========== */
 async function fetchCsrfToken(url) {
   let r;
   try {
     r = await fetch(url, { credentials: "include" });
   } catch (e) {
-    const err = new Error(`CSRF request failed (network/502?) → ${url}`);
-    err.cause = e;
-    throw err;
+    throw buildNetworkError({ url, method: "GET", cause: e });
   }
   if (!r.ok) {
-    const err = new Error(`CSRF ${r.status} at ${url}`);
-    err.status = r.status;
-    throw err;
+    const data = await parseResponsePayload(r);
+    throw buildHttpError(r, data, { url, method: "GET" });
   }
 
   let bodyToken = null;
@@ -87,7 +316,7 @@ async function fetchCsrfToken(url) {
       data?.csrf ||
       data?.token ||
       null;
-  } catch (_) {}
+  } catch (_) { /* noop */ }
 
   if (bodyToken) {
     setCookie("csrftoken", bodyToken);
@@ -157,9 +386,10 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
   }
 
   const url = `${API}${path}`;
-  if (typeof window !== "undefined") {
+  if (typeof window !== "undefined" && appEnv.DEV) {
     console.debug("[AUTH] request", { method, url, hasBody: !!body, csrf });
   }
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
@@ -167,44 +397,27 @@ async function authRequest(path, { method = "GET", body, headers = {}, csrf = fa
       credentials: "include",
       headers: finalHeaders,
       body: isFormData ? payload : payload ?? undefined,
+      signal,
     });
   } catch (networkError) {
-    const err = new Error(`Auth API network error for ${url}`);
-    err.cause = networkError;
-    throw err;
+    throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
-  const contentType = response.headers.get("content-type") || "";
-  let data = null;
-  if (contentType.includes("application/json")) {
-    try {
-      data = await response.json();
-    } catch (_) {
-      data = null;
-    }
-  } else if (response.status !== 204) {
-    try {
-      const text = await response.text();
-      if (text) data = { detail: text };
-    } catch (_) {
-      data = null;
-    }
-  }
+  const data = await parseResponsePayload(response);
 
   if (!response.ok) {
-    const err = new Error(`Auth API ${response.status} ${response.statusText}`);
-    err.status = response.status;
-    err.details = data;
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && appEnv.DEV) {
       console.debug("[AUTH] error", { url, status: response.status, details: data });
     }
-    throw err;
+    throw buildHttpError(response, data, { url, method });
   }
 
   return data;
 }
 
-async function apiRequest(path, { method = "GET", body, headers = {}, csrf = false } = {}) {
+async function apiRequest(path, { method = "GET", body, headers = {}, csrf = false, _retry = false } = {}) {
   const finalHeaders = {
     Accept: "application/json",
     ...headers,
@@ -223,6 +436,7 @@ async function apiRequest(path, { method = "GET", body, headers = {}, csrf = fal
   }
 
   const url = `${API_BASE}${path}`;
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
@@ -230,35 +444,27 @@ async function apiRequest(path, { method = "GET", body, headers = {}, csrf = fal
       credentials: "include",
       headers: finalHeaders,
       body: isFormData ? payload : payload ?? undefined,
+      signal,
     });
   } catch (networkError) {
-    const err = new Error(`API network error for ${url}`);
-    err.cause = networkError;
-    throw err;
+    throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
-  const contentType = response.headers.get("content-type") || "";
-  let data = null;
-  if (contentType.includes("application/json")) {
-    try {
-      data = await response.json();
-    } catch (_) {
-      data = null;
-    }
-  } else if (response.status !== 204) {
-    try {
-      const text = await response.text();
-      if (text) data = { detail: text };
-    } catch (_) {
-      data = null;
-    }
-  }
+  const data = await parseResponsePayload(response);
 
   if (!response.ok) {
-    const err = new Error(`API ${response.status} ${response.statusText}`);
-    err.status = response.status;
-    err.details = data;
-    throw err;
+    // Auto-retry on 401 (expired access token)
+    if (response.status === 401 && !_retry) {
+      try {
+        await _tryRefreshToken();
+        return apiRequest(path, { method, body, headers, csrf, _retry: true });
+      } catch {
+        // refresh failed — let the original 401 bubble up
+      }
+    }
+    throw buildHttpError(response, data, { url, method });
   }
 
   return data;
@@ -276,23 +482,24 @@ async function authRequestRaw(path, { method = "GET", headers = {}, csrf = false
   }
 
   const url = `${API}${path}`;
+  const { signal, clear } = _withTimeout();
   let response;
   try {
     response = await fetch(url, {
       method,
       credentials: "include",
       headers: finalHeaders,
+      signal,
     });
   } catch (networkError) {
-    const err = new Error(`Auth API network error for ${url}`);
-    err.cause = networkError;
-    throw err;
+    throw buildNetworkError({ url, method, cause: networkError });
+  } finally {
+    clear();
   }
 
   if (!response.ok) {
-    const err = new Error(`Auth API ${response.status} ${response.statusText}`);
-    err.status = response.status;
-    throw err;
+    const data = await parseResponsePayload(response);
+    throw buildHttpError(response, data, { url, method });
   }
 
   return response;
@@ -307,7 +514,7 @@ export const AuthApi = {
   },
   async exportData() {
     const response = await authRequestRaw("/gdpr/");
-    const contentType = response.headers.get("content-type") || "";
+    const contentType = response.headers?.get?.("content-type") || "";
     let blob;
     if (contentType.includes("application/json")) {
       const json = await response.json();
@@ -317,7 +524,7 @@ export const AuthApi = {
     } else {
       blob = await response.blob();
     }
-    const disposition = response.headers.get("content-disposition") || "";
+    const disposition = response.headers?.get?.("content-disposition") || "";
     return { blob, disposition };
   },
   deleteAccount() {
@@ -333,6 +540,14 @@ export const AuthApi = {
   },
   register(payload) {
     return authRequest("/register/", { method: "POST", body: payload, csrf: true });
+  },
+  oauthGoogle(payload) {
+    return authRequest("/oauth/google/", { method: "POST", body: payload, csrf: true }).then(
+      (data) => {
+        storeAuthTokens(data);
+        return data;
+      }
+    );
   },
   logout() {
     return authRequest("/logout/", { method: "POST", csrf: true }).finally(() => {
@@ -350,9 +565,53 @@ export const AuthApi = {
   },
 };
 
+export function getEnabledOAuthProviders() {
+  const providers = [];
+  if (OAUTH_GITHUB_URL) {
+    providers.push({ id: "github", label: "GitHub", url: OAUTH_GITHUB_URL });
+  }
+  return providers;
+}
+
 export const NewsletterApi = {
-  subscribe(payload) {
-    return apiRequest("/newsletter-consents/", {
+  async subscribe(payload) {
+    // Use a direct fetch to capture the response status:
+    // 201 = new subscription, 200 = already subscribed (backend is idempotent).
+    // apiRequest() would swallow the status and only return the parsed body.
+    const url = `${API_BASE}/newsletter-consents/`;
+    const csrf = getCookie("csrftoken");
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(csrf ? { "X-CSRFToken": csrf } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (networkErr) {
+      throw buildNetworkError({ url, method: "POST", cause: networkErr });
+    }
+    const data = await parseResponsePayload(response);
+    if (!response.ok) {
+      throw buildHttpError(response, data, { url, method: "POST" });
+    }
+    return { data, created: response.status === 201 };
+  },
+};
+
+export const SubjectsApi = {
+  list() {
+    return apiRequest("/subjects/");
+  },
+};
+
+export const MessagesApi = {
+  create(payload) {
+    return apiRequest("/messages/", {
       method: "POST",
       body: payload,
       csrf: true,

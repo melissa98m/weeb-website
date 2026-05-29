@@ -47,7 +47,7 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
 
   const frame =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] text-white"
+      ? "bg-surface border-border text-white"
       : "bg-white border-gray-200 text-gray-900";
 
   return (
@@ -60,18 +60,21 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
           <img
             src={cover}
             alt={item.title}
+            width={260}
+            height={144}
             className="h-full w-full object-cover"
             loading="lazy"
+            decoding="async"
           />
         </div>
       )}
       <div className="p-3">
-        <h4 className="text-sm font-semibold line-clamp-2">{item.title}</h4>
+        <h3 className="text-sm font-semibold line-clamp-2">{item.title}</h3>
         <div className={`text-xs mt-2 ${theme === "dark" ? "text-white/70" : "text-gray-600"}`}>
           {authorLabel} • {formatDate(dateIso, language)}
         </div>
 
-        {/* genres (bordure/texte colorés) */}
+        {/* Genres (colored border/text chips) */}
         <div className="mt-2 flex flex-wrap gap-1.5">
           {(Array.isArray(item.genres) ? item.genres : []).slice(0, 3).map((g) => (
             <span
@@ -147,12 +150,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
   if (loading || !genreIds.length) return null;
   if (err || items.length === 0) return null;
 
-  const barMask =
-    theme === "dark"
-      ? "from-[#1c1c1c] via-transparent to-[#1c1c1c]"
-      : "from-white via-transparent to-white";
-
-  // CSS pour masquer les barres de défilement (Firefox, WebKit, Edge/IE)
+  // CSS to hide scrollbars (Firefox, WebKit, Edge/IE)
   const HIDE_SCROLLBAR_CSS = `
     .related-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .related-scroll::-webkit-scrollbar { display: none; }
@@ -163,9 +161,9 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
       <style>{HIDE_SCROLLBAR_CSS}</style>
 
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold">
           {language === "fr" ? "Articles du même genre" : "More in this genre"}
-        </h3>
+        </h2>
         <div className="flex gap-2">
           <button
             type="button"
@@ -173,7 +171,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
             aria-label={language === "fr" ? "Faire défiler vers la gauche" : "Scroll left"}
             className={`px-3 py-1.5 rounded-md border text-sm ${
               theme === "dark"
-                ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >
@@ -185,7 +183,7 @@ export default function RelatedCarousel({ currentId, currentGenres, theme, langu
             aria-label={language === "fr" ? "Faire défiler vers la droite" : "Scroll right"}
             className={`px-3 py-1.5 rounded-md border text-sm ${
               theme === "dark"
-                ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                 : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
             }`}
           >

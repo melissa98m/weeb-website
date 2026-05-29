@@ -27,16 +27,18 @@ Site web complet de l'entreprise **Weeb**, développé en React avec authentific
 Weeb est une plateforme web moderne offrant :
 
 - **Pages publiques** : Accueil, À propos, Contact, Blog, Formations, Mentions légales, Politique de confidentialité
-- **Authentification complète** : Connexion, inscription, réinitialisation de mot de passe avec gestion de session
-- **Profil utilisateur** : Gestion du profil personnel avec export de données et suppression de compte (RGPD)
-- **Panneau d'administration** : Interface complète pour la gestion du contenu
-  - Gestion des articles de blog (CRUD complet)
-  - Gestion des formations (accès Personnel requis)
-  - Gestion des genres pour les articles
-  - Gestion des messages de contact
-  - Gestion des feedbacks utilisateurs
-  - Gestion des formations utilisateurs (personnel)
-- **Fonctionnalités avancées** : Thème dark/light, internationalisation FR/EN, bannière de cookies RGPD
+- **Authentification complète** : Connexion, inscription, OAuth Google, réinitialisation de mot de passe
+- **Parcours de formation** : Suivi séquentiel modules → cours → QCM avec barre de progression
+- **Profil utilisateur** : Tableau de bord personnel, progression formations, export RGPD, suppression de compte
+- **Chat support** : Widget temps réel (WebSocket) accessible depuis toutes les pages
+- **Panneau d'administration** : Interface complète
+  - Analytics, exports CSV et PDF
+  - Gestion des articles avec éditeur Tiptap, révisions, commentaires
+  - Gestion des formations, modules et cours (M2M)
+  - Tableau de bord commercial
+  - Campagnes newsletter planifiées
+  - Chat support admin
+- **Fonctionnalités transversales** : Thème dark/light, internationalisation FR/EN, bannière de cookies RGPD, recherche globale (Ctrl+K)
 
 Le design suit les maquettes fournies par l'équipe Weeb et utilise **Tailwind CSS** pour le styling.
 
@@ -89,58 +91,82 @@ weeb-website/
 ├── src/
 │   ├── assets/
 │   ├── components/
-│   │   ├── admin/           # UI admin
-│   │   ├── About/
-│   │   ├── Blog/
-│   │   ├── Contact/
+│   │   ├── admin/
+│   │   │   ├── AdminSidebar.jsx          # Navigation latérale admin
+│   │   │   ├── FormationContentEditor.jsx # Éditeur modules/cours en glisser-déposer
+│   │   │   ├── RichTextEditor.jsx        # Éditeur Tiptap réutilisable
+│   │   │   ├── ExportCSVButton.jsx
+│   │   │   └── AnalyticsCharts.jsx       # Graphiques recharts
+│   │   ├── chat/
+│   │   │   └── ChatWidget.jsx            # Widget chat support WebSocket
 │   │   ├── Formations/
-│   │   ├── Home/
-│   │   ├── Icon/
+│   │   │   └── FormationModal.jsx        # Modal détail formation + progression
 │   │   ├── profile/
-│   │   ├── ui/
+│   │   │   └── TrainingItem.jsx          # Carte formation avec progression
+│   │   ├── About/, Blog/, Contact/, Home/, Icon/, ui/
 │   │   ├── CookieBanner.jsx
 │   │   ├── Footer.jsx
-│   │   ├── Header.jsx
+│   │   ├── Header.jsx                    # Barre de recherche Ctrl+K
 │   │   └── ProtectedRoute.jsx
-│   ├── context/             # Contexts (Auth, Language, Theme)
-│   ├── layouts/             # Layouts réutilisables
-│   ├── lib/                 # Client API + cookies + env
+│   ├── context/
+│   │   ├── AuthContext.jsx               # Auth JWT + OAuth Google
+│   │   ├── ChatContext.jsx               # État global chat support
+│   │   ├── ThemeContext.jsx              # Dark/light
+│   │   └── LanguageContext.jsx           # FR/EN
+│   ├── layouts/
+│   │   └── AdminLayout.jsx
+│   ├── lib/
+│   │   ├── api.js                        # Client HTTP + CSRF
+│   │   ├── seo.js                        # Helpers SEO (canonical, og:meta, JSON-LD)
+│   │   └── env.js
 │   ├── pages/
-│   │   ├── admin/           # Pages admin
+│   │   ├── admin/
+│   │   │   ├── AdminHome.jsx             # Analytics + exports CSV
+│   │   │   ├── AdminChatPanel.jsx        # Gestion chat support
+│   │   │   ├── AnalyticsPage.jsx
+│   │   │   ├── ArticlesManager.jsx
+│   │   │   ├── CommercialDashboard.jsx   # Tableau de bord commercial
+│   │   │   ├── ContenuManager.jsx        # Gestion modules et cours (M2M)
+│   │   │   ├── FormationsManager.jsx
+│   │   │   ├── GenresManager.jsx
+│   │   │   ├── NewsletterManager.jsx
+│   │   │   └── PersonnelFormationAdmin.jsx
 │   │   ├── About.jsx
 │   │   ├── Blog.jsx
-│   │   ├── BlogDetail.jsx
+│   │   ├── BlogDetail.jsx               # Rendu HTML Tiptap + tracking lecture
 │   │   ├── Contact.jsx
 │   │   ├── Feedbacks.jsx
-│   │   ├── ForgotPassword.jsx
+│   │   ├── FormationParcours.jsx         # Parcours séquentiel modules→cours→QCM
 │   │   ├── Formations.jsx
+│   │   ├── ForgotPassword.jsx
 │   │   ├── Home.jsx
 │   │   ├── Legal.jsx
 │   │   ├── Login.jsx
 │   │   ├── Messages.jsx
 │   │   ├── Privacy.jsx
-│   │   ├── Profile.jsx
-│   │   └── Register.jsx
-│   ├── routes/             # Routes protégées
+│   │   ├── Profile.jsx                  # Profil + tableau de bord + progression
+│   │   ├── Register.jsx
+│   │   ├── ResetPassword.jsx
+│   │   └── SearchResults.jsx
+│   ├── routes/
 │   │   ├── PersonnelRoute.jsx
+│   │   ├── RedactionRoute.jsx
 │   │   └── StaffRoute.jsx
-│   ├── utils/              # Utilitaires
-│   │   └── roles.js        # Gestion des rôles et permissions
-│   ├── App.jsx             # Composant principal avec routing
-│   ├── App.css             # Styles globaux
-│   ├── main.jsx            # Point d'entrée de l'application
-│   └── index.css           # Styles de base
-├── .env                    # Variables locales (exemple, non versionné en prod)
-├── cypress.config.js       # Configuration Cypress
-├── docker-compose.yml      # Configuration Docker Compose
-├── Dockerfile              # Image Docker pour développement
-├── eslint.config.js        # Configuration ESLint
-├── index.html              # Template HTML
-├── package.json            # Dépendances & scripts
-├── postcss.config.js       # Configuration PostCSS
-├── tailwind.config.js      # Configuration Tailwind CSS
-├── vercel.json             # Configuration Vercel
-└── vite.config.js          # Configuration Vite
+│   ├── utils/
+│   │   └── roles.js                     # hasPersonnelRole, hasAnyStaffRole…
+│   ├── App.jsx                          # Routing SPA complet
+│   ├── App.css
+│   ├── main.jsx
+│   └── index.css
+├── .env
+├── cypress.config.js
+├── docker-compose.yml
+├── Dockerfile
+├── eslint.config.js
+├── index.html
+├── package.json
+├── vercel.json
+└── vite.config.js
 ```
 
 ## 💾 Installation
@@ -169,10 +195,14 @@ Créez ou mettez à jour un fichier `.env` à la racine du projet :
 ```env
 VITE_API_URL=http://localhost:8000/api
 VITE_SENTRY_DSN=__votre_dsn_sentry__
+VITE_GOOGLE_CLIENT_ID=__votre_google_client_id__
+VITE_OAUTH_GITHUB_URL=http://localhost:8000/api/auth/oauth/github/
 ```
 
 - `VITE_API_URL` : URL du backend Django. **Si non défini**, l'app utilise par défaut `https://weebbackend.melissa-mangione.com/api`.
 - `VITE_SENTRY_DSN` : DSN Sentry. **Si défini en production**, active le reporting d'erreurs et les traces/replays.
+- `VITE_GOOGLE_CLIENT_ID` : Client ID Google OAuth. **Si défini**, le bouton Google apparaît sur `/login` et envoie un `id_token` au backend.
+- `VITE_OAUTH_GITHUB_URL` : URL de démarrage OAuth GitHub. **Si définie**, un bouton GitHub apparaît sur `/login`.
 
 ## 🛠 Scripts disponibles
 
@@ -196,35 +226,42 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 - **📖 À propos** (`/about-us`) : Page de présentation de l'entreprise
 - **📨 Contact** (`/contact`) : Formulaire de contact avec validation et envoi de messages
 - **📝 Blog** (`/blog`) : Liste des articles de blog avec pagination et filtres par genre
-- **📄 Détail article** (`/blog/:id`) : Page de détail d'un article avec contenu complet
+- **📄 Détail article** (`/blog/:id`) : Rendu HTML Tiptap + tracking lecture + likes + commentaires
 - **📚 Formations** (`/formations`) : Catalogue des formations disponibles avec modal de détail
-- **🪟 Détail formation** (`/formation/:id`) : Route dédiée au modal de formation
-- **🔐 Connexion** (`/login`) : Page de connexion avec validation et animations
-- **📝 Inscription** (`/register`) : Page d'inscription avec validation
-- **🔑 Mot de passe oublié** (`/forgot-password`) : Demande de réinitialisation de mot de passe
-- **🔄 Réinitialisation** (`/reset-password`) : Réinitialisation du mot de passe avec token
-- **⚖️ Mentions légales** (`/mentions-legales`) : Page des mentions légales
-- **🔒 Politique de confidentialité** (`/politique-confidentialite`) : Page de politique de confidentialité
+- **🪟 Détail formation** (`/formation/:id`) : Modal formation — description, progression (si inscrit)
+- **🔍 Résultats de recherche** (`/search?q=`) : Recherche globale articles + formations
+- **🔐 Connexion** (`/login`) : Connexion identifiants ou OAuth Google
+- **📝 Inscription** (`/register`) : Création de compte
+- **🔑 Mot de passe oublié** (`/forgot-password`) : Demande de réinitialisation
+- **🔄 Réinitialisation** (`/reset-password`) : Réinitialisation avec token
+- **⚖️ Mentions légales** (`/legal-notices`)
+- **🔒 Politique de confidentialité** (`/privacy-policy`)
 
-### 🔒 Pages protégées
+### 🔒 Pages protégées (IsAuthenticated)
 
-- **👤 Profil** (`/profile`) : Gestion du profil utilisateur avec :
-  - Affichage des informations personnelles
-  - Liste des formations suivies
-  - Liste des feedbacks donnés
-  - Export des données personnelles (RGPD)
-  - Suppression de compte (RGPD)
-  - Gestion des droits sur les données
+- **👤 Profil** (`/profile`) :
+  - Informations personnelles, formations suivies avec progression %
+  - Bouton "Continuer →" par formation, feedback post-formation (100% requis)
+  - Export données RGPD, suppression de compte
+- **🎓 Parcours de formation** (`/formation/:id/learn`) :
+  - Navigation séquentielle modules → cours → QCM
+  - Sidebar de navigation, barre de progression globale
+  - Validation QCM requise pour débloquer le module suivant
 
 ### 🛡️ Panneau d'administration
 
-- **🏠 Tableau de bord** (`/admin`)
-- **📝 Articles** (`/admin/articles`)
-- **📚 Formations** (`/admin/formations`) *(Personnel requis)*
-- **👥 Formations utilisateurs** (`/admin/user-formations`) *(Personnel requis)*
-- **🏷️ Genres** (`/admin/genres`)
-- **💬 Messages** (`/admin/messages`)
-- **⭐ Feedbacks** (`/admin/feedbacks`)
+- **🏠 Tableau de bord** (`/admin`) : Analytics recharts + exports CSV *(ProtectedRoute)*
+- **📝 Articles** (`/admin/articles`) : CRUD Tiptap, révisions, modération *(Redaction)*
+- **🏷️ Genres** (`/admin/genres`) *(Redaction)*
+- **📚 Formations** (`/admin/formations`) : CRUD + éditeur de contenu inline *(Personnel)*
+- **📖 Contenu** (`/admin/content`) : Gestion globale modules et cours M2M *(Personnel)*
+- **👥 Formations utilisateurs** (`/admin/user-formations`) *(Personnel)*
+- **💼 Commercial** (`/admin/commercial`) : KPIs, revenus, conversion *(Staff)*
+- **💬 Messages** (`/admin/messages`) *(Staff)*
+- **⭐ Feedbacks** (`/admin/feedbacks`) *(Staff)*
+- **📊 Analytiques** (`/admin/analytics`) *(Staff)*
+- **📧 Newsletter** (`/admin/newsletter`) : Campagnes planifiées (Celery Beat) *(Staff)*
+- **💬 Chat support** (`/admin/chat`) : Panel agent, historique salles *(Staff)*
 
 ### 🎨 Fonctionnalités transversales
 
@@ -237,6 +274,13 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 - **📧 Newsletter** : Système d'abonnement avec consentement
 - **🔒 Protection des routes** : Routes protégées avec vérification d'authentification et de rôles
 - **⚡ Optimisations de build** : Code splitting manuel, minification ESBuild, noms de fichiers hashés
+- **🔍 Recherche globale** : Barre de recherche `SearchBar` (raccourci Ctrl+K sur desktop), résultats articles + formations en temps réel
+- **📊 Tableau de bord personnel** : Section "Mon tableau de bord" dans `/profile` avec stats de lecture et timeline des formations (`DashboardStats`)
+- **📤 Exports CSV** : Export des inscrits, feedbacks et messages depuis l'admin (`ExportCSVButton`)
+- **📈 Analytics admin** : Graphiques recharts (BarChart + PieChart) dans `AdminHome` via `AnalyticsCharts`
+- **🔎 SEO** : Chaque page publique définit canonical, Open Graph complet (og:title/description/image/url/type) et Twitter Cards. `BlogDetail` injecte un JSON-LD `Article` + `BreadcrumbList`. `Home` injecte un JSON-LD `WebSite` avec `SearchAction`. Les pages privées/admin ont `noindex, nofollow`. Helper centralisé : `src/lib/seo.js`.
+- **♿ Accessibilité** : Animations conditionnées à `prefers-reduced-motion` (via `useReducedMotion` Framer Motion), `<label>` visible sur tous les champs de formulaire, `role="status" aria-live="polite"` sur le fallback Suspense.
+- **🍪 Analytics conditionnels** : Vercel Analytics et Sentry initialisés uniquement après acceptation des cookies (`localStorage["cookie-consent"]`), conformément au RGPD.
 
 ## 🔐 Authentification et rôles
 
@@ -245,6 +289,8 @@ VITE_SENTRY_DSN=__votre_dsn_sentry__
 L'application utilise un système d'authentification basé sur des cookies avec protection CSRF. `AuthContext` centralise :
 
 - **Connexion** (`login`) : Accepte email/username/identifier + password, pose les cookies, puis charge `/me`
+- **Connexion OAuth Google** : Optionnelle via Google Identity, puis appel backend `POST /auth/oauth/google/` avec `id_token`
+- **Connexion OAuth GitHub** : Optionnelle via URL provider configurée dans les variables d'environnement
 - **Inscription** (`register`) : Création de compte puis connexion automatique
 - **Déconnexion** (`logout`) : Suppression des tokens et nettoyage de l'état
 - **Vérification de l'utilisateur** (`me`) : Récupération des informations de l'utilisateur connecté
@@ -267,9 +313,10 @@ Le système de rôles est géré via `src/utils/roles.js` avec une détection fl
 - **Redacteur** : Accès à la rédaction d'articles
 
 **Routes protégées :**
-- `ProtectedRoute` : Vérifie uniquement l'authentification (admin + profil)
-- `PersonnelRoute` : Vérifie le rôle Personnel (pages formations)
-- `StaffRoute` : Helper prêt à l'usage (non utilisé dans les routes actuelles)
+- `ProtectedRoute` : Authentification uniquement (profil, parcours formation, admin)
+- `PersonnelRoute` : Rôle Personnel (formations, contenu, user-formations)
+- `RedactionRoute` : Rôle Rédacteur (articles, genres)
+- `StaffRoute` : Tout rôle staff (feedbacks, messages, analytics, commercial, newsletter, chat)
 
 ## 🧪 Tests
 
@@ -349,10 +396,6 @@ Le fichier `docker-compose.yml` configure :
 - Variables d'environnement pour le file watching (`CHOKIDAR_USEPOLLING`, `WATCHPACK_POLLING`)
 - Commande : `npm run dev -- --host 0.0.0.0 --port 5173`
 
-**Note importante** : `docker-compose.yml` référence `Dockerfile.dev` mais le fichier s'appelle `Dockerfile`. Deux options :
-- Renommer `Dockerfile` en `Dockerfile.dev`, ou
-- Modifier `docker-compose.yml` pour utiliser `Dockerfile`
-
 ### Build Docker
 
 ```bash
@@ -387,23 +430,26 @@ npm run build
 
 ### Contextes React
 
-L'application utilise trois contextes principaux :
+L'application utilise quatre contextes principaux :
 
 1. **AuthContext** (`src/context/AuthContext.jsx`) :
-   - Gestion de l'état d'authentification
+   - Gestion de l'état d'authentification JWT HttpOnly
    - Méthodes : `login`, `register`, `logout`, `reload`
+   - OAuth Google (`id_token` → backend `POST /auth/oauth/google/`)
    - Initialisation intelligente avec idle callback
-   - Gestion automatique du CSRF
 
-2. **ThemeContext** (`src/context/ThemeContext.jsx`) :
-   - Gestion du thème dark/light
-   - Persistance dans localStorage
-   - Synchronisation avec le DOM (`class` + `data-theme`)
+2. **ChatContext** (`src/context/ChatContext.jsx`) :
+   - Connexion WebSocket au chat support
+   - État des messages non lus, salle active
+   - `ChatWidget` disponible sur toutes les pages via `App.jsx`
 
-3. **LanguageContext** (`src/context/LanguageContext.jsx`) :
-   - Gestion de la langue (FR/EN)
-   - Persistance dans localStorage
-   - Synchronisation avec le DOM (`lang` + `data-lang`)
+3. **ThemeContext** (`src/context/ThemeContext.jsx`) :
+   - Thème dark/light avec persistance localStorage
+   - Synchronisation DOM (`class` + `data-theme`)
+
+4. **LanguageContext** (`src/context/LanguageContext.jsx`) :
+   - Langue FR/EN avec persistance localStorage
+   - Synchronisation DOM (`lang` + `data-lang`)
 
 ### Structure des composants
 

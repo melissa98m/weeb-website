@@ -75,8 +75,11 @@ describe("Messages page", () => {
     const names = await screen.findAllByText("Ada Lovelace");
     expect(names.length).toBeGreaterThan(0);
 
-    const buttons = screen.getAllByRole("button", { name: "Mark as processed" });
-    await user.click(buttons[0]);
+    const replyButtons = screen.getAllByRole("button", { name: "Reply" });
+    await user.click(replyButtons[0]);
+
+    const resolvedButtons = screen.getAllByRole("button", { name: "Résolu" });
+    await user.click(resolvedButtons[0]);
     expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining("/messages/1/"), expect.objectContaining({ method: "PATCH" }));
   });
 });

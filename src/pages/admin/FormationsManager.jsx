@@ -1,19 +1,22 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import FormationDetailsModal from "../../components/admin/FormationDetailsModal";
 import CreateFormationModal from "../../components/admin/CreateFormationModal";
 import { getEnv } from "../../lib/env";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 
 // Normalise toujours vers .../api
 const API_BASE = (() => {
@@ -25,6 +28,19 @@ const API_BASE = (() => {
 export default function FormationsManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
+
+  useEffect(() => {
+    const prev = document.title;
+    document.title = t.page_title_formations;
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,17 +61,15 @@ export default function FormationsManager() {
   // AbortController
   const ctrlRef = useRef(null);
 
-  const card =
-    theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
-      : "bg-white text-gray-900 border-gray-200";
+  const isDark = theme === "dark";
+  const card = isDark ? "bg-surface border-border text-white" : "bg-white text-gray-900 border-gray-200";
   const inputCls =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+      ? "bg-surface text-white border-border placeholder-white/60"
       : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+      ? "bg-surface text-white border-border hover:bg-surface-raised"
       : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const ctaBtn =
     theme === "dark"
@@ -76,7 +90,7 @@ export default function FormationsManager() {
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
     const t = setTimeout(() => {
-      try { ctrl.abort(); } catch {}
+      try { ctrl.abort(); } catch { /* noop */ }
     }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
@@ -137,7 +151,7 @@ export default function FormationsManager() {
     }
   }, [fetchJSON, startTask, pageSize, debouncedQ]);
 
-  // initial + changements de critères
+  // Initial load + re-fetch when criteria change
   useEffect(() => { setPage(1); }, [pageSize, debouncedQ]);
   useEffect(() => { load(page); }, [page, load]);
 
@@ -149,13 +163,13 @@ export default function FormationsManager() {
   const onDeleted = (id) => {
     setOpen(false);
     setItems((prev) => prev.filter((f) => String(f.id) !== String(id)));
-    // load(1); // si tu préfères recharger depuis l'API
+    // load(1); // uncomment to reload from the API instead
   };
 
   const handleCreated = useCallback((created) => {
-    // ferme la modale de création
+    // Close the create modal
     setShowCreate(false);
-    // ouvre directement la modale de détails sur l'élément créé
+    // Open the detail modal directly on the newly created item
     const f = {
       id: created.id,
       title: created.title ?? created.name ?? created.label ?? `formation#${created.id}`,
@@ -163,7 +177,7 @@ export default function FormationsManager() {
     };
     setCurrent(f);
     setOpen(true);
-    // rafraîchit la liste (et la pagination)
+    // Refresh the list (and pagination)
     setTimeout(() => {
       setPage(1);
       load(1);
@@ -171,83 +185,101 @@ export default function FormationsManager() {
   }, [load]);
 
   // guards
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
   if (!hasPersonnelRole(user))
-    return <div className="p-6 text-red-600">Accès refusé. Cette page est réservée au personnel.</div>;
+    return <div className="p-6 text-red-600">{t.common_access_denied}</div>;
 
   return (
-    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
-      {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight truncate">
-            Gérer les formations
-          </h1>
-          <p className="mt-1 text-xs text-gray-500 dark:text-white/60">
-            Liste, recherche, création et ouverture des détails avec les inscrits.
-          </p>
-        </div>
-
-        {/* Actions: créer + recherche + taille de page */}
-        <div className="flex items-center gap-2 flex-wrap sm:justify-end">
-          <button
-            type="button"
-            className={`rounded-xl border px-4 py-2 ${ctaBtn}`}
-            onClick={() => setShowCreate(true)}
-          >
-            + Nouvelle formation
-          </button>
-
-          <input
-            className={`w-60 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder="Rechercher une formation"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <PageSizer pageSize={pageSize} onChange={setPageSize} />
-        </div>
-      </header>
+    <main className="px-4 md:px-6 py-6">
+      <AdminPageHeader
+        title={t.formations_title}
+        subtitle={t.formations_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l9 5-9 5-9-5 9-5z"/><path d="M4 10v4l8 4 8-4v-4"/></svg>}
+        iconBg={isDark ? "bg-primary/10 text-primary" : "bg-purple-100 text-purple-600"}
+        isDark={isDark}
+      >
+        <button type="button" className={`rounded-xl border px-4 py-2 text-sm font-medium ${ctaBtn}`} onClick={() => setShowCreate(true)}>
+          {t.formations_new}
+        </button>
+        <input
+          className={`w-52 rounded-xl border px-3 py-2 text-sm ${inputCls}`}
+          placeholder={t.formations_search}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <PageSizer pageSize={pageSize} onChange={setPageSize} />
+      </AdminPageHeader>
 
       {/* Content */}
       <section className={`rounded-2xl border mt-3 p-4 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
         {!loading && err && (
-          <div className="p-4 text-sm text-red-600 dark:text-red-400">
-            Erreur : {err}
+          <div className={`rounded-xl border px-4 py-3 text-sm ${isDark ? "border-red-700/30 bg-red-900/10 text-red-400" : "border-red-200 bg-red-50 text-red-600"}`}>
+            {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={() => load(page)}>
-                Recharger
+                {t.common_reload}
               </button>
             </div>
           </div>
         )}
+
         {!loading && !err && items.length === 0 && (
-          <div className="p-4 text-sm opacity-80">Aucune formation.</div>
+          <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/60" : "border-gray-200 text-gray-400"}`}>
+            {t.formations_no_results}
+          </div>
         )}
 
-        {!loading && !err && items.length > 0 && (
-          <ul
-            className="grid gap-3 p-3
-                       sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-          >
-            {items.map((f) => (
-              <li key={f.id} className="rounded-xl border overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => openModal(f)}
-                  className="w-full text-left p-4 hover:brightness-105 transition"
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {loading
+            ? Array.from({ length: pageSize > 8 ? 8 : pageSize }).map((_, i) => (
+                <li
+                  key={i}
+                  className={`rounded-2xl border animate-pulse ${isDark ? "border-border bg-surface" : "border-gray-200 bg-white"}`}
                 >
-                  <div className="font-semibold truncate">{f.title}</div>
-                  {f.description && (
-                    <div className="mt-1 text-sm opacity-80 line-clamp-2">
-                      {f.description}
+                  <div className="p-4 flex flex-col gap-2.5">
+                    <div className={`w-9 h-9 rounded-xl ${isDark ? "bg-white/5" : "bg-gray-100"}`} />
+                    <div className="space-y-1.5">
+                      <div className={`h-3 rounded-full w-3/4 ${isDark ? "bg-white/5" : "bg-gray-100"}`} />
+                      <div className={`h-2.5 rounded-full w-full ${isDark ? "bg-white/3" : "bg-gray-50"}`} />
+                      <div className={`h-2.5 rounded-full w-2/3 ${isDark ? "bg-white/3" : "bg-gray-50"}`} />
                     </div>
-                  )}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  </div>
+                </li>
+              ))
+            : items.map((f) => (
+                <li
+                  key={f.id}
+                  className={`rounded-2xl border transition-colors ${
+                    isDark
+                      ? "border-border hover:border-primary/30 bg-surface"
+                      : "border-gray-200 hover:border-secondary/30 bg-white"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => openModal(f)}
+                    className="w-full text-left p-4 flex flex-col gap-2.5 h-full"
+                  >
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold font-display shrink-0 ${
+                      isDark ? "bg-primary/15 text-primary" : "bg-secondary/10 text-secondary"
+                    }`}>
+                      {(f.title || "?")[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div className={`font-display font-semibold text-sm leading-snug truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {f.title}
+                      </div>
+                      {f.description && (
+                        <div className={`mt-1 text-xs line-clamp-2 ${isDark ? "text-white/70" : "text-gray-400"}`}>
+                          {f.description}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                </li>
+              ))
+          }
+        </ul>
       </section>
 
       {/* Pagination */}
@@ -255,7 +287,7 @@ export default function FormationsManager() {
         <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
       </div>
 
-      {/* Modal détails */}
+      {/* Detail modal */}
       <FormationDetailsModal
         open={open}
         onClose={() => setOpen(false)}
@@ -264,7 +296,7 @@ export default function FormationsManager() {
         onDeleted={onDeleted}
       />
 
-      {/* Modal création */}
+      {/* Create modal */}
       <CreateFormationModal
         open={showCreate}
         onClose={() => setShowCreate(false)}

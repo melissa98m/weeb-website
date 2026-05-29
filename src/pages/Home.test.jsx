@@ -1,7 +1,21 @@
 import React from "react";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import Home from "./Home";
+
+vi.mock("../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
+vi.mock("../lib/seo", () => ({
+  setCanonical: () => () => {},
+  setOgMeta: () => () => {},
+  setJsonLd: () => () => {},
+  setHreflang: () => () => {},
+  setTwitterMeta: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "https://weeb.melissa-mangione.com/og-image.jpg",
+}));
 
 vi.mock("../components/Home/HeroSection", () => ({
   default: () => <div>HeroSection</div>,

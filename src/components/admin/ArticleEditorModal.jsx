@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { ensureCsrf } from "../../lib/api";
-import GenrePicker from "./GenrePicker"; // <- votre composant
+import GenrePicker from "./GenrePicker"; 
+import RichTextEditor from "./RichTextEditor";
 
 /* --- Helpers d’URL --- */
 const ARTICLE_ENDPOINTS = (apiBase) => [`${apiBase}/articles/`];
@@ -40,11 +41,11 @@ async function formatApiError(r, fallbackLabel) {
         else if (data.detail) detail = data.detail;
         else detail = JSON.stringify(data);
       }
-    } catch {}
+    } catch { /* noop */ }
   } else {
     try {
       detail = (await r.text()).trim();
-    } catch {}
+    } catch { /* noop */ }
   }
   const base = `${r.status} ${r.statusText}`.trim();
   const msg = detail ? `${base} - ${detail}` : base;
@@ -55,8 +56,8 @@ export default function ArticleEditorModal({
   open = false,
   onClose = () => {},
   apiBase,
-  userId = null,
-  article = null,             // null => création ; sinon objet article
+  userId: _userId = null,
+  article = null,             // null = creating a new article; otherwise the existing article object
   onSaved = () => {},
   onDeleted = () => {},
 }) {
@@ -64,13 +65,13 @@ export default function ArticleEditorModal({
 
   /* ---------- UI styles ---------- */
   const card = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333]"
+    ? "bg-surface text-white border-border"
     : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+    ? "bg-surface text-white border-border placeholder-white/60"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+    ? "bg-surface text-white border-border hover:bg-surface-raised"
     : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const cta = theme === "dark"
     ? "bg-secondary text-white border-secondary hover:brightness-110"
@@ -84,7 +85,7 @@ export default function ArticleEditorModal({
   const [content, setContent] = useState(article?.article_content ?? "");
   const [imageUrl, setImageUrl] = useState(article?.link_image ?? "");
 
-  // genres sélectionnés : [{id,name,color?}]
+  // Selected genres: [{id,name,color?}]
   const initialGenres = useMemo(() => {
     const g = Array.isArray(article?.genres) ? article.genres : [];
     return g.map((x) => (typeof x === "object" ? x : { id: x }));
@@ -94,13 +95,60 @@ export default function ArticleEditorModal({
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState("");
 
+  /* ---------- Revisions ---------- */
+  const [showRevisions, setShowRevisions] = useState(false);
+  const [revisions, setRevisions] = useState([]);
+  const [revisionsLoading, setRevisionsLoading] = useState(false);
+
+  const fetchRevisions = useCallback(async () => {
+    if (!artId) return;
+    setRevisionsLoading(true);
+    try {
+      const r = await fetch(`${apiBase}/articles/${artId}/revisions/`, { credentials: "include" });
+      if (r.ok) {
+        const data = await r.json();
+        setRevisions(Array.isArray(data) ? data : (data.results ?? []));
+      }
+    } catch { /* noop */ }
+    finally { setRevisionsLoading(false); }
+  }, [artId, apiBase]);
+
+  const restoreRevision = useCallback(async (revisionId) => {
+    if (!window.confirm("Restaurer cette révision ? Le contenu actuel sera remplacé.")) return;
+    const csrf = await ensureCsrf();
+    try {
+      const r = await fetch(`${apiBase}/articles/${artId}/revisions/${revisionId}/restore/`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "X-CSRFToken": csrf },
+      });
+      if (r.ok) {
+        const data = await r.json();
+        // Reload the article fresh from the API after restoring
+        const articleR = await fetch(`${apiBase}/articles/${artId}/`, { credentials: "include" });
+        if (articleR.ok) {
+          const updated = await articleR.json();
+          setTitle(updated.title ?? "");
+          setContent(updated.article_content ?? "");
+        }
+        setShowRevisions(false);
+        setRevisions([]);
+        alert(data.detail ?? "Révision restaurée.");
+      }
+    } catch { /* noop */ }
+  }, [artId, apiBase]);
+
+  useEffect(() => {
+    if (showRevisions && artId) fetchRevisions();
+  }, [showRevisions, artId, fetchRevisions]);
+
   /* ---------- Abort controller commun ---------- */
   const ctrlRef = useRef(null);
   const startTask = useCallback((ms = 20000) => {
-    try { ctrlRef.current?.abort(); } catch {}
+    try { ctrlRef.current?.abort(); } catch { /* noop */ }
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -113,10 +161,10 @@ export default function ArticleEditorModal({
   }, []);
 
   useEffect(() => {
-    return () => { try { ctrlRef.current?.abort(); } catch {} };
+    return () => { try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, []);
 
-  /* ---------- (Ré)initialisation quand on ouvre/ferme ---------- */
+  /* ---------- (Re)initialize when the modal opens or closes ---------- */
   useEffect(() => {
     if (!open) return;
     setErr("");
@@ -189,7 +237,7 @@ export default function ArticleEditorModal({
         /* continue */
       }
     }
-    // fallback: on tente de relire l’article pour récupérer ses genres
+    // Fallback: re-fetch the article to recover its genres
     try {
       const detail = await fetchJSON(`${apiBase}/articles/${articleId}/`, { signal });
       const g = Array.isArray(detail?.genres) ? detail.genres : [];
@@ -206,7 +254,7 @@ export default function ArticleEditorModal({
     const csrf = await ensureCsrf();
     const { assocBase, rawList } = await getAssocEndpointAndList(articleId, signal);
 
-    // Normalise lignes renvoyées
+    // Normalize returned rows
     const rows = (rawList || []).map((row) => ({
       id: row?.id ?? row?.pk ?? null,
       article: (() => {
@@ -223,7 +271,7 @@ export default function ArticleEditorModal({
       })(),
     }));
 
-    // On n’agit QUE sur les lignes qui appartiennent bien à cet article
+    // Only act on rows that actually belong to this article
     const current = rows.filter((r) => Number(r.article) === Number(articleId) && r.genre != null);
 
     const wantIds = new Set((desiredIds || []).map(Number));
@@ -247,7 +295,7 @@ export default function ArticleEditorModal({
         });
       }
     } else {
-      // Pas d’endpoint dédié => on tente un PATCH direct (genres M2M sur article)
+      // No dedicated endpoint — fall back to a direct PATCH (M2M genres on the article)
       try {
         await fetch(`${apiBase}/articles/${articleId}/`, {
           method: "PATCH",
@@ -262,7 +310,7 @@ export default function ArticleEditorModal({
       }
     }
 
-    // Suppressions (précises)
+    // Precise deletions
     if (assocBase && canDelete) {
       for (const rec of toRemove) {
         if (rec.id != null) {
@@ -273,7 +321,7 @@ export default function ArticleEditorModal({
             headers: { "X-CSRFToken": csrf },
           });
         } else {
-          // Si on n’a pas d’ID d’association, recherche ciblée
+          // No association ID — do a targeted lookup
           try {
             const data = await fetchJSON(`${assocBase}?article=${articleId}&genre=${rec.genre}`, { signal });
             const found = Array.isArray(data?.results) ? data.results : Array.isArray(data) ? data : [];
@@ -287,7 +335,7 @@ export default function ArticleEditorModal({
               });
             }
           } catch {
-            // on s’abstient si on ne peut pas cibler précisément
+            // skip if we can’t target the association precisely
           }
         }
       }
@@ -325,7 +373,7 @@ export default function ArticleEditorModal({
 
       await syncArticleGenres(saved.id ?? saved.pk, desiredIds, task.signal);
 
-      // Renvoie à l’appelant : on “force” genres = ce que l’utilisateur a choisi
+      // Pass back to the caller: enforce genres = what the user actually selected
       onSaved({
         ...saved,
         genres: genres,
@@ -379,16 +427,71 @@ export default function ArticleEditorModal({
             <div className="font-semibold">
               {isEditing ? `Éditer l’article #${artId}` : "Nouvel article"}
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className={`rounded-lg border px-2 py-1 ${ghostBtn}`}
-              disabled={saving}
-              aria-label="Fermer"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-2">
+              {isEditing && (
+                <button
+                  type="button"
+                  onClick={() => setShowRevisions((v) => !v)}
+                  className={`rounded-lg border px-3 py-1 text-sm ${ghostBtn}`}
+                  aria-expanded={showRevisions}
+                >
+                  {showRevisions ? "← Éditeur" : "Historique"}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={onClose}
+                className={`rounded-lg border px-2 py-1 ${ghostBtn}`}
+                disabled={saving}
+                aria-label="Fermer"
+              >
+                ✕
+              </button>
+            </div>
           </header>
+
+          {/* Revisions panel */}
+          {showRevisions && (
+            <div className="p-4 border-b">
+              <h3 className="text-sm font-semibold mb-3">Historique des révisions</h3>
+              {revisionsLoading && <p className="text-sm opacity-60">Chargement…</p>}
+              {!revisionsLoading && revisions.length === 0 && (
+                <p className="text-sm opacity-60">Aucune révision.</p>
+              )}
+              {!revisionsLoading && revisions.length > 0 && (
+                <ul className="space-y-2 max-h-72 overflow-y-auto">
+                  {revisions.map((rev) => (
+                    <li
+                      key={rev.id}
+                      className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2 text-sm ${
+                        theme === "dark" ? "border-border" : "border-gray-200"
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <span className="font-medium">v{rev.revision_number}</span>
+                        <span className="mx-2 opacity-40">·</span>
+                        <span className="truncate opacity-70">{rev.title}</span>
+                        <span className="mx-2 opacity-40">·</span>
+                        <span className="opacity-50 text-xs">
+                          {new Date(rev.created_at).toLocaleString("fr-FR")}
+                        </span>
+                        {rev.author?.username && (
+                          <span className="ml-2 opacity-50 text-xs">par {rev.author.username}</span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => restoreRevision(rev.id)}
+                        className={`shrink-0 rounded-md border px-2 py-1 text-xs ${ghostBtn}`}
+                      >
+                        Restaurer
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
 
           {/* Formulaire (unique) */}
           <form onSubmit={save} className="p-4 space-y-4">
@@ -411,11 +514,10 @@ export default function ArticleEditorModal({
 
             <div>
               <label className="block text-sm mb-1">Contenu</label>
-              <textarea
-                className={`w-full rounded-lg border px-3 py-2 ${inputCls}`}
-                rows={8}
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
+                onChange={setContent}
+                theme={theme}
               />
             </div>
 
@@ -429,7 +531,7 @@ export default function ArticleEditorModal({
               />
             </div>
 
-            {/* Sélection des genres (aucun <form> à l’intérieur) */}
+            {/* Genre selection (no nested <form> here) */}
             <div>
               <label className="block text-sm mb-2">Genres</label>
               <GenrePicker

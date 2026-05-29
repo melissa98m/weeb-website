@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { ensureCsrf } from "./api";
+import { AuthApi, ensureCsrf, getApiErrorMessage, getApiRetryAfter, mapApiFieldErrors } from "./api";
 
 function clearCookie(name) {
   document.cookie = `${name}=; Max-Age=0; Path=/`;
@@ -36,5 +36,93 @@ describe("api csrf", () => {
     expect(token).toBe("testtoken");
     expect(document.cookie).toContain("csrftoken=testtoken");
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("normalizes backend auth errors into a stable client error", async () => {
+    window.Cypress = true;
+    fetchSpy.mockResolvedValueOnce({
+      ok: false,
+      status: 429,
+      headers: new Headers({
+        "content-type": "application/json",
+        "x-request-id": "req_12345678",
+      }),
+      json: async () => ({
+        detail: "too many login attempts",
+        code: "login_locked",
+        retry_after: 12,
+      }),
+    });
+
+    await expect(
+      AuthApi.login({ login: "user@example.com", password: "wrong" })
+    ).rejects.toMatchObject({
+      name: "ApiClientError",
+      status: 429,
+      code: "login_locked",
+      requestId: "req_12345678",
+      retryAfter: 12,
+    });
+  });
+});
+
+describe("api timeout", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // fetch that waits forever but respects the abort signal
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url, options) =>
+        new Promise((_resolve, reject) => {
+          options?.signal?.addEventListener("abort", () => {
+            reject(options.signal.reason ?? new DOMException("Aborted", "AbortError"));
+          });
+        })
+      )
+    );
+    document.cookie = "csrftoken=test; Path=/";
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+    vi.clearAllMocks();
+    clearCookie("csrftoken");
+  });
+
+  it("aborts and rejects with a network error after 10 seconds", async () => {
+    const promise = AuthApi.me();
+    // Attach the handler before advancing timers to avoid an unhandled rejection
+    const assertion = expect(promise).rejects.toMatchObject({
+      name: "ApiClientError",
+      network: true,
+    });
+    await vi.advanceTimersByTimeAsync(10_001);
+    await assertion;
+  });
+});
+
+describe("api error helpers", () => {
+  it("maps field and global messages from the normalized error payload", () => {
+    const error = {
+      details: {
+        detail: "validation error",
+        errors: {
+          email: ["Email already taken."],
+          password: ["Too weak."],
+        },
+      },
+    };
+
+    expect(mapApiFieldErrors(error, { email: "email", password: "password" })).toEqual({
+      email: "Email already taken.",
+      password: "Too weak.",
+    });
+    expect(getApiErrorMessage(error, "fallback")).toBe("validation error");
+  });
+
+  it("reads retry_after from normalized error payload", () => {
+    expect(getApiRetryAfter({ details: { retry_after: 9 } })).toBe(9);
+    expect(getApiRetryAfter({ details: {} })).toBeNull();
   });
 });

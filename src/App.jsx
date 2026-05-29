@@ -1,15 +1,18 @@
 import "./App.css";
 import { lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CookieBanner from "./components/CookieBanner";
+import OfflineBanner from "./components/OfflineBanner";
 import { useTheme } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PersonnelRoute from "./routes/PersonnelRoute";
 import StaffRoute from "./routes/StaffRoute";
 import RedactionRoute from "./routes/RedactionRoute";
-import Formations from "./pages/Formations";
+const Formations = lazy(() => import("./pages/Formations"));
+import { ChatProvider } from "./context/ChatContext";
+import ChatWidget from "./components/chat/ChatWidget";
 
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -31,26 +34,40 @@ const FormationsManager = lazy(() => import("./pages/admin/FormationsManager"));
 const ArticlesManager = lazy(() => import("./pages/admin/ArticlesManager"));
 const GenresManager = lazy(() => import("./pages/admin/GenresManager"));
 const AdminHome = lazy(() => import("./pages/admin/AdminHome"));
+const NewsletterManager = lazy(() => import("./pages/admin/NewsletterManager"));
+const AnalyticsPage = lazy(() => import("./pages/admin/AnalyticsPage"));
+const AdminChatPanel = lazy(() => import("./pages/admin/AdminChatPanel"));
+const CommercialDashboard = lazy(() => import("./pages/admin/CommercialDashboard"));
+const ContenuManager = lazy(() => import("./pages/admin/ContenuManager"));
 const AdminLayout = lazy(() => import("./layouts/AdminLayout"));
+const SearchResults = lazy(() => import("./pages/SearchResults"));
+const FormationParcours = lazy(() => import("./pages/FormationParcours"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 function App() {
   const { theme } = useTheme();
+  const location = useLocation();
+
+  // The learning page is a standalone full-screen interface with its own header —
+  // the global header/footer should not render there.
+  const isLearnPage = /^\/formation\/[^/]+\/learn/.test(location.pathname);
 
   return (
+    <ChatProvider>
     <div className="text-white font-sans overflow-x-hidden relative">
-      <Header />
+      {!isLearnPage && <Header />}
       <main
-        className={`pt-[24px] md:pt-[58px] min-h-screen ${
+        className={`${isLearnPage ? "" : "pt-[24px] md:pt-[58px]"} min-h-screen ${
           theme === "dark" ? "bg-background text-white" : "bg-light text-dark"
         }`}
       >
-        <Suspense fallback={<div className="p-6">Chargement...</div>}>
+        <Suspense fallback={<div role="status" aria-live="polite" className="p-6">Chargement...</div>}>
           <Routes>
             {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/about-us" element={<About />} />
-            <Route path="/mentions-legales" element={<Legal />} />
-            <Route path="/politique-confidentialite" element={<Privacy />} />
+            <Route path="/legal-notices" element={<Legal />} />
+            <Route path="/privacy-policy" element={<Privacy />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -60,6 +77,17 @@ function App() {
             <Route path="/blog/:id" element={<BlogDetail />} />
             <Route path="/formations" element={<Formations />} />
             <Route path="/formation/:id" element={<FormationModal />} />
+            <Route path="/search" element={<SearchResults />} />
+
+            {/* Formation learning path — enrolled users only */}
+            <Route
+              path="/formation/:id/learn"
+              element={
+                <ProtectedRoute>
+                  <FormationParcours />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Auth-required (non admin layout) */}
             <Route
@@ -133,21 +161,76 @@ function App() {
               }
             />
             <Route
+              path="/admin/newsletter"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <NewsletterManager />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <AnalyticsPage />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
+              path="/admin/commercial"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <CommercialDashboard />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
+              path="/admin/content"
+              element={
+                <PersonnelRoute>
+                  <AdminLayout>
+                    <ContenuManager />
+                  </AdminLayout>
+                </PersonnelRoute>
+              }
+            />
+            <Route
+              path="/admin/chat"
+              element={
+                <StaffRoute>
+                  <AdminLayout>
+                    <AdminChatPanel />
+                  </AdminLayout>
+                </StaffRoute>
+              }
+            />
+            <Route
               path="/admin"
               element={
-                <ProtectedRoute>
+                <StaffRoute>
                   <AdminLayout>
                     <AdminHome />
                   </AdminLayout>
-                </ProtectedRoute>
+                </StaffRoute>
               }
             />
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isLearnPage && <Footer />}
       <CookieBanner />
+      <OfflineBanner />
+      <ChatWidget />
     </div>
+    </ChatProvider>
   );
 }
 
