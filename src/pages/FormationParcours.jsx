@@ -157,7 +157,7 @@ function StatusDot({ done, accessible, small = false }) {
       aria-label={t.status_locked}
       role="img"
     >
-      <svg className="w-2.5 h-2.5 text-gray-400 dark:text-white/30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <svg className="w-2.5 h-2.5 text-gray-400 dark:text-white/60" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
       </svg>
     </span>
@@ -302,7 +302,7 @@ function QCMPanel({ moduleId, onPassed, theme, onAnnounce, onAuthError }) {
                     ? "text-green-500 bg-green-500/10 border-green-500/30"
                     : isChosen
                     ? "text-red-400 bg-red-400/10 border-red-400/30"
-                    : theme === "dark" ? "text-white/30 border-transparent" : "text-gray-400 border-transparent";
+                    : theme === "dark" ? "text-white/60 border-transparent" : "text-gray-400 border-transparent";
                   return (
                     <li key={c.id} className={`text-sm flex items-center gap-2 px-2 py-1 rounded border ${cls}`}>
                       <span className="shrink-0 w-4 text-center" aria-hidden="true">
@@ -348,7 +348,7 @@ function QCMPanel({ moduleId, onPassed, theme, onAnnounce, onAuthError }) {
           className={`text-xs shrink-0 px-2 py-1 rounded-full border tabular-nums ${
             allAnswered
               ? "border-green-500/40 text-green-500 bg-green-500/10"
-              : theme === "dark" ? "border-zinc-600 text-white/40" : "border-gray-200 text-gray-400"
+              : theme === "dark" ? "border-zinc-600 text-white/60" : "border-gray-200 text-gray-400"
           }`}
           aria-live="polite"
           aria-label={language === "fr" ? `${answeredCount} sur ${totalQ} questions répondues` : `${answeredCount} of ${totalQ} questions answered`}
@@ -695,7 +695,7 @@ export default function FormationParcours() {
 
   const bg = theme === "dark" ? "bg-background text-white" : "bg-light text-dark";
   const sidebarCls = theme === "dark" ? "bg-zinc-900 border-zinc-800" : "bg-white border-gray-200";
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
 
   const safeModules = Array.isArray(modules) ? modules : [];
 

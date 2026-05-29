@@ -66,7 +66,7 @@ export default function TrainingsList({
             isDark ? "bg-surface border-border" : "bg-white border-gray-200"
           }`}
         >
-          <p className={`text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+          <p className={`text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
             {t.trainings_empty}
           </p>
         </div>

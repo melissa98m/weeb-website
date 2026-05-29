@@ -224,7 +224,7 @@ export default function FormationsManager() {
         )}
 
         {!loading && !err && items.length === 0 && (
-          <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/30" : "border-gray-200 text-gray-400"}`}>
+          <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/60" : "border-gray-200 text-gray-400"}`}>
             {t.formations_no_results}
           </div>
         )}
@@ -270,7 +270,7 @@ export default function FormationsManager() {
                         {f.title}
                       </div>
                       {f.description && (
-                        <div className={`mt-1 text-xs line-clamp-2 ${isDark ? "text-white/50" : "text-gray-400"}`}>
+                        <div className={`mt-1 text-xs line-clamp-2 ${isDark ? "text-white/70" : "text-gray-400"}`}>
                           {f.description}
                         </div>
                       )}

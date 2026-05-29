@@ -40,8 +40,8 @@ function UserFormationTable({ loading, error, links: _links, filteredLinks, onRe
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  const muted       = isDark ? "text-white/40" : "text-gray-400";
-  const headText    = isDark ? "text-white/35" : "text-gray-400";
+  const muted       = isDark ? "text-white/60" : "text-gray-400";
+  const headText    = isDark ? "text-white/60" : "text-gray-400";
   const rowHover    = isDark ? "hover:bg-white/3" : "hover:bg-gray-50/80";
   const rowDivider  = isDark ? "border-border/60" : "border-gray-100";
   const tagBase     = `inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
@@ -64,7 +64,7 @@ function UserFormationTable({ loading, error, links: _links, filteredLinks, onRe
 
   if (!loading && filteredLinks.length === 0) {
     return (
-      <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/30" : "border-gray-200 text-gray-400"}`}>
+      <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${isDark ? "border-border text-white/60" : "border-gray-200 text-gray-400"}`}>
         Aucune affectation trouvée.
       </div>
     );

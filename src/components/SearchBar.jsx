@@ -87,7 +87,7 @@ export default function SearchBar() {
         <IconSearch size={14} />
         <span className="hidden lg:inline">Rechercher…</span>
         <kbd className={`hidden lg:inline text-xs px-1 rounded border font-mono
-          ${theme === "dark" ? "border-muted text-white/50" : "border-gray-300 text-gray-400"}`}>
+          ${theme === "dark" ? "border-muted text-white/70" : "border-gray-300 text-gray-400"}`}>
           ⌘K
         </kbd>
       </button>

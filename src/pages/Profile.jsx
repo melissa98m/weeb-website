@@ -246,7 +246,7 @@ export default function Profile() {
                   { label: t.lastName,  value: user.last_name  },
                 ].filter(({ value }) => !!value).map(({ label, value }) => (
                   <div key={label}>
-                    <p className={`text-[10px] font-semibold uppercase tracking-widest mb-0.5 ${isDark ? "text-white/30" : "text-gray-400"}`}>{label}</p>
+                    <p className={`text-[10px] font-semibold uppercase tracking-widest mb-0.5 ${isDark ? "text-white/60" : "text-gray-400"}`}>{label}</p>
                     <p className={`text-sm font-medium break-all ${isDark ? "text-white" : "text-dark"}`}>{value}</p>
                   </div>
                 ))}
@@ -277,7 +277,7 @@ export default function Profile() {
             {/* Mini stats */}
             {!dashLoading && dashData && (
               <div className={`rounded-2xl border p-4 ${isDark ? "bg-surface border-border" : "bg-white border-gray-200 shadow-sm"}`}>
-                <p className={`text-[10px] font-semibold uppercase tracking-widest mb-3 ${isDark ? "text-white/30" : "text-gray-400"}`}>
+                <p className={`text-[10px] font-semibold uppercase tracking-widest mb-3 ${isDark ? "text-white/60" : "text-gray-400"}`}>
                   {t.dashboard_title}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
@@ -288,7 +288,7 @@ export default function Profile() {
                   ].map(({ value, label, color }) => (
                     <div key={label} className={`rounded-xl p-2.5 text-center ${isDark ? "bg-surface-2" : "bg-gray-50"}`}>
                       <p className="text-lg font-bold font-display tabular-nums" style={{ color }}>{value ?? "—"}</p>
-                      <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? "text-white/40" : "text-dark/40"}`}>{label}</p>
+                      <p className={`text-[10px] mt-0.5 leading-tight ${isDark ? "text-white/60" : "text-dark/40"}`}>{label}</p>
                     </div>
                   ))}
                 </div>

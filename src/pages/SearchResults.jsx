@@ -37,7 +37,7 @@ function ArticleCard({ article, theme, t }) {
         </h3>
 
         {authorName && (
-          <p className={`text-xs ${isDark ? "text-white/45" : "text-dark/45"}`}>
+          <p className={`text-xs ${isDark ? "text-white/65" : "text-dark/45"}`}>
             {t.by_author.replace("{author}", authorName)}
           </p>
         )}
@@ -47,7 +47,7 @@ function ArticleCard({ article, theme, t }) {
       <div className="flex justify-end mt-4">
         <svg
           className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${
-            isDark ? "text-white/25" : "text-dark/25"
+            isDark ? "text-white/60" : "text-dark/25"
           }`}
           viewBox="0 0 24 24"
           fill="none"
@@ -93,7 +93,7 @@ function FormationCard({ formation, theme, t }) {
         </h3>
 
         {formation.description && (
-          <p className={`text-xs line-clamp-2 ${isDark ? "text-white/45" : "text-dark/45"}`}>
+          <p className={`text-xs line-clamp-2 ${isDark ? "text-white/65" : "text-dark/45"}`}>
             {formation.description}
           </p>
         )}
@@ -103,7 +103,7 @@ function FormationCard({ formation, theme, t }) {
       <div className="flex justify-end mt-4">
         <svg
           className={`w-4 h-4 transition-transform group-hover:translate-x-0.5 ${
-            isDark ? "text-white/25" : "text-dark/25"
+            isDark ? "text-white/60" : "text-dark/25"
           }`}
           viewBox="0 0 24 24"
           fill="none"
@@ -225,7 +225,7 @@ export default function SearchResults() {
 
         {/* Results count — test: getByText(/2 résultats trouvés/i) */}
         {results && !loading && (
-          <p className={`mt-3 text-sm tabular-nums ${isDark ? "text-white/50" : "text-dark/50"}`}>
+          <p className={`mt-3 text-sm tabular-nums ${isDark ? "text-white/70" : "text-dark/50"}`}>
             {totalResults}{" "}
             {totalResults !== 1 ? t.results_count_many : t.results_count_one}
           </p>
@@ -233,7 +233,7 @@ export default function SearchResults() {
 
         {/* Min chars hint — test: getByText(/saisir au moins 3 caractères/i) */}
         {q.length > 0 && q.length < 3 && (
-          <p className={`mt-3 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+          <p className={`mt-3 text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
             {t.min_chars}
           </p>
         )}
@@ -288,7 +288,7 @@ export default function SearchResults() {
             }`}
           >
             <svg
-              className={`w-5 h-5 ${isDark ? "text-white/30" : "text-dark/30"}`}
+              className={`w-5 h-5 ${isDark ? "text-white/60" : "text-dark/30"}`}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -310,7 +310,7 @@ export default function SearchResults() {
           >
             {t.no_results_title}
           </p>
-          <p className={`text-sm mb-7 max-w-sm mx-auto ${isDark ? "text-white/50" : "text-dark/50"}`}>
+          <p className={`text-sm mb-7 max-w-sm mx-auto ${isDark ? "text-white/70" : "text-dark/50"}`}>
             {t.no_results_body}
           </p>
 
@@ -348,7 +348,7 @@ export default function SearchResults() {
           {results.articles.length > 0 && (
             <section>
               <div className={`flex items-center gap-3 mb-5 pb-3 border-b ${isDark ? "border-border" : "border-gray-100"}`}>
-                <h2 className={`text-[11px] uppercase tracking-[.15em] font-semibold ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                <h2 className={`text-[11px] uppercase tracking-[.15em] font-semibold ${isDark ? "text-white/60" : "text-dark/40"}`}>
                   {t.section_articles.replace("{count}", results.articles.length)}
                 </h2>
                 <span
@@ -368,7 +368,7 @@ export default function SearchResults() {
           {results.formations.length > 0 && (
             <section>
               <div className={`flex items-center gap-3 mb-5 pb-3 border-b ${isDark ? "border-border" : "border-gray-100"}`}>
-                <h2 className={`text-[11px] uppercase tracking-[.15em] font-semibold ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                <h2 className={`text-[11px] uppercase tracking-[.15em] font-semibold ${isDark ? "text-white/60" : "text-dark/40"}`}>
                   {t.section_formations.replace("{count}", results.formations.length)}
                 </h2>
                 <span

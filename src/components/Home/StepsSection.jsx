@@ -132,7 +132,7 @@ export default function StepsSection() {
         transition={{ duration: 0.5 }}
         className="text-center mb-16"
       >
-        <span className={`text-xs font-semibold uppercase tracking-[0.18em] ${isDark ? "text-white/30" : "text-dark/30"}`}>
+        <span className={`text-xs font-semibold uppercase tracking-[0.18em] ${isDark ? "text-white/60" : "text-dark/30"}`}>
           {isFr ? "Simple et efficace" : "Simple and effective"}
         </span>
         <h2
@@ -141,7 +141,7 @@ export default function StepsSection() {
         >
           {isFr ? "Comment ça marche" : "How it works"}
         </h2>
-        <p className={`mt-3 text-base max-w-md mx-auto ${isDark ? "text-white/50" : "text-dark/50"}`}>
+        <p className={`mt-3 text-base max-w-md mx-auto ${isDark ? "text-white/70" : "text-dark/50"}`}>
           {isFr
             ? "Trois étapes pour maîtriser le développement web à votre rythme."
             : "Three steps to master web development at your own pace."}
@@ -219,7 +219,7 @@ export default function StepsSection() {
                 </h3>
 
                 {/* Description */}
-                <p className={`text-sm leading-relaxed max-w-xs ${isDark ? "text-white/50" : "text-dark/55"}`}>
+                <p className={`text-sm leading-relaxed max-w-xs ${isDark ? "text-white/70" : "text-dark/55"}`}>
                   {step.description}
                 </p>
               </motion.div>

@@ -53,14 +53,14 @@ function FormationCardBase({ f, theme, onView }) {
             {excerpt}
           </p>
         ) : (
-          <p className={`text-sm italic ${isDark ? "text-white/30" : "text-gray-400"}`}>—</p>
+          <p className={`text-sm italic ${isDark ? "text-white/60" : "text-gray-400"}`}>—</p>
         )}
 
         {/* Progress bar */}
         {typeof f.progress_percent === "number" && (
           <div className="mt-4">
             <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className={isDark ? "text-white/40" : "text-gray-400"}>
+              <span className={isDark ? "text-white/60" : "text-gray-400"}>
                 {language === "fr" ? "Progression" : "Progress"}
               </span>
               <span className={`font-semibold tabular-nums ${

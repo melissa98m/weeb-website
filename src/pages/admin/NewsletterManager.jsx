@@ -106,7 +106,7 @@ function SubscribersList({ theme, t }) {
   const inputCls = theme === "dark"
     ? "bg-surface text-white border-border placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
-  const mutedCls = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const mutedCls = theme === "dark" ? "text-white/70" : "text-gray-400";
   const rowHover = theme === "dark" ? "hover:bg-white/5" : "hover:bg-gray-50";
   const divider = theme === "dark" ? "divide-[#333]" : "divide-gray-100";
 
@@ -245,7 +245,7 @@ function CampaignsBadge({ status, t }) {
 
 function CampaignsList({ theme, onSelect, refresh, t }) {
   const card = theme === "dark" ? "bg-surface-2 border-border text-white" : "bg-white border-gray-200 text-gray-900";
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
   const [campaigns, setCampaigns] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -342,7 +342,7 @@ export default function NewsletterManager() {
     ? "bg-surface text-white border-border placeholder-white/40"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn = isDark ? "bg-surface text-white border-border hover:bg-surface-raised" : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
-  const muted = isDark ? "text-white/50" : "text-gray-500";
+  const muted = isDark ? "text-white/70" : "text-gray-500";
 
   const [editingCampaignId, setEditingCampaignId] = useState(null);
   const [subject, setSubject] = useState("");

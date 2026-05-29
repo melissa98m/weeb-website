@@ -65,7 +65,7 @@ function ShortcardCard({ to, icon: Icon, title, desc, badge, isDark, accentClass
           {title}
           {badge}
         </div>
-        <p className={`text-xs leading-relaxed mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}>
+        <p className={`text-xs leading-relaxed mt-0.5 ${isDark ? "text-white/70" : "text-gray-500"}`}>
           {desc}
         </p>
       </div>
@@ -90,7 +90,7 @@ function StatCard({ label, value, accent, isDark }) {
       >
         {value ?? <span className="text-base opacity-20">—</span>}
       </span>
-      <span className={`text-xs ${isDark ? "text-white/40" : "text-gray-500"}`}>{label}</span>
+      <span className={`text-xs ${isDark ? "text-white/60" : "text-gray-500"}`}>{label}</span>
     </div>
   );
 }
@@ -126,7 +126,7 @@ function ExportSection({ isDark, canStaff, canPersonnel, t }) {
       <div className="space-y-2.5">
         {canPersonnel && (
           <div className="flex flex-wrap gap-2 items-center">
-            <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/40" : "text-gray-400"}`}>{t.home_export_registrations}</span>
+            <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/60" : "text-gray-400"}`}>{t.home_export_registrations}</span>
             <ExportCSVButton type="registrations" format="csv" dateFrom={dateFrom} dateTo={dateTo} label="CSV" className={ghostBtn} />
             <ExportCSVButton type="registrations" format="pdf" dateFrom={dateFrom} dateTo={dateTo} label="PDF" className={ghostBtn} />
           </div>
@@ -134,12 +134,12 @@ function ExportSection({ isDark, canStaff, canPersonnel, t }) {
         {canStaff && (
           <>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/40" : "text-gray-400"}`}>{t.home_export_feedbacks}</span>
+              <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/60" : "text-gray-400"}`}>{t.home_export_feedbacks}</span>
               <ExportCSVButton type="feedbacks" format="csv" dateFrom={dateFrom} dateTo={dateTo} label="CSV" className={ghostBtn} />
               <ExportCSVButton type="feedbacks" format="pdf" dateFrom={dateFrom} dateTo={dateTo} label="PDF" className={ghostBtn} />
             </div>
             <div className="flex flex-wrap gap-2 items-center">
-              <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/40" : "text-gray-400"}`}>{t.home_export_messages}</span>
+              <span className={`text-xs font-medium w-20 shrink-0 ${isDark ? "text-white/60" : "text-gray-400"}`}>{t.home_export_messages}</span>
               <ExportCSVButton type="messages" format="csv" dateFrom={dateFrom} dateTo={dateTo} label="CSV" className={ghostBtn} />
               <ExportCSVButton type="messages" format="pdf" dateFrom={dateFrom} dateTo={dateTo} label="PDF" className={ghostBtn} />
             </div>
@@ -320,7 +320,7 @@ export default function AdminHome() {
               onClick={loadCounts}
               className={`inline-flex items-center gap-1.5 text-xs rounded-lg border px-3 py-1.5 transition-colors ${
                 isDark
-                  ? "bg-surface border-border text-white/50 hover:text-white"
+                  ? "bg-surface border-border text-white/70 hover:text-white"
                   : "bg-white border-gray-200 text-gray-500 hover:text-gray-800"
               }`}
             >
@@ -369,7 +369,7 @@ export default function AdminHome() {
           {analytics?.taux_satisfaction != null && (
             <div className="mt-4">
               <div className="flex items-center justify-between mb-1.5">
-                <span className={`text-xs ${isDark ? "text-white/50" : "text-gray-500"}`}>{t.home_satisfaction}</span>
+                <span className={`text-xs ${isDark ? "text-white/70" : "text-gray-500"}`}>{t.home_satisfaction}</span>
                 <span
                   className="text-sm font-bold"
                   style={{

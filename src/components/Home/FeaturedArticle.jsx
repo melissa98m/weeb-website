@@ -89,7 +89,7 @@ export default function FeaturedArticle() {
   const [main, ...secondary] = articles;
   const cardBase = `rounded-2xl border overflow-hidden flex flex-col ${isDark ? "bg-surface border-border" : "bg-white border-gray-200"}`;
   const ctaClass = `inline-flex items-center gap-1.5 text-sm font-semibold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded ${isDark ? "text-primary hover:text-white" : "text-secondary hover:text-dark"}`;
-  const metaClass = `flex items-center gap-2 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`;
+  const metaClass = `flex items-center gap-2 text-xs ${isDark ? "text-white/60" : "text-dark/40"}`;
 
   return (
     <section
@@ -102,7 +102,7 @@ export default function FeaturedArticle() {
         whileInView={{ opacity: 1, x: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.4 }}
-        className={`text-xs uppercase tracking-widest font-semibold mb-6 ${isDark ? "text-white/40" : "text-dark/40"}`}
+        className={`text-xs uppercase tracking-widest font-semibold mb-6 ${isDark ? "text-white/60" : "text-dark/40"}`}
       >
         {isFr ? "Derniers articles" : "Latest articles"}
       </motion.p>
@@ -235,7 +235,7 @@ export default function FeaturedArticle() {
                       {title}
                     </h3>
 
-                    <p className={`mt-1.5 text-sm leading-relaxed line-clamp-2 ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                    <p className={`mt-1.5 text-sm leading-relaxed line-clamp-2 ${isDark ? "text-white/70" : "text-dark/50"}`}>
                       {makeExcerpt(article.article_content || "", 18)}
                     </p>
                   </div>

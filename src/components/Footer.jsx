@@ -177,7 +177,7 @@ export default function Footer() {
                 <h2 className={`font-display font-bold text-xl leading-snug mt-1.5 ${isDark ? "text-white" : "text-dark"}`}>
                   {t.newsletter_title}
                 </h2>
-                <p className={`mt-2 text-sm leading-relaxed ${isDark ? "text-white/50" : "text-dark/50"}`}>
+                <p className={`mt-2 text-sm leading-relaxed ${isDark ? "text-white/70" : "text-dark/50"}`}>
                   {t.newsletter_subtitle}
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default function Footer() {
                   </p>
                 )}
 
-                <div className={`mt-3 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                <div className={`mt-3 text-xs ${isDark ? "text-white/60" : "text-dark/40"}`}>
                   <label className="flex items-start gap-2 cursor-pointer">
                     <input
                       id="newsletter-consent"
@@ -292,7 +292,7 @@ export default function Footer() {
             <p className="font-display font-extrabold text-2xl tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               weeb
             </p>
-            <p className={`mt-2 text-xs leading-relaxed ${isDark ? "text-white/40" : "text-dark/40"}`}>
+            <p className={`mt-2 text-xs leading-relaxed ${isDark ? "text-white/60" : "text-dark/40"}`}>
               {t.tagline}
             </p>
             <div className="flex gap-0.5 mt-5 -ml-1.5" role="list" aria-label="Réseaux sociaux">
@@ -306,7 +306,7 @@ export default function Footer() {
                   target="_blank"
                   className={`min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                     isDark
-                      ? "text-white/30 hover:text-primary hover:bg-primary/10"
+                      ? "text-white/60 hover:text-primary hover:bg-primary/10"
                       : "text-dark/30 hover:text-secondary hover:bg-secondary/8"
                   }`}
                 >
@@ -320,7 +320,7 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:flex lg:gap-16">
             {FOOTER_LINKS.map(({ title, links }) => (
               <div key={label(title)}>
-                <h3 className={`text-xs font-semibold uppercase tracking-widest mb-4 ${isDark ? "text-white/25" : "text-dark/30"}`}>
+                <h3 className={`text-xs font-semibold uppercase tracking-widest mb-4 ${isDark ? "text-white/60" : "text-dark/30"}`}>
                   {label(title)}
                 </h3>
                 <ul className="space-y-2.5">
@@ -329,7 +329,7 @@ export default function Footer() {
                       <a
                         href={href}
                         className={`transition-colors duration-150 ${
-                          isDark ? "text-white/50 hover:text-primary" : "text-dark/50 hover:text-secondary"
+                          isDark ? "text-white/70 hover:text-primary" : "text-dark/50 hover:text-secondary"
                         }`}
                       >
                         {label(lbl)}
@@ -344,7 +344,7 @@ export default function Footer() {
 
         {/* ── Bottom bar ─────────────────────────────────────── */}
         <div className={`border-t mt-10 pt-6 ${isDark ? "border-border/50" : "border-gray-100"}`}>
-          <p className={`text-xs ${isDark ? "text-white/20" : "text-dark/30"}`}>
+          <p className={`text-xs ${isDark ? "text-white/60" : "text-dark/30"}`}>
             &copy; {new Date().getFullYear()} {t.copyright}
           </p>
         </div>

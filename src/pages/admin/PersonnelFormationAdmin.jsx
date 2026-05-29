@@ -518,7 +518,7 @@ export default function PersonnelFormationAdmin() {
       <section className={`rounded-2xl border overflow-hidden ${card}`}>
         {/* Table header bar */}
         <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b ${isDark ? "border-border/60" : "border-gray-100"}`}>
-          <p className={`text-xs font-semibold ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <p className={`text-xs font-semibold ${isDark ? "text-white/60" : "text-gray-400"}`}>
             {linksLoading ? "Chargement…" : `${filteredLinks.length} affectation${filteredLinks.length !== 1 ? "s" : ""}`}
           </p>
           <PageSizer pageSize={pageSize} onChange={setPageSize} />

@@ -135,7 +135,7 @@ function CommentItem({ comment: c, theme, language, user, txt, onReply, onDelete
             <span className={`text-sm font-semibold truncate ${isDark ? "text-white" : "text-dark"}`}>
               {authorName}
             </span>
-            <span className={`text-xs flex-shrink-0 ${isDark ? "text-white/35" : "text-dark/35"}`}>
+            <span className={`text-xs flex-shrink-0 ${isDark ? "text-white/60" : "text-dark/35"}`}>
               {dateStr}
             </span>
           </div>
@@ -146,7 +146,7 @@ function CommentItem({ comment: c, theme, language, user, txt, onReply, onDelete
         </p>
 
         {/* Actions */}
-        <div className={`flex gap-4 mt-2.5 text-xs ${isDark ? "text-white/35" : "text-dark/35"}`}>
+        <div className={`flex gap-4 mt-2.5 text-xs ${isDark ? "text-white/60" : "text-dark/35"}`}>
           {user && depth === 0 && (
             <button
               type="button"
@@ -600,7 +600,7 @@ export default function BlogDetail() {
         {/* Breadcrumb */}
         <nav
           aria-label="Fil d'Ariane"
-          className={`flex items-center gap-1.5 text-xs mb-6 ${isDark ? "text-white/35" : "text-dark/35"}`}
+          className={`flex items-center gap-1.5 text-xs mb-6 ${isDark ? "text-white/60" : "text-dark/35"}`}
         >
           <Link to="/" className="hover:text-primary transition-colors">
             {language === "fr" ? "Accueil" : "Home"}
@@ -641,7 +641,7 @@ export default function BlogDetail() {
 
         {/* Meta row */}
         <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-5 ${
-          isDark ? "text-white/45" : "text-dark/45"
+          isDark ? "text-white/65" : "text-dark/45"
         }`}>
           <div className="flex items-center gap-2 text-sm flex-wrap">
             <span>{authorLabel}</span>
@@ -665,7 +665,7 @@ export default function BlogDetail() {
                 <span>{likesCount}</span>
               </button>
             ) : likesCount > 0 ? (
-              <span className={`flex items-center gap-1.5 text-sm ${isDark ? "text-white/35" : "text-dark/35"}`}>
+              <span className={`flex items-center gap-1.5 text-sm ${isDark ? "text-white/60" : "text-dark/35"}`}>
                 <IconHeart size={13} /> {likesCount}
               </span>
             ) : null}
@@ -750,7 +750,7 @@ export default function BlogDetail() {
           <Link
             to="/blog"
             className={`text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded ${
-              isDark ? "text-white/40 hover:text-white" : "text-dark/40 hover:text-dark"
+              isDark ? "text-white/60 hover:text-white" : "text-dark/40 hover:text-dark"
             }`}
           >
             ← {txt.back}
@@ -771,12 +771,12 @@ export default function BlogDetail() {
                 }`}
               >
                 <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                  isDark ? "bg-white/5 text-white/50 group-hover:bg-white/10" : "bg-dark/5 text-dark/50 group-hover:bg-dark/10"
+                  isDark ? "bg-white/5 text-white/70 group-hover:bg-white/10" : "bg-dark/5 text-dark/50 group-hover:bg-dark/10"
                 }`}>
                   <IconChevronLeft />
                 </span>
                 <span className="min-w-0">
-                  <span className={`block text-[11px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/35" : "text-dark/35"}`}>
+                  <span className={`block text-[11px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/60" : "text-dark/35"}`}>
                     {txt.prev ?? (language === "fr" ? "Précédent" : "Previous")}
                   </span>
                   <span className={`block text-sm font-medium truncate ${isDark ? "text-white/80" : "text-dark/80"}`}>
@@ -797,7 +797,7 @@ export default function BlogDetail() {
                 }`}
               >
                 <span className="min-w-0">
-                  <span className={`block text-[11px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/35" : "text-dark/35"}`}>
+                  <span className={`block text-[11px] uppercase tracking-wider mb-0.5 ${isDark ? "text-white/60" : "text-dark/35"}`}>
                     {txt.next ?? (language === "fr" ? "Suivant" : "Next")}
                   </span>
                   <span className={`block text-sm font-medium truncate ${isDark ? "text-white/80" : "text-dark/80"}`}>
@@ -805,7 +805,7 @@ export default function BlogDetail() {
                   </span>
                 </span>
                 <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                  isDark ? "bg-white/5 text-white/50 group-hover:bg-white/10" : "bg-dark/5 text-dark/50 group-hover:bg-dark/10"
+                  isDark ? "bg-white/5 text-white/70 group-hover:bg-white/10" : "bg-dark/5 text-dark/50 group-hover:bg-dark/10"
                 }`}>
                   <IconChevronRight />
                 </span>
@@ -824,7 +824,7 @@ export default function BlogDetail() {
           >
             {txt.comments_title}
             {comments.length > 0 && (
-              <span className={`ml-2 text-base font-normal ${isDark ? "text-white/35" : "text-dark/35"}`}>
+              <span className={`ml-2 text-base font-normal ${isDark ? "text-white/60" : "text-dark/35"}`}>
                 ({comments.length})
               </span>
             )}
@@ -834,7 +834,7 @@ export default function BlogDetail() {
           {user ? (
             <form onSubmit={submitComment} className="mb-8">
               {replyTo && (
-                <div className={`text-xs mb-2 flex items-center gap-2 ${isDark ? "text-white/45" : "text-dark/45"}`}>
+                <div className={`text-xs mb-2 flex items-center gap-2 ${isDark ? "text-white/65" : "text-dark/45"}`}>
                   <span>↩ {txt.comment_reply} @{replyTo.username}</span>
                   <button type="button" onClick={() => setReplyTo(null)} className="underline hover:text-primary transition-colors">
                     {txt.comment_cancel}
@@ -873,7 +873,7 @@ export default function BlogDetail() {
               </div>
             </form>
           ) : (
-            <p className={`text-sm mb-6 ${isDark ? "text-white/45" : "text-dark/45"}`}>
+            <p className={`text-sm mb-6 ${isDark ? "text-white/65" : "text-dark/45"}`}>
               {txt.comment_login_required}
             </p>
           )}
@@ -890,7 +890,7 @@ export default function BlogDetail() {
             <p className="text-red-400 text-sm">{txt.comment_error}</p>
           )}
           {!commentsLoading && !commentsError && comments.length === 0 && (
-            <p className={`text-sm ${isDark ? "text-white/40" : "text-dark/40"}`}>{txt.comment_empty}</p>
+            <p className={`text-sm ${isDark ? "text-white/60" : "text-dark/40"}`}>{txt.comment_empty}</p>
           )}
           {!commentsLoading && !commentsError && comments.length > 0 && (
             <ul className="space-y-4" aria-label={txt.comments_title}>

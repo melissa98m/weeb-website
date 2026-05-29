@@ -120,7 +120,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
         <h2 className={`font-display font-bold text-xl mb-1 ${isDark ? "text-white" : "text-dark"}`}>
           {t.gdpr_title}
         </h2>
-        <p className={`text-sm mb-5 ${isDark ? "text-white/50" : "text-dark/50"}`}>
+        <p className={`text-sm mb-5 ${isDark ? "text-white/70" : "text-dark/50"}`}>
           {t.gdpr_intro}
         </p>
 
@@ -160,7 +160,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
         )}
 
         {dataTouched && dataPayload === null && !dataLoading && !dataError && (
-          <p className={`mt-3 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`}>
+          <p className={`mt-3 text-xs ${isDark ? "text-white/60" : "text-dark/40"}`}>
             {t.gdpr_data_empty}
           </p>
         )}
@@ -180,7 +180,7 @@ export default function DataRights({ theme, t, onSignedOut }) {
           </svg>
           <h3 className="text-base font-semibold text-red-600">{t.gdpr_delete_title}</h3>
         </div>
-        <p className={`text-sm mb-5 ${isDark ? "text-white/50" : "text-dark/50"}`}>
+        <p className={`text-sm mb-5 ${isDark ? "text-white/70" : "text-dark/50"}`}>
           {t.gdpr_delete_intro}
         </p>
 

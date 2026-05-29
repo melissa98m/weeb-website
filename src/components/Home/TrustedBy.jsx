@@ -81,7 +81,7 @@ function MetricItem({ target, suffix, labelFr, labelEn, theme, language }) {
       >
         {formatted}{suffix}
       </dt>
-      <dd className={`mt-2 text-sm ${theme === "dark" ? "text-white/50" : "text-dark/50"}`}>
+      <dd className={`mt-2 text-sm ${theme === "dark" ? "text-white/70" : "text-dark/50"}`}>
         {language === "fr" ? labelFr : labelEn}
       </dd>
     </div>

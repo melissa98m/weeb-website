@@ -16,12 +16,12 @@ export default function TrendsSection() {
         <div
           className={`font-mono text-xs rounded-lg border p-5 leading-relaxed select-none ${
             isDark
-              ? "bg-surface border-border text-white/45"
+              ? "bg-surface border-border text-white/65"
               : "bg-gray-50 border-gray-200 text-dark/45"
           }`}
           aria-hidden="true"
         >
-          <div className={`mb-2 ${isDark ? "text-white/20" : "text-dark/20"}`}>
+          <div className={`mb-2 ${isDark ? "text-white/60" : "text-dark/20"}`}>
             {language === "fr" ? "// derniers articles" : "// latest articles"}
           </div>
           <div>const articles = await</div>
@@ -29,7 +29,7 @@ export default function TrendsSection() {
           <div className="pl-3">{"{ cache: \"no-store\" }"}</div>
           <div>)</div>
           <div className="mt-3 mb-1 border-t border-current opacity-10" />
-          <div className={isDark ? "text-white/20" : "text-dark/20"}>
+          <div className={isDark ? "text-white/60" : "text-dark/20"}>
             {language === "fr" ? "// résultats →" : "// results →"}
           </div>
           <div>articles.map(a =&gt; {"{"}</div>

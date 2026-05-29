@@ -32,7 +32,7 @@ function StatCard({ label, value, sub, theme, accent = false }) {
         {value ?? <span className="text-base opacity-20">—</span>}
       </div>
       <div className={`text-sm font-medium mt-2 ${isDark ? "text-white/70" : "text-gray-700"}`}>{label}</div>
-      {sub && <div className={`text-xs mt-0.5 ${isDark ? "text-white/40" : "text-gray-400"}`}>{sub}</div>}
+      {sub && <div className={`text-xs mt-0.5 ${isDark ? "text-white/60" : "text-gray-400"}`}>{sub}</div>}
     </div>
   );
 }
@@ -48,7 +48,7 @@ export default function CommercialDashboard() {
   const isDark = theme === "dark";
 
   const card = isDark ? "bg-surface border-border text-white" : "bg-white border-gray-200 text-gray-900";
-  const meta = isDark ? "text-white/50" : "text-gray-500";
+  const meta = isDark ? "text-white/70" : "text-gray-500";
 
   const isAllowed = hasAnyRole(user, ["Commercial"]);
 

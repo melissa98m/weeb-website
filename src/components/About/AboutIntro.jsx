@@ -90,7 +90,7 @@ export default function AboutIntro() {
             >
               {value}
             </dt>
-            <dd className={`mt-1 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`}>
+            <dd className={`mt-1 text-xs ${isDark ? "text-white/60" : "text-dark/40"}`}>
               {language === "fr" ? labelFr : labelEn}
             </dd>
           </div>

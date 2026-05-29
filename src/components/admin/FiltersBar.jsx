@@ -28,21 +28,21 @@ function FiltersBar({
     ? "bg-surface text-white border-border placeholder:text-white/35 focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
     : "bg-white text-gray-900 border-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-secondary/20 focus:border-secondary/40";
 
-  const labelClass = `mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/40" : "text-gray-400"}`;
+  const labelClass = `mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/60" : "text-gray-400"}`;
 
   const hasFilters = filterUser || filterFormation || searchUser;
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <p className={`text-xs font-semibold uppercase tracking-wider ${isDark ? "text-white/30" : "text-gray-400"}`}>
+        <p className={`text-xs font-semibold uppercase tracking-wider ${isDark ? "text-white/60" : "text-gray-400"}`}>
           Filtres
         </p>
         {hasFilters && (
           <button
             type="button"
             onClick={() => { setFilterUser(null); setFilterFormation(null); setSearchUser(""); }}
-            className={`text-xs transition-colors ${isDark ? "text-white/40 hover:text-white" : "text-gray-400 hover:text-gray-700"}`}
+            className={`text-xs transition-colors ${isDark ? "text-white/60 hover:text-white" : "text-gray-400 hover:text-gray-700"}`}
           >
             Effacer les filtres ×
           </button>
@@ -62,7 +62,7 @@ function FiltersBar({
         <div className="sm:col-span-2">
           <label htmlFor="search-user" className={labelClass}>Recherche</label>
           <div className="relative">
-            <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? "text-white/30" : "text-gray-400"}`}>
+            <span className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDark ? "text-white/60" : "text-gray-400"}`}>
               <IconSearch />
             </span>
             <input

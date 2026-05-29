@@ -63,9 +63,9 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
   const ctrlRef = useRef(null);
 
   const card = isDark ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
-  const muted = isDark ? "text-white/50" : "text-gray-400";
+  const muted = isDark ? "text-white/70" : "text-gray-400";
   const rowDivider = isDark ? "border-border/60" : "border-gray-100";
-  const headText = isDark ? "text-white/35" : "text-gray-400";
+  const headText = isDark ? "text-white/60" : "text-gray-400";
 
   const overlay = open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0";
   const panel = open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0";
@@ -271,7 +271,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
                   ? isDark
                     ? "border-primary text-primary"
                     : "border-secondary text-secondary"
-                  : `border-transparent ${isDark ? "text-white/50 hover:text-white/80" : "text-gray-400 hover:text-gray-700"}`
+                  : `border-transparent ${isDark ? "text-white/70 hover:text-white/80" : "text-gray-400 hover:text-gray-700"}`
               }`}
             >
               {label}
@@ -303,7 +303,7 @@ export default function FormationDetailsModal({ open, onClose, apiBase, formatio
 
             {!err && !loading && rows.length === 0 && (
               <div className={`rounded-2xl border px-4 py-10 text-center text-sm ${
-                isDark ? "border-border text-white/30" : "border-gray-200 text-gray-400"
+                isDark ? "border-border text-white/60" : "border-gray-200 text-gray-400"
               }`}>
                 Aucun inscrit pour cette formation.
               </div>
