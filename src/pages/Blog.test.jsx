@@ -1,6 +1,7 @@
 import React from "react";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Blog from "./Blog";
 import blogEn from "../../locales/en/blog.json";
 import { useTheme } from "../context/ThemeContext";
@@ -20,6 +21,7 @@ vi.mock("framer-motion", () => ({
   motion: {
     header: (props) => <header {...props} />,
     div: (props) => <div {...props} />,
+    article: ({ initial: _i, animate: _a, transition: _t, ...rest }) => <article {...rest} />,
   },
   AnimatePresence: ({ children }) => <>{children}</>,
   useReducedMotion: () => false,
@@ -89,7 +91,7 @@ describe("Blog page", () => {
       }),
     });
 
-    render(<Blog />);
+    render(<MemoryRouter><Blog /></MemoryRouter>);
 
     expect(await screen.findByText("Post One")).toBeInTheDocument();
   });
@@ -106,7 +108,7 @@ describe("Blog page", () => {
       json: async () => ({ results: [], count: 0, next: null }),
     });
 
-    render(<Blog />);
+    render(<MemoryRouter><Blog /></MemoryRouter>);
 
     expect(await screen.findByText(blogEn.empty)).toBeInTheDocument();
   });

@@ -52,7 +52,7 @@ describe("FormationDetailsModal", () => {
       />
     );
 
-    expect(await screen.findAllByText(/Aucun inscrit/)).toHaveLength(2);
+    expect(await screen.findAllByText(/Aucun inscrit/)).toHaveLength(1);
   });
 
   it("deletes formation", async () => {

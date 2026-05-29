@@ -14,8 +14,11 @@ vi.mock("../../context/LanguageContext", () => ({
 
 vi.mock("framer-motion", () => ({
   motion: {
-    img: ({ drag: _drag, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, whileTap: _wt, ...rest }) =>
-      <img {...rest} />,
+    div: ({ initial: _i, animate: _a, transition: _t, ...rest }) => <div {...rest} />,
+    h1: ({ initial: _i, animate: _a, transition: _t, ...rest }) => <h1 {...rest} />,
+    p: ({ initial: _i, animate: _a, transition: _t, ...rest }) => <p {...rest} />,
+    span: ({ initial: _i, animate: _a, transition: _t, ...rest }) => <span {...rest} />,
+    img: ({ drag: _d, dragConstraints: _dc, dragDirectionLock: _ddl, dragTransition: _dt, dragElastic: _de, whileTap: _wt, initial: _i, animate: _a, transition: _t, ...rest }) => <img {...rest} />,
   },
   useReducedMotion: () => false,
 }));
@@ -55,7 +58,7 @@ describe("HeroSection", () => {
 
   it("affiche l'image mockup avec un attribut alt", () => {
     renderHero();
-    expect(screen.getByAltText("Mockup de l'interface Weeb sur desktop")).toBeInTheDocument();
+    expect(screen.getByAltText("Interface Weeb — aperçu de la plateforme")).toBeInTheDocument();
   });
 
   it("est encapsulé dans une balise section", () => {

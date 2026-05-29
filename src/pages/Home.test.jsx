@@ -21,16 +21,24 @@ vi.mock("../components/Home/HeroSection", () => ({
   default: () => <div>HeroSection</div>,
 }));
 
-vi.mock("../components/Home/LearningSection", () => ({
-  default: () => <div>LearningSection</div>,
+vi.mock("../components/Home/MarqueeSection", () => ({
+  default: () => <div>MarqueeSection</div>,
 }));
 
-vi.mock("../components/Home/TrendsSection", () => ({
-  default: () => <div>TrendsSection</div>,
+vi.mock("../components/Home/BentoGrid", () => ({
+  default: () => <div>BentoGrid</div>,
 }));
 
-vi.mock("../components/Home/TrustedBy", () => ({
-  default: () => <div>TrustedBy</div>,
+vi.mock("../components/Home/StepsSection", () => ({
+  default: () => <div>StepsSection</div>,
+}));
+
+vi.mock("../components/Home/CtaFinal", () => ({
+  default: () => <div>CtaFinal</div>,
+}));
+
+vi.mock("../components/Home/FeaturedArticle", () => ({
+  default: () => <div>FeaturedArticle</div>,
 }));
 
 describe("Home page", () => {
@@ -38,8 +46,10 @@ describe("Home page", () => {
     render(<Home />);
 
     expect(screen.getByText("HeroSection")).toBeInTheDocument();
-    expect(screen.getByText("LearningSection")).toBeInTheDocument();
-    expect(screen.getByText("TrendsSection")).toBeInTheDocument();
-    expect(await screen.findByText("TrustedBy")).toBeInTheDocument();
+    expect(screen.getByText("MarqueeSection")).toBeInTheDocument();
+    expect(screen.getByText("BentoGrid")).toBeInTheDocument();
+    expect(screen.getByText("StepsSection")).toBeInTheDocument();
+    expect(screen.getByText("CtaFinal")).toBeInTheDocument();
+    expect(await screen.findByText("FeaturedArticle")).toBeInTheDocument();
   });
 });

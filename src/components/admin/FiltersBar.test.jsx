@@ -44,13 +44,13 @@ describe("FiltersBar", () => {
       />
     );
 
-    await user.selectOptions(screen.getByLabelText("Filtrer par utilisateur"), "u1");
+    await user.selectOptions(screen.getByLabelText("Utilisateur"), "u1");
     expect(setFilterUser).toHaveBeenCalledWith("u1");
 
-    await user.selectOptions(screen.getByLabelText("Filtrer par formation"), "f1");
+    await user.selectOptions(screen.getByLabelText("Formation"), "f1");
     expect(setFilterFormation).toHaveBeenCalledWith("f1");
 
-    const input = screen.getByLabelText("Recherche utilisateur");
+    const input = screen.getByLabelText("Recherche");
     await user.type(input, "ada");
     const calls = setSearchUser.mock.calls.map((c) => c[0]);
     expect(calls.join("")).toBe("ada");

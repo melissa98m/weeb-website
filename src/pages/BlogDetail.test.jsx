@@ -95,8 +95,8 @@ describe("BlogDetail page", () => {
     expect(screen.getByText("Paragraph one.")).toBeInTheDocument();
     expect(screen.getByText("Paragraph two.")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: blogEn.copy_link }));
-    expect(await screen.findByText(blogEn.copied)).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: blogEn.copy_link })[0]);
+    expect((await screen.findAllByText(blogEn.copied)).length).toBeGreaterThan(0);
   });
 
   it("renders not found state on error", async () => {
