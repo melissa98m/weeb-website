@@ -71,7 +71,7 @@ export default function ContactIntro() {
       {/* Trust strip */}
       <div
         className={`mt-10 flex flex-col sm:flex-row items-center justify-center gap-6 text-sm ${
-          isDark ? "text-white/50" : "text-dark/50"
+          isDark ? "text-white/70" : "text-dark/50"
         }`}
       >
         <span className="flex items-center gap-2">

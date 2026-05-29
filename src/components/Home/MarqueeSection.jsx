@@ -49,8 +49,8 @@ export default function MarqueeSection() {
             key={idx}
             className={`text-sm font-medium tracking-wide whitespace-nowrap ${
               idx % (KEYWORDS.length * 2) === 0
-                ? isDark ? "text-white/20" : "text-dark/20"
-                : isDark ? "text-white/20" : "text-dark/20"
+                ? isDark ? "text-white/60" : "text-dark/20"
+                : isDark ? "text-white/60" : "text-dark/20"
             }`}
           >
             {word}

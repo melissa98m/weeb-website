@@ -184,7 +184,7 @@ export default function HeroSection() {
           <span
             key={i}
             className={`flex items-center gap-1.5 text-xs font-medium ${
-              isDark ? "text-white/40" : "text-dark/40"
+              isDark ? "text-white/60" : "text-dark/40"
             }`}
           >
             <span
@@ -212,7 +212,7 @@ export default function HeroSection() {
           transition: { duration: 2, repeat: Infinity, ease: "easeInOut" },
         })}
         className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 ${
-          isDark ? "text-white/25" : "text-dark/25"
+          isDark ? "text-white/60" : "text-dark/25"
         }`}
         aria-hidden="true"
       >

@@ -226,7 +226,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
           <p className="font-display font-bold text-sm leading-tight truncate">
             {t.nav_administration}
           </p>
-          <p className={`text-[10px] truncate ${isDark ? "text-white/35" : "text-gray-400"}`}>
+          <p className={`text-[10px] truncate ${isDark ? "text-white/60" : "text-gray-400"}`}>
             Weeb
           </p>
         </div>
@@ -249,7 +249,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-3" aria-label={t.nav_admin_label}>
         {visibleItems.length === 0 ? (
-          <p className={`text-xs px-2 py-1 ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <p className={`text-xs px-2 py-1 ${isDark ? "text-white/60" : "text-gray-400"}`}>
             {t.nav_no_module}
           </p>
         ) : (
@@ -260,7 +260,7 @@ export default function AdminSidebar({ open = false, onClose = () => {} }) {
               return (
                 <div key={group.key}>
                   <p className={`text-[10px] font-semibold uppercase tracking-[0.12em] px-3 mb-1 ${
-                    isDark ? "text-white/25" : "text-gray-400"
+                    isDark ? "text-white/60" : "text-gray-400"
                   }`}>
                     {group.label}
                   </p>

@@ -470,7 +470,7 @@ export default function ContactForm() {
             </select>
             <svg
               className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                isDark ? "text-white/40" : "text-dark/40"
+                isDark ? "text-white/60" : "text-dark/40"
               }`}
               viewBox="0 0 24 24"
               fill="none"
@@ -498,7 +498,7 @@ export default function ContactForm() {
             </div>
           )}
           {!loadingSubjects && !subjectsError && subjects.length === 0 && (
-            <p className={`text-xs mt-1.5 ${isDark ? "text-white/40" : "text-dark/40"}`}>
+            <p className={`text-xs mt-1.5 ${isDark ? "text-white/60" : "text-dark/40"}`}>
               {t?.subjects_empty || "No subjects available at the moment."}
             </p>
           )}
@@ -534,7 +534,7 @@ export default function ContactForm() {
                   ? "text-red-500 font-medium"
                   : form.message_content.length >= 4000
                   ? "text-amber-500"
-                  : isDark ? "text-white/30" : "text-dark/30"
+                  : isDark ? "text-white/60" : "text-dark/30"
               }`}
             >
               {form.message_content.length} / 5000
@@ -566,7 +566,7 @@ export default function ContactForm() {
           }}
           transition={{ duration: 0.4 }}
         >
-          <p className={isDark ? "text-white/50" : "text-dark/50"}>
+          <p className={isDark ? "text-white/70" : "text-dark/50"}>
             {t?.privacy_notice || "Your data is used only to process your request."}
           </p>
           <label className="flex items-start gap-3 min-h-[44px] py-2 cursor-pointer">

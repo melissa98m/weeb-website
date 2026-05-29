@@ -74,7 +74,7 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
     ? "bg-surface-deep border-border-2 text-white placeholder-white/40"
     : "bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400";
   const rowHover = theme === "dark" ? "hover:bg-surface-3" : "hover:bg-gray-50";
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${overlay}`} onClick={onClose}>
@@ -121,7 +121,7 @@ function AttachCoursModal({ apiBase, moduleId, allCours, attached, theme, onAtta
 }
 
 function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, onUpdated, onDeleted }) {
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
   const block = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   const inputCls = theme === "dark"
     ? "bg-surface-deep border-border-2 text-white"
@@ -312,7 +312,7 @@ function ModuleAccordion({ apiBase, module: initialModule, allCours, theme, t, o
 }
 
 function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onModuleUpdated, onModuleDeleted }) {
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
   const inputCls = theme === "dark" ? "bg-surface-deep border-border-2 text-white" : "bg-white border-gray-300 text-gray-900";
   const inputBase = `w-full rounded-lg border px-2 py-1.5 text-sm outline-none transition ${inputCls}`;
 
@@ -410,7 +410,7 @@ function ModulesTab({ apiBase, modules, allCours, theme, t, onModuleCreated, onM
 // ── Onglet Cours ──────────────────────────────────────────────────────────────
 
 function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onDeleted }) {
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
   const block = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
 
   const [busy, setBusy] = useState(false);
@@ -454,7 +454,7 @@ function CoursRow({ apiBase, cours, theme, t, onEdit, onUpdated: _onUpdated, onD
 }
 
 function CoursTab({ apiBase, cours, theme, t, onCoursCreated, onCoursUpdated, onCoursDeleted }) {
-  const muted = theme === "dark" ? "text-white/50" : "text-gray-400";
+  const muted = theme === "dark" ? "text-white/70" : "text-gray-400";
   const inputCls = theme === "dark" ? "bg-surface-deep border-border-2 text-white" : "bg-white border-gray-300 text-gray-900";
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -553,7 +553,7 @@ export default function ContenuManager() {
 
   const isDark = theme === "dark";
   const card = isDark ? "bg-surface border-surface-3" : "bg-white border-gray-200";
-  const muted = isDark ? "text-white/50" : "text-gray-400";
+  const muted = isDark ? "text-white/70" : "text-gray-400";
 
   const load = useCallback(async () => {
     ctrlRef.current?.abort();
@@ -586,7 +586,7 @@ export default function ContenuManager() {
       className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition ${
         tab === key
           ? isDark ? "border-primary text-primary" : "border-secondary text-secondary"
-          : `border-transparent ${isDark ? "text-white/50 hover:text-white" : "text-gray-500 hover:text-gray-800"}`
+          : `border-transparent ${isDark ? "text-white/70 hover:text-white" : "text-gray-500 hover:text-gray-800"}`
       }`}
     >
       {label}

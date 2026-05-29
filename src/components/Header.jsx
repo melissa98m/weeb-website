@@ -179,7 +179,7 @@ function SearchModal({ isDark, onClose }) {
             <kbd
               aria-label="Appuyer sur Échap pour fermer"
               className={`text-xs px-2 py-1 rounded border font-mono flex-shrink-0 ${
-                isDark ? "border-border-2 text-white/40" : "border-gray-300 text-gray-400"
+                isDark ? "border-border-2 text-white/60" : "border-gray-300 text-gray-400"
               }`}
             >
               Esc
@@ -325,14 +325,14 @@ export default function Header() {
               aria-label="Ouvrir la recherche (Ctrl+K)"
               className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm transition-colors duration-150 min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isDark
-                  ? "border-border-2 text-white/50 hover:text-white hover:border-muted bg-surface-3/60"
+                  ? "border-border-2 text-white/70 hover:text-white hover:border-muted bg-surface-3/60"
                   : "border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 bg-white/60"
               }`}
             >
               <IconSearch size={14} />
               <span className="hidden lg:inline text-xs">Rechercher</span>
               <kbd className={`hidden lg:inline text-[10px] px-1.5 py-0.5 rounded border font-mono ${
-                isDark ? "border-border-2 text-white/30" : "border-gray-200 text-gray-300"
+                isDark ? "border-border-2 text-white/60" : "border-gray-200 text-gray-300"
               }`}>
                 ⌘K
               </kbd>
@@ -343,7 +343,7 @@ export default function Header() {
               onClick={toggleTheme}
               aria-label={t("change_theme", "Change theme")}
               className={`p-2 rounded-lg min-h-[36px] min-w-[36px] flex items-center justify-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                isDark ? "text-white/45 hover:text-white hover:bg-white/5" : "text-dark/45 hover:text-dark hover:bg-dark/5"
+                isDark ? "text-white/65 hover:text-white hover:bg-white/5" : "text-dark/45 hover:text-dark hover:bg-dark/5"
               }`}
             >
               {isDark ? <IconSun /> : <IconMoon />}
@@ -355,7 +355,7 @@ export default function Header() {
               aria-label={t("change_language", "Change language")}
               className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold tracking-wider min-h-[36px] border transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                 isDark
-                  ? "border-border-2 text-white/45 hover:text-white hover:border-border"
+                  ? "border-border-2 text-white/65 hover:text-white hover:border-border"
                   : "border-gray-200 text-dark/45 hover:text-dark hover:border-gray-300"
               }`}
             >
@@ -571,7 +571,7 @@ export default function Header() {
                     onClick={toggleTheme}
                     aria-label={t("change_theme", "Change theme")}
                     className={`p-2.5 rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                      isDark ? "text-white/50 hover:text-white hover:bg-white/5" : "text-dark/50 hover:text-dark hover:bg-dark/5"
+                      isDark ? "text-white/70 hover:text-white hover:bg-white/5" : "text-dark/50 hover:text-dark hover:bg-dark/5"
                     }`}
                   >
                     {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
@@ -581,7 +581,7 @@ export default function Header() {
                     aria-label={t("change_language", "Change language")}
                     className={`px-3 py-2 rounded-xl text-xs font-bold tracking-wider min-h-[44px] border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                       isDark
-                        ? "border-border-2 text-white/50 hover:text-white hover:border-border"
+                        ? "border-border-2 text-white/70 hover:text-white hover:border-border"
                         : "border-gray-200 text-dark/50 hover:text-dark hover:border-gray-300"
                     }`}
                   >

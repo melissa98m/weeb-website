@@ -84,7 +84,7 @@ export default function BentoGrid() {
         <h2 className={`font-display font-extrabold text-3xl md:text-4xl tracking-tight ${isDark ? "text-white" : "text-dark"}`}>
           {language === "fr" ? "Tout pour progresser" : "Everything to progress"}
         </h2>
-        <p className={`mt-3 text-base max-w-md mx-auto ${isDark ? "text-white/50" : "text-dark/50"}`}>
+        <p className={`mt-3 text-base max-w-md mx-auto ${isDark ? "text-white/70" : "text-dark/50"}`}>
           {language === "fr"
             ? "Articles, formations et communauté pour maîtriser le développement web."
             : "Articles, courses and community to master web development."}
@@ -112,7 +112,7 @@ export default function BentoGrid() {
             >
               120+
             </p>
-            <p className={`mt-1 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`mt-1 text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {language === "fr" ? "articles publiés" : "published articles"}
             </p>
             <Link
@@ -140,7 +140,7 @@ export default function BentoGrid() {
             <p className={`font-display font-extrabold text-4xl tracking-tight leading-none ${isDark ? "text-white" : "text-dark"}`}>
               18
             </p>
-            <p className={`mt-1 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`mt-1 text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {language === "fr" ? "formations" : "courses"}
             </p>
             <Link
@@ -168,7 +168,7 @@ export default function BentoGrid() {
             <p className={`font-display font-extrabold text-4xl tracking-tight leading-none ${isDark ? "text-white" : "text-dark"}`}>
               2k+
             </p>
-            <p className={`mt-1 text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`mt-1 text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {language === "fr" ? "apprenants actifs" : "active learners"}
             </p>
           </div>
@@ -189,7 +189,7 @@ export default function BentoGrid() {
             <h3 className={`font-display font-bold text-xl leading-snug ${isDark ? "text-white" : "text-dark"}`}>
               {language === "fr" ? "Restez à jour" : "Stay up to date"}
             </h3>
-            <p className={`mt-2 text-sm leading-relaxed ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`mt-2 text-sm leading-relaxed ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {language === "fr"
                 ? "Frameworks émergents, SEO, accessibilité — chaque semaine."
                 : "Emerging frameworks, SEO, accessibility — every week."}

@@ -323,7 +323,7 @@ export default function Blog() {
         >
           {t.title}
         </h1>
-        <p className={`mt-3 text-base md:text-lg max-w-xl ${isDark ? "text-white/50" : "text-dark/50"}`}>
+        <p className={`mt-3 text-base md:text-lg max-w-xl ${isDark ? "text-white/70" : "text-dark/50"}`}>
           {t.subtitle}
         </p>
       </motion.header>

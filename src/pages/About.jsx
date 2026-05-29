@@ -95,7 +95,7 @@ function ValueCard({ icon: Icon, title, desc, isDark, accentColor, delay = 0 }) 
 function SectionLabel({ children, isDark }) {
   return (
     <p className={`text-[11px] font-semibold uppercase tracking-[.15em] mb-3 ${
-      isDark ? "text-white/35" : "text-dark/35"
+      isDark ? "text-white/60" : "text-dark/35"
     }`}>
       {children}
     </p>
@@ -244,7 +244,7 @@ export default function About() {
           >
             {t.values_title}
           </motion.h2>
-          <p className={`mt-2 text-sm ${isDark ? "text-white/40" : "text-dark/40"}`}>
+          <p className={`mt-2 text-sm ${isDark ? "text-white/60" : "text-dark/40"}`}>
             {language === "fr"
               ? "Les principes qui guident chaque décision."
               : "The principles that guide every decision."}

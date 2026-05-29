@@ -12,7 +12,7 @@ export default function AdminPageHeader({ title, subtitle, icon: Icon, iconBg, i
             {title}
           </h1>
           {subtitle && (
-            <p className={`text-sm mt-0.5 ${isDark ? "text-white/50" : "text-gray-500"}`}>
+            <p className={`text-sm mt-0.5 ${isDark ? "text-white/70" : "text-gray-500"}`}>
               {subtitle}
             </p>
           )}

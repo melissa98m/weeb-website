@@ -22,7 +22,7 @@ export default function ContactFAQ() {
     });
   };
 
-  const muted = isDark ? "text-white/50" : "text-dark/50";
+  const muted = isDark ? "text-white/70" : "text-dark/50";
   const accent = isDark ? "text-primary" : "text-secondary";
   const divider = isDark ? "border-border" : "border-gray-100";
   const cardBg = isDark ? "bg-surface border-border" : "bg-white border-gray-200";

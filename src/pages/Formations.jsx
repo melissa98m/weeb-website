@@ -33,7 +33,7 @@ function IconPlay({ size = 14 }) {
 
 // ── Resume section (for authenticated users with in-progress formations) ────
 
-function ResumeSection({ userFormations, allFormations, theme, t, language, onView }) {
+function ResumeSection({ userFormations, allFormations, theme, _t, language, onView }) {
   const isDark = theme === "dark";
   const prefersReducedMotion = useReducedMotion();
 
@@ -236,7 +236,7 @@ export default function Formations() {
             >
               {t.title}
             </h1>
-            <p className={`mt-3 text-base md:text-lg max-w-xl ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`mt-3 text-base md:text-lg max-w-xl ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {t.subtitle}
             </p>
           </div>
@@ -345,7 +345,7 @@ export default function Formations() {
                 className="px-6 py-2.5"
               >
                 {language === "fr" ? "Charger plus" : "Load more"}
-                <span className={`ml-2 text-xs ${isDark ? "text-white/40" : "text-dark/40"}`}>
+                <span className={`ml-2 text-xs ${isDark ? "text-white/60" : "text-dark/40"}`}>
                   ({filtered.length - visible} {language === "fr" ? "restantes" : "remaining"})
                 </span>
               </Button>

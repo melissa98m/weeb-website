@@ -113,7 +113,7 @@ function AddUserFormationForm({
 
       <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] items-start" onSubmit={onSubmit}>
         <div>
-          <label htmlFor="add-user" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <label htmlFor="add-user" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/60" : "text-gray-400"}`}>
             Utilisateur
           </label>
           <Autocomplete
@@ -131,7 +131,7 @@ function AddUserFormationForm({
         </div>
 
         <div>
-          <label htmlFor="add-formation" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/40" : "text-gray-400"}`}>
+          <label htmlFor="add-formation" className={`mb-1.5 block text-xs font-semibold uppercase tracking-wide ${isDark ? "text-white/60" : "text-gray-400"}`}>
             Formation
           </label>
           <Autocomplete
@@ -162,7 +162,7 @@ function AddUserFormationForm({
                   ? "bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
                   : "bg-secondary/8 border-secondary/25 text-secondary hover:bg-secondary/15"
                 : isDark
-                  ? "border-border text-white/30"
+                  ? "border-border text-white/60"
                   : "border-gray-200 text-gray-400"
             }`}
           >

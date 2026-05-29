@@ -265,7 +265,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
           localModule.is_completed
             ? "border-green-500 bg-green-500 text-white"
             : !localModule.is_accessible
-            ? (theme === "dark" ? "border-white/20 text-white/20" : "border-gray-300 text-gray-300")
+            ? (theme === "dark" ? "border-white/20 text-white/60" : "border-gray-300 text-gray-300")
             : "border-indigo-400 text-indigo-400"
         }`} aria-hidden="true">
           {localModule.is_completed ? "✓" : !localModule.is_accessible ? "🔒" : `${localModule.order + 1}`}

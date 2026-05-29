@@ -291,7 +291,7 @@ export default function Login() {
             >
               {L.login || "Log In"}
             </h1>
-            <p className={`text-sm ${isDark ? "text-white/50" : "text-dark/50"}`}>
+            <p className={`text-sm ${isDark ? "text-white/70" : "text-dark/50"}`}>
               {language === "fr" ? "Connectez-vous à votre compte" : "Sign in to your account"}
             </p>
           </motion.div>
@@ -386,7 +386,7 @@ export default function Login() {
               <Link
                 to="/forgot-password"
                 className={`text-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded ${
-                  isDark ? "text-white/40 hover:text-primary" : "text-dark/40 hover:text-secondary"
+                  isDark ? "text-white/60 hover:text-primary" : "text-dark/40 hover:text-secondary"
                 }`}
               >
                 {L.forgot_password || "Forgot?"}
@@ -415,7 +415,7 @@ export default function Login() {
                     : (language === "fr" ? "Afficher le mot de passe" : "Show password")
                 }
                 className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                  isDark ? "text-white/35 hover:text-white/70" : "text-dark/35 hover:text-dark/70"
+                  isDark ? "text-white/60 hover:text-white/70" : "text-dark/35 hover:text-dark/70"
                 } ${isLocked ? "cursor-not-allowed opacity-50" : ""}`}
               >
                 {showPassword ? <IconEyeOff /> : <IconEye />}
@@ -470,7 +470,7 @@ export default function Login() {
             >
               <div className="relative flex items-center gap-3">
                 <div className={`flex-1 h-px ${isDark ? "bg-border" : "bg-gray-200"}`} />
-                <span className={`text-[11px] shrink-0 ${isDark ? "text-white/35" : "text-dark/35"}`}>
+                <span className={`text-[11px] shrink-0 ${isDark ? "text-white/60" : "text-dark/35"}`}>
                   {L.or_continue_with || "Or continue with"}
                 </span>
                 <div className={`flex-1 h-px ${isDark ? "bg-border" : "bg-gray-200"}`} />
@@ -528,7 +528,7 @@ export default function Login() {
             transition={{ delay: 0.46 }}
             className="text-center pt-1"
           >
-            <p className={`text-xs ${isDark ? "text-white/45" : "text-dark/45"}`}>
+            <p className={`text-xs ${isDark ? "text-white/65" : "text-dark/45"}`}>
               {L.no_account || "No account?"}{" "}
               <Link
                 to="/register"

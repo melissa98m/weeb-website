@@ -794,7 +794,7 @@ export default function FormationContentEditor({ apiBase, formationId, theme }) 
             onClick={() => setAttachingModule(true)}
             className={`flex-1 rounded-xl border border-dashed py-2.5 text-sm transition ${
               theme === "dark"
-                ? "text-white/50 hover:bg-white/5 border-border-2"
+                ? "text-white/70 hover:bg-white/5 border-border-2"
                 : "text-gray-500 hover:bg-gray-50 border-gray-300"
             }`}
           >
