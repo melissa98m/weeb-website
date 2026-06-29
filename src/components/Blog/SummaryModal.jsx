@@ -99,7 +99,16 @@ export default function SummaryModal({ open, onClose, post, theme, language, t }
       >
         {post.cover && (
           <div className="overflow-hidden rounded-t-xl">
-            <img src={post.cover} alt={title} className="h-56 w-full object-cover" loading="lazy" />
+            <img
+              src={post.cover}
+              alt={title}
+              className="h-56 w-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                const fallback = `https://picsum.photos/seed/article-${post.id}/600/400`;
+                if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+              }}
+            />
           </div>
         )}
         <div className="p-5">
