@@ -118,6 +118,10 @@ export default function BlogCard({
           loading={isLcp ? "eager" : "lazy"}
           fetchPriority={isLcp ? "high" : "auto"}
           decoding="async"
+          onError={(e) => {
+            const fallback = `https://picsum.photos/seed/article-${post.id}/600/400`;
+            if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+          }}
         />
         {/* Badge temps de lecture */}
         <div
