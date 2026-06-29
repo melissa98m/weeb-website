@@ -62,6 +62,10 @@ const RelatedCard = React.memo(function RelatedCard({ item, theme, language }) {
             alt={item.title}
             className="h-full w-full object-cover"
             loading="lazy"
+            onError={(e) => {
+              const fallback = `https://picsum.photos/seed/article-${item.id}/500/300`;
+              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+            }}
           />
         </div>
       )}
