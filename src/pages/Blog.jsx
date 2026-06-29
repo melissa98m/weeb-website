@@ -12,6 +12,11 @@ import blogFr from "../../locales/fr/blog.json";
 import { getEnv } from "../lib/env";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
+const API_HOST = (API_BASE || "").replace(/\/api\/?$/, "");
+function resolveImageUrl(src) {
+  if (!src) return null;
+  return /^https?:\/\//i.test(src) ? src : `${API_HOST}${src}`;
+}
 
 function makeExcerpt(text = "", maxWords = 40) {
   const words = String(text).trim().split(/\s+/);
@@ -83,7 +88,7 @@ export default function Blog() {
           const title = a.title || "";
           const excerpt = makeExcerpt(a.article_content || "");
           const cover =
-            a.link_image ||
+            resolveImageUrl(a.link_image) ||
             `https://picsum.photos/seed/article-${a.id}/600/400`;
           const author = a.author?.username || a.author || (language === "fr" ? "Auteur" : "Author");
           const date = a.created_at || a.updated_at || new Date().toISOString();
