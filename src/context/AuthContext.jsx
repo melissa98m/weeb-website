@@ -40,7 +40,6 @@ export function AuthProvider({ children }) {
     didInitRef.current = true;
 
     const run = async () => {
-      // Prépare le CSRF puis tente /me
       try {
         await ensureCsrf();
       } finally {
@@ -48,53 +47,38 @@ export function AuthProvider({ children }) {
       }
     };
 
-    const isProtectedPath = (() => {
-      if (typeof window === "undefined") return false;
-      const path = window.location.pathname || "";
-      return path === "/profile" || path.startsWith("/admin");
-    })();
-
-    if (isProtectedPath || (typeof window !== "undefined" && window.Cypress)) {
-      run();
-      return;
-    }
-
-    let idleId;
-    let timeoutId;
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(() => run(), { timeout: 1500 });
-    } else {
-      timeoutId = setTimeout(() => run(), 1200);
-    }
-
-    return () => {
-      if (typeof window !== "undefined" && idleId) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    run();
   }, [fetchMe]);
 
-  //  Accepte email/username/identifier + password, pose les cookies, puis charge /me
+  // Accepts email/username/identifier + password, sets auth cookies, then loads /me
   const login = useCallback(
     async ({ email, username, identifier, password }) => {
       const id = (email ?? username ?? identifier ?? "").trim();
       await AuthApi.login({ login: id, password });
-      const me = await fetchMe(); // hydrate le context
+      const me = await fetchMe(); // hydrate the context
       return me;                  
     },
     [fetchMe]
   );
 
-  // Après register, on tente de connecter puis on charge /me
+  // After registration, attempt auto-login then reload /me
   const register = useCallback(
     async (payload) => {
       await AuthApi.register(payload);
       try {
         await AuthApi.login({ login: payload.email, password: payload.password });
       } catch {
-       
+        // auto-login after register — ignore login failure, user will log in manually
       }
+      const me = await fetchMe();
+      return me;
+    },
+    [fetchMe]
+  );
+
+  const loginWithGoogle = useCallback(
+    async ({ idToken }) => {
+      await AuthApi.oauthGoogle({ id_token: idToken });
       const me = await fetchMe();
       return me;
     },
@@ -115,11 +99,12 @@ export function AuthProvider({ children }) {
       loading,
       error,
       login,
+      loginWithGoogle,
       register,
       logout,
       reload: fetchMe,
     }),
-    [user, loading, error, login, register, logout, fetchMe]
+    [user, loading, error, login, loginWithGoogle, register, logout, fetchMe]
   );
 
   return (

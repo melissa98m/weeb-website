@@ -9,7 +9,7 @@ export default function PageSizer({ pageSize, onChange, className = "" }) {
     "rounded-xl border px-3 py-2 outline-none transition";
   const selectThemed =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] focus:ring-2 focus:ring-white/20 focus:border-white/30"
+      ? "bg-surface text-white border-border focus:ring-2 focus:ring-white/20 focus:border-white/30"
       : "bg-white text-gray-900 border-gray-200 focus:ring-2 focus:ring-black/10 focus:border-gray-300";
 
   return (

@@ -1,0 +1,17 @@
+{
+  "page_title_query": "Résultats pour \"{q}\" | Weeb",
+  "page_title_empty": "Recherche | Weeb",
+  "heading_query": "Résultats pour « {q} »",
+  "heading_empty": "Recherche",
+  "results_count_one": "résultat trouvé",
+  "results_count_many": "résultats trouvés",
+  "min_chars": "Saisir au moins 3 caractères.",
+  "error": "Erreur : {message}",
+  "no_results_title": "Aucun résultat",
+  "no_results_body": "Essaie avec d'autres mots-clés ou consulte directement le blog et les formations.",
+  "section_articles": "Articles ({count})",
+  "section_formations": "Formations ({count})",
+  "tag_article": "Article",
+  "tag_formation": "Formation",
+  "by_author": "par {author}"
+}

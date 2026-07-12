@@ -1,42 +1,45 @@
 {
-  "title": "Mentions legales",
-  "updated": "Derniere mise a jour: 2025-01-01",
-  "intro": "Cette page presente l'editeur du site et les conditions d'utilisation.",
+  "title": "Mentions légales",
+  "updated": "Dernière mise à jour : 20 janvier 2026",
+  "intro": "Cette page présente l'éditeur du site et les conditions d'utilisation.",
+  "tocLabel": "Sommaire",
+  "backToTop": "Retour en haut",
   "sections": [
     {
-      "title": "Editeur du site",
+      "title": "Éditeur du site",
       "items": [
-        "Weeb, Inc.",
-        "Adresse: a completer",
-        "Email: contact@weeb.com",
-        "Directeur de publication: a completer"
+        "Weeb",
+        "Adresse : France",
+        "Email : contact@weebbackend.melissa-mangione.com",
+        "Directrice de publication : Melissa Mangione"
       ]
     },
     {
-      "title": "Hebergement",
+      "title": "Hébergement",
       "items": [
-        "Hebergeur: a completer",
-        "Adresse: a completer"
+        "Hébergeur : Vercel Inc.",
+        "Adresse : 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis",
+        "Site : vercel.com"
       ]
     },
     {
-      "title": "Propriete intellectuelle",
+      "title": "Propriété intellectuelle",
       "items": [
-        "L'ensemble des contenus du site est protege par les lois applicables.",
-        "Toute reproduction ou reutilisation sans autorisation est interdite."
+        "L'ensemble des contenus du site est protégé par les lois applicables en matière de propriété intellectuelle.",
+        "Toute reproduction ou réutilisation sans autorisation préalable est interdite."
       ]
     },
     {
-      "title": "Responsabilite",
+      "title": "Responsabilité",
       "items": [
-        "Nous nous efforcons de fournir des informations exactes sans garantie.",
-        "L'utilisateur reste responsable de l'usage du site."
+        "Nous nous efforçons de fournir des informations exactes, sans pouvoir en garantir l'exhaustivité.",
+        "L'utilisateur reste responsable de l'usage qu'il fait du site."
       ]
     },
     {
       "title": "Contact",
       "items": [
-        "Pour toute question, contactez-nous via la page contact."
+        "Pour toute question relative au site, contactez-nous à : contact@weebbackend.melissa-mangione.com"
       ]
     }
   ]

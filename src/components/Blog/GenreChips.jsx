@@ -43,7 +43,7 @@ export default function GenreChips({ genres, selectedId, onChange, theme }) {
           <button
             key={g.id ?? "all"}
             onClick={() => onChange(active ? null : g.id)}
-            className="px-3 py-1.5 text-sm rounded-full border transition hover:scale-105"
+            className="px-3 py-1.5 text-sm rounded-full border transition hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1"
             style={style}
           >
             {g.name}

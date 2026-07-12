@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { AuthApi } from "../lib/api";
+import { AuthApi, getApiErrorMessage, mapApiFieldErrors } from "../lib/api";
 import Button from "../components/Button";
 import forgotEn from "../../locales/en/forgot_password.json";
 import forgotFr from "../../locales/fr/forgot_password.json";
@@ -19,6 +19,17 @@ export default function ForgotPassword() {
   const [submitting, setSubmitting] = useState(false);
   const [serverMsg, setServerMsg] = useState(null);
   const shakeTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Mot de passe oublié | Weeb" : "Forgot Password | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
 
   useEffect(() => {
     return () => {
@@ -76,15 +87,16 @@ export default function ForgotPassword() {
           "If an account exists for this email, you will receive a reset link shortly.",
       });
     } catch (err) {
-      const details = err?.details || {};
-      if (details.email) {
-        setErrors({
-          email: Array.isArray(details.email) ? details.email.join(" ") : String(details.email),
-        });
+      const fieldErrors = mapApiFieldErrors(err, { email: "email" });
+      if (fieldErrors.email) {
+        setErrors(fieldErrors);
       } else {
         setServerMsg({
           type: "error",
-          text: t.error_message || "Unable to send reset email. Please try again later.",
+          text: getApiErrorMessage(
+            err,
+            t.error_message || "Unable to send reset email. Please try again later."
+          ),
         });
       }
       triggerShake();

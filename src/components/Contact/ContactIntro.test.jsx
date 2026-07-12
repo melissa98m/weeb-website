@@ -5,13 +5,19 @@ import ContactIntro from "./ContactIntro";
 import contactEn from "../../../locales/en/contact.json";
 import contactFr from "../../../locales/fr/contact.json";
 import { useLanguage } from "../../context/LanguageContext";
+import { useTheme } from "../../context/ThemeContext";
 
 vi.mock("../../context/LanguageContext", () => ({
   useLanguage: vi.fn(),
 }));
 
+vi.mock("../../context/ThemeContext", () => ({
+  useTheme: vi.fn(),
+}));
+
 beforeEach(() => {
   useLanguage.mockReset();
+  useTheme.mockReturnValue({ theme: "light" });
 });
 
 describe("ContactIntro", () => {

@@ -10,13 +10,13 @@ export default function GenrePicker({
 }) {
   const { theme } = useTheme();
 
-  const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface-2 text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+    ? "bg-surface text-white border-border placeholder-white/60"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const chipCls = "px-2 py-1 rounded-full border text-xs";
   const ghostBtn = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+    ? "bg-surface text-white border-border hover:bg-surface-raised"
     : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
 
   const [all, setAll] = useState([]);         // [{id,name,color?}]
@@ -24,9 +24,9 @@ export default function GenrePicker({
   const [err, setErr] = useState("");
   const [q, setQ] = useState("");
 
-  // création rapide
+  // Quick create
   const [newName, setNewName] = useState("");
-  const [newColor, setNewColor] = useState("#6b7280"); // gris par défaut
+  const [newColor, setNewColor] = useState("#6b7280"); // default gray
   const [creating, setCreating] = useState(false);
   const lastColorRef = useRef(new Map());
 
@@ -35,7 +35,7 @@ export default function GenrePicker({
     ctrlRef.current?.abort();
     const ctrl = new AbortController();
     ctrlRef.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -69,7 +69,7 @@ export default function GenrePicker({
         if (alive) setLoading(false);
       }
     })();
-    return () => { alive = false; try { ctrlRef.current?.abort(); } catch {} };
+    return () => { alive = false; try { ctrlRef.current?.abort(); } catch { /* noop */ } };
   }, [apiBase, startTask]);
 
   const selectedIds = useMemo(() => new Set(value.map(v => v.id)), [value]);
@@ -96,7 +96,7 @@ export default function GenrePicker({
     onChange(value.filter(v => String(v.id) !== String(id)));
   }, [value, onChange]);
 
-  // PATCH couleur d’un genre sélectionné
+  // PATCH the color of a selected genre
   const patchColor = useCallback(async (id, color) => {
     // Optimistic update local
     onChange(value.map(v => (String(v.id) === String(id) ? { ...v, color } : v)));
@@ -126,7 +126,7 @@ export default function GenrePicker({
     patchColor(id, next);
   }, [patchColor]);
 
-  // Créer un genre (avec couleur)
+  // Create a genre (with color)
   const createGenre = useCallback(async () => {
     const n = newName.trim();
     if (!n) return;
@@ -157,7 +157,7 @@ export default function GenrePicker({
   return (
     <section className={`rounded-xl border ${card}`}>
       <div className="p-4 space-y-3">
-        {/* sélection actuelle */}
+        {/* Current selection */}
         <div className="flex flex-wrap gap-2">
           {value.length === 0 && (
             <span className={theme === "dark" ? "text-white/60" : "text-gray-600"}>
@@ -171,7 +171,7 @@ export default function GenrePicker({
               style={safeChipStyle(g.color, theme)}
             >
               {g.name}
-              {/* Color picker inline pour le genre sélectionné */}
+              {/* Inline color picker for the selected genre */}
               <input
                 type="color"
                 value={(g.color && /^#[0-9A-Fa-f]{6}$/.test(g.color)) ? g.color : "#6b7280"}
@@ -239,7 +239,7 @@ export default function GenrePicker({
           )}
         </div>
 
-        {/* création rapide — pas de <form> ici */}
+        {/* Quick create — no nested <form> here */}
         <div className="flex flex-wrap items-center gap-2 pt-2 border-t">
           <input
             className={`min-w-[200px] rounded-lg border px-3 py-2 ${inputCls}`}

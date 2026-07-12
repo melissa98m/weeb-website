@@ -27,6 +27,15 @@ vi.mock("../lib/api", () => ({
   AuthApi: {
     requestPasswordReset: vi.fn(),
   },
+  getApiErrorMessage: vi.fn((error, fallback) => error?.details?.detail || fallback),
+  mapApiFieldErrors: vi.fn((error, mapping) =>
+    Object.entries(mapping).reduce((acc, [uiField, apiField]) => {
+      const value = error?.details?.[apiField];
+      if (Array.isArray(value) && value.length) acc[uiField] = value.join(" ");
+      else if (typeof value === "string") acc[uiField] = value;
+      return acc;
+    }, {})
+  ),
 }));
 
 beforeEach(() => {

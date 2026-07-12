@@ -6,8 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 
-vi.mock("../components/profile/ProfileInfo", () => ({
-  default: () => <div>ProfileInfo</div>,
+vi.mock("../components/profile/DashboardStats", () => ({
+  default: () => <div>DashboardStats</div>,
 }));
 vi.mock("../components/profile/TrainingsList", () => ({
   default: () => <div>TrainingsList</div>,
@@ -51,7 +51,7 @@ describe("Profile page", () => {
 
     render(<Profile />);
 
-    expect(screen.getByText("ProfileInfo")).toBeInTheDocument();
+    expect(screen.getByText("DashboardStats")).toBeInTheDocument();
     expect(screen.getByText("TrainingsList")).toBeInTheDocument();
     expect(screen.getByText("DataRights")).toBeInTheDocument();
     expect(screen.getByText("FeedbackModal")).toBeInTheDocument();
