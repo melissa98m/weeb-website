@@ -1,7 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { useAuth } from "./AuthContext";
-import { API_BASE, WS_BASE } from "../lib/api";
-import { getCookie } from "../lib/cookies";
+import { API_BASE, WS_BASE, ensureCsrf } from "../lib/api";
 
 export const NotificationContext = createContext(null);
 
@@ -24,7 +23,7 @@ export function NotificationProvider({ children }) {
       const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
         method: "POST",
         credentials: "include",
-        headers: { "X-CSRFToken": getCookie("csrftoken") ?? "" },
+        headers: { "X-CSRFToken": await ensureCsrf() },
       });
       if (res.ok) {
         const data = await res.json();
@@ -112,7 +111,7 @@ export function NotificationProvider({ children }) {
 
   const markAllRead = useCallback(async () => {
     try {
-      const csrf = getCookie("csrftoken");
+      const csrf = await ensureCsrf();
       await fetch(`${API_BASE}/notifications/read-all/`, {
         method: "POST",
         credentials: "include",

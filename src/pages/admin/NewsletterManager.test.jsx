@@ -4,8 +4,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NewsletterManager from "./NewsletterManager";
 
-vi.mock("../../lib/api", () => ({ API_BASE: "http://localhost:8000/api" }));
-vi.mock("../../lib/cookies", () => ({ getCookie: vi.fn(() => "csrf") }));
+vi.mock("../../lib/api", () => ({
+  API_BASE: "http://localhost:8000/api",
+  ensureCsrf: vi.fn(() => Promise.resolve("csrf")),
+}));
 vi.mock("../../context/ThemeContext", () => ({
   useTheme: () => ({ theme: "dark" }),
 }));

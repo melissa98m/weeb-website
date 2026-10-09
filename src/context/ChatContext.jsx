@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "./AuthContext";
-import { API_BASE, WS_BASE } from "../lib/api";
-import { getCookie } from "../lib/cookies";
+import { API_BASE, WS_BASE, ensureCsrf } from "../lib/api";
 
 const ChatContext = createContext(null);
 
@@ -32,7 +31,7 @@ export function ChatProvider({ children }) {
       const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
         method: "POST",
         credentials: "include",
-        headers: { "X-CSRFToken": getCookie("csrftoken") ?? "" },
+        headers: { "X-CSRFToken": await ensureCsrf() },
       });
       if (res.ok) {
         const data = await res.json();
