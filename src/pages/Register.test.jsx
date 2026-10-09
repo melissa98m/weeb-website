@@ -15,6 +15,8 @@ vi.mock("framer-motion", () => ({
     div: (props) => <div {...props} />,
     p: (props) => <p {...props} />,
     li: (props) => <li {...props} />,
+    span: (props) => <span {...props} />,
+    h2: (props) => <h2 {...props} />,
   },
   AnimatePresence: ({ children }) => <>{children}</>,
 }));
@@ -29,6 +31,33 @@ vi.mock("../context/LanguageContext", () => ({
 
 vi.mock("../context/AuthContext", () => ({
   useAuth: vi.fn(),
+}));
+
+vi.mock("../lib/api", () => ({
+  getApiErrorMessage: vi.fn((error, fallback) => error?.details?.detail || fallback),
+  getApiLockoutMessage: vi.fn((error, language, fallbackSeconds = 30) =>
+    language === "fr"
+      ? `Trop de tentatives. Réessayez dans ${error?.details?.retry_after ?? fallbackSeconds}s.`
+      : `Too many attempts. Retry in ${error?.details?.retry_after ?? fallbackSeconds}s.`
+  ),
+  getApiRetryAfter: vi.fn((error) => error?.details?.retry_after ?? null),
+  mapApiFieldErrors: vi.fn((error, mapping) =>
+    Object.entries(mapping).reduce((acc, [uiField, apiField]) => {
+      const keys = Array.isArray(apiField) ? apiField : [apiField];
+      for (const key of keys) {
+        const value = error?.details?.[key];
+        if (Array.isArray(value) && value.length) {
+          acc[uiField] = value.join(" ");
+          break;
+        }
+        if (typeof value === "string") {
+          acc[uiField] = value;
+          break;
+        }
+      }
+      return acc;
+    }, {})
+  ),
 }));
 
 beforeEach(() => {

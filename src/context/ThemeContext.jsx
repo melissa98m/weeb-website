@@ -38,4 +38,4 @@ const useTheme = () => {
 };
 
 
-export { ThemeProvider, useTheme };
+export { ThemeProvider, useTheme, ThemeContext };

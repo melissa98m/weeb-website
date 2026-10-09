@@ -10,7 +10,11 @@ import { useAuth } from "../../context/AuthContext";
 import { hasPersonnelRole, PERSONNEL_ROLE } from "../../utils/roles";
 import { ensureCsrf } from "../../lib/api";
 import { useTheme } from "../../context/ThemeContext";
+import { useLanguage } from "../../context/LanguageContext";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 import Pill from "../../components/ui/Pill";
 import FiltersBar from "../../components/admin/FiltersBar";
 import AddUserFormationForm from "../../components/admin/AddUserFormation";
@@ -19,7 +23,7 @@ import Pagination from "../../components/ui/Pagination";
 import PageSizer from "../../components/ui/PageSizer";
 import { getEnv } from "../../lib/env";
 
-// Normalise toujours vers .../api
+// Always normalizes to .../api
 const API_BASE = (() => {
   const raw = getEnv("VITE_API_URL", "http://localhost:8000") + "";
   const base = raw.replace(/\/$/, "");
@@ -29,6 +33,20 @@ const API_BASE = (() => {
 export default function PersonnelFormationAdmin() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
+
+  useEffect(() => {
+    const prev = document.title;
+    document.title = t.page_title_personnel;
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
 
   // boot (users + formations)
   const [bootLoading, setBootLoading] = useState(true);
@@ -52,7 +70,7 @@ export default function PersonnelFormationAdmin() {
   const [searchUser, setSearchUser] = useState("");
   const searchQ = useDeferredValue(searchUser.trim().toLowerCase());
 
-  // debounce pour la recherche (évite les fetchs à chaque frappe)
+  // Debounce search input to avoid fetching on every keystroke
   const [searchTrigger, setSearchTrigger] = useState("");
   useEffect(() => {
     const t = setTimeout(() => setSearchTrigger(searchQ), 250);
@@ -70,7 +88,7 @@ export default function PersonnelFormationAdmin() {
   const [busy, setBusy] = useState(false);
   const [addError, setAddError] = useState("");
 
-  // 2 contrôleurs séparés
+  // 2 separate abort controllers
   const bootCtrlRef = useRef(null);
   const linksCtrlRef = useRef(null);
 
@@ -126,7 +144,7 @@ export default function PersonnelFormationAdmin() {
     const ctrl = new AbortController();
     ref.current = ctrl;
     const t = setTimeout(() => {
-      try { ctrl.abort(); } catch {}
+      try { ctrl.abort(); } catch { /* noop */ }
     }, ms);
 
     const isAbortError = (e) => {
@@ -190,7 +208,7 @@ export default function PersonnelFormationAdmin() {
     }
   }, [fetchJSON, startTask, fmtUser, fmtFormation]);
 
-  // charge liens (pagination + filtres + recherche) et met à jour linksTotal
+  // Load links (pagination + filters + search) and update linksTotal
   const loadLinks = useCallback(
     async (p = 1) => {
       setLinksLoading(true);
@@ -245,7 +263,7 @@ export default function PersonnelFormationAdmin() {
         });
         setLinks(mapped);
 
-        // Totaux renvoyés par l'API si paginée
+        // Totals returned by the API when paginated
         const total =
           typeof data?.count === "number"
             ? data.count
@@ -357,7 +375,7 @@ export default function PersonnelFormationAdmin() {
               errorMessage = errorText;
             }
             
-            // Détecter si c'est une erreur de duplication
+            // Detect duplicate-enrollment errors
             const errorLower = errorMessage.toLowerCase();
             if (
               res.status === 400 ||
@@ -369,12 +387,12 @@ export default function PersonnelFormationAdmin() {
               errorLower.includes("unique") ||
               errorLower.includes("duplicate")
             ) {
-              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+              errorMessage = t.personnel_already_registered;
             }
-          } catch (parseError) {
-            // Si on ne peut pas parser le JSON, utiliser le message par défaut
+          } catch (_parseError) {
+            // If JSON can't be parsed, fall back to the default message
             if (res.status === 400 || res.status === 409) {
-              errorMessage = "Cet utilisateur est déjà inscrit à cette formation.";
+              errorMessage = t.personnel_already_registered;
             }
           }
           throw new Error(errorMessage);
@@ -421,128 +439,111 @@ export default function PersonnelFormationAdmin() {
   );
 
   // guards
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
   if (!hasPersonnelRole(user))
     return (
-      <div className="p-6 text-red-600">
-        Accès refusé. Cette page est réservée au personnel.
-      </div>
+      <div className="p-6 text-red-600">{t.common_access_denied}</div>
     );
 
+  const card = isDark ? "bg-surface border-border" : "bg-white border-gray-200";
+  const errorCard = isDark
+    ? "border-red-700/40 bg-red-900/10 text-red-300"
+    : "border-red-200 bg-red-50 text-red-700";
+  const reloadBtn = isDark
+    ? "border-border text-white/60 hover:text-white hover:bg-surface-2"
+    : "border-gray-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50";
+
   return (
-    <div className="p-6 space-y-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-start md:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold leading-tight">
-            Gestion des inscriptions aux formations
-          </h1>
-          <div className="mt-0.5 text-xs text-gray-500 dark:text-white/60 sm:hidden">
-            Accès réservé au personnel
-          </div>
-        </div>
+    <main className="px-4 md:px-6 py-6 space-y-5">
 
-        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
-          <Pill color="primary" variant="soft" size="md">
-            {usersTotal} utilisateurs
-          </Pill>
-          <Pill color="info" variant="soft" size="md">
-            {formationsTotal} formations
-          </Pill>
-          <Pill color="success" variant="soft" size="md">
-            {linksTotal} liens
-          </Pill>
-        </div>
-      </header>
+      {/* ── Header ── */}
+      <AdminPageHeader
+        title={t.personnel_title}
+        subtitle={t.personnel_access_reserved}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M8 7h2a4 4 0 0 1 0 8H8"/><path d="M16 17h-2a4 4 0 0 1 0-8h2"/><path d="M9 12h6"/></svg>}
+        iconBg={isDark ? "bg-primary/10 text-primary" : "bg-purple-100 text-purple-600"}
+        isDark={isDark}
+      >
+        <Pill color="primary" variant="soft" size="md">{usersTotal} {t.personnel_users}</Pill>
+        <Pill color="info" variant="soft" size="md">{formationsTotal} {t.personnel_formations}</Pill>
+        <Pill color="success" variant="soft" size="md">{linksTotal} {t.personnel_links}</Pill>
+      </AdminPageHeader>
 
+      {/* ── Errors ── */}
       {bootError && (
-        <div
-          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
-          role="alert"
-        >
-          {bootError}
-          <div className="mt-2">
-            <button
-              className="rounded-xl border px-3 py-1 text-sm"
-              onClick={loadBootstrap}
-              disabled={bootLoading}
-            >
-              Recharger utilisateurs/formations
-            </button>
-          </div>
+        <div role="alert" className={`rounded-2xl border px-4 py-3 text-sm flex items-start justify-between gap-3 ${errorCard}`}>
+          <span>{bootError}</span>
+          <button onClick={loadBootstrap} disabled={bootLoading} className={`shrink-0 text-xs rounded-lg border px-2.5 py-1 transition-colors ${reloadBtn}`}>
+            {t.personnel_reload_users}
+          </button>
         </div>
       )}
-
       {linksError && (
-        <div
-          className="rounded-xl border border-red-300 bg-red-50 p-3 text-sm text-red-800"
-          role="alert"
-        >
-          {linksError}
-          <div className="mt-2">
-            <button
-              className="rounded-xl border px-3 py-1 text-sm"
-              onClick={() => loadLinks(page)}
-              disabled={linksLoading}
-            >
-              Recharger les liens
-            </button>
-          </div>
+        <div role="alert" className={`rounded-2xl border px-4 py-3 text-sm flex items-start justify-between gap-3 ${errorCard}`}>
+          <span>{linksError}</span>
+          <button onClick={() => loadLinks(page)} disabled={linksLoading} className={`shrink-0 text-xs rounded-lg border px-2.5 py-1 transition-colors ${reloadBtn}`}>
+            {t.personnel_reload_links}
+          </button>
         </div>
       )}
 
-      <FiltersBar
-        userOptions={userOptions}
-        formationOptions={formationOptions}
-        filterUser={filterUser}
-        setFilterUser={setFilterUser}
-        filterFormation={filterFormation}
-        setFilterFormation={setFilterFormation}
-        searchUser={searchUser}
-        setSearchUser={setSearchUser}
-      />
+      {/* ── Action card: Add + Filters ── */}
+      <section className={`rounded-2xl border p-5 space-y-5 ${card}`}>
+        <AddUserFormationForm
+          addUserId={addUserId}
+          setAddUserId={(v) => { setAddUserId(v); if (addError) setAddError(""); }}
+          addFormationId={addFormationId}
+          setAddFormationId={(v) => { setAddFormationId(v); if (addError) setAddError(""); }}
+          onSubmit={onSubmitAdd}
+          busy={busy}
+          error={addError}
+        />
 
-      <div className="flex items-center justify-end">
-        <PageSizer pageSize={pageSize} onChange={setPageSize} />
-      </div>
+        {/* Divider */}
+        <div className={`border-t ${isDark ? "border-border/60" : "border-gray-100"}`} />
 
-      <AddUserFormationForm
-        addUserId={addUserId}
-        setAddUserId={(value) => {
-          setAddUserId(value);
-          if (addError) setAddError("");
-        }}
-        addFormationId={addFormationId}
-        setAddFormationId={(value) => {
-          setAddFormationId(value);
-          if (addError) setAddError("");
-        }}
-        onSubmit={onSubmitAdd}
-        busy={busy}
-        error={addError}
-      />
+        <FiltersBar
+          userOptions={userOptions}
+          formationOptions={formationOptions}
+          filterUser={filterUser}
+          setFilterUser={setFilterUser}
+          filterFormation={filterFormation}
+          setFilterFormation={setFilterFormation}
+          searchUser={searchUser}
+          setSearchUser={setSearchUser}
+        />
+      </section>
 
-      <UserFormationTable
-        loading={linksLoading}
-        error={linksError}
-        links={links}
-        filteredLinks={filteredLinks}
-        onRemove={removeLink}
-        busy={busy}
-        page={page}
-        pageCount={pageCount}
-        onPageChange={setPage}
-      />
+      {/* ── Table card ── */}
+      <section className={`rounded-2xl border overflow-hidden ${card}`}>
+        {/* Table header bar */}
+        <div className={`flex items-center justify-between gap-3 px-4 py-3 border-b ${isDark ? "border-border/60" : "border-gray-100"}`}>
+          <p className={`text-xs font-semibold ${isDark ? "text-white/60" : "text-gray-400"}`}>
+            {linksLoading ? "Chargement…" : `${filteredLinks.length} affectation${filteredLinks.length !== 1 ? "s" : ""}`}
+          </p>
+          <PageSizer pageSize={pageSize} onChange={setPageSize} />
+        </div>
 
-      <div className="mt-4">
-        <Pagination
+        <UserFormationTable
+          loading={linksLoading}
+          error={linksError}
+          links={links}
+          filteredLinks={filteredLinks}
+          onRemove={removeLink}
+          busy={busy}
           page={page}
           pageCount={pageCount}
           onPageChange={setPage}
-          theme={theme}
         />
-      </div>
+
+        {pageCount > 1 && (
+          <div className={`border-t px-4 py-3 ${isDark ? "border-border/60" : "border-gray-100"}`}>
+            <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+          </div>
+        )}
+      </section>
 
       <AdminAccessFooter allowedRoles={PERSONNEL_ROLE} />
-    </div>
+    </main>
   );
 }

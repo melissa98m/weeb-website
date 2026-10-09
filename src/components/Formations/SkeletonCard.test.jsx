@@ -7,8 +7,8 @@ describe("SkeletonCard", () => {
   it("applies dark theme classes", () => {
     const { container } = render(<SkeletonCard theme="dark" />);
 
-    expect(container.firstChild.className).toContain("bg-[#1c1c1c]");
-    expect(container.firstChild.className).toContain("border-[#333]");
+    expect(container.firstChild.className).toContain("bg-surface");
+    expect(container.firstChild.className).toContain("border-border");
   });
 
   it("applies light theme classes", () => {

@@ -25,11 +25,11 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("defaults to submit when no onClick is provided", () => {
+  it("defaults to button when no onClick is provided", () => {
     render(<Button>Submit</Button>);
 
     const btn = screen.getByRole("button", { name: "Submit" });
-    expect(btn).toHaveAttribute("type", "submit");
+    expect(btn).toHaveAttribute("type", "button");
   });
 
   it("defaults to button when onClick is provided", () => {

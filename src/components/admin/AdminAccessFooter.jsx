@@ -3,7 +3,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { hasAnyRole } from "../../utils/roles";
 
-/* Icône cadenas (inline) */
+/* Inline padlock icon */
 function LockIcon({ size = 16 }) {
   return (
     <svg
@@ -24,7 +24,7 @@ function LockIcon({ size = 16 }) {
   );
 }
 
-/* Utilitaire d’unicité en conservant l’ordre d’apparition */
+/* Deduplicate values while preserving insertion order */
 function uniq(list) {
   const s = new Set();
   const out = [];
@@ -36,7 +36,7 @@ function uniq(list) {
   return out;
 }
 
-/* Récupère des noms "affichables" de rôles depuis l’objet user (sans normaliser). */
+/* Collects human-readable role names from the user object (without normalizing). */
 function collectDisplayRoleNames(user) {
   if (!user) return [];
 
@@ -56,7 +56,7 @@ function collectDisplayRoleNames(user) {
   if (user.role) out.push(String(user.role));
   if (user.profile?.group?.name) out.push(String(user.profile.group.name));
 
-  // Flags -> étiquettes lisibles
+  // Flags -> human-readable labels
   if (user.is_commercial) out.push("Commercial");
   if (user.is_personnel) out.push("Personnel");
   if (user.is_redacteur) out.push("Rédacteur");
@@ -84,7 +84,7 @@ export default function AdminAccessFooter({
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
@@ -116,7 +116,7 @@ export default function AdminAccessFooter({
       aria-live="polite"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        {/* Bloc gauche : libellé d’accès */}
+        {/* Left block: access label */}
         <div className="flex items-center gap-2 min-w-0">
           <LockIcon />
           <div className="min-w-0">

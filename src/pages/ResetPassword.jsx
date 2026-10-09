@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
-import { AuthApi } from "../lib/api";
+import { AuthApi, getApiErrorMessage, mapApiFieldErrors } from "../lib/api";
 import Button from "../components/Button";
 import resetEn from "../../locales/en/reset_password.json";
 import resetFr from "../../locales/fr/reset_password.json";
@@ -29,12 +29,25 @@ export default function ResetPassword() {
   const [serverMsg, setServerMsg] = useState(null);
   const [showPwd, setShowPwd] = useState(false);
   const [showConfirmPwd, setShowConfirmPwd] = useState(false);
+  const shakeTimeoutRef = useRef(null);
+  const redirectTimeoutRef = useRef(null);
   const [pwdValidations, setPwdValidations] = useState({
     length: false,
     uppercase: false,
     number: false,
     special: false,
   });
+
+  useEffect(() => {
+    const prev = document.title;
+    document.title = language === "fr" ? "Réinitialiser le mot de passe | Weeb" : "Reset Password | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, [language]);
 
   useEffect(() => {
     const { password } = form;
@@ -45,6 +58,28 @@ export default function ResetPassword() {
       special: /[^A-Za-z0-9]/.test(password),
     });
   }, [form.password]);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimeoutRef.current) {
+        clearTimeout(shakeTimeoutRef.current);
+      }
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerShake = () => {
+    setShake(true);
+    if (shakeTimeoutRef.current) {
+      clearTimeout(shakeTimeoutRef.current);
+    }
+    shakeTimeoutRef.current = setTimeout(() => {
+      setShake(false);
+      shakeTimeoutRef.current = null;
+    }, 500);
+  };
 
   const validate = () => {
     const errs = {};
@@ -77,8 +112,7 @@ export default function ResetPassword() {
     const validation = validate();
     if (Object.keys(validation).length) {
       setErrors(validation);
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
       return;
     }
 
@@ -90,25 +124,24 @@ export default function ResetPassword() {
         password: form.password,
       });
       setServerMsg({ type: "success", text: t.success_message || "Password updated. You can now log in." });
-      setTimeout(() => navigate("/login"), 1200);
-    } catch (err) {
-      const details = err?.details || {};
-      const map = {};
-      if (details.password) {
-        map.password = Array.isArray(details.password) ? details.password.join(" ") : String(details.password);
+      if (redirectTimeoutRef.current) {
+        clearTimeout(redirectTimeoutRef.current);
       }
-      if (details.uid || details.token || details.non_field_errors || details.detail) {
-        const nonField =
-          Array.isArray(details.non_field_errors) && details.non_field_errors.length
-            ? details.non_field_errors.join(" ")
-            : null;
-        map.form =
-          details.uid?.join?.(" ") ||
-          details.token?.join?.(" ") ||
-          nonField ||
-          details.detail ||
-          t.invalid_token ||
-          "Reset link is invalid or expired.";
+      redirectTimeoutRef.current = setTimeout(() => {
+        navigate("/login");
+        redirectTimeoutRef.current = null;
+      }, 1200);
+    } catch (err) {
+      const map = mapApiFieldErrors(err, {
+        password: "password",
+        form: ["uid", "token"],
+      });
+
+      if (!map.form) {
+        map.form = getApiErrorMessage(
+          err,
+          t.invalid_token || "Reset link is invalid or expired."
+        );
       }
 
       if (Object.keys(map).length) {
@@ -119,8 +152,7 @@ export default function ResetPassword() {
           text: t.error_message || "Unable to reset password. Please try again.",
         });
       }
-      setShake(true);
-      setTimeout(() => setShake(false), 500);
+      triggerShake();
     } finally {
       setSubmitting(false);
     }
@@ -131,7 +163,7 @@ export default function ResetPassword() {
       hasError
         ? "border-red-500 focus:ring-red-400"
         : theme === "dark"
-        ? "bg-[#1c1c1c] border-[#333] text-white focus:ring-blue-500"
+        ? "bg-surface border-border text-white focus:ring-blue-500"
         : "bg-white border-gray-300 text-gray-900 focus:ring-blue-500"
     }`;
 

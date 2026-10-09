@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import feedbackFr from "../../locales/fr/feedback.json";
 import feedbackEn from "../../locales/en/feedback.json";
 import { getEnv } from "../lib/env";
@@ -9,7 +9,7 @@ const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 export default function FeedbackModal({
   open,
   onClose,
-  userId,
+  userId: _userId,
   formation,
   theme,
   language,
@@ -19,12 +19,16 @@ export default function FeedbackModal({
   const [content, setContent] = useState("");
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      triggerRef.current = document.activeElement;
+    } else {
       setContent("");
       setErr(null);
       setSending(false);
+      triggerRef.current?.focus();
     }
   }, [open]);
 
@@ -32,7 +36,7 @@ export default function FeedbackModal({
 
   const card =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333]"
+      ? "bg-surface text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
 
   const send = async () => {
@@ -56,7 +60,7 @@ export default function FeedbackModal({
       const created = await res.json();
       onSuccess?.(created);
       onClose();
-    } catch (e) {
+    } catch (_e) {
       setErr(t.error);
     } finally {
       setSending(false);
@@ -72,10 +76,11 @@ export default function FeedbackModal({
       <div
         role="dialog"
         aria-modal="true"
+        aria-labelledby="feedback-modal-title"
         className={`fixed z-[101] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-lg rounded-xl border shadow ${card}`}
       >
         <div className="p-5">
-          <h3 className="text-lg font-semibold mb-1">{t.title}</h3>
+          <h2 id="feedback-modal-title" className="text-lg font-semibold mb-1">{t.title}</h2>
           <p className="text-sm opacity-70 mb-4">{formation.name}</p>
 
           <textarea
@@ -85,7 +90,7 @@ export default function FeedbackModal({
             placeholder={t.placeholder}
             className={`w-full resize-y rounded-md border px-3 py-2 outline-none ${
               theme === "dark"
-                ? "bg-[#0f0f0f] border-[#333] text-white placeholder-white/40"
+                ? "bg-surface-deep border-border text-white placeholder-white/40"
                 : "bg-white border-gray-300 text-gray-900 placeholder-gray-400"
             }`}
           />
@@ -99,7 +104,7 @@ export default function FeedbackModal({
               onClick={onClose}
               className={`px-4 py-2 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
             >

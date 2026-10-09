@@ -23,3 +23,10 @@ dist-ssr
 *.sln
 *.sw?
 package-lock.json
+.env
+storybook-static/
+cypress/screenshots/
+cypress/videos/
+package-lock.json
+
+yarn.lock

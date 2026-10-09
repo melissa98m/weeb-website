@@ -1,0 +1,10 @@
+{
+  "total": 312,
+  "active": 298,
+  "unsubscribed": 14,
+  "subscribers": [
+    { "id": 1, "email": "alice@example.com", "subscribed_at": "2025-01-15T10:00:00Z", "active": true },
+    { "id": 2, "email": "bob@example.com", "subscribed_at": "2025-02-20T08:30:00Z", "active": true },
+    { "id": 3, "email": "carol@example.com", "subscribed_at": "2025-03-01T12:00:00Z", "active": false }
+  ]
+}

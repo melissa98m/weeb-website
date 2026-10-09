@@ -8,7 +8,7 @@ function Select({ value, onChange, options = [], placeholder, id, className = ""
     "w-full rounded-xl border px-3 py-2 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed";
   const themed =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
+      ? "bg-surface text-white border-border placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
       : "bg-white text-gray-900 border-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-black/10 focus:border-gray-300";
 
   return (

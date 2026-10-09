@@ -1,6 +1,7 @@
 import React from "react";
 import ContactIntro from "./ContactIntro";
 import { LanguageProvider } from "../../context/LanguageContext";
+import { ThemeProvider } from "../../context/ThemeContext";
 
 const applyLanguage = (language) => {
   if (typeof document === "undefined") return;
@@ -11,7 +12,11 @@ const applyLanguage = (language) => {
 
 const Providers = ({ language, children }) => {
   applyLanguage(language);
-  return <LanguageProvider>{children}</LanguageProvider>;
+  return (
+    <ThemeProvider>
+      <LanguageProvider>{children}</LanguageProvider>
+    </ThemeProvider>
+  );
 };
 
 const meta = {

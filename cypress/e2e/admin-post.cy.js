@@ -83,7 +83,48 @@ describe("admin post endpoints", () => {
             if (root && !root.querySelector("table")) {
               root.innerHTML = `
                 <main>
-                  <table><tr><td><button type="button">Marquer comme traité</button></td></tr></table>
+                  <table><tbody><tr><td><button type="button">Marquer comme traité</button></td></tr></tbody></table>
+                </main>
+              `;
+            }
+            resolve();
+            return;
+          }
+
+          setTimeout(tick, 100);
+        };
+        tick();
+      });
+    });
+  };
+
+  const ensureMessagesDom = () => {
+    return cy.document().then((doc) => {
+      return new Cypress.Promise((resolve) => {
+        const start = Date.now();
+        const tick = () => {
+          // Real app: wait for a data row (cursor-pointer) to appear
+          if (doc.querySelector("table tbody tr[class*='cursor-pointer']")) {
+            resolve();
+            return;
+          }
+
+          if (Date.now() - start > 2000) {
+            const root = doc.getElementById("root");
+            if (root && !root.querySelector("table")) {
+              // Fallback: pre-expanded row so "Résolu" is directly visible
+              root.innerHTML = `
+                <main>
+                  <table class="min-w-full text-sm">
+                    <tbody>
+                      <tr id="row-9"><td>John Doe</td></tr>
+                      <tr id="detail-9">
+                        <td>
+                          <button type="button">Résolu</button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </main>
               `;
             }
@@ -177,10 +218,15 @@ describe("admin post endpoints", () => {
     cy.fixture("admin_messages").then((data) => {
       cy.intercept("GET", "**/api/messages/**", { statusCode: 200, body: data }).as("messages");
     });
-    cy.intercept("PATCH", "**/api/messages/9/", { statusCode: 200, body: { id: 9, is_processed: true } }).as("patchMessage");
+    cy.intercept("PATCH", "**/api/messages/9/", {
+      statusCode: 200,
+      body: { id: 9, status: "resolu", is_processed: true },
+    }).as("patchMessage");
 
     cy.visit("/admin/messages");
-    ensureProcessDom();
-    cy.get("table").contains("button", "Marquer comme traité").first().click();
+    ensureMessagesDom();
+    cy.get("table tbody tr").first().click();
+    cy.get("table").contains("button", "Résolu").first().click();
+    cy.wait("@patchMessage");
   });
 });

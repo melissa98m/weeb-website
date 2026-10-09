@@ -52,7 +52,7 @@ describe("Footer", () => {
   it("submits newsletter and shows success state", async () => {
     const user = userEvent.setup();
 
-    NewsletterApi.subscribe.mockResolvedValue({ ok: true });
+    NewsletterApi.subscribe.mockResolvedValue({ data: {}, created: true });
 
     render(<Footer />);
 

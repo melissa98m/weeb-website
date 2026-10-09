@@ -10,6 +10,7 @@ vi.mock("../lib/api", () => ({
     me: vi.fn(),
     refresh: vi.fn(),
     login: vi.fn(),
+    oauthGoogle: vi.fn(),
     register: vi.fn(),
     logout: vi.fn(),
   },
@@ -26,6 +27,9 @@ function Consumer() {
       {ctx.error ? <span data-testid="error">error</span> : null}
       <button type="button" onClick={() => ctx.login({ email: " user@test.com ", password: "pw" })}>
         login
+      </button>
+      <button type="button" onClick={() => ctx.loginWithGoogle({ idToken: "google-token" })}>
+        login-google
       </button>
       <button
         type="button"
@@ -56,6 +60,7 @@ describe("AuthContext", () => {
     AuthApi.me.mockResolvedValue(null);
     AuthApi.refresh.mockResolvedValue({});
     AuthApi.login.mockResolvedValue({});
+    AuthApi.oauthGoogle.mockResolvedValue({});
     AuthApi.register.mockResolvedValue({});
     AuthApi.logout.mockResolvedValue({});
 
@@ -128,6 +133,20 @@ describe("AuthContext", () => {
       login: "new@test.com",
       password: "pw",
     });
+  });
+
+  it("loginWithGoogle calls oauth endpoint and updates user", async () => {
+    const user = userEvent.setup();
+    AuthApi.me
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ id: 6, name: "F" });
+
+    renderAuth();
+
+    await user.click(screen.getByRole("button", { name: "login-google" }));
+
+    await waitFor(() => expect(screen.getByTestId("user").textContent).toBe("F"));
+    expect(AuthApi.oauthGoogle).toHaveBeenCalledWith({ id_token: "google-token" });
   });
 
   it("clears user on logout even when api fails", async () => {

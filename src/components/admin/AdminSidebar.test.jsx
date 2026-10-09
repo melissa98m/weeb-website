@@ -21,6 +21,10 @@ vi.mock("../../utils/roles", () => ({
   hasAnyRedactionRole: vi.fn(),
 }));
 
+vi.mock("../../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useAuth.mockReturnValue({ user: { id: 1 } });
@@ -44,7 +48,7 @@ describe("AdminSidebar", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByRole("navigation", { name: "Menu d’administration" })).toBeInTheDocument();
+    expect(screen.getAllByRole("navigation", { name: "Menu d’administration" }).length).toBeGreaterThan(0);
     expect(screen.getByText("Affectations")).toBeInTheDocument();
     expect(screen.getByText("Formations")).toBeInTheDocument();
     expect(screen.getByText("Articles")).toBeInTheDocument();

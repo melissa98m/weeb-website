@@ -33,46 +33,18 @@ describe("blog", () => {
               doc.body.appendChild(root);
             }
             if (!root.querySelector("h1")) {
+              // BlogCard est maintenant un lien direct (plus de bouton "Voir" / modal)
               root.innerHTML = `
                 <main>
                   <h1>Blog</h1>
                   <input placeholder="Rechercher un article..." />
                   <section>
-                    <h2>Deuxieme article</h2>
-                    <button type="button">Voir</button>
+                    <a href="/blog/1">
+                      <h2>Deuxieme article</h2>
+                    </a>
                   </section>
-                  <div id="summary-modal" role="dialog" style="display:none">
-                    <h4>Résumé</h4>
-                    <a href="/blog/1">Lire</a>
-                    <button type="button">Fermer</button>
-                  </div>
                 </main>
               `;
-              const viewBtn = root.querySelector("button");
-              const modal = root.querySelector("#summary-modal");
-              const closeBtn = modal?.querySelector("button");
-              const readLink = modal?.querySelector("a");
-              if (viewBtn && modal) {
-                viewBtn.addEventListener("click", () => {
-                  modal.style.display = "block";
-                });
-              }
-              if (closeBtn && modal) {
-                closeBtn.addEventListener("click", () => {
-                  modal.remove();
-                });
-              }
-              if (readLink && modal) {
-                readLink.addEventListener("click", (event) => {
-                  event.preventDefault();
-                  doc.defaultView?.history.pushState({}, "", "/blog/1");
-                  modal.remove();
-                  const back = doc.createElement("a");
-                  back.href = "/blog";
-                  back.textContent = "Retour";
-                  root.appendChild(back);
-                });
-              }
             }
             resolve();
             return;
@@ -101,20 +73,18 @@ describe("blog", () => {
     cy.contains("h2", "Deuxieme article").should("be.visible");
 
     cy.get("input[placeholder='Rechercher un article...']").clear();
-    cy.contains("button", "Voir").first().click();
-    cy.get("[role='dialog']").should("be.visible");
-    cy.contains("h4", "Résumé").should("be.visible");
-    cy.contains("button", "Fermer").click();
-    cy.get("[role='dialog']").should("not.exist");
+    // BlogCard est maintenant un lien direct vers le détail (plus de modal)
+    cy.contains("a[href*='/blog/']", "Deuxieme article")
+      .first()
+      .should("be.visible");
   });
 
   it("navigates to article detail from modal", () => {
     cy.visit("/blog");
     ensureBlogDom();
 
-    cy.contains("button", "Voir").first().click();
-    cy.contains("a", "Lire").click();
+    // Naviguer directement via le lien de la carte
+    cy.contains("a[href*='/blog/']", "Deuxieme article").first().click();
     cy.location("pathname").should("match", /\/blog\/\d+$/);
-    cy.get("a[href='/blog']").should("be.visible");
   });
 });

@@ -16,7 +16,10 @@ const config = {
     "@storybook/addon-docs",
     "@storybook/addon-onboarding"
   ],
-  "framework": "@storybook/react-vite",
+  "framework": {
+    "name": "@storybook/react-vite",
+    "options": {}
+  },
   "docs": {
     "autodocs": true
   }

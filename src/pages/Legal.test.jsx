@@ -29,7 +29,11 @@ describe("Legal page", () => {
     legalEn.sections.forEach((section) => {
       expect(screen.getByRole("heading", { name: section.title })).toBeInTheDocument();
       section.items.forEach((item) => {
-        expect(screen.getAllByText(item).length).toBeGreaterThan(0);
+        // Email addresses are rendered as <a> links, splitting the text across nodes.
+        // We match on textContent of the container element instead.
+        expect(
+          screen.getAllByText((_, el) => el?.textContent === item).length
+        ).toBeGreaterThan(0);
       });
     });
   });

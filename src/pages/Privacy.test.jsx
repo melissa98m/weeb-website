@@ -29,7 +29,11 @@ describe("Privacy page", () => {
     privacyEn.sections.forEach((section) => {
       expect(screen.getByRole("heading", { name: section.title })).toBeInTheDocument();
       section.items.forEach((item) => {
-        expect(screen.getByText(item)).toBeInTheDocument();
+        // Email addresses are rendered as <a> links, splitting the text across nodes.
+        // We match on textContent of the container element instead.
+        expect(
+          screen.getAllByText((_, el) => el?.textContent === item).length
+        ).toBeGreaterThan(0);
       });
     });
   });

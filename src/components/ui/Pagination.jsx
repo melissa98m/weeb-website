@@ -4,14 +4,14 @@ export default function Pagination({ page, pageCount, onPageChange, theme }) {
   if (pageCount <= 1) return null;
 
   const baseBtn =
-    "min-w-9 h-9 px-3 rounded-md border text-sm flex items-center justify-center";
+    "min-w-11 h-11 px-3 rounded-md border text-sm flex items-center justify-center";
   const solid =
     theme === "dark"
       ? "bg-secondary text-white border-secondary"
       : "bg-primary text-dark border-primary";
   const ghost =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+      ? "bg-surface-2 text-white border-border hover:bg-surface-3"
       : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100";
 
   const go = (p) => () => {

@@ -2,25 +2,73 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Weeb - Plateforme d'apprentissage du développement web moderne. Découvrez nos articles, formations et ressources pour développeurs, designers et passionnés du digital. Restez à jour avec les dernières tendances web, frameworks et meilleures pratiques." />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="description" content="Weeb — Plateforme d'apprentissage du développement web. Articles, formations et ressources pour développeurs, designers et passionnés du web moderne." />
     <meta name="keywords" content="développement web, formation web, blog développement, React, JavaScript, web design, programmation, technologies web, frameworks, SEO, accessibilité" />
     <meta name="author" content="Weeb" />
     <meta name="robots" content="index, follow" />
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Weeb - Plateforme d'apprentissage du développement web" />
+    <meta property="og:title" content="Weeb — Apprendre le développement web" />
     <meta property="og:description" content="Découvrez nos articles, formations et ressources pour développeurs, designers et passionnés du digital." />
     <meta property="og:site_name" content="Weeb" />
-    
+    <meta property="og:url" content="https://weeb.melissa-mangione.com/" />
+    <meta property="og:image" content="https://weeb.melissa-mangione.com/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@weeb_fr" />
     <meta name="twitter:title" content="Weeb - Plateforme d'apprentissage du développement web" />
     <meta name="twitter:description" content="Découvrez nos articles, formations et ressources pour développeurs, designers et passionnés du digital." />
-    
+    <meta name="twitter:image" content="https://weeb.melissa-mangione.com/og-image.jpg" />
+
+    <!-- hreflang -->
+    <link rel="alternate" hreflang="x-default" href="https://weeb.melissa-mangione.com/" />
+
+    <!-- Polices web — chargement non-bloquant (évite render-blocking + FOIT) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      media="print" force le navigateur à charger la feuille en arrière-plan
+      sans bloquer le rendu initial. onload bascule vers media="all" une fois
+      le fichier reçu. Le <noscript> est le fallback sans JS.
+    -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+      rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- LCP image — préchargée pour éviter le resource load delay -->
+    <link rel="preload" as="image" href="/home/mokup-1176.webp"
+      imagesrcset="/home/mokup-400.webp 400w, /home/mokup-800.webp 800w, /home/mokup-1176.webp 1176w"
+      imagesizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1176px"
+      fetchpriority="high" type="image/webp" />
+
+    <!-- Resource hints — connexions anticipées -->
+    <link rel="preconnect" href="https://weebbackend.melissa-mangione.com" crossorigin />
+    <link rel="dns-prefetch" href="https://accounts.google.com" />
+    <link rel="dns-prefetch" href="https://www.googleapis.com" />
+
     <link rel="icon" type="image/svg+xml" href="/weeb.svg" />
-    <title>Weeb - Plateforme d'apprentissage du développement web moderne</title>
+    <title>Weeb — Apprendre le développement web</title>
   </head>
   <body>
     <div id="root"></div>

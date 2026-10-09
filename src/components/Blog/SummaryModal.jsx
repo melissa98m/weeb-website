@@ -62,17 +62,10 @@ export default function SummaryModal({ open, onClose, post, theme, language, t }
   const title = (language === "fr" ? post.title_fr : post.title) || post.title;
   const excerpt = (language === "fr" ? post.excerpt_fr : post.excerpt) || post.excerpt;
   const metaColor = theme === "dark" ? "text-white/70" : "text-gray-600";
-  const card = theme === "dark" ? "bg-[#1c1c1c] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const readingMin = Math.max(1, Math.ceil(String(excerpt).split(/\s+/).length / 200));
   const formattedDate = formatDate(post.date, language);
   const genres = post._genres || [];
-  const labels = {
-    author: t.author_label,
-    date: t.date_label,
-    genres: t.genres_label,
-    reading: t.reading_time_label,
-    minutes: t.minutes_label,
-  };
   const titleId = "summary-modal-title";
 
   return (
@@ -128,14 +121,6 @@ export default function SummaryModal({ open, onClose, post, theme, language, t }
           <h4 className="font-semibold mb-2">{t.summary_title}</h4>
           <p className={`${metaColor}`}>{excerpt}</p>
 
-          <h4 className="font-semibold mt-5 mb-2">{t.key_points}</h4>
-          <ul className={`pl-5 space-y-1 ${metaColor}`}>
-            <li>{labels.author} {post.author}</li>
-            <li>{labels.date} {formattedDate}</li>
-            <li>{labels.genres} {genres.map((g) => g.name).join(", ") || "-"}</li>
-            <li>{labels.reading} ~{readingMin} {labels.minutes}</li>
-          </ul>
-
           <div className="mt-6 flex items-center justify-end gap-3">
             <Button
               type="button"
@@ -143,7 +128,7 @@ export default function SummaryModal({ open, onClose, post, theme, language, t }
               data-autofocus
               className={`px-4 py-2 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#262626] text-white border-[#333] hover:bg-[#303030]"
+                  ? "bg-surface-2 text-white border-border hover:bg-surface-3"
                   : "bg-white text-gray-900 border-gray-200 hover:bg-gray-100"
               }`}
             >

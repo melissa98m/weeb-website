@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function SkeletonCard({ theme }) {
-  const card = theme === "dark" ? "bg-[#1c1c1c] border-[#333]" : "bg-white border-gray-200";
+  const card = theme === "dark" ? "bg-surface border-border" : "bg-white border-gray-200";
   return (
     <div className={`rounded-xl border shadow p-4 ${card} animate-pulse`}>
       <div className="h-40 w-full rounded-lg mb-4 bg-gray-300/30" />

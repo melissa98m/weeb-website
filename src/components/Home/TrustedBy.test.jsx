@@ -2,15 +2,8 @@ import React from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TrustedBy from "./TrustedBy";
-import homeEn from "../../../locales/en/home.json";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
-
-vi.mock("../Icon/Artvenue", () => ({ default: () => <div>Artvenue</div> }));
-vi.mock("../Icon/Shells", () => ({ default: () => <div>Shells</div> }));
-vi.mock("../Icon/Smartfinder", () => ({ default: () => <div>Smartfinder</div> }));
-vi.mock("../Icon/Waves", () => ({ default: () => <div>Waves</div> }));
-vi.mock("../Icon/Zoomerr", () => ({ default: () => <div>Zoomerr</div> }));
 
 vi.mock("../../context/ThemeContext", () => ({
   useTheme: vi.fn(),
@@ -21,22 +14,51 @@ vi.mock("../../context/LanguageContext", () => ({
 }));
 
 beforeEach(() => {
-  useTheme.mockReset();
-  useLanguage.mockReset();
   useTheme.mockReturnValue({ theme: "dark" });
   useLanguage.mockReturnValue({ language: "en" });
+
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+
+  const mockObserver = { observe: vi.fn(), disconnect: vi.fn() };
+  class MockIntersectionObserver {
+    constructor() { return mockObserver; }
+  }
+  vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 });
 
 describe("TrustedBy", () => {
-  it("renders heading and lazy-loaded logos", async () => {
+  it("renders heading and lazy-loaded logos", () => {
     render(<TrustedBy />);
 
-    expect(screen.getByRole("heading", { name: homeEn.trust })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /weeb in numbers/i })).toBeInTheDocument();
+  });
 
-    expect(await screen.findByText("Artvenue")).toBeInTheDocument();
-    expect(await screen.findByText("Shells")).toBeInTheDocument();
-    expect(await screen.findByText("Smartfinder")).toBeInTheDocument();
-    expect(await screen.findByText("Waves")).toBeInTheDocument();
-    expect(await screen.findByText("Zoomerr")).toBeInTheDocument();
+  it("displays all metric labels", () => {
+    render(<TrustedBy />);
+
+    expect(screen.getByText("articles published")).toBeInTheDocument();
+    expect(screen.getByText("courses available")).toBeInTheDocument();
+    expect(screen.getByText("active learners")).toBeInTheDocument();
+  });
+
+  it("shows metric labels in French when language is fr", () => {
+    useLanguage.mockReturnValue({ language: "fr" });
+    render(<TrustedBy />);
+
+    expect(screen.getByText("articles publiés")).toBeInTheDocument();
+    expect(screen.getByText("formations disponibles")).toBeInTheDocument();
+    expect(screen.getByText("apprenants actifs")).toBeInTheDocument();
   });
 });

@@ -1,16 +1,16 @@
-// --- Déclarations de familles de rôles (affichage) ---
+// --- Role family declarations ---
 export const STAFF_ROLES = ["Commercial", "Personnel"];
 export const REDACTION_ROLES = ["Redacteur", "Personnel"];
 export const PERSONNEL_ROLE = ["Personnel"]; // unique
 
-// Mappe les flags booléens potentiels vers des noms de rôles (pour la détection)
+// Maps boolean flags to role names (used for role detection)
 const FLAG_TO_ROLE = {
   is_commercial: "Commercial",
   is_personnel: "Personnel",
   is_redacteur: "Redacteur",
 };
 
-// Permissions qui donnent implicitement l'accès "Personnel" (fallback)
+// Permissions that implicitly grant "Personnel" access (fallback)
 const PERMS_FOR_PERSONNEL = [
   "api.view_userformation",
   "api.add_userformation",
@@ -18,7 +18,7 @@ const PERMS_FOR_PERSONNEL = [
   "api.delete_userformation",
 ];
 
-// --- Utils internes ---
+// --- Internal helpers ---
 function norm(s) {
   return String(s || "").normalize("NFKD").toLowerCase().trim();
 }
@@ -31,8 +31,8 @@ function pickNames(arr) {
 }
 
 /**
- * Collecte TOUTES les sources possibles de rôles côté user
- * et renvoie un Set de NOMS DE RÔLES normalisés (lowercase).
+ * Collects ALL possible role sources from the user object
+ * and returns a Set of normalized (lowercase) role names.
  */
 export function collectUserRoleNames(user) {
   if (!user) return new Set();
@@ -43,7 +43,7 @@ export function collectUserRoleNames(user) {
     ...pickNames(user.roles),
     user.role,
     user.profile?.group?.name,
-    // Flags booléens -> noms de rôle
+    // Boolean flags -> role names
     ...Object.entries(FLAG_TO_ROLE)
       .filter(([flag]) => !!user?.[flag])
       .map(([, roleName]) => roleName),
@@ -53,14 +53,14 @@ export function collectUserRoleNames(user) {
 }
 
 /**
- * Test générique : l'utilisateur a-t-il AU MOINS UN rôle dans allowedRoles ?
- * + fallbacks staff/superuser
- * + (optionnel) si extraPerms est fourni, vérifie les permissions explicites.
+ * Generic check: does the user have AT LEAST ONE role from allowedRoles?
+ * Also falls back to staff/superuser flags.
+ * Optionally checks explicit permissions if extraPerms is provided.
  */
 export function hasAnyRole(user, allowedRoles, extraPerms = []) {
   if (!user) return false;
 
-  // Staff/superuser -> accès
+  // Staff/superuser -> always allowed
   if (user.is_staff || user.is_superuser) return true;
 
   const want = new Set((allowedRoles || []).map(norm));
@@ -70,7 +70,7 @@ export function hasAnyRole(user, allowedRoles, extraPerms = []) {
     if (have.has(r)) return true;
   }
 
-  // Fallback permissions explicites (si exposées côté backend)
+  // Explicit permission fallback (if the backend exposes them)
   if (Array.isArray(extraPerms) && Array.isArray(user?.perms)) {
     const p = new Set(user.perms);
     if (extraPerms.some((perm) => p.has(perm))) return true;
@@ -79,13 +79,13 @@ export function hasAnyRole(user, allowedRoles, extraPerms = []) {
   return false;
 }
 
-// --- Spécialisations conviviales ---
+// --- Convenience wrappers ---
 export function hasAnyStaffRole(user) {
   return hasAnyRole(user, STAFF_ROLES);
 }
 
 export function hasPersonnelRole(user) {
-  // autorise via rôle "Personnel" ou via permissions liées aux user-formations
+  // grants access via "Personnel" role or via user-formation-related permissions
   return hasAnyRole(user, PERSONNEL_ROLE, PERMS_FOR_PERSONNEL);
 }
 

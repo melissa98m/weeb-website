@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { Link } from "react-router-dom";
@@ -5,364 +6,379 @@ import AboutIntro from "../components/About/AboutIntro";
 import aboutEn from "../../locales/en/about.json";
 import aboutFr from "../../locales/fr/about.json";
 import { motion } from "framer-motion";
+import { setCanonical, setOgMeta, setHreflang, setJsonLd, setTwitterMeta, SITE_URL, DEFAULT_OG_IMAGE } from "../lib/seo";
+import Button from "../components/Button";
 
+// ─── Icons ────────────────────────────────────────────────────────────────────
 
-function IconAward({ size = 24 }) {
+function IconAward({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="8" r="7"></circle>
-      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="7" />
+      <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
     </svg>
   );
 }
 
-function IconRocket({ size = 24 }) {
+function IconRocket({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="2" x2="12" y2="22"></line>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+      <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
     </svg>
   );
 }
 
-function IconUsers({ size = 24 }) {
+function IconUsers({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-      <circle cx="9" cy="7" r="4"></circle>
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
 
-function IconUniversalAccess({ size = 24 }) {
+function IconGlobe({ size = 20 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"></circle>
-      <path d="M12 2v20M2 12h20"></path>
-      <circle cx="12" cy="12" r="2"></circle>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
     </svg>
   );
 }
+
+// ─── Value card ───────────────────────────────────────────────────────────────
+
+function ValueCard({ icon: Icon, title, desc, isDark, accentColor, delay = 0 }) {
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  return (
+    <motion.div
+      initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.45, delay, ease: [0.16, 1, 0.3, 1] }}
+      className={`flex gap-4 p-6 rounded-2xl border transition-colors duration-200 ${
+        isDark
+          ? "bg-surface border-border hover:border-border-2"
+          : "bg-white border-gray-200 hover:border-gray-300"
+      }`}
+    >
+      <div
+        className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
+        style={{ background: `${accentColor}15`, color: accentColor }}
+      >
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <h3 className={`font-display font-bold text-base mb-1.5 ${isDark ? "text-white" : "text-dark"}`}>
+          {title}
+        </h3>
+        <p className={`text-sm leading-relaxed ${isDark ? "text-white/55" : "text-dark/55"}`}>
+          {desc}
+        </p>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Section label ────────────────────────────────────────────────────────────
+
+function SectionLabel({ children, isDark }) {
+  return (
+    <p className={`text-[11px] font-semibold uppercase tracking-[.15em] mb-3 ${
+      isDark ? "text-white/60" : "text-dark/35"
+    }`}>
+      {children}
+    </p>
+  );
+}
+
+// ─── Main page ─────────────────────────────────────────────────────────────────
 
 export default function About() {
   const { theme } = useTheme();
   const { language } = useLanguage();
   const t = language === "fr" ? aboutFr : aboutEn;
+  const isDark = theme === "dark";
+  const prefersReducedMotion =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const cardClass = theme === "dark" 
-    ? "bg-[#1c1c1c] border-[#333] text-white" 
-    : "bg-white border-gray-200 text-dark";
+  // SEO
+  useEffect(() => {
+    const prev = document.title;
+    const isFr = language === "fr";
+    const title = isFr
+      ? "À propos | Weeb — Notre mission et notre équipe"
+      : "About | Weeb — Our Mission and Team";
+    const desc = isFr
+      ? "Découvrez la mission de Weeb : rendre l'apprentissage du développement web accessible à tous, avec des formations pratiques et des articles de qualité."
+      : "Discover Weeb's mission: making web development learning accessible to everyone, with practical courses and quality articles.";
 
-  const sectionClass = theme === "dark"
-    ? "bg-background text-white"
-    : "bg-light text-dark";
+    document.title = title;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute("content", desc);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "index, follow");
 
-  const valueCardClass = theme === "dark"
-    ? "bg-[#262626] border-[#333] hover:bg-[#2a2a2a]"
-    : "bg-gray-50 border-gray-200 hover:bg-gray-100";
+    const cleanCanonical = setCanonical("/about-us");
+    const cleanHreflang = setHreflang("/about-us");
+    const cleanOgUrl = setOgMeta("og:url", `${SITE_URL}/about-us`);
+    const cleanOgTitle = setOgMeta("og:title", title);
+    const cleanOgDesc = setOgMeta("og:description", desc);
+    const cleanOgImg = setOgMeta("og:image", DEFAULT_OG_IMAGE);
+    const cleanTwTitle = setTwitterMeta("twitter:title", title);
+    const cleanTwDesc = setTwitterMeta("twitter:description", desc);
+    const cleanTwImg = setTwitterMeta("twitter:image", DEFAULT_OG_IMAGE);
 
-  const primaryButtonClass = theme === "dark"
-    ? "bg-secondary text-white hover:bg-secondary/70"
-    : "bg-primary text-dark hover:bg-primary/70";
+    const cleanJsonLd = setJsonLd("jsonld-org", {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Weeb",
+      url: SITE_URL,
+      description: desc,
+      sameAs: [],
+    });
 
-  const secondaryButtonClass = theme === "dark"
-    ? "border-white text-white hover:bg-white/10"
-    : "border-dark text-dark hover:bg-dark/10";
+    return () => {
+      document.title = prev;
+      cleanCanonical(); cleanHreflang(); cleanOgUrl(); cleanOgTitle();
+      cleanOgDesc(); cleanOgImg(); cleanTwTitle(); cleanTwDesc(); cleanTwImg();
+      cleanJsonLd();
+    };
+  }, [language]);
+
+  const VALUES = [
+    { key: "quality",       icon: IconAward,  title: t.value_quality,       desc: t.value_quality_desc,       accentColor: "#c084fc" },
+    { key: "innovation",    icon: IconRocket, title: t.value_innovation,    desc: t.value_innovation_desc,    accentColor: "#38bdf8" },
+    { key: "community",     icon: IconUsers,  title: t.value_community,     desc: t.value_community_desc,     accentColor: "#34d399" },
+    { key: "accessibility", icon: IconGlobe,  title: t.value_accessibility, desc: t.value_accessibility_desc, accentColor: "#fb923c" },
+  ];
 
   return (
-    <div className={`min-h-screen ${sectionClass}`}>
+    <div>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <AboutIntro />
 
-      {/* Mission Section */}
-      <section className="px-6 py-12 max-w-4xl mx-auto">
+      {/* ── Manifesto: Mission + Vision ──────────────────────────────────── */}
+      <section
+        className="max-w-2xl mx-auto px-6 py-16"
+        aria-label={language === "fr" ? "Mission et vision" : "Mission and vision"}
+      >
+        {/* Mission */}
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15,
-            duration: 0.6 
-          }}
-          whileHover={{ scale: 1.02, y: -5 }}
-          className={`rounded-xl border shadow-lg p-8 ${cardClass}`}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <motion.h2 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className={`text-3xl font-bold mb-4 ${
-              theme === "dark" ? "text-primary" : "text-secondary"
+          <SectionLabel isDark={isDark}>
+            {language === "fr" ? "Mission" : "Mission"}
+          </SectionLabel>
+          <motion.h2
+            className={`font-display font-extrabold text-2xl md:text-3xl tracking-tight leading-snug mb-5 ${
+              isDark ? "text-white" : "text-dark"
             }`}
           >
             {t.mission_title}
           </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-base md:text-lg leading-relaxed"
+          <motion.p
+            className={`text-base md:text-lg leading-[1.8] ${isDark ? "text-white/65" : "text-dark/65"}`}
           >
             {t.mission_text}
           </motion.p>
         </motion.div>
-      </section>
 
-      {/* Vision Section */}
-      <section className="px-6 py-12 max-w-4xl mx-auto">
+        {/* Divider */}
+        <div
+          aria-hidden="true"
+          className={`my-12 border-t ${isDark ? "border-border" : "border-gray-200"}`}
+        />
+
+        {/* Vision */}
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15,
-            duration: 0.6,
-            delay: 0.1 
-          }}
-          whileHover={{ scale: 1.02, y: -5 }}
-          className={`rounded-xl border shadow-lg p-8 ${cardClass}`}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
-          <motion.h2 
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className={`text-3xl font-bold mb-4 ${
-              theme === "dark" ? "text-primary" : "text-secondary"
+          <SectionLabel isDark={isDark}>
+            {language === "fr" ? "Vision" : "Vision"}
+          </SectionLabel>
+          <motion.h2
+            className={`font-display font-extrabold text-2xl md:text-3xl tracking-tight leading-snug mb-5 ${
+              isDark ? "text-white" : "text-dark"
             }`}
           >
             {t.vision_title}
           </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-            className="text-base md:text-lg leading-relaxed"
+          <motion.p
+            className={`text-base md:text-lg leading-[1.8] ${isDark ? "text-white/65" : "text-dark/65"}`}
           >
             {t.vision_text}
           </motion.p>
         </motion.div>
       </section>
 
-      {/* Values Section */}
-      <section className="px-6 py-12 max-w-6xl mx-auto">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
+      {/* ── Values ───────────────────────────────────────────────────────── */}
+      <section className="max-w-5xl mx-auto px-6 py-10 pb-16">
+        <motion.div
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15,
-            duration: 0.6 
-          }}
-          className={`text-3xl font-bold text-center mb-8 ${
-            theme === "dark" ? "text-white" : "text-dark"
-          }`}
+          transition={{ duration: 0.4 }}
+          className="mb-8"
         >
-          {t.values_title}
-        </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            { key: "quality", title: t.value_quality, desc: t.value_quality_desc, icon: IconAward },
-            { key: "innovation", title: t.value_innovation, desc: t.value_innovation_desc, icon: IconRocket },
-            { key: "community", title: t.value_community, desc: t.value_community_desc, icon: IconUsers },
-            { key: "accessibility", title: t.value_accessibility, desc: t.value_accessibility_desc, icon: IconUniversalAccess },
-          ].map((value, index) => {
-            const IconComponent = value.icon;
-            return (
-              <motion.div
-                key={value.key}
-                initial={{ opacity: 0, y: 30, scale: 0.9 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 100, 
-                  damping: 15,
-                  duration: 0.5, 
-                  delay: 0.1 + index * 0.1 
-                }}
-                whileHover={{ 
-                  scale: 1.05, 
-                  y: -8,
-                  transition: { duration: 0.3 }
-                }}
-                className={`rounded-xl border p-6 text-center cursor-pointer ${valueCardClass}`}
-              >
-                <div className="flex flex-col items-center gap-4 mb-4">
-                  <motion.div 
-                    className={`p-3 rounded-lg ${
-                      theme === "dark" ? "bg-primary/20 text-primary" : "bg-secondary/20 text-secondary"
-                    }`}
-                    whileHover={{ 
-                      rotate: [0, -10, 10, -10, 0],
-                      scale: 1.1,
-                      transition: { duration: 0.5 }
-                    }}
-                  >
-                    <IconComponent size={24} />
-                  </motion.div>
-                  <motion.h3 
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    className={`text-xl font-bold ${
-                      theme === "dark" ? "text-primary" : "text-secondary"
-                    }`}
-                  >
-                    {value.title}
-                  </motion.h3>
-                </div>
-                <motion.p 
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="text-sm md:text-base leading-relaxed"
-                >
-                  {value.desc}
-                </motion.p>
-              </motion.div>
-            );
-          })}
+          <motion.h2
+            className={`font-display font-extrabold text-3xl tracking-tight ${isDark ? "text-white" : "text-dark"}`}
+          >
+            {t.values_title}
+          </motion.h2>
+          <p className={`mt-2 text-sm ${isDark ? "text-white/60" : "text-dark/40"}`}>
+            {language === "fr"
+              ? "Les principes qui guident chaque décision."
+              : "The principles that guide every decision."}
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {VALUES.map(({ key, icon, title, desc, accentColor }, idx) => (
+            <ValueCard
+              key={key}
+              icon={icon}
+              title={title}
+              desc={desc}
+              isDark={isDark}
+              accentColor={accentColor}
+              delay={idx * 0.07}
+            />
+          ))}
         </div>
       </section>
 
-      {/* Team Section */}
-      <section className="px-6 py-12 max-w-4xl mx-auto">
+      {/* ── Team ─────────────────────────────────────────────────────────── */}
+      <section className="max-w-3xl mx-auto px-6 py-12 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15,
-            duration: 0.6 
-          }}
-          whileHover={{ scale: 1.02, y: -5 }}
-          className={`rounded-xl border shadow-lg p-8 text-center ${cardClass}`}
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5 }}
         >
-          <motion.h2 
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className={`text-3xl font-bold mb-4 ${
-              theme === "dark" ? "text-primary" : "text-secondary"
+          {/* Large decorative quote mark */}
+          <div
+            aria-hidden="true"
+            className="font-display font-extrabold text-8xl leading-none mb-4 select-none"
+            style={{ color: isDark ? "rgba(192,132,252,0.18)" : "rgba(147,51,234,0.12)" }}
+          >
+            "
+          </div>
+
+          <motion.h2
+            className={`font-display font-extrabold text-2xl md:text-3xl tracking-tight mb-5 ${
+              isDark ? "text-white" : "text-dark"
             }`}
           >
             {t.team_title}
           </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-base md:text-lg leading-relaxed"
+
+          <motion.p
+            className={`text-base md:text-lg leading-[1.8] max-w-xl mx-auto ${
+              isDark ? "text-white/65" : "text-dark/65"
+            }`}
           >
             {t.team_text}
           </motion.p>
         </motion.div>
       </section>
 
-      {/* CTA Section */}
-      <section className="px-6 py-16 max-w-4xl mx-auto">
+      {/* ── CTA ──────────────────────────────────────────────────────────── */}
+      <section className="max-w-5xl mx-auto px-6 py-10 pb-20">
         <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.95 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 100, 
-            damping: 15,
-            duration: 0.6 
+          initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          className="relative overflow-hidden rounded-3xl px-8 py-16 md:py-20 text-center"
+          style={{
+            background: isDark
+              ? "linear-gradient(135deg, rgba(192,132,252,0.08) 0%, rgba(147,51,234,0.12) 100%)"
+              : "linear-gradient(135deg, rgba(192,132,252,0.06) 0%, rgba(147,51,234,0.09) 100%)",
+            border: isDark ? "1px solid rgba(192,132,252,0.15)" : "1px solid rgba(147,51,234,0.12)",
           }}
-          whileHover={{ scale: 1.02, y: -5 }}
-          className={`rounded-xl border shadow-lg p-8 text-center ${cardClass}`}
         >
-          <motion.h2 
-            initial={{ opacity: 0, y: -10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className={`text-3xl font-bold mb-4 ${
-              theme === "dark" ? "text-white" : "text-dark"
-            }`}
-          >
-            {t.cta_title}
-          </motion.h2>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.5 }}
-            className={`text-lg mb-8 ${
-              theme === "dark" ? "text-white/80" : "text-dark/80"
-            }`}
-          >
-            {t.cta_text}
-          </motion.p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4, type: "spring", stiffness: 150 }}
-              whileHover={{ scale: 1.1, y: -3 }}
-              whileTap={{ scale: 0.95 }}
+          {/* Decorative glow */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: isDark
+                ? "radial-gradient(ellipse 60% 40% at 50% 110%, rgba(192,132,252,0.10), transparent)"
+                : "radial-gradient(ellipse 60% 40% at 50% 110%, rgba(147,51,234,0.05), transparent)",
+            }}
+          />
+
+          <div className="relative">
+            <motion.h2
+              className={`font-display font-extrabold tracking-tight ${isDark ? "text-white" : "text-dark"}`}
+              style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
             >
+              {t.cta_title}
+            </motion.h2>
+
+            <motion.p
+              className={`mt-4 text-base max-w-md mx-auto ${isDark ? "text-white/55" : "text-dark/55"}`}
+            >
+              {t.cta_text}
+            </motion.p>
+
+            {/* CTAs — links tested by href and accessible name */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-3 items-center justify-center">
               <Link
                 to="/blog"
-                className={`px-6 py-3 rounded-md shadow transition-colors duration-200 ease-in-out focus:outline-none ${primaryButtonClass}`}
+                className={`inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold transition-colors duration-150 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  isDark
+                    ? "bg-primary text-dark hover:bg-white"
+                    : "bg-secondary text-white hover:bg-primary"
+                }`}
               >
                 {t.cta_blog}
               </Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, type: "spring", stiffness: 150 }}
-              whileHover={{ scale: 1.1, y: -3 }}
-              whileTap={{ scale: 0.95 }}
-            >
+
               <Link
                 to="/formations"
-                className={`px-6 py-3 rounded-md shadow transition-colors duration-200 ease-in-out focus:outline-none ${primaryButtonClass}`}
+                className={`inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold transition-colors duration-150 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  isDark
+                    ? "bg-primary text-dark hover:bg-white"
+                    : "bg-secondary text-white hover:bg-primary"
+                }`}
               >
                 {t.cta_formations}
               </Link>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6, type: "spring", stiffness: 150 }}
-              whileHover={{ scale: 1.1, y: -3 }}
-              whileTap={{ scale: 0.95 }}
-            >
+
               <Link
                 to="/contact"
-                className={`border px-6 py-3 rounded-md transition-colors duration-200 ease-in-out focus:outline-none ${secondaryButtonClass}`}
+                className={`inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-semibold border transition-colors duration-150 min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                  isDark
+                    ? "border-border text-white/70 hover:text-white hover:border-border-2"
+                    : "border-gray-300 text-dark/70 hover:text-dark hover:border-gray-400"
+                }`}
               >
                 {t.cta_contact}
               </Link>
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </section>
     </div>
   );
 }
-

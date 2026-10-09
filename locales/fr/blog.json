@@ -20,10 +20,25 @@
     "back": "Retour au blog",
     "read_time": "Lecture",
     "min": "min",
+    "like": "J'aime",
+    "unlike": "Je n'aime plus",
+    "likes": "j'aime",
+    "share": "Partager",
     "copy_link": "Copier le lien",
     "copied": "Copié !",
     "not_found_title": "Article introuvable",
     "not_found_desc": "L’article demandé n’existe pas ou a été supprimé.",
-    "all_genres": "Tous les genres"
+    "all_genres": "Tous les genres",
+    "comments_title": "Commentaires",
+    "comment_placeholder": "Écrivez votre commentaire...",
+    "comment_reply_placeholder": "Répondre à ce commentaire...",
+    "comment_submit": "Publier",
+    "comment_reply": "Répondre",
+    "comment_cancel": "Annuler",
+    "comment_delete": "Supprimer",
+    "comment_login_required": "Connectez-vous pour laisser un commentaire.",
+    "comment_empty": "Aucun commentaire pour le moment. Soyez le premier !",
+    "comment_error": "Impossible de charger les commentaires.",
+    "comment_submit_error": "Erreur lors de la publication. Réessayez."
   }
   

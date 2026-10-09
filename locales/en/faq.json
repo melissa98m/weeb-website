@@ -1,0 +1,60 @@
+{
+    "faq_title": "Frequently asked questions",
+    "faq_subtitle": "Find a quick answer before reaching out to us.",
+    "faq_not_found": "Can't find what you're looking for?",
+    "faq_cta": "Send us a message",
+    "faq_categories": [
+        {
+            "category": "Courses",
+            "items": [
+                {
+                    "q": "How do I access my courses after signing up?",
+                    "a": "Go to your personal space via the top-right menu. All your purchased or free courses are listed there, ready to follow at your own pace."
+                },
+                {
+                    "q": "Are courses available offline?",
+                    "a": "Not yet. We're working on an offline mode coming soon. For now, an internet connection is required to access the content."
+                },
+                {
+                    "q": "Can I learn at my own pace?",
+                    "a": "Yes, all our courses are fully self-paced. No live sessions, no expiry dates — advance whenever you want and come back as many times as you need."
+                }
+            ]
+        },
+        {
+            "category": "Account & security",
+            "items": [
+                {
+                    "q": "How do I change my password?",
+                    "a": "From your profile, go to security settings and click \"Change Password\". A confirmation link will be sent to your email address."
+                },
+                {
+                    "q": "How do I delete my account?",
+                    "a": "In your profile, under \"Personal Data\", you will find the deletion option. In accordance with GDPR, all your data is permanently erased within 30 days."
+                }
+            ]
+        },
+        {
+            "category": "Newsletter",
+            "items": [
+                {
+                    "q": "How do I unsubscribe from the newsletter?",
+                    "a": "Click the \"Unsubscribe\" link at the bottom of any email you received. You can also do it from your profile, under the \"Notifications\" tab."
+                }
+            ]
+        },
+        {
+            "category": "Blog & content",
+            "items": [
+                {
+                    "q": "How do I suggest an article topic?",
+                    "a": "Use the form below and select the \"Content Suggestion\" topic. We read all suggestions, even if we can't always act on them right away."
+                },
+                {
+                    "q": "Are articles available in multiple languages?",
+                    "a": "Yes, the site is available in French and English. Use the language selector in the navigation menu to switch. Some articles may only be available in one language."
+                }
+            ]
+        }
+    ]
+}

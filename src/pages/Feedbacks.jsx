@@ -20,6 +20,17 @@ export default function Feedback() {
   const { theme } = useTheme();
   const { language } = useLanguage();
 
+  useEffect(() => {
+    const prev = document.title;
+    document.title = "Feedbacks — Admin | Weeb";
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
+
   const t = useMemo(
     () =>
       language === "fr"
@@ -76,9 +87,9 @@ export default function Feedback() {
 
   const card =
     theme === "dark"
-      ? "bg-[#262626] text-white border-[#333]"
+      ? "bg-surface-2 text-white border-border"
       : "bg-white text-gray-900 border-gray-200";
-  const headRow = theme === "dark" ? "bg-[#232323]" : "bg-gray-50";
+  const headRow = theme === "dark" ? "bg-surface-2" : "bg-gray-50";
   const muted = theme === "dark" ? "text-white/70" : "text-gray-600";
 
   const [items, setItems] = useState([]);
@@ -277,7 +288,7 @@ export default function Feedback() {
 
   if (!canSee) {
     return (
-      <main className="px-6 py-16 max-w-5xl mx-auto">
+      <main className="px-4 md:px-6 py-6">
         <div className={`rounded-xl border p-6 ${card}`}>
           <h1 className="text-xl font-semibold mb-2">{t.title}</h1>
           <p className={theme === "dark" ? "text-white/70" : "text-gray-600"}>
@@ -445,7 +456,7 @@ export default function Feedback() {
               return (
                 <tr
                   key={row.id ?? `${row.userId}-${row.formationId}`}
-                  className="border-t border-gray-200 dark:border-[#333]"
+                  className="border-t border-gray-200 dark:border-border"
                 >
                   <td className="px-4 py-2 align-top">
                     <div className="whitespace-normal break-words">{row.userName}</div>
@@ -508,7 +519,7 @@ export default function Feedback() {
   );
 
   return (
-    <main className="pt-[34px] md:pt-[58px] bg-background text-white p-6">
+    <main className="px-4 md:px-6 py-6">
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between mb-4">
         <h1 className="text-xl sm:text-2xl font-semibold">{t.title}</h1>
@@ -521,7 +532,7 @@ export default function Feedback() {
               onChange={(e) => setSort(e.target.value)}
               className={`px-2 py-1 rounded-md border text-sm ${
                 theme === "dark"
-                  ? "bg-[#1c1c1c] text-white border-[#333]"
+                  ? "bg-surface text-white border-border"
                   : "bg-white text-gray-900 border-gray-200"
               }`}
             >

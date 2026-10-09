@@ -29,5 +29,11 @@
   "gdpr_delete_keyword": "SUPPRIMER",
   "gdpr_delete_cta": "Supprimer mon compte",
   "gdpr_delete_error": "Impossible de supprimer votre compte.",
-  "gdpr_delete_success": "Votre compte a ete supprime."
+  "gdpr_delete_success": "Votre compte a ete supprime.",
+  "dashboard_title": "Mon tableau de bord",
+  "dashboard_enrolled_on": "Inscrit le",
+  "dashboard_articles_read": "Articles lus",
+  "dashboard_formations": "Formations suivies",
+  "dashboard_feedback_sent": "Feedbacks envoyés",
+  "dashboard_recent_formations": "Formations récentes"
 }

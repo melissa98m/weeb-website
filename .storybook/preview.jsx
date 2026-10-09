@@ -1,11 +1,24 @@
+import React from "react";
 import "../src/index.css";
 import { installStorybookMocks } from "../src/stories/storybook-mocks";
+import { StoryProviders, buildMockAuth } from "../src/stories/StoryProviders";
 
 installStorybookMocks();
 
 /** @type { import('@storybook/react-vite').Preview } */
 const preview = {
   tags: ["autodocs"],
+  decorators: [
+    (Story, context) => {
+      const theme = context.globals?.theme ?? context.args?.theme ?? "light";
+      const language = context.globals?.language ?? context.args?.language ?? "fr";
+      return (
+        <StoryProviders theme={theme} language={language} auth={buildMockAuth()}>
+          <Story />
+        </StoryProviders>
+      );
+    },
+  ],
   parameters: {
     controls: {
       matchers: {
@@ -14,9 +27,6 @@ const preview = {
       },
     },
     a11y: {
-      // 'todo' - show a11y violations in the test UI only
-      // 'error' - fail CI on a11y violations
-      // 'off' - skip a11y checks entirely
       test: "todo",
     },
   },

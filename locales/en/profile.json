@@ -29,5 +29,11 @@
   "gdpr_delete_keyword": "DELETE",
   "gdpr_delete_cta": "Delete my account",
   "gdpr_delete_error": "Unable to delete your account.",
-  "gdpr_delete_success": "Your account has been deleted."
+  "gdpr_delete_success": "Your account has been deleted.",
+  "dashboard_title": "My dashboard",
+  "dashboard_enrolled_on": "Enrolled on",
+  "dashboard_articles_read": "Articles read",
+  "dashboard_formations": "Courses followed",
+  "dashboard_feedback_sent": "Feedbacks sent",
+  "dashboard_recent_formations": "Recent courses"
 }

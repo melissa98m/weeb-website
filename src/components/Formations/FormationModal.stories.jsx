@@ -2,6 +2,9 @@ import React from "react";
 import { MemoryRouter } from "react-router-dom";
 import FormationModal from "./FormationModal";
 import Button from "../Button";
+import { AuthContext } from "../../context/AuthContext";
+
+const mockAuth = { user: null, isAuthenticated: false, loading: false, logout: () => {} };
 
 const formation = {
   id: 1,
@@ -21,9 +24,11 @@ const meta = {
   parameters: { layout: "fullscreen" },
   decorators: [
     (Story) => (
-      <MemoryRouter>
-        <Story />
-      </MemoryRouter>
+      <AuthContext.Provider value={mockAuth}>
+        <MemoryRouter>
+          <Story />
+        </MemoryRouter>
+      </AuthContext.Provider>
     ),
   ],
   argTypes: {

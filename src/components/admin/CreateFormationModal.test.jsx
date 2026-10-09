@@ -26,8 +26,6 @@ afterEach(() => {
 
 describe("CreateFormationModal", () => {
   it("shows validation error when name is empty", async () => {
-    const user = userEvent.setup();
-
     render(
       <CreateFormationModal open onClose={() => {}} onCreated={() => {}} apiBase="/api" />
     );

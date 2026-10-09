@@ -16,6 +16,19 @@ vi.mock("../context/ThemeContext", () => ({
   useTheme: vi.fn(),
 }));
 
+vi.mock("../context/LanguageContext", () => ({
+  useLanguage: () => ({ language: "fr" }),
+}));
+
+vi.mock("../lib/seo", () => ({
+  setCanonical: () => () => {},
+  setOgMeta: () => () => {},
+  setHreflang: () => () => {},
+  setTwitterMeta: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "https://weeb.melissa-mangione.com/og-image.jpg",
+}));
+
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
 });

@@ -1,42 +1,45 @@
 {
   "title": "Legal Notice",
-  "updated": "Last updated: 2026-01-20",
+  "updated": "Last updated: January 20, 2026",
   "intro": "This page describes the publisher and the terms of use for this website.",
+  "tocLabel": "Table of contents",
+  "backToTop": "Back to top",
   "sections": [
     {
       "title": "Publisher",
       "items": [
-        "Weeb, Inc.",
-        "Address: to be completed",
+        "Weeb",
+        "Country: France",
         "Email: contact@weebbackend.melissa-mangione.com",
-        "Publication director: to be completed"
+        "Publication director: Melissa Mangione"
       ]
     },
     {
       "title": "Hosting",
       "items": [
-        "Hosting provider: to be completed",
-        "Address: to be completed"
+        "Hosting provider: Vercel Inc.",
+        "Address: 340 S Lemon Ave #4133, Walnut, CA 91789, United States",
+        "Website: vercel.com"
       ]
     },
     {
       "title": "Intellectual property",
       "items": [
         "All content on this site is protected by applicable intellectual property laws.",
-        "Any reproduction or reuse without authorization is prohibited."
+        "Any reproduction or reuse without prior authorization is prohibited."
       ]
     },
     {
       "title": "Liability",
       "items": [
-        "We strive to provide accurate information but cannot guarantee it.",
+        "We strive to provide accurate information but cannot guarantee its completeness.",
         "Users are responsible for their use of the site."
       ]
     },
     {
       "title": "Contact",
       "items": [
-        "For any question, please use the contact page."
+        "For any question regarding the site, contact us at: contact@weebbackend.melissa-mangione.com"
       ]
     }
   ]

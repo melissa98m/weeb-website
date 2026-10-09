@@ -9,7 +9,11 @@ const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(file
 
 // More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // vite-plugin-pwa retiré (Phase 3 non commencée — vulnérabilités HIGH dans
+    // la chaîne serialize-javascript/workbox-build, GHSA-5c6j-r48x-rmvq)
+  ],
   resolve: {
     alias: {}
   },
@@ -70,9 +74,27 @@ export default defineConfig({
     // Désactiver les source maps en production pour réduire la taille
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'framer-motion': ['framer-motion']
+        manualChunks(id) {
+          // Vendor React — stable, long cache
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'react-vendor';
+          }
+          // Framer Motion — gros, rarement mis à jour
+          if (id.includes('node_modules/framer-motion')) {
+            return 'framer-motion';
+          }
+          // Recharts — admin uniquement, long cache séparé
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor')) {
+            return 'recharts-vendor';
+          }
+          // Tiptap + prosemirror — admin uniquement
+          if (id.includes('node_modules/@tiptap') || id.includes('node_modules/prosemirror')) {
+            return 'tiptap-vendor';
+          }
+          // Pages et composants admin — chunk séparé (non chargé par les visiteurs)
+          if (id.includes('/src/pages/admin/') || id.includes('/src/components/admin/') || id.includes('/src/layouts/AdminLayout')) {
+            return 'admin';
+          }
         },
         // Optimiser les noms de fichiers pour le cache
         chunkFileNames: 'assets/js/[name]-[hash].js',

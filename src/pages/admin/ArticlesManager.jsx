@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../context/ThemeContext";
-import { hasAnyRedactionRole } from "../../utils/roles";
+import { useLanguage } from "../../context/LanguageContext";
+import { hasAnyRedactionRole, REDACTION_ROLES } from "../../utils/roles";
+import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
+import AdminPageHeader from "../../components/admin/AdminPageHeader";
+import adminEn from "../../../locales/en/admin.json";
+import adminFr from "../../../locales/fr/admin.json";
 import { safeChipStyle } from "../../utils/colors";
 import PageSizer from "../../components/ui/PageSizer";
 import Pagination from "../../components/ui/Pagination";
@@ -18,28 +23,38 @@ const API_BASE = (() => {
 export default function ArticlesManager() {
   const { user } = useAuth();
   const { theme } = useTheme();
+  const { language } = useLanguage();
+  const t = language === "fr" ? adminFr : adminEn;
+  const isDark = theme === "dark";
 
-  const canRedact = hasAnyRedactionRole(user);
-  if (!user) return <div className="p-6">Veuillez vous connecter.</div>;
-  if (!canRedact) return <div className="p-6 text-red-600">Accès refusé. Réservé aux Rédacteurs.</div>;
+  useEffect(() => {
+    const prev = document.title;
+    document.title = t.page_title_articles;
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) metaRobots.setAttribute("content", "noindex, nofollow");
+    return () => {
+      document.title = prev;
+      if (metaRobots) metaRobots.setAttribute("content", "index, follow");
+    };
+  }, []);
 
-  const card = theme === "dark" ? "bg-[#262626] text-white border-[#333]" : "bg-white text-gray-900 border-gray-200";
+  const card = theme === "dark" ? "bg-surface-2 text-white border-border" : "bg-white text-gray-900 border-gray-200";
   const inputCls = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] placeholder-white/60"
+    ? "bg-surface text-white border-border placeholder-white/60"
     : "bg-white text-gray-900 border-gray-200 placeholder-gray-400";
   const ghostBtn = theme === "dark"
-    ? "bg-[#1c1c1c] text-white border-[#333] hover:bg-[#222]"
+    ? "bg-surface text-white border-border hover:bg-surface-raised"
     : "bg-white text-gray-900 border-gray-200 hover:bg-gray-50";
   const cta = theme === "dark"
     ? "bg-secondary text-white border-secondary hover:brightness-110"
     : "bg-primary text-dark border-primary hover:brightness-110";
 
-  // Liste affichée
+  // Displayed items
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
 
-  // Recherche
+  // Search
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
 
@@ -52,11 +67,19 @@ export default function ArticlesManager() {
   const [genres, setGenres] = useState([]); // [{id,name,color}]
   const [selectedGenreId, setSelectedGenreId] = useState(null);
 
-  // Modale
+  // Active tab
+  const [activeTab, setActiveTab] = useState("articles"); // "articles" | "comments"
+
+  // Comment moderation
+  const [allComments, setAllComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [commentsFilter, setCommentsFilter] = useState("all"); // "all" | "true" | "false"
+
+  // Modal
   const [open, setOpen] = useState(false);
   const [current, setCurrent] = useState(null);
 
-  // Deux contrôleurs distincts
+  // Two separate abort controllers
   const genresCtrlRef = useRef(null);
   const listCtrlRef = useRef(null);
 
@@ -64,7 +87,7 @@ export default function ArticlesManager() {
     ref.current?.abort();
     const ctrl = new AbortController();
     ref.current = ctrl;
-    const t = setTimeout(() => { try { ctrl.abort(); } catch {} }, ms);
+    const t = setTimeout(() => { try { ctrl.abort(); } catch { /* noop */ } }, ms);
     const isAbortError = (e) =>
       ctrl.signal.aborted ||
       e?.name === "AbortError" ||
@@ -103,8 +126,8 @@ export default function ArticlesManager() {
   }, [fetchJSON, startTask]);
 
   const genresForChips = useMemo(
-    () => [{ id: null, name: "Tous", color: null }, ...genres],
-    [genres]
+    () => [{ id: null, name: t.articles_filter_all, color: null }, ...genres],
+    [genres, t]
   );
 
   const load = useCallback(async (p = 1) => {
@@ -132,7 +155,7 @@ export default function ArticlesManager() {
         raw: a,
       }));
 
-      // Filtre local (genre + recherche) comme Blog
+      // Local filter (genre + search) like the Blog page
       const localFiltered = normalized.filter((it) => {
         const genreOk =
           selectedGenreId == null
@@ -159,15 +182,62 @@ export default function ArticlesManager() {
 
   useEffect(() => {
     loadGenres();
-    return () => { try { genresCtrlRef.current?.abort(); } catch {} };
+    return () => { try { genresCtrlRef.current?.abort(); } catch { /* noop */ } };
   }, [loadGenres]);
 
   useEffect(() => { setPage(1); }, [pageSize, debouncedQ, selectedGenreId]);
 
   useEffect(() => {
     load(page);
-    return () => { try { listCtrlRef.current?.abort(); } catch {} };
+    return () => { try { listCtrlRef.current?.abort(); } catch { /* noop */ } };
   }, [page, load]);
+
+  const loadComments = useCallback(async () => {
+    setCommentsLoading(true);
+    try {
+      const params = new URLSearchParams({ page_size: "200" });
+      if (commentsFilter !== "all") params.set("is_approved", commentsFilter);
+      const data = await fetchJSON(`${API_BASE}/admin/comments/?${params.toString()}`, null);
+      setAllComments(Array.isArray(data) ? data : (data.results ?? []));
+    } catch { /* noop */ }
+    finally { setCommentsLoading(false); }
+  }, [fetchJSON, commentsFilter]);
+
+  useEffect(() => {
+    if (activeTab === "comments") loadComments();
+  }, [activeTab, loadComments]);
+
+  const moderateComment = useCallback(async (id, isApproved) => {
+    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? "";
+    try {
+      await fetch(`${API_BASE}/comments/${id}/`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRFToken": csrfToken } : {}),
+        },
+        body: JSON.stringify({ is_approved: isApproved }),
+      });
+      await loadComments();
+    } catch { /* noop */ }
+  }, [loadComments]);
+
+  const deleteComment = useCallback(async (id) => {
+    const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] ?? "";
+    try {
+      await fetch(`${API_BASE}/comments/${id}/`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
+      });
+      await loadComments();
+    } catch { /* noop */ }
+  }, [loadComments]);
+
+  const canRedact = hasAnyRedactionRole(user);
+  if (!user) return <div className="p-6">{t.common_please_login}</div>;
+  if (!canRedact) return <div className="p-6 text-red-600">{t.common_access_denied_redaction}</div>;
 
   const openCreate = () => { setCurrent(null); setOpen(true); };
   const openEdit = (a) => { setCurrent(a.raw); setOpen(true); };
@@ -191,54 +261,164 @@ export default function ArticlesManager() {
 
   return (
     <main className="px-4 md:px-6 py-4 md:py-6">
-      {/* Header */}
-      <header className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-xl md:text-2xl font-bold leading-tight">Gérer les articles</h1>
-          <p className="text-xs mt-1 opacity-80">Recherche, filtre par genre, création/édition.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <input
-            className={`w-64 rounded-xl border px-3 py-2 ${inputCls}`}
-            placeholder="Rechercher un article"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-          <PageSizer pageSize={pageSize} onChange={setPageSize} />
-          <button type="button" onClick={openCreate} className={`rounded-xl border px-3 py-2 ${cta}`}>
-            + Nouvel article
+      <AdminPageHeader
+        title={t.articles_title}
+        subtitle={t.articles_subtitle}
+        icon={() => <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>}
+        iconBg={isDark ? "bg-sky-500/10 text-sky-400" : "bg-sky-100 text-sky-600"}
+        isDark={isDark}
+      >
+        <input
+          className={`w-56 rounded-xl border px-3 py-2 text-sm ${inputCls}`}
+          placeholder={t.articles_search}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <PageSizer pageSize={pageSize} onChange={setPageSize} />
+        <button type="button" onClick={openCreate} className={`rounded-xl border px-4 py-2 text-sm font-medium ${cta}`}>
+          {t.articles_new}
+        </button>
+      </AdminPageHeader>
+
+      {/* Onglets */}
+      <div className="flex gap-2 mt-4 border-b border-current/10">
+        {["articles", "comments"].map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === tab
+                ? "border-primary text-primary"
+                : "border-transparent opacity-60 hover:opacity-80"
+            }`}
+          >
+            {tab === "articles" ? t.articles_tab_articles : t.articles_tab_comments}
           </button>
-        </div>
-      </header>
+        ))}
+      </div>
 
       {/* Filtres genres (chips comme blog) */}
-      {!open && (
+      {activeTab === "articles" && !open && (
         <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-          <div className="text-sm opacity-80 mb-2">Filtrer par genre</div>
+          <div className="text-sm opacity-80 mb-2">{t.articles_filter_genre}</div>
           <GenreChips
             genres={genresForChips}
             selectedId={selectedGenreId}
-            onChange={(id) => setSelectedGenreId(id)} // id peut être null (“Tous”)
+            onChange={(id) => setSelectedGenreId(id)} // id can be null (“All”)
             theme={theme}
           />
         </section>
       )}
 
+      {/* Comment moderation panel */}
+      {activeTab === "comments" && (
+        <section className={`mt-3 rounded-2xl border p-4 ${card}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-sm font-medium">{t.articles_filter_label}</span>
+            {[["all", t.articles_filter_all], ["true", t.articles_filter_approved], ["false", t.articles_filter_pending]].map(([val, label]) => (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setCommentsFilter(val)}
+                className={`px-3 py-1 rounded-full text-xs border transition ${
+                  commentsFilter === val
+                    ? "bg-primary/20 text-primary border-primary/30"
+                    : ghostBtn
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {commentsLoading && <div className="text-sm opacity-70 py-4">{t.common_loading}</div>}
+          {!commentsLoading && allComments.length === 0 && (
+            <div className="text-sm opacity-70 py-4">{t.articles_no_comments}</div>
+          )}
+          {!commentsLoading && allComments.length > 0 && (
+            <ul className="space-y-3">
+              {allComments.map((c) => (
+                <li
+                  key={c.id}
+                  className={`rounded-xl border p-4 ${
+                    c.is_approved
+                      ? theme === "dark" ? "border-border" : "border-gray-200"
+                      : "border-orange-400/40 bg-orange-50/5"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="font-medium text-sm">
+                          {c.author?.username || "—"}
+                        </span>
+                        <span className="text-xs opacity-60">
+                          sur article #{c.article}
+                        </span>
+                        {!c.is_approved && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-orange-400/20 text-orange-400">
+                            {t.articles_comment_pending}
+                          </span>
+                        )}
+                        {c.parent && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-400/20 text-blue-400">
+                            {t.articles_comment_reply}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm leading-relaxed">{c.content}</p>
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      {!c.is_approved && (
+                        <button
+                          type="button"
+                          onClick={() => moderateComment(c.id, true)}
+                          className="px-2 py-1 rounded-md text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30"
+                        >
+                          {t.articles_comment_approve}
+                        </button>
+                      )}
+                      {c.is_approved && (
+                        <button
+                          type="button"
+                          onClick={() => moderateComment(c.id, false)}
+                          className="px-2 py-1 rounded-md text-xs bg-orange-400/20 text-orange-400 hover:bg-orange-400/30"
+                        >
+                          {t.articles_comment_hide}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => deleteComment(c.id)}
+                        className="px-2 py-1 rounded-md text-xs bg-red-400/20 text-red-400 hover:bg-red-400/30"
+                      >
+                        {t.common_delete}
+                      </button>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {/* Liste */}
-      <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
-        {loading && <div className="p-4 text-sm opacity-80">Chargement…</div>}
+      {activeTab === "articles" && <section className={`mt-3 rounded-2xl border p-3 ${card}`}>
+        {loading && <div className="p-4 text-sm opacity-80">{t.common_loading}</div>}
         {!loading && err && (
           <div className="p-4 text-sm text-red-600 dark:text-red-400">
-            Erreur : {err}
+            {t.common_error.replace("{message}", err)}
             <div className="mt-2">
               <button className={`rounded-xl border px-3 py-1 text-sm ${ghostBtn}`} onClick={() => load(page)}>
-                Recharger
+                {t.common_reload}
               </button>
             </div>
           </div>
         )}
         {!loading && !err && items.length === 0 && (
-          <div className="p-4 text-sm opacity-80">Aucun article.</div>
+          <div className="p-4 text-sm opacity-80">{t.articles_no_articles}</div>
         )}
 
         {!loading && !err && items.length > 0 && (
@@ -285,12 +465,14 @@ export default function ArticlesManager() {
             ))}
           </ul>
         )}
-      </section>
+      </section>}
 
-      {/* Pagination */}
-      <div className="mt-2">
-        <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
-      </div>
+      {/* Pagination (articles uniquement) */}
+      {activeTab === "articles" && (
+        <div className="mt-2">
+          <Pagination page={page} pageCount={pageCount} onPageChange={setPage} theme={theme} />
+        </div>
+      )}
 
       {/* Modale */}
       <ArticleEditorModal
@@ -302,6 +484,7 @@ export default function ArticlesManager() {
         onSaved={onSaved}
         onDeleted={onDeleted}
       />
+      <AdminAccessFooter allowedRoles={REDACTION_ROLES} />
     </main>
   );
 }

@@ -6,6 +6,7 @@ import Formations from "./Formations";
 import formationsEn from "../../locales/en/formations.json";
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
+import { useAuth } from "../context/AuthContext";
 
 vi.mock("framer-motion", () => ({
   motion: {
@@ -24,6 +25,20 @@ vi.mock("../context/LanguageContext", () => ({
   useLanguage: vi.fn(),
 }));
 
+vi.mock("../context/AuthContext", () => ({
+  useAuth: vi.fn(),
+}));
+
+vi.mock("../lib/seo", () => ({
+  setCanonical: () => () => {},
+  setOgMeta: () => () => {},
+  setHreflang: () => () => {},
+  setJsonLd: () => () => {},
+  setTwitterMeta: () => () => {},
+  SITE_URL: "https://weeb.melissa-mangione.com",
+  DEFAULT_OG_IMAGE: "/og.jpg",
+}));
+
 vi.mock("../components/Formations/FormationCard", () => ({
   default: ({ f, onView }) => (
     <button type="button" onClick={() => onView(f)}>
@@ -39,6 +54,7 @@ vi.mock("../components/Formations/FormationModal", () => ({
 beforeEach(() => {
   useTheme.mockReturnValue({ theme: "light" });
   useLanguage.mockReturnValue({ language: "en" });
+  useAuth.mockReturnValue({ user: null });
   vi.stubGlobal("fetch", vi.fn());
 });
 

@@ -35,14 +35,14 @@ function Autocomplete({
     "w-full rounded-xl border px-3 py-2 outline-none transition disabled:opacity-50 disabled:cursor-not-allowed";
   const inputThemed =
     theme === "dark"
-      ? "bg-[#1c1c1c] text-white border-[#333] placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
+      ? "bg-surface text-white border-border placeholder:text-white/50 focus:ring-2 focus:ring-white/20 focus:border-white/30"
       : "bg-white text-gray-900 border-gray-200 placeholder:text-gray-400 focus:ring-2 focus:ring-black/10 focus:border-gray-300";
 
   const dropdownBase =
     "absolute z-50 w-full mt-1 rounded-xl border shadow-lg max-h-60 overflow-auto";
   const dropdownThemed =
     theme === "dark"
-      ? "bg-[#1c1c1c] border-[#333] shadow-black/50"
+      ? "bg-surface border-border shadow-black/50"
       : "bg-white border-gray-200 shadow-gray-200/50";
 
   const optionBase = "px-3 py-2 cursor-pointer transition";
