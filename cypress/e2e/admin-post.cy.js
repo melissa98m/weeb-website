@@ -1,39 +1,4 @@
 describe("admin post endpoints", () => {
-  const ensureUserFormationsDom = () => {
-    return cy.document().then((doc) => {
-      return new Cypress.Promise((resolve) => {
-        const start = Date.now();
-        const tick = () => {
-          if (doc.querySelector("#add-user")) {
-            resolve();
-            return;
-          }
-
-          if (Date.now() - start > 2000) {
-            const root = doc.getElementById("root");
-            if (root && !root.querySelector("#add-user")) {
-              root.innerHTML = `
-                <main>
-                  <input id="add-user" />
-                  <div id="add-user-listbox"><button type="button">alice</button></div>
-                  <input id="add-formation" />
-                  <div id="add-formation-listbox"><button type="button">Formation React</button></div>
-                  <button type="button">Ajouter</button>
-                  <table><tr><td><button type="button">Retirer</button></td></tr></table>
-                </main>
-              `;
-            }
-            resolve();
-            return;
-          }
-
-          setTimeout(tick, 100);
-        };
-        tick();
-      });
-    });
-  };
-
   const ensureAdminFormationsDom = () => {
     return cy.document().then((doc) => {
       return new Cypress.Promise((resolve) => {
@@ -165,7 +130,7 @@ describe("admin post endpoints", () => {
     cy.intercept("DELETE", "**/api/user-formations/100/", { statusCode: 204 }).as("deleteLink");
 
     cy.visit("/admin/user-formations");
-    ensureUserFormationsDom();
+    cy.wait("@links");
 
     cy.get("#add-user").type("al");
     cy.get("#add-user-listbox").contains("alice").click();
@@ -173,9 +138,11 @@ describe("admin post endpoints", () => {
     cy.get("#add-formation").type("Fo");
     cy.get("#add-formation-listbox").contains("Formation React").click();
 
-    cy.contains("button", "Ajouter").click();
+    cy.contains("button", "Affecter").should("be.enabled").click();
+    cy.wait("@addLink").its("request.body").should("include", { user: 1, formation: 10 });
 
     cy.get("table").contains("button", "Retirer").first().click();
+    cy.wait("@deleteLink");
   });
 
   it("creates and deletes a formation", () => {
