@@ -158,7 +158,12 @@ describe("accessibility", () => {
     cy.visit("/");
     ensureHeaderDom();
 
-    cy.get("button[aria-label='Ouvrir la recherche']").focus().should("be.focused");
+    // Desktop and mobile triggers share the label prefix; only one is visible per viewport
+    cy.get("header button[aria-label^='Ouvrir la recherche']")
+      .filter(":visible")
+      .should("have.length", 1)
+      .focus()
+      .should("be.focused");
   });
 
   it("les liens de navigation ont des href valides", () => {

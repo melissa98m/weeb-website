@@ -1,49 +1,5 @@
 describe("profile", () => {
-  const ensureProfileDom = () => {
-    return cy.document().then((doc) => {
-      return new Cypress.Promise((resolve) => {
-        const start = Date.now();
-        const tick = () => {
-          if (doc.querySelector("h1")) {
-            resolve();
-            return;
-          }
-
-          if (Date.now() - start > 2000) {
-            const root = doc.getElementById("root");
-            if (root && !root.querySelector("h1")) {
-              root.innerHTML = `
-                <main>
-                  <h1>Mon profil</h1>
-                  <h2>Mes formations</h2>
-                  <div>Formation React</div>
-                  <span>Feedback</span>
-                  <button type="button">Donner un feedback</button>
-                  <div role="dialog" style="display:none">
-                    <textarea></textarea>
-                    <button type="button">Envoyer</button>
-                  </div>
-                </main>
-              `;
-
-              const dialog = root.querySelector("[role='dialog']");
-              const openBtn = root.querySelector("button");
-              if (openBtn && dialog) {
-                openBtn.addEventListener("click", () => {
-                  dialog.style.display = "block";
-                });
-              }
-            }
-            resolve();
-            return;
-          }
-
-          setTimeout(tick, 100);
-        };
-        tick();
-      });
-    });
-  };
+  const FEEDBACK_DIALOG = "[role='dialog'][aria-labelledby='feedback-modal-title']";
 
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
@@ -57,30 +13,43 @@ describe("profile", () => {
       statusCode: 200,
       body: { progress_percent: 100, modules: [] },
     }).as("progress");
+    // Formation 201 already has a feedback, formation 202 does not
     cy.fixture("profile_feedbacks").then((data) => {
       cy.intercept("GET", "**/api/feedbacks/**", { statusCode: 200, body: data }).as("feedbacks");
     });
     cy.intercept("POST", "**/api/feedbacks/", {
-      statusCode: 200,
-      body: { id: 999, formation: 201, feedback_content: "Super" }
+      statusCode: 201,
+      body: { id: 999, formation: 202, feedback_content: "Formation claire et utile." },
     }).as("sendFeedback");
   });
 
   it("shows formations and allows sending feedback", () => {
     cy.visit("/profile");
-    ensureProfileDom();
+    cy.wait(["@me", "@formations", "@feedbacks"]);
 
-    cy.contains("h1", "Mon profil").should("be.visible");
+    // The h1 shows the user's display name since the sidebar layout (8a203f1)
+    cy.contains("h1", "melissa").should("be.visible");
     cy.contains("h2", "Mes formations").should("be.visible");
+    cy.contains("Formation React").should("be.visible");
+    cy.contains("Formation Node").should("be.visible");
 
-    cy.contains("div", "Formation React").should("be.visible");
-    cy.contains("button", "Donner un feedback").should("be.visible");
+    // Only the formation without feedback offers the button
+    cy.get("span").filter(":contains('Feedback déjà envoyé')").should("have.length", 1);
+    cy.get("button").filter(":contains('Donner un feedback')").should("have.length", 1).click();
 
-    cy.contains("button", "Donner un feedback").click();
-    cy.get("[role='dialog']").should("be.visible");
-    cy.get("textarea").type("Formation claire et utile.");
-    cy.contains("button", "Envoyer").click();
+    cy.get(FEEDBACK_DIALOG)
+      .should("be.visible")
+      .within(() => {
+        cy.contains("Formation Node").should("be.visible");
+        cy.get("textarea").type("Formation claire et utile.");
+        cy.contains("button", "Envoyer").click();
+      });
 
-    cy.contains("span", "Feedback").should("be.visible");
+    cy.wait("@sendFeedback")
+      .its("request.body")
+      .should("deep.equal", { formation: 202, feedback_content: "Formation claire et utile." });
+    cy.get(FEEDBACK_DIALOG).should("not.exist");
+    cy.contains("button", "Donner un feedback").should("not.exist");
+    cy.get("span").filter(":contains('Feedback déjà envoyé')").should("have.length", 2);
   });
 });
