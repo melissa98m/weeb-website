@@ -4,6 +4,16 @@ describe("dashboard", () => {
   // formations timeline (DashboardStats with hideCards).
   const DASHBOARD_REGION = "section[aria-label='Mon tableau de bord']";
 
+  // Waits for real data: the region renders once auth resolves, and the
+  // aria-busy skeleton goes away once the dashboard response is applied.
+  // Longer timeout because CI runners are noticeably slower than local runs.
+  const visitProfile = () => {
+    cy.visit("/profile");
+    cy.wait("@dashboard");
+    cy.get(DASHBOARD_REGION, { timeout: 10000 }).should("exist");
+    cy.get(`${DASHBOARD_REGION} [aria-busy='true']`, { timeout: 10000 }).should("not.exist");
+  };
+
   const miniStat = (label) => cy.contains("aside p", new RegExp(`^${label}$`)).parent();
 
   beforeEach(() => {
@@ -24,16 +34,14 @@ describe("dashboard", () => {
   });
 
   it("affiche la section tableau de bord", () => {
-    cy.visit("/profile");
-    cy.wait("@dashboard");
+    visitProfile();
 
     cy.get(DASHBOARD_REGION).should("be.visible").and("contain.text", "Mon tableau de bord");
   });
 
   it("affiche le nombre de formations inscrites", () => {
     cy.fixture("dashboard_stats").then((stats) => {
-      cy.visit("/profile");
-      cy.wait("@dashboard");
+      visitProfile();
 
       miniStat("Formations")
         .should("be.visible")
@@ -43,8 +51,7 @@ describe("dashboard", () => {
 
   it("affiche le nombre de feedbacks laissés", () => {
     cy.fixture("dashboard_stats").then((stats) => {
-      cy.visit("/profile");
-      cy.wait("@dashboard");
+      visitProfile();
 
       miniStat("Avis")
         .should("be.visible")
@@ -54,8 +61,7 @@ describe("dashboard", () => {
 
   it("affiche le nombre d'articles lus", () => {
     cy.fixture("dashboard_stats").then((stats) => {
-      cy.visit("/profile");
-      cy.wait("@dashboard");
+      visitProfile();
 
       miniStat("Articles")
         .should("be.visible")
@@ -65,8 +71,7 @@ describe("dashboard", () => {
 
   it("liste les formations dans l'historique", () => {
     cy.fixture("dashboard_stats").then((stats) => {
-      cy.visit("/profile");
-      cy.wait("@dashboard");
+      visitProfile();
 
       cy.get(DASHBOARD_REGION).within(() => {
         cy.contains("h3", /formations récentes/i).should("be.visible");
