@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { API_BASE, WS_BASE } from "../../lib/api";
-import { getCookie } from "../../lib/cookies";
+import { API_BASE, WS_BASE, ensureCsrf } from "../../lib/api";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
 import { STAFF_ROLES } from "../../utils/roles";
@@ -82,7 +81,7 @@ export default function AdminChatPanel() {
       const res = await fetch(`${API_BASE}/auth/ws-ticket/`, {
         method: "POST",
         credentials: "include",
-        headers: { "X-CSRFToken": getCookie("csrftoken") ?? "" },
+        headers: { "X-CSRFToken": await ensureCsrf() },
       });
       if (res.ok) ticket = (await res.json()).ticket ?? "";
     } catch { /* silent */ }
@@ -142,7 +141,7 @@ export default function AdminChatPanel() {
     await fetch(`${API_BASE}/chat/rooms/${room.room_id}/read/`, {
       method: "POST",
       credentials: "include",
-      headers: { "X-CSRFToken": getCookie("csrftoken") },
+      headers: { "X-CSRFToken": await ensureCsrf() },
     });
     setRooms((prev) => prev.map((r) => r.room_id === room.room_id ? { ...r, unread: 0 } : r));
   };

@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import Button from "../../components/Button";
 import { useAuth } from "../../context/AuthContext";
 import { getEnv } from "../../lib/env";
-import { getCookie } from "../../lib/cookies";
+import { ensureCsrf } from "../../lib/api";
 
 const API_BASE = getEnv("VITE_API_URL", "http://localhost:8000/api");
 
@@ -57,7 +57,7 @@ function QCMPanel({ moduleId, theme, onPassed }) {
     setSubmitting(true);
     setError(null);
     try {
-      const csrf = getCookie("csrftoken");
+      const csrf = await ensureCsrf();
       const res = await fetch(`${API_BASE}/modules/${moduleId}/qcm/submit/`, {
         method: "POST",
         credentials: "include",
@@ -212,7 +212,7 @@ function ModuleAccordion({ module, theme, onProgressUpdate }) {
 
   const completeCours = async (c) => {
     if (!c.is_accessible || c.is_completed) return;
-    const csrf = getCookie("csrftoken");
+    const csrf = await ensureCsrf();
     try {
       const r = await fetch(`${API_BASE}/courses/${c.id}/complete/`, {
         method: "POST",

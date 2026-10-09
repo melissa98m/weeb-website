@@ -4,7 +4,7 @@ import { motion, AnimatePresence, useScroll, useSpring, useReducedMotion } from 
 import { useTheme } from "../context/ThemeContext";
 import { useLanguage } from "../context/LanguageContext";
 import { useAuth } from "../context/AuthContext";
-import { getCookie } from "../lib/cookies";
+import { ensureCsrf } from "../lib/api";
 import { highlightContainer } from "../lib/hljs";
 import Button from "../components/Button";
 import blogEn from "../../locales/en/blog.json";
@@ -231,12 +231,15 @@ export default function BlogDetail() {
   // Read tracking
   useEffect(() => {
     if (!user || !currId) return;
-    const csrfToken = getCookie("csrftoken");
-    fetch(`${API_BASE}/articles/${currId}/view/`, {
-      method: "POST",
-      credentials: "include",
-      headers: csrfToken ? { "X-CSRFToken": csrfToken } : {},
-    }).catch(() => {});
+    ensureCsrf()
+      .then((csrfToken) =>
+        fetch(`${API_BASE}/articles/${currId}/view/`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "X-CSRFToken": csrfToken },
+        })
+      )
+      .catch(() => {});
   }, [currId, user]);
 
   const fetchComments = useCallback(async () => {
@@ -263,7 +266,7 @@ export default function BlogDetail() {
     if (!text) return;
     setCommentSubmitting(true);
     setCommentError(null);
-    const csrfToken = getCookie("csrftoken");
+    const csrfToken = await ensureCsrf();
     try {
       const r = await fetch(`${API_BASE}/articles/${currId}/comments/`, {
         method: "POST",
@@ -300,7 +303,7 @@ export default function BlogDetail() {
   }, [commentText, currId, replyTo]);
 
   const deleteComment = useCallback(async (commentId) => {
-    const csrfToken = getCookie("csrftoken");
+    const csrfToken = await ensureCsrf();
     try {
       await fetch(`${API_BASE}/comments/${commentId}/`, {
         method: "DELETE",
@@ -467,7 +470,7 @@ export default function BlogDetail() {
 
   const handleLike = useCallback(async () => {
     const method = isLiked ? "DELETE" : "POST";
-    const csrfToken = getCookie("csrftoken");
+    const csrfToken = await ensureCsrf();
     try {
       const r = await fetch(`${API_BASE}/articles/${currId}/like/`, {
         method,

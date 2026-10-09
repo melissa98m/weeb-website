@@ -10,10 +10,7 @@ import { NotificationProvider, useNotifications } from "./NotificationContext";
 vi.mock("../lib/api", () => ({
   API_BASE: "http://localhost:8000/api",
   WS_BASE: "ws://localhost:8000",
-}));
-
-vi.mock("../lib/cookies", () => ({
-  getCookie: vi.fn(() => "csrftoken-test"),
+  ensureCsrf: vi.fn(() => Promise.resolve("csrftoken-test")),
 }));
 
 vi.mock("./AuthContext", () => ({
@@ -219,7 +216,10 @@ describe("NotificationContext", () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       expect.stringContaining("/notifications/read-all/"),
-      expect.objectContaining({ method: "POST" })
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ "X-CSRFToken": "csrftoken-test" }),
+      })
     );
     expect(screen.getByTestId("count").textContent).toBe("0");
   });

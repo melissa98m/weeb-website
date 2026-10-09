@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useTheme } from "../../context/ThemeContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { getCookie } from "../../lib/cookies";
-import { API_BASE } from "../../lib/api";
+import { API_BASE, ensureCsrf } from "../../lib/api";
 import RichTextEditor from "../../components/admin/RichTextEditor";
 import AdminAccessFooter from "../../components/admin/AdminAccessFooter";
 import AdminPageHeader from "../../components/admin/AdminPageHeader";
@@ -262,7 +261,7 @@ function CampaignsList({ theme, onSelect, refresh, t }) {
   useEffect(() => { load(); }, [load, refresh]);
 
   const deleteC = async (id) => {
-    const csrf = getCookie("csrftoken");
+    const csrf = await ensureCsrf();
     await fetch(`${API_BASE}/admin/newsletter/campaigns/${id}/`, {
       method: "DELETE",
       credentials: "include",
@@ -382,7 +381,7 @@ export default function NewsletterManager() {
   };
 
   const saveDraft = async () => {
-    const csrf = getCookie("csrftoken");
+    const csrf = await ensureCsrf();
     const payload = {
       subject: subject.trim(),
       body_text: bodyText.trim(),
@@ -409,7 +408,7 @@ export default function NewsletterManager() {
     setToast(null);
     try {
       const campaign = await saveDraft();
-      const csrf = getCookie("csrftoken");
+      const csrf = await ensureCsrf();
       const sendPayload = scheduledAt ? { scheduled_at: scheduledAt } : {};
       const res = await fetch(`${API_BASE}/admin/newsletter/campaigns/${campaign.id}/send/`, {
         method: "POST",
