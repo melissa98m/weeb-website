@@ -1,51 +1,10 @@
 describe("dashboard", () => {
-  const ensureDashboardDom = (stats) => {
-    return cy.document().then((doc) => {
-      return new Cypress.Promise((resolve) => {
-        const start = Date.now();
-        const tick = () => {
-          if (doc.querySelector("[aria-label='Tableau de bord']") || doc.querySelector("h2")) {
-            resolve();
-            return;
-          }
-          if (Date.now() - start > 2000) {
-            const root = doc.getElementById("root");
-            if (root) {
-              root.innerHTML = `
-                <main>
-                  <h1>Mon profil</h1>
-                  <section aria-label="Tableau de bord">
-                    <h2>Mon tableau de bord</h2>
-                    <div>
-                      <span>${stats.formations_inscrites}</span>
-                      <span>Formations suivies</span>
-                    </div>
-                    <div>
-                      <span>${stats.feedbacks_laisses}</span>
-                      <span>Feedbacks envoyés</span>
-                    </div>
-                    <div>
-                      <span>${stats.articles_lus}</span>
-                      <span>Articles lus</span>
-                    </div>
-                    <h3>Historique des formations</h3>
-                    <ul>
-                      ${stats.historique_formations
-                        .map((f) => `<li>${f.name}</li>`)
-                        .join("")}
-                    </ul>
-                  </section>
-                </main>
-              `;
-            }
-            resolve();
-          }
-          setTimeout(tick, 100);
-        };
-        tick();
-      });
-    });
-  };
+  // Since the sidebar layout (8a203f1), the stat counters live in the sidebar
+  // mini-stats card with short labels, and the main <section> only renders the
+  // formations timeline (DashboardStats with hideCards).
+  const DASHBOARD_REGION = "section[aria-label='Mon tableau de bord']";
+
+  const miniStat = (label) => cy.contains("aside p", new RegExp(`^${label}$`)).parent();
 
   beforeEach(() => {
     cy.setCookie("csrftoken", "testtoken");
@@ -65,65 +24,72 @@ describe("dashboard", () => {
   });
 
   it("affiche la section tableau de bord", () => {
-    cy.fixture("dashboard_stats").then((stats) => {
-      cy.visit("/profile");
-      ensureDashboardDom(stats);
+    cy.visit("/profile");
+    cy.wait("@dashboard");
 
-      cy.get("[aria-label='Tableau de bord'], h2")
-        .filter(":contains('tableau de bord')")
-        .should("exist");
-    });
+    cy.get(DASHBOARD_REGION).should("be.visible").and("contain.text", "Mon tableau de bord");
   });
 
   it("affiche le nombre de formations inscrites", () => {
     cy.fixture("dashboard_stats").then((stats) => {
       cy.visit("/profile");
-      ensureDashboardDom(stats);
+      cy.wait("@dashboard");
 
-      cy.contains(stats.formations_inscrites.toString()).should("be.visible");
-      cy.contains(/formations suivies/i).should("be.visible");
+      miniStat("Formations")
+        .should("be.visible")
+        .and("contain.text", stats.formations_inscrites.toString());
     });
   });
 
   it("affiche le nombre de feedbacks laissés", () => {
     cy.fixture("dashboard_stats").then((stats) => {
       cy.visit("/profile");
-      ensureDashboardDom(stats);
+      cy.wait("@dashboard");
 
-      cy.contains(stats.feedbacks_laisses.toString()).should("be.visible");
-      cy.contains(/feedbacks envoyés/i).should("be.visible");
+      miniStat("Avis")
+        .should("be.visible")
+        .and("contain.text", stats.feedbacks_laisses.toString());
     });
   });
 
   it("affiche le nombre d'articles lus", () => {
     cy.fixture("dashboard_stats").then((stats) => {
       cy.visit("/profile");
-      ensureDashboardDom(stats);
+      cy.wait("@dashboard");
 
-      cy.contains(stats.articles_lus.toString()).should("be.visible");
-      cy.contains(/articles lus/i).should("be.visible");
+      miniStat("Articles")
+        .should("be.visible")
+        .and("contain.text", stats.articles_lus.toString());
     });
   });
 
   it("liste les formations dans l'historique", () => {
     cy.fixture("dashboard_stats").then((stats) => {
       cy.visit("/profile");
-      ensureDashboardDom(stats);
+      cy.wait("@dashboard");
 
-      cy.contains(/historique/i).should("be.visible");
-      cy.contains("Formation React").should("be.visible");
-      cy.contains("Formation Node").should("be.visible");
+      cy.get(DASHBOARD_REGION).within(() => {
+        cy.contains("h3", /formations récentes/i).should("be.visible");
+        stats.historique_formations.forEach((f) => {
+          cy.contains(f.name).should("be.visible");
+        });
+      });
     });
   });
 
   it("affiche un état de chargement avant les données", () => {
-    // Délai volontaire pour capturer le skeleton
-    cy.intercept("GET", "**/api/dashboard/", (req) => {
-      req.reply({ statusCode: 200, body: {}, delay: 500 });
-    }).as("dashboardSlow");
+    // Delay the response so the aria-busy skeleton can be observed
+    cy.fixture("dashboard_stats").then((stats) => {
+      cy.intercept("GET", "**/api/dashboard/", {
+        statusCode: 200,
+        body: stats,
+        delay: 1000,
+      }).as("dashboardSlow");
+    });
 
     cy.visit("/profile");
-    // Le skeleton aria-busy ou les cartes skeleton sont visibles brièvement
-    cy.get("body").should("be.visible");
+    cy.get(`${DASHBOARD_REGION} [aria-busy='true']`).should("exist");
+    cy.wait("@dashboardSlow");
+    cy.get(`${DASHBOARD_REGION} [aria-busy='true']`).should("not.exist");
   });
 });
